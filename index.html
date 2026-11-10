@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#08111d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SPC Tools" />
+    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjoiIzA4MTExZCIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8uIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImljb25zIjpbXSwibmFtZSI6IlNQQyBUb29scyIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJzY29wZSI6Ii4uLyIsInNob3J0X25hbWUiOiJTUEMgVG9vbHMiLCJzdGFydF91cmwiOiIuLi9pbmRleC5odG1sIiwidGhlbWVfY29sb3IiOiIjMDgxMTFkIn0=" />
+    <link rel="icon" href="data:," />
+    <title>SPC Tools</title>
+    <style>
+      :root{
+        --bg:#08111d; --bg2:#0a1728; --panel:#0e1c2e; --panel2:#0b1828;
+        --line:#1e3a56; --line-soft:#16304a;
+        --ink:#dbe9f5; --ink-dim:#8fb0c9; --ink-faint:#5f7f99;
+        --cyan:#2fd4e8; --cyan-dim:#1789a0;
+        --amber:#f5b83d; --red:#ff6b6b; --green:#3ddc97;
+        --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+        --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      }
+      *{box-sizing:border-box}
+      html{-webkit-text-size-adjust:100%}
+      body{
+        margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+        background-image:
+          linear-gradient(rgba(47,212,232,.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(47,212,232,.045) 1px, transparent 1px);
+        background-size:28px 28px;
+      }
+      .wrap{max-width:920px; margin:0 auto; padding:18px 14px 40px}
+      header.top{padding:6px 2px 14px; border-bottom:1px solid var(--line)}
+      header.top h1{margin:0; font-size:26px; letter-spacing:.04em; font-weight:800}
+      header.top h1 .accent{color:var(--cyan)}
+      header.top p{margin:6px 0 0; color:var(--ink-dim); font-size:13.5px; line-height:1.5; max-width:60ch}
+      header.top p strong{color:var(--ink)}
+      /* Tabs */
+      nav.tabs{display:flex; gap:6px; flex-wrap:wrap; margin:16px 0 14px}
+      nav.tabs button{
+        flex:1 1 auto; min-height:48px; padding:10px 8px; cursor:pointer;
+        background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
+        border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:700; letter-spacing:.02em;
+      }
+      nav.tabs button[aria-selected="true"]{background:var(--panel); color:var(--cyan); border-color:var(--cyan-dim); box-shadow:inset 0 -3px 0 var(--cyan)}
+      nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
+      section.tool{display:none}
+      section.tool.active{display:block}
+      .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px}
+      .card h2{margin:0 0 4px; font-size:19px; letter-spacing:.02em}
+      .card h3{margin:18px 0 8px; font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim)}
+      .card h3:first-of-type{margin-top:6px}
+      .guru{margin:0 0 12px; color:var(--ink-faint); font-size:13px; line-height:1.55; font-style:italic; border-left:3px solid var(--cyan-dim); padding-left:10px}
+      label.flabel{display:block; font-size:12.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-dim); margin:12px 0 5px}
+      input[type="text"], input[type="number"], textarea, select{
+        width:100%; background:var(--bg2); color:var(--ink); border:1px solid var(--line);
+        border-radius:7px; padding:11px 12px; font-size:16px; font-family:var(--sans);
+      }
+      textarea{font-family:var(--mono); font-size:14.5px; line-height:1.5; min-height:110px; resize:vertical}
+      .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+      .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+      @media (max-width:520px){ .row3{grid-template-columns:1fr 1fr} }
+      .btnrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
+      button.act{
+        min-height:48px; padding:11px 18px; cursor:pointer; border-radius:8px; border:1px solid var(--cyan-dim);
+        background:var(--cyan); color:#04222b; font-weight:800; font-size:15px; font-family:var(--sans);
+      }
+      button.ghost{
+        min-height:48px; padding:11px 16px; cursor:pointer; border-radius:8px; border:1px solid var(--line);
+        background:var(--panel2); color:var(--ink); font-weight:700; font-size:14px; font-family:var(--sans);
+      }
+      button.act:active, button.ghost:active{transform:translateY(1px)}
+      .msg{margin-top:12px; font-size:14px; line-height:1.5; color:var(--amber)}
+      .msg.ok{color:var(--ink-dim)}
+      .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(104px,1fr)); gap:8px; margin-top:6px}
+      .stat{background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px; padding:9px 10px}
+      .stat .k{display:block; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; overflow-wrap:break-word; line-height:1.35}
+      .stat .v{display:block; margin-top:3px; font-family:var(--mono); font-size:17px; color:var(--ink)}
+      .stat .v.good{color:var(--green)} .stat .v.warn{color:var(--amber)} .stat .v.bad{color:var(--red)}
+      .chartbox{background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px; padding:8px 4px 2px; margin-top:10px}
+      .chartbox svg{width:100%; height:auto; display:block}
+      .legend{display:flex; flex-wrap:wrap; gap:12px; font-size:12px; color:var(--ink-dim); margin-top:8px}
+      .legend span{display:inline-flex; align-items:center; gap:5px}
+      .swatch{width:10px; height:10px; border-radius:50%; display:inline-block}
+      .flags{margin-top:10px}
+      .flag{border-radius:8px; padding:10px 12px; font-size:14px; line-height:1.5; margin-bottom:8px; border:1px solid}
+      .flag.red{background:rgba(255,107,107,.10); border-color:rgba(255,107,107,.45); color:#ffc9c9}
+      .flag.amber{background:rgba(245,184,61,.10); border-color:rgba(245,184,61,.45); color:#ffe1a1}
+      .flag.green{background:rgba(61,220,151,.10); border-color:rgba(61,220,151,.45); color:#b9f4da}
+      .snapshot{background:var(--bg2); border:1px dashed var(--cyan-dim); border-radius:8px; padding:14px; margin-top:12px}
+      .snapshot h4{margin:0 0 8px; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan)}
+      .snapshot table{width:100%; border-collapse:collapse; font-size:14px}
+      .snapshot td{padding:3px 0; vertical-align:top}
+      .snapshot td:first-child{color:var(--ink-dim); width:42%}
+      .snapshot td:last-child{font-family:var(--mono)}
+      .verdict{font-size:16px; font-weight:800; margin-top:10px; line-height:1.45}
+      .verdict.good{color:var(--green)} .verdict.warn{color:var(--amber)} .verdict.bad{color:var(--red)}
+      table.grid{border-collapse:collapse; width:100%; font-size:13px}
+      table.grid th, table.grid td{border:1px solid var(--line-soft); padding:3px; text-align:center}
+      table.grid th{background:var(--bg2); color:var(--ink-dim); font-size:11.5px; letter-spacing:.03em}
+      table.grid input{width:100%; min-width:44px; background:transparent; border:none; color:var(--ink); font-family:var(--mono); font-size:13.5px; padding:7px 2px; text-align:center}
+      table.grid input:focus{outline:2px solid var(--cyan); outline-offset:-2px}
+      .gridscroll{overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--line-soft); border-radius:8px}
+      .prow{display:grid; grid-template-columns:1fr 110px 44px; gap:8px; margin-bottom:8px; align-items:center}
+      .prow button{min-height:44px}
+      .small{font-size:12.5px; color:var(--ink-faint); line-height:1.5}
+      .cite{font-size:12.5px; color:var(--ink-faint); margin-top:10px}
+      footer{margin-top:22px; padding-top:14px; border-top:1px solid var(--line); color:var(--ink-faint); font-size:12.5px; line-height:1.6}
+      .hidden{display:none !important}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <h1>SPC <span class="accent">Tools</span></h1>
+        <p><strong>Your data never leaves this device.</strong> All calculations run in your browser — paste your values, get your answers. Nothing is uploaded, stored on a server, or kept after you close the tab.</p>
+      </header>
+
+      <nav class="tabs" role="tablist" aria-label="Tools">
+        <button role="tab" id="tabbtn-spc" aria-selected="true" data-tab="spc">SPC &amp; Capability</button>
+        <button role="tab" id="tabbtn-check" aria-selected="false" data-tab="check">Data Check</button>
+        <button role="tab" id="tabbtn-grr" aria-selected="false" data-tab="grr">Gage R&amp;R</button>
+        <button role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql">AQL Lookup</button>
+        <button role="tab" id="tabbtn-pareto" aria-selected="false" data-tab="pareto">Pareto</button>
+      </nav>
+
+      <!-- ============ TOOL 1 : SPC & CAPABILITY ============ -->
+      <section class="tool active" id="tool-spc" role="tabpanel" aria-labelledby="tabbtn-spc">
+        <div class="card">
+          <h2>SPC &amp; Capability</h2>
+          <p class="guru">Shewhart: the chart separates common causes from special causes — react to signals, not to noise. Deming: adjusting a stable process only adds variation.</p>
+
+          <label class="flabel" for="spcName">Characteristic</label>
+          <input type="text" id="spcName" placeholder="e.g. Hone bore Ø (in)" autocomplete="off" />
+
+          <label class="flabel" for="spcData">Measurements — paste or type, any mix of spaces, commas, lines</label>
+          <textarea id="spcData" placeholder="4.5021, 4.5030, 4.5018 …" spellcheck="false"></textarea>
+
+          <div class="row2">
+            <div>
+              <label class="flabel" for="spcLSL">LSL (optional)</label>
+              <input type="number" id="spcLSL" step="any" inputmode="decimal" placeholder="Lower spec" />
+            </div>
+            <div>
+              <label class="flabel" for="spcUSL">USL (optional)</label>
+              <input type="number" id="spcUSL" step="any" inputmode="decimal" placeholder="Upper spec" />
+            </div>
+          </div>
+
+          <div class="btnrow">
+            <button class="act" id="spcAnalyse">Analyse</button>
+            <button class="ghost" id="spcSample">Load sample data</button>
+            <button class="ghost" id="spcClear">Clear</button>
+          </div>
+          <div class="msg hidden" id="spcMsg" role="status"></div>
+
+          <div id="spcResults" class="hidden">
+            <h3>Individuals (I) chart</h3>
+            <div class="chartbox" id="spcChart"></div>
+            <div class="legend">
+              <span><i class="swatch" style="background:var(--cyan)"></i> In control</span>
+              <span><i class="swatch" style="background:var(--amber)"></i> Out of control</span>
+              <span><i class="swatch" style="background:var(--red)"></i> Out of spec</span>
+              <span>— Centre line x̄</span><span>– – Control limits (x̄ ± 3σ within)</span><span>– – Spec limits</span>
+            </div>
+            <div class="flags" id="spcFlags"></div>
+
+            <h3>Process statistics</h3>
+            <div class="stats" id="spcStats"></div>
+
+            <div id="spcCapWrap" class="hidden">
+              <h3>Capability (spec limits given)</h3>
+              <div class="stats" id="spcCap"></div>
+            </div>
+
+            <h3>Capability snapshot</h3>
+            <div class="snapshot" id="spcSnapshot"></div>
+
+            <div class="btnrow">
+              <button class="ghost" id="spcCsv">Download CSV (data + results)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TOOL 2 : DATA CHECK ============ -->
+      <section class="tool" id="tool-check" role="tabpanel" aria-labelledby="tabbtn-check">
+        <div class="card">
+          <h2>Data Check — histogram &amp; normality</h2>
+          <p class="guru">Montgomery: check the distribution before you trust the index.</p>
+          <p class="small">Uses the same measurements you entered in <strong>SPC &amp; Capability</strong> — one data entry drives both tools. Spec lines are drawn when LSL/USL are set there.</p>
+          <div class="btnrow">
+            <button class="act" id="checkRefresh">Check my data</button>
+          </div>
+          <div class="msg hidden" id="checkMsg" role="status"></div>
+          <div id="checkResults" class="hidden">
+            <h3>Histogram</h3>
+            <div class="chartbox" id="checkChart"></div>
+            <h3>Summary</h3>
+            <div class="stats" id="checkStats"></div>
+            <h3>Normality — Anderson–Darling test</h3>
+            <div class="stats" id="checkAD"></div>
+            <div class="flags" id="checkVerdict"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TOOL 3 : GAGE R&R ============ -->
+      <section class="tool" id="tool-grr" role="tabpanel" aria-labelledby="tabbtn-grr">
+        <div class="card">
+          <h2>Gage R&amp;R — crossed study (ANOVA)</h2>
+          <p class="guru">AIAG MSA: validate the ruler before you measure the room — a study on a bad gauge grades the gauge, not the process.</p>
+
+          <div class="row3">
+            <div>
+              <label class="flabel" for="grrOps">Operators (2–3)</label>
+              <select id="grrOps"><option value="2">2</option><option value="3" selected>3</option></select>
+            </div>
+            <div>
+              <label class="flabel" for="grrParts">Parts (3–15)</label>
+              <input type="number" id="grrParts" value="10" min="3" max="15" step="1" inputmode="numeric" />
+            </div>
+            <div>
+              <label class="flabel" for="grrTrials">Trials (2–3)</label>
+              <select id="grrTrials"><option value="2" selected>2</option><option value="3">3</option></select>
+            </div>
+          </div>
+          <label class="flabel" for="grrTol">Tolerance (USL − LSL) — for % of tolerance</label>
+          <input type="number" id="grrTol" step="any" inputmode="decimal" placeholder="e.g. 0.005" />
+
+          <div class="btnrow">
+            <button class="ghost" id="grrBuild">Build / resize grid</button>
+            <button class="ghost" id="grrSample">Load sample study</button>
+          </div>
+
+          <h3>Study grid — one row per part</h3>
+          <p class="small" style="margin:-4px 0 8px">Wide studies scroll sideways inside the grid — every operator column stays reachable.</p>
+          <div class="gridscroll"><table class="grid" id="grrGrid" aria-label="Gage R&R readings grid"></table></div>
+
+          <label class="flabel" for="grrPaste">…or paste a block of readings (fills the grid part by part, operator by operator, trial by trial)</label>
+          <textarea id="grrPaste" style="min-height:64px" placeholder="Paste readings in row order" spellcheck="false"></textarea>
+          <div class="btnrow">
+            <button class="ghost" id="grrFill">Fill grid from paste</button>
+            <button class="act" id="grrCalc">Calculate Gage R&amp;R</button>
+          </div>
+          <div class="msg hidden" id="grrMsg" role="status"></div>
+
+          <div id="grrResults" class="hidden">
+            <h3>Variation components (standard deviations)</h3>
+            <div class="stats" id="grrStats"></div>
+            <h3>Against tolerance &amp; study variation</h3>
+            <div class="stats" id="grrPct"></div>
+            <div class="flags" id="grrVerdict"></div>
+            <p class="small" id="grrNote"></p>
+            <div class="btnrow">
+              <button class="ghost" id="grrCsv">Download CSV (grid + results)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TOOL 4 : AQL LOOKUP ============ -->
+      <section class="tool" id="tool-aql" role="tabpanel" aria-labelledby="tabbtn-aql">
+        <div class="card">
+          <h2>AQL Lookup — acceptance sampling</h2>
+          <p class="guru">Dodge &amp; Romig built acceptance sampling so a lot can be judged on evidence, not opinion.</p>
+          <div class="row3">
+            <div>
+              <label class="flabel" for="aqlLot">Lot size</label>
+              <input type="number" id="aqlLot" min="2" step="1" inputmode="numeric" placeholder="e.g. 500" />
+            </div>
+            <div>
+              <label class="flabel" for="aqlLevel">Inspection level</label>
+              <select id="aqlLevel">
+                <option value="I">General I</option>
+                <option value="II" selected>General II</option>
+                <option value="III">General III</option>
+              </select>
+            </div>
+            <div>
+              <label class="flabel" for="aqlVal">AQL (%)</label>
+              <select id="aqlVal">
+                <option>0.065</option><option>0.10</option><option>0.15</option><option>0.25</option>
+                <option>0.40</option><option>0.65</option><option selected>1.0</option><option>1.5</option>
+                <option>2.5</option><option>4.0</option><option>6.5</option>
+              </select>
+            </div>
+          </div>
+          <div class="btnrow">
+            <button class="act" id="aqlGo">Look up plan</button>
+          </div>
+          <div class="msg hidden" id="aqlMsg" role="status"></div>
+          <div id="aqlResults" class="hidden">
+            <h3>Sampling plan</h3>
+            <div class="stats" id="aqlStats"></div>
+            <div class="flags" id="aqlNote"></div>
+          </div>
+          <p class="cite">Single sampling plans, normal inspection — ANSI/ASQ Z1.4 (Tables I &amp; II-A). Arrow rules are followed to the first real plan, as the standard requires.</p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL 5 : PARETO ============ -->
+      <section class="tool" id="tool-pareto" role="tabpanel" aria-labelledby="tabbtn-pareto">
+        <div class="card">
+          <h2>Pareto — defect categories</h2>
+          <p class="guru">Juran: separate the vital few from the useful many — fix these first.</p>
+
+          <h3>Categories &amp; counts</h3>
+          <div id="paretoRows"></div>
+          <div class="btnrow">
+            <button class="ghost" id="paretoAdd">+ Add row</button>
+          </div>
+
+          <label class="flabel" for="paretoPaste">…or paste two columns (category, count — one per line)</label>
+          <textarea id="paretoPaste" style="min-height:64px" placeholder="Scratches, 42&#10;Dents, 18&#10;…" spellcheck="false"></textarea>
+          <div class="btnrow">
+            <button class="ghost" id="paretoLoad">Load from paste</button>
+            <button class="act" id="paretoGo">Build Pareto</button>
+          </div>
+          <div class="msg hidden" id="paretoMsg" role="status"></div>
+
+          <div id="paretoResults" class="hidden">
+            <h3>Pareto chart</h3>
+            <div class="chartbox" id="paretoChart"></div>
+            <div class="legend">
+              <span><i class="swatch" style="background:var(--cyan)"></i> Count per category</span>
+              <span><i class="swatch" style="background:var(--amber)"></i> Cumulative %</span>
+              <span>– – 80% line</span>
+            </div>
+            <div class="flags" id="paretoCallout"></div>
+            <div class="btnrow">
+              <button class="ghost" id="paretoCsv">Download CSV</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality. Estimates from your data — verify critical results before acting on them.
+      </footer>
+    </div>
+
+    <script>
+      "use strict";
+      /* ---------- helpers ---------- */
+      var $ = function(id){ return document.getElementById(id); };
+      function fmt(x, d){ if(x===null||x===undefined||!isFinite(x)) return "—"; return Number(x).toFixed(d===undefined?4:d); }
+      function fmt2(x){ return fmt(x,2); }
+      function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+      function showMsg(el, text, ok){ el.textContent = text; el.classList.remove("hidden"); el.classList.toggle("ok", !!ok); }
+      function hideMsg(el){ el.classList.add("hidden"); }
+      function parseNumbers(text){
+        var tokens = String(text||"").split(/[\s,;]+/).filter(function(t){ return t.length>0; });
+        var vals = [], junk = 0;
+        tokens.forEach(function(t){ var v = Number(t); if(isFinite(v)) vals.push(v); else junk++; });
+        return { vals: vals, junk: junk };
+      }
+      function mean(a){ var s=0; for(var i=0;i<a.length;i++) s+=a[i]; return s/a.length; }
+      function sampleSD(a){ if(a.length<2) return 0; var m=mean(a), s=0; for(var i=0;i<a.length;i++){ var d=a[i]-m; s+=d*d; } return Math.sqrt(s/(a.length-1)); }
+      function normCdf(z){
+        var s = z<0 ? -1 : 1, x = Math.abs(z)/Math.SQRT2;
+        var t = 1/(1+0.3275911*x);
+        var y = 1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+        return 0.5*(1+s*y);
+      }
+      function downloadCSV(name, text){
+        var blob = new Blob([text], {type:"text/csv;charset=utf-8"});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a"); a.href = url; a.download = name;
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 300);
+      }
+      function statTile(k, v, cls){ return '<div class="stat"><span class="k">'+esc(k)+'</span><span class="v'+(cls?' '+cls:'')+'">'+esc(v)+'</span></div>'; }
+      /* regularised incomplete beta (for F-test p-values) */
+      function betacf(a,b,x){
+        var MAXIT=200, EPS=3e-12, FPMIN=1e-300, qab=a+b, qap=a+1, qam=a-1;
+        var c=1, d=1-qab*x/qap; if(Math.abs(d)<FPMIN) d=FPMIN; d=1/d; var h=d;
+        for(var m=1;m<=MAXIT;m++){
+          var m2=2*m;
+          var aa=m*(b-m)*x/((qam+m2)*(a+m2));
+          d=1+aa*d; if(Math.abs(d)<FPMIN) d=FPMIN;
+          c=1+aa/c; if(Math.abs(c)<FPMIN) c=FPMIN;
+          d=1/d; h*=d*c;
+          aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+          d=1+aa*d; if(Math.abs(d)<FPMIN) d=FPMIN;
+          c=1+aa/c; if(Math.abs(c)<FPMIN) c=FPMIN;
+          d=1/d; var del=d*c; h*=del;
+          if(Math.abs(del-1)<EPS) break;
+        }
+        return h;
+      }
+      function ibeta(a,b,x){
+        if(x<=0) return 0; if(x>=1) return 1;
+        var bt = Math.exp(a*Math.log(x)+b*Math.log(1-x) - (lgamma(a)+lgamma(b)-lgamma(a+b)));
+        if(x < (a+1)/(a+b+2)) return bt*betacf(a,b,x)/a;
+        return 1 - bt*betacf(b,a,1-x)/b;
+      }
+      function lgamma(x){
+        var c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+        if(x<0.5) return Math.log(Math.PI/Math.sin(Math.PI*x)) - lgamma(1-x);
+        x-=1; var a=c[0], t=x+7.5;
+        for(var i=1;i<c.length;i++) a+=c[i]/(x+i);
+        return 0.5*Math.log(2*Math.PI) + (x+0.5)*Math.log(t) - t + Math.log(a);
+      }
+      function fUpperP(f, d1, d2){ if(f<=0) return 1; var x = d2/(d2 + d1*f); return ibeta(d2/2, d1/2, x); }
+
+      /* ---------- tabs ---------- */
+      var tabBtns = document.querySelectorAll("nav.tabs button");
+      tabBtns.forEach(function(btn){
+        btn.addEventListener("click", function(){
+          tabBtns.forEach(function(b){ b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
+          document.querySelectorAll("section.tool").forEach(function(s){ s.classList.toggle("active", s.id === "tool-"+btn.getAttribute("data-tab")); });
+          window.scrollTo({top:0, behavior:"smooth"});
+        });
+      });
+
+      /* ================= TOOL 1 : SPC ================= */
+      var spcState = null; // {name, vals, lsl, usl, stats...}
+      function getSpecs(){
+        var lslRaw = $("spcLSL").value.trim(), uslRaw = $("spcUSL").value.trim();
+        return {
+          lsl: lslRaw==="" ? null : Number(lslRaw),
+          usl: uslRaw==="" ? null : Number(uslRaw)
+        };
+      }
+      function computeSPC(vals, lsl, usl){
+        var n = vals.length, xbar = mean(vals), sdO = sampleSD(vals);
+        var mrSum = 0; for(var i=1;i<n;i++) mrSum += Math.abs(vals[i]-vals[i-1]);
+        var mrBar = n>1 ? mrSum/(n-1) : 0;
+        var sdW = mrBar/1.128;
+        var ucl = xbar + 3*sdW, lcl = xbar - 3*sdW;
+        var outSpec = [], outCtrl = [];
+        vals.forEach(function(v, idx){
+          var oos = (lsl!==null && v<lsl) || (usl!==null && v>usl);
+          if(oos) outSpec.push(idx+1);
+          else if(v>ucl || v<lcl) outCtrl.push(idx+1);
+        });
+        /* run of 8+ on one side of centre line */
+        var runs = [], side = 0, len = 0, start = 0;
+        vals.forEach(function(v, idx){
+          var s = v>xbar ? 1 : (v<xbar ? -1 : 0);
+          if(s!==0 && s===side){ len++; }
+          else if(s!==0){ side=s; len=1; start=idx; }
+          else { side=0; len=0; }
+          if(len===8) runs.push({from:start+1, to:idx+1, side: side>0?"above":"below"});
+          else if(len>8 && runs.length && runs[runs.length-1].to===idx) runs[runs.length-1].to = idx+1;
+        });
+        var cap = null;
+        if(lsl!==null || usl!==null){
+          function idx1(sd){
+            if(sd<=0) return null;
+            var cpu = usl!==null ? (usl-xbar)/(3*sd) : null;
+            var cpl = lsl!==null ? (xbar-lsl)/(3*sd) : null;
+            var cp = (usl!==null && lsl!==null) ? (usl-lsl)/(6*sd) : null;
+            var cpk = cpu===null ? cpl : (cpl===null ? cpu : Math.min(cpu,cpl));
+            return { cp:cp, cpk:cpk };
+          }
+          var w = idx1(sdW), o = idx1(sdO);
+          var ppm = null;
+          if(sdO>0){
+            var p = 0;
+            if(lsl!==null) p += normCdf((lsl-xbar)/sdO);
+            if(usl!==null) p += 1-normCdf((usl-xbar)/sdO);
+            ppm = p*1e6;
+          }
+          cap = { cp:w.cp, cpk:w.cpk, pp:o.cp, ppk:o.cpk, ppm:ppm, oosCount: outSpec.length };
+        }
+        return { n:n, xbar:xbar, sdW:sdW, sdO:sdO, mrBar:mrBar, ucl:ucl, lcl:lcl,
+                 outSpec:outSpec, outCtrl:outCtrl, runs:runs, cap:cap };
+      }
+      function spcChartSVG(vals, st, lsl, usl){
+        var W=720, H=300, padL=58, padR=14, padT=16, padB=30;
+        var iw = W-padL-padR, ih = H-padT-padB;
+        var lo = Math.min.apply(null, vals.concat([st.lcl])), hi = Math.max.apply(null, vals.concat([st.ucl]));
+        if(lsl!==null) lo = Math.min(lo, lsl); if(usl!==null) hi = Math.max(hi, usl);
+        var span = hi-lo || 1; lo -= span*0.10; hi += span*0.10; span = hi-lo;
+        function X(i){ return padL + (vals.length===1 ? iw/2 : iw*i/(vals.length-1)); }
+        function Y(v){ return padT + ih*(1-(v-lo)/span); }
+        var g = "";
+        function hline(v, color, dash, label){
+          var y = Y(v);
+          g += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="'+color+'" stroke-width="1.4" '+(dash?'stroke-dasharray="6 4"':'')+'/>';
+          g += '<text x="'+(padL-5)+'" y="'+(y+3.5)+'" fill="'+color+'" font-size="10.5" font-family="monospace" text-anchor="end">'+label+'</text>';
+        }
+        hline(st.ucl, "#f5b83d", true, fmt(st.ucl));
+        hline(st.xbar, "#2fd4e8", false, fmt(st.xbar));
+        hline(st.lcl, "#f5b83d", true, fmt(st.lcl));
+        if(usl!==null) hline(usl, "#ff6b6b", true, fmt(usl));
+        if(lsl!==null) hline(lsl, "#ff6b6b", true, fmt(lsl));
+        var pts = "";
+        for(var i=1;i<vals.length;i++)
+          pts += '<line x1="'+X(i-1)+'" y1="'+Y(vals[i-1])+'" x2="'+X(i)+'" y2="'+Y(vals[i])+'" stroke="#3d6a8f" stroke-width="1.2"/>';
+        vals.forEach(function(v, i){
+          var oos = (lsl!==null && v<lsl) || (usl!==null && v>usl);
+          var ooc = !oos && (v>st.ucl || v<st.lcl);
+          var c = oos ? "#ff6b6b" : (ooc ? "#f5b83d" : "#2fd4e8");
+          pts += '<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="'+(oos||ooc?5:3.6)+'" fill="'+c+'" stroke="#08111d" stroke-width="1"/>';
+        });
+        g += pts;
+        g += '<text x="'+padL+'" y="'+(H-8)+'" fill="#5f7f99" font-size="10.5">Part 1</text>';
+        g += '<text x="'+(W-padR)+'" y="'+(H-8)+'" fill="#5f7f99" font-size="10.5" text-anchor="end">Part '+vals.length+'</text>';
+        return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Individuals control chart">'+g+'</svg>';
+      }
+      function capClass(v){ if(v===null||v===undefined) return ""; return v>=1.33 ? "good" : (v>=1.0 ? "warn" : "bad"); }
+      function analyseSPC(){
+        var parsed = parseNumbers($("spcData").value);
+        var vals = parsed.vals, msgEl = $("spcMsg");
+        if(vals.length < 2){
+          $("spcResults").classList.add("hidden"); spcState = null;
+          showMsg(msgEl, "Enter at least 2 measurements to analyse." + (parsed.junk ? " ("+parsed.junk+" non-numeric item"+(parsed.junk>1?"s":"")+" ignored.)" : ""));
+          return;
+        }
+        var sp = getSpecs();
+        if(sp.lsl!==null && !isFinite(sp.lsl)) sp.lsl = null;
+        if(sp.usl!==null && !isFinite(sp.usl)) sp.usl = null;
+        if(sp.lsl!==null && sp.usl!==null && sp.usl<=sp.lsl){
+          $("spcResults").classList.add("hidden"); spcState = null;
+          showMsg(msgEl, "USL must be greater than LSL — check the spec limits.");
+          return;
+        }
+        var st = computeSPC(vals, sp.lsl, sp.usl);
+        var name = $("spcName").value.trim();
+        spcState = { name:name, vals:vals, lsl:sp.lsl, usl:sp.usl, st:st };
+        if(parsed.junk) showMsg(msgEl, "Note: "+parsed.junk+" non-numeric item"+(parsed.junk>1?"s were":" was")+" ignored.", true);
+        else hideMsg(msgEl);
+        $("spcChart").innerHTML = spcChartSVG(vals, st, sp.lsl, sp.usl);
+        var flags = "";
+        if(st.outSpec.length) flags += '<div class="flag red"><strong>Out of spec:</strong> part'+(st.outSpec.length>1?"s ":" ")+st.outSpec.join(", ")+' — beyond a specification limit. Contain and disposition these parts.</div>';
+        if(st.outCtrl.length) flags += '<div class="flag amber"><strong>Out of control:</strong> part'+(st.outCtrl.length>1?"s ":" ")+st.outCtrl.join(", ")+' beyond the 3σ control limits (in spec, but a special cause is likely). Investigate before adjusting.</div>';
+        st.runs.forEach(function(r){ flags += '<div class="flag amber"><strong>Run signal:</strong> parts '+r.from+"–"+r.to+" sit on the "+r.side+" side of the centre line (8+ in a row) — the process mean may have shifted.</div>"; });
+        if(!flags) flags = '<div class="flag green"><strong>No signals.</strong> No points beyond the control or spec limits and no runs of 8 — the process looks stable on this data. Keep sampling; stability is something you keep proving.</div>';
+        $("spcFlags").innerHTML = flags;
+        $("spcStats").innerHTML =
+          statTile("n", String(st.n)) +
+          statTile("Mean x̄", fmt(st.xbar)) +
+          statTile("σ within (MR̄/d₂)", fmt(st.sdW)) +
+          statTile("σ overall (s)", fmt(st.sdO)) +
+          statTile("UCL", fmt(st.ucl)) +
+          statTile("LCL", fmt(st.lcl));
+        if(st.cap){
+          $("spcCapWrap").classList.remove("hidden");
+          $("spcCap").innerHTML =
+            statTile("Cp (within)", st.cap.cp===null?"—":fmt2(st.cap.cp), capClass(st.cap.cp)) +
+            statTile("Cpk (within)", st.cap.cpk===null?"—":fmt2(st.cap.cpk), capClass(st.cap.cpk)) +
+            statTile("Pp (overall)", st.cap.pp===null?"—":fmt2(st.cap.pp), capClass(st.cap.pp)) +
+            statTile("Ppk (overall)", st.cap.ppk===null?"—":fmt2(st.cap.ppk), capClass(st.cap.ppk)) +
+            statTile("Out of spec", String(st.cap.oosCount), st.cap.oosCount? "bad":"good") +
+            statTile("Expected PPM (model estimate)", st.cap.ppm===null?"—":fmt(st.cap.ppm,0));
+        } else $("spcCapWrap").classList.add("hidden");
+        var verdict, vcls;
+        if(st.cap){
+          if(st.cap.oosCount>0){ verdict = "Parts are out of spec — contain first, then work the cause."; vcls="bad"; }
+          else if(st.cap.cpk!==null && st.cap.cpk>=1.33){ verdict = "Capable and centred enough (Cpk ≥ 1.33). Maintain control."; vcls="good"; }
+          else if(st.cap.cpk!==null && st.cap.cpk>=1.0){ verdict = "Marginal capability (1.00 ≤ Cpk < 1.33) — capable today, little room for drift."; vcls="warn"; }
+          else { verdict = "Not capable (Cpk < 1.00) — the spread or centring must improve before this spec is safe."; vcls="bad"; }
+        } else if(st.outCtrl.length || st.runs.length){ verdict = "Signals present — process may not be stable. Add spec limits for a capability verdict."; vcls="warn"; }
+        else { verdict = "Stable on this data. Add spec limits (LSL/USL) for Cp/Cpk."; vcls="good"; }
+        $("spcSnapshot").innerHTML =
+          "<h4>Capability snapshot</h4><table>" +
+          "<tr><td>Characteristic</td><td>"+esc(name || "—")+"</td></tr>" +
+          "<tr><td>Readings (n)</td><td>"+st.n+"</td></tr>" +
+          "<tr><td>Mean x̄</td><td>"+fmt(st.xbar)+"</td></tr>" +
+          "<tr><td>σ within / overall</td><td>"+fmt(st.sdW)+" / "+fmt(st.sdO)+"</td></tr>" +
+          "<tr><td>Control limits</td><td>"+fmt(st.lcl)+" to "+fmt(st.ucl)+"</td></tr>" +
+          (sp.lsl!==null||sp.usl!==null ? "<tr><td>Spec limits</td><td>"+(sp.lsl!==null?fmt(sp.lsl):"—")+" to "+(sp.usl!==null?fmt(sp.usl):"—")+"</td></tr>" : "") +
+          (st.cap ? "<tr><td>Cp / Cpk</td><td>"+(st.cap.cp===null?"—":fmt2(st.cap.cp))+" / "+(st.cap.cpk===null?"—":fmt2(st.cap.cpk))+"</td></tr>" +
+                    "<tr><td>Pp / Ppk</td><td>"+(st.cap.pp===null?"—":fmt2(st.cap.pp))+" / "+(st.cap.ppk===null?"—":fmt2(st.cap.ppk))+"</td></tr>" +
+                    "<tr><td>Out of spec</td><td>"+st.cap.oosCount+" of "+st.n+"</td></tr>" : "") +
+          "</table>" +
+          '<div class="verdict '+vcls+'">'+esc(verdict)+"</div>";
+        $("spcResults").classList.remove("hidden");
+      }
+      $("spcAnalyse").addEventListener("click", analyseSPC);
+      $("spcSample").addEventListener("click", function(){
+        $("spcName").value = "Hone bore Ø (in)";
+        $("spcData").value = "4.5021, 4.5030, 4.5018, 4.5026, 4.5034, 4.5022, 4.5015, 4.5029, 4.5031, 4.5024, 4.5019, 4.5027, 4.5033, 4.5020, 4.5016, 4.5028, 4.5032, 4.5023, 4.5017, 4.5025, 4.5030, 4.5021, 4.5018, 4.5026, 4.5035, 4.5022, 4.5019, 4.5028, 4.5031, 4.5024";
+        $("spcLSL").value = "4.5000"; $("spcUSL").value = "4.5050";
+        analyseSPC();
+      });
+      $("spcClear").addEventListener("click", function(){
+        $("spcName").value=""; $("spcData").value=""; $("spcLSL").value=""; $("spcUSL").value="";
+        $("spcResults").classList.add("hidden"); hideMsg($("spcMsg")); spcState=null;
+      });
+      $("spcCsv").addEventListener("click", function(){
+        if(!spcState) return;
+        var s = spcState, st = s.st, lines = [];
+        lines.push("Characteristic,"+csvq(s.name||""));
+        lines.push("n,"+st.n); lines.push("Mean,"+fmt(st.xbar)); lines.push("Sigma within (MRbar/d2),"+fmt(st.sdW));
+        lines.push("Sigma overall (s),"+fmt(st.sdO)); lines.push("UCL,"+fmt(st.ucl)); lines.push("LCL,"+fmt(st.lcl));
+        if(s.lsl!==null) lines.push("LSL,"+fmt(s.lsl));
+        if(s.usl!==null) lines.push("USL,"+fmt(s.usl));
+        if(st.cap){
+          lines.push("Cp,"+(st.cap.cp===null?"":fmt2(st.cap.cp))); lines.push("Cpk,"+(st.cap.cpk===null?"":fmt2(st.cap.cpk)));
+          lines.push("Pp,"+(st.cap.pp===null?"":fmt2(st.cap.pp))); lines.push("Ppk,"+(st.cap.ppk===null?"":fmt2(st.cap.ppk)));
+          lines.push("Out of spec count,"+st.cap.oosCount); lines.push("Expected PPM (model estimate),"+(st.cap.ppm===null?"":fmt(st.cap.ppm,0)));
+        }
+        lines.push(""); lines.push("Part,Value,Status");
+        s.vals.forEach(function(v,i){
+          var status = "In spec / in control";
+          if((s.lsl!==null&&v<s.lsl)||(s.usl!==null&&v>s.usl)) status="Out of spec";
+          else if(v>st.ucl||v<st.lcl) status="Out of control";
+          lines.push((i+1)+","+fmt(v)+","+status);
+        });
+        downloadCSV("spc-results.csv", lines.join("\n"));
+      });
+      function csvq(s){ return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }
+
+      /* ================= TOOL 2 : DATA CHECK ================= */
+      function andersonDarling(vals){
+        var n = vals.length, m = mean(vals), sd = sampleSD(vals);
+        if(sd<=0) return null;
+        var sorted = vals.slice().sort(function(a,b){ return a-b; });
+        var F = sorted.map(function(v){ var f = normCdf((v-m)/sd); return Math.min(Math.max(f, 1e-10), 1-1e-10); });
+        var sum = 0;
+        for(var i=1;i<=n;i++) sum += (2*i-1)*(Math.log(F[i-1]) + Math.log(1-F[n-i]));
+        var A2 = -n - sum/n;
+        var A2s = A2*(1 + 0.75/n + 2.25/(n*n));
+        var p;
+        if(A2s < 0.2) p = 1 - Math.exp(-13.436 + 101.14*A2s - 223.73*A2s*A2s);
+        else if(A2s < 0.34) p = 1 - Math.exp(-8.318 + 42.796*A2s - 59.938*A2s*A2s);
+        else if(A2s < 0.6) p = Math.exp(0.9177 - 4.279*A2s - 1.38*A2s*A2s);
+        else p = Math.exp(1.2937 - 5.709*A2s + 0.0186*A2s*A2s);
+        return { A2:A2, A2s:A2s, p: Math.min(Math.max(p,0),1) };
+      }
+      function refreshCheck(){
+        var parsed = parseNumbers($("spcData").value), vals = parsed.vals, msgEl = $("checkMsg");
+        if(vals.length < 3){
+          $("checkResults").classList.add("hidden");
+          showMsg(msgEl, "Enter at least 3 measurements in the SPC & Capability tab first — this tool reads the same data.");
+          return;
+        }
+        hideMsg(msgEl);
+        var sp = getSpecs();
+        var n = vals.length, m = mean(vals), sd = sampleSD(vals);
+        var sorted = vals.slice().sort(function(a,b){ return a-b; });
+        var median = n%2 ? sorted[(n-1)/2] : (sorted[n/2-1]+sorted[n/2])/2;
+        var min = sorted[0], max = sorted[n-1];
+        var m2=0, m3=0, m4=0;
+        vals.forEach(function(v){ var d=v-m; m2+=d*d; m3+=d*d*d; m4+=d*d*d*d; });
+        m2/=n; m3/=n; m4/=n;
+        var skew = (Math.sqrt(n*(n-1))/(n-2)) * (m3/Math.pow(m2,1.5));
+        var kurt = m2>0 ? m4/(m2*m2) : 0;
+        var bc = m2>0 ? (Math.pow(m3/Math.pow(m2,1.5),2)+1)/kurt : 0; // bimodality coefficient
+        /* histogram */
+        var bins = Math.max(5, Math.min(20, Math.round(Math.sqrt(n))));
+        var range = max-min, bw = range>0 ? range/bins : 1;
+        var counts = new Array(bins).fill(0);
+        vals.forEach(function(v){ var b = range>0 ? Math.min(bins-1, Math.floor((v-min)/bw)) : 0; counts[b]++; });
+        var maxC = Math.max.apply(null, counts.concat([1]));
+        var W=720, H=260, padL=44, padR=14, padT=14, padB=34, iw=W-padL-padR, ih=H-padT-padB;
+        function Y(c){ return padT + ih*(1-c/maxC); }
+        var g = "";
+        counts.forEach(function(c, i){
+          var x = padL + iw*i/bins, w = iw/bins;
+          g += '<rect x="'+(x+1)+'" y="'+Y(c)+'" width="'+Math.max(w-2,1)+'" height="'+(padT+ih-Y(c))+'" fill="#2fd4e8" opacity="0.85"/>';
+          g += '<text x="'+(x+w/2)+'" y="'+(Y(c)-4)+'" fill="#8fb0c9" font-size="10.5" font-family="monospace" text-anchor="middle">'+(c||"")+'</text>';
+          g += '<text x="'+(x+w/2)+'" y="'+(H-16)+'" fill="#5f7f99" font-size="9.5" font-family="monospace" text-anchor="middle">'+fmt(min+i*bw,3)+'</text>';
+        });
+        g += '<line x1="'+padL+'" y1="'+(padT+ih)+'" x2="'+(W-padR)+'" y2="'+(padT+ih)+'" stroke="#1e3a56"/>';
+        function specLine(v, label){
+          if(v===null || !isFinite(v) || range<=0) return;
+          var x = padL + iw*(v-min)/range;
+          if(x<padL||x>W-padR) return;
+          g += '<line x1="'+x+'" y1="'+padT+'" x2="'+x+'" y2="'+(padT+ih)+'" stroke="#ff6b6b" stroke-width="1.6" stroke-dasharray="6 4"/>';
+          g += '<text x="'+x+'" y="'+(padT-3)+'" fill="#ff6b6b" font-size="10.5" font-family="monospace" text-anchor="middle">'+label+'</text>';
+        }
+        specLine(sp.lsl, "LSL"); specLine(sp.usl, "USL");
+        $("checkChart").innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Histogram of the measurements">'+g+'</svg>';
+        $("checkStats").innerHTML =
+          statTile("n", String(n)) + statTile("Mean", fmt(m)) + statTile("Median", fmt(median)) +
+          statTile("Std dev (s)", fmt(sd)) + statTile("Min", fmt(min)) + statTile("Max", fmt(max)) +
+          statTile("Skewness", fmt(skew,2));
+        var ad = andersonDarling(vals);
+        if(ad){
+          $("checkAD").innerHTML =
+            statTile("A² (adjusted)", fmt(ad.A2s,3)) +
+            statTile("p-value (approx.)", ad.p<0.001 ? "< 0.001" : fmt(ad.p,3));
+          var html;
+          if(ad.p >= 0.05) html = '<div class="flag green"><strong>Normal-looking (p ≥ 0.05).</strong> No strong evidence against normality — capability indices (Cp/Cpk) rest on a reasonable assumption for this data.</div>';
+          else html = '<div class="flag amber"><strong>Not clearly normal (p &lt; 0.05).</strong> Cpk assumes a normal distribution — treat the index with caution and look at the histogram shape before quoting it. A skewed or two-humped shape often means mixed streams, two setups, or a process that shifted mid-run.</div>';
+          if(bc > 0.555) html += '<div class="flag amber"><strong>Shape hint:</strong> the histogram\'s shape is consistent with more than one hump — check whether two machines, cavities, shifts, or setups were mixed into one dataset.</div>';
+          else if(Math.abs(skew) > 1) html += '<div class="flag amber"><strong>Shape hint:</strong> strong skew ('+fmt(skew,2)+') — a one-sided tail. Look for a physical bound (e.g. runout, flatness) or parts sorted before measuring.</div>';
+          $("checkVerdict").innerHTML = html;
+        } else {
+          $("checkAD").innerHTML = statTile("A²","—");
+          $("checkVerdict").innerHTML = '<div class="flag amber">All readings are identical — no variation to test.</div>';
+        }
+        $("checkResults").classList.remove("hidden");
+      }
+      $("checkRefresh").addEventListener("click", refreshCheck);
+
+      /* ================= TOOL 3 : GAGE R&R (ANOVA) ================= */
+      var grrDims = { o:3, p:10, r:2 };
+      function grrBuildGrid(keep){
+        var o = parseInt($("grrOps").value,10);
+        var p = parseInt($("grrParts").value,10);
+        var r = parseInt($("grrTrials").value,10);
+        if(!isFinite(p) || p<3) p = 3; if(p>15) p = 15;
+        $("grrParts").value = p;
+        var old = {};
+        if(keep){
+          for(var pi=0; pi<grrDims.p; pi++) for(var oi=0; oi<grrDims.o; oi++) for(var ti=0; ti<grrDims.r; ti++){
+            var el = $("grr_"+pi+"_"+oi+"_"+ti); if(el && el.value.trim()!=="") old[pi+"_"+oi+"_"+ti] = el.value;
+          }
+        }
+        grrDims = { o:o, p:p, r:r };
+        var opNames = ["A","B","C"];
+        var html = "<thead><tr><th>Part</th>";
+        for(var oi2=0; oi2<o; oi2++) html += '<th colspan="'+r+'">Operator '+opNames[oi2]+"</th>";
+        html += "</tr><tr><th></th>";
+        for(var oi3=0; oi3<o; oi3++) for(var ti3=0; ti3<r; ti3++) html += "<th>T"+(ti3+1)+"</th>";
+        html += "</tr></thead><tbody>";
+        for(var pi2=0; pi2<p; pi2++){
+          html += "<tr><th>"+(pi2+1)+"</th>";
+          for(var oi4=0; oi4<o; oi4++) for(var ti4=0; ti4<r; ti4++){
+            var v = old[pi2+"_"+oi4+"_"+ti4] || "";
+            html += '<td><input type="number" step="any" inputmode="decimal" id="grr_'+pi2+"_"+oi4+"_"+ti4+'" value="'+esc(v)+'" aria-label="Part '+(pi2+1)+' operator '+opNames[oi4]+' trial '+(ti4+1)+'"></td>';
+          }
+          html += "</tr>";
+        }
+        html += "</tbody>";
+        $("grrGrid").innerHTML = html;
+      }
+      $("grrBuild").addEventListener("click", function(){ grrBuildGrid(true); hideMsg($("grrMsg")); });
+      ["grrOps","grrTrials"].forEach(function(id){ $(id).addEventListener("change", function(){ grrBuildGrid(true); }); });
+      $("grrParts").addEventListener("change", function(){ grrBuildGrid(true); });
+      $("grrFill").addEventListener("click", function(){
+        var parsed = parseNumbers($("grrPaste").value);
+        var need = grrDims.p*grrDims.o*grrDims.r;
+        if(parsed.vals.length === 0){ showMsg($("grrMsg"), "Nothing to fill — paste some readings first."); return; }
+        var k = 0;
+        for(var pi=0; pi<grrDims.p; pi++) for(var oi=0; oi<grrDims.o; oi++) for(var ti=0; ti<grrDims.r; ti++){
+          if(k < parsed.vals.length) $("grr_"+pi+"_"+oi+"_"+ti).value = parsed.vals[k];
+          k++;
+        }
+        showMsg($("grrMsg"), "Filled "+Math.min(parsed.vals.length, need)+" of "+need+" cells from the paste."+(parsed.junk ? " "+parsed.junk+" non-numeric item(s) ignored." : ""), true);
+      });
+      var grrLast = null;
+      function calcGRR(){
+        var o = grrDims.o, p = grrDims.p, r = grrDims.r, msgEl = $("grrMsg");
+        /* read grid: x[part][op][trial] */
+        var x = [], missing = 0;
+        for(var pi=0; pi<p; pi++){ x.push([]); for(var oi=0; oi<o; oi++){ x[pi].push([]); for(var ti=0; ti<r; ti++){
+          var raw = $("grr_"+pi+"_"+oi+"_"+ti).value.trim();
+          var v = raw==="" ? NaN : Number(raw);
+          if(!isFinite(v)) missing++; x[pi][oi].push(v);
+        }}}
+        if(missing){ $("grrResults").classList.add("hidden"); showMsg(msgEl, "The study grid has "+missing+" empty or non-numeric cell"+(missing>1?"s":"")+" — every part needs every operator × trial filled before the ANOVA can run."); return; }
+        hideMsg(msgEl);
+        var N = p*o*r, grand = 0;
+        var cellMean = [], partMean = new Array(p).fill(0), opMean = new Array(o).fill(0), opSum = new Array(o).fill(0);
+        for(var a=0;a<p;a++){ cellMean.push([]); for(var b=0;b<o;b++){ var s=0; for(var c=0;c<r;c++){ s+=x[a][b][c]; grand+=x[a][b][c]; } cellMean[a].push(s/r); partMean[a]+= (s/r); opSum[b]+=s; } partMean[a]/=o; }
+        grand/=N;
+        for(var b2=0;b2<o;b2++) opMean[b2] = opSum[b2]/(p*r);
+        var ssT=0, ssE=0;
+        for(var a2=0;a2<p;a2++) for(var b3=0;b3<o;b3++) for(var c2=0;c2<r;c2++){
+          var d1 = x[a2][b3][c2]-grand; ssT += d1*d1;
+          var d2 = x[a2][b3][c2]-cellMean[a2][b3]; ssE += d2*d2;
+        }
+        var ssP=0, ssO=0, ssCells=0;
+        partMean.forEach(function(v){ ssP += o*r*(v-grand)*(v-grand); });
+        opMean.forEach(function(v){ ssO += p*r*(v-grand)*(v-grand); });
+        for(var a3=0;a3<p;a3++) for(var b4=0;b4<o;b4++){ var dc = cellMean[a3][b4]-grand; ssCells += r*dc*dc; }
+        var ssI = Math.max(0, ssCells - ssP - ssO);
+        var dfP=p-1, dfO=o-1, dfI=(p-1)*(o-1), dfE=p*o*(r-1);
+        var msP=ssP/dfP, msO=ssO/dfO, msI=dfI>0?ssI/dfI:0, msE=dfE>0?ssE/dfE:0;
+        /* AIAG: pool interaction into error when not significant at alpha = 0.25 */
+        var pooled = false, pInt = null;
+        if(dfI>0 && msE>0){ pInt = fUpperP(msI/msE, dfI, dfE); if(pInt > 0.25) pooled = true; }
+        else if(dfI>0 && msE===0 && msI===0) pooled = true;
+        var varE, varI, varO, varP;
+        if(pooled){
+          var msEp = (ssI+ssE)/(dfI+dfE);
+          varE = msEp; varI = 0;
+          varO = Math.max(0,(msO-msEp)/(p*r));
+          varP = Math.max(0,(msP-msEp)/(o*r));
+        } else {
+          varE = msE; varI = Math.max(0,(msI-msE)/r);
+          varO = Math.max(0,(msO-msI)/(p*r));
+          varP = Math.max(0,(msP-msI)/(o*r));
+        }
+        var EV = Math.sqrt(varE), AV = Math.sqrt(varO+varI), PV = Math.sqrt(varP);
+        var GRR = Math.sqrt(EV*EV + AV*AV), TV = Math.sqrt(GRR*GRR + PV*PV);
+        var tolRaw = $("grrTol").value.trim(), tol = tolRaw==="" ? null : Number(tolRaw);
+        if(tol!==null && (!isFinite(tol) || tol<=0)) tol = null;
+        var pctTol = (tol!==null && GRR>=0) ? 6*GRR/tol*100 : null;
+        var pctStudy = TV>0 ? GRR/TV*100 : null;
+        var ndc = GRR>0 ? Math.floor(1.41*PV/GRR) : null;
+        grrLast = { o:o, p:p, r:r, tol:tol, EV:EV, AV:AV, PV:PV, GRR:GRR, TV:TV, pctTol:pctTol, pctStudy:pctStudy, ndc:ndc, opMean:opMean, pooled:pooled, x:x };
+        $("grrStats").innerHTML =
+          statTile("EV (repeatability)", fmt(EV,5)) +
+          statTile("AV (reproducibility)", fmt(AV,5)) +
+          statTile("GRR (combined)", fmt(GRR,5)) +
+          statTile("PV (part variation)", fmt(PV,5)) +
+          statTile("TV (total)", fmt(TV,5)) +
+          opMean.map(function(v,i){ return statTile("Operator "+"ABC"[i]+" avg", fmt(v)); }).join("");
+        var basis = pctTol!==null ? pctTol : pctStudy, basisName = pctTol!==null ? "%GRR of tolerance (6σ)" : "%GRR of study variation";
+        $("grrPct").innerHTML =
+          statTile("%GRR of tolerance", pctTol===null ? "— (no tolerance)" : fmt(pctTol,1)+"%", pctTol===null?"":(pctTol<10?"good":pctTol<=30?"warn":"bad")) +
+          statTile("%GRR of study var.", pctStudy===null ? "—" : fmt(pctStudy,1)+"%") +
+          statTile("ndc (distinct categories)", ndc===null ? "—" : String(ndc), ndc===null?"":(ndc>=5?"good":"bad"));
+        var verdict, cls;
+        if(basis===null){ verdict = "Add a tolerance to get the AIAG verdict."; cls="amber"; }
+        else if(basis < 10){ verdict = "Acceptable — %GRR "+fmt(basis,1)+"% ("+basisName+"). The measurement system is fine; variation you see is the process."; cls="green"; }
+        else if(basis <= 30){ verdict = "Marginal — %GRR "+fmt(basis,1)+"% ("+basisName+"). Usable with care: fine for sorting and SPC, risky for tight capability calls."; cls="amber"; }
+        else { verdict = "Unacceptable — %GRR "+fmt(basis,1)+"% ("+basisName+"). Fix the gauge, the method, or the training before trusting any measurement from this system."; cls="red"; }
+        var html = '<div class="flag '+cls+'"><strong>AIAG verdict:</strong> '+esc(verdict)+"</div>";
+        if(ndc!==null && ndc < 5) html += '<div class="flag amber"><strong>ndc = '+ndc+' (&lt; 5).</strong> The gauge can only sort parts into '+ndc+' distinct categories — too coarse to see process movement on a control chart.</div>';
+        $("grrVerdict").innerHTML = html;
+        $("grrNote").textContent = "ANOVA method per AIAG MSA. Operator × part interaction " + (pooled ? "was not significant at α = 0.25 and was pooled into the error term." : "was kept in the model (significant at α = 0.25).") + " AV combines operator and interaction variance, per the manual.";
+        $("grrResults").classList.remove("hidden");
+      }
+      $("grrCalc").addEventListener("click", calcGRR);
+      $("grrSample").addEventListener("click", function(){
+        $("grrOps").value = "3"; $("grrTrials").value = "2"; $("grrParts").value = "5"; $("grrTol").value = "1.00";
+        grrBuildGrid(false);
+        /* [part][operator][trial] — fixed demo study */
+        var data = [
+          [[10.24,10.26],[10.28,10.27],[10.21,10.23]],
+          [[9.87,9.86],[9.90,9.91],[9.84,9.85]],
+          [[10.52,10.51],[10.55,10.54],[10.49,10.50]],
+          [[9.65,9.66],[9.68,9.67],[9.62,9.64]],
+          [[10.08,10.09],[10.11,10.10],[10.05,10.07]]
+        ];
+        for(var pi=0;pi<5;pi++) for(var oi=0;oi<3;oi++) for(var ti=0;ti<2;ti++) $("grr_"+pi+"_"+oi+"_"+ti).value = data[pi][oi][ti];
+        hideMsg($("grrMsg")); calcGRR();
+      });
+      $("grrCsv").addEventListener("click", function(){
+        if(!grrLast) return;
+        var g = grrLast, lines = [];
+        lines.push("Gage R&R study (ANOVA, AIAG MSA)");
+        lines.push("Operators,"+g.o+",Parts,"+g.p+",Trials,"+g.r);
+        lines.push("EV,"+fmt(g.EV,5)); lines.push("AV,"+fmt(g.AV,5)); lines.push("GRR,"+fmt(g.GRR,5));
+        lines.push("PV,"+fmt(g.PV,5)); lines.push("TV,"+fmt(g.TV,5));
+        if(g.tol!==null) lines.push("Tolerance,"+fmt(g.tol)+",%GRR of tolerance,"+(g.pctTol===null?"":fmt(g.pctTol,1)));
+        lines.push("%GRR of study variation,"+(g.pctStudy===null?"":fmt(g.pctStudy,1)));
+        lines.push("ndc,"+(g.ndc===null?"":g.ndc));
+        lines.push("");
+        var head = "Part"; for(var oi=0;oi<g.o;oi++) for(var ti=0;ti<g.r;ti++) head += ",Op "+"ABC"[oi]+" T"+(ti+1);
+        lines.push(head);
+        for(var pi=0;pi<g.p;pi++){ var row = String(pi+1); for(var oi2=0;oi2<g.o;oi2++) for(var ti2=0;ti2<g.r;ti2++) row += ","+g.x[pi][oi2][ti2]; lines.push(row); }
+        downloadCSV("gage-rr-study.csv", lines.join("\n"));
+      });
+      grrBuildGrid(false);
+
+      /* ================= TOOL 4 : AQL (ANSI/ASQ Z1.4) ================= */
+      var AQL_LETTERS = ["A","B","C","D","E","F","G","H","J","K","L","M","N","P","Q","R"];
+      var AQL_N = {A:2,B:3,C:5,D:8,E:13,F:20,G:32,H:50,J:80,K:125,L:200,M:315,N:500,P:800,Q:1250,R:2000};
+      /* Table I — general inspection levels: [max lot size, I, II, III] */
+      var AQL_TABLE1 = [
+        [8,"A","A","B"],[15,"A","B","C"],[25,"B","C","D"],[50,"C","D","E"],[90,"C","E","F"],
+        [150,"D","F","G"],[280,"E","G","H"],[500,"F","H","J"],[1200,"G","J","K"],[3200,"H","K","L"],
+        [10000,"H","L","M"],[35000,"J","M","N"],[150000,"K","N","P"],[500000,"L","P","Q"],[Infinity,"M","Q","R"]
+      ];
+      /* Table II-A master table. Plans sit on a constant diagonal: for each AQL,
+         the letter index where the 0/1 plan sits; Ac follows 0,1,2,3,5,7,10,14,21.
+         Above the first plan = down arrow, beyond the last = up arrow (per the standard). */
+      var AQL_ACSEQ = [0,1,2,3,5,7,10,14,21];
+      var AQL_START = { "0.065":11, "0.10":10, "0.15":9, "0.25":8, "0.40":7, "0.65":6, "1.0":6, "1.5":5, "2.5":4, "4.0":3, "6.5":2 };
+      function aqlCell(letterIdx, aql){
+        var start = AQL_START[aql], k = letterIdx - start;
+        if(k < 0) return "D";
+        if(k >= AQL_ACSEQ.length) return "U";
+        return AQL_ACSEQ[k];
+      }
+      $("aqlGo").addEventListener("click", function(){
+        var msgEl = $("aqlMsg");
+        var lot = parseInt($("aqlLot").value, 10);
+        if(!isFinite(lot) || lot < 2){ $("aqlResults").classList.add("hidden"); showMsg(msgEl, "Enter a lot size of 2 or more."); return; }
+        hideMsg(msgEl);
+        var level = $("aqlLevel").value, aql = $("aqlVal").value;
+        var row = null;
+        for(var i=0;i<AQL_TABLE1.length;i++){ if(lot <= AQL_TABLE1[i][0]){ row = AQL_TABLE1[i]; break; } }
+        var letter = level==="I" ? row[1] : (level==="II" ? row[2] : row[3]);
+        var idx = AQL_LETTERS.indexOf(letter), cell = aqlCell(idx, aql), steps = 0;
+        while(cell === "D" || cell === "U"){ idx += (cell === "D" ? 1 : -1); cell = aqlCell(idx, aql); steps++; }
+        var planLetter = AQL_LETTERS[idx], n = AQL_N[planLetter], ac = cell, re = cell + 1;
+        $("aqlStats").innerHTML =
+          statTile("Code letter", letter) +
+          statTile("Sample size n", String(n)) +
+          statTile("Accept (Ac)", String(ac), "good") +
+          statTile("Reject (Re)", String(re), "bad");
+        var note;
+        if(n >= lot) note = '<div class="flag amber"><strong>Inspect 100% of the lot.</strong> The plan\'s sample size ('+n+') meets or exceeds the lot size ('+lot+') — sampling saves nothing here.</div>';
+        else if(steps > 0) note = '<div class="flag green">Arrow rule applied: code letter '+letter+' has no plan at AQL '+aql+', so the standard\'s arrow leads to code <strong>'+planLetter+'</strong> (n = '+n+', Ac '+ac+', Re '+re+'). Inspect '+n+' pieces: accept the lot on '+ac+' or fewer defectives, reject on '+re+' or more.</div>';
+        else note = '<div class="flag green">Inspect <strong>'+n+'</strong> pieces from the lot of '+lot+': accept on <strong>'+ac+'</strong> or fewer defectives, reject on <strong>'+re+'</strong> or more.</div>';
+        $("aqlNote").innerHTML = note;
+        $("aqlResults").classList.remove("hidden");
+      });
+
+      /* ================= TOOL 5 : PARETO ================= */
+      var paretoData = [];
+      function paretoAddRow(cat, count){
+        var wrap = $("paretoRows");
+        var div = document.createElement("div");
+        div.className = "prow";
+        div.innerHTML = '<input type="text" placeholder="Category (e.g. Scratches)" value="'+esc(cat||"")+'" aria-label="Category">' +
+                        '<input type="number" step="any" min="0" inputmode="decimal" placeholder="Count" value="'+(count===undefined?"":count)+'" aria-label="Count">' +
+                        '<button class="ghost" type="button" aria-label="Remove row">✕</button>';
+        div.querySelector("button").addEventListener("click", function(){ wrap.removeChild(div); });
+        wrap.appendChild(div);
+      }
+      function paretoReadRows(){
+        var out = [];
+        $("paretoRows").querySelectorAll(".prow").forEach(function(row){
+          var inputs = row.querySelectorAll("input");
+          var cat = inputs[0].value.trim(), cnt = Number(inputs[1].value);
+          if(cat && isFinite(cnt) && cnt > 0) out.push({ cat:cat, count:cnt });
+        });
+        return out;
+      }
+      ["Scratches","Dents","Flash","Short shot","Discoloration"].forEach(function(c, i){ paretoAddRow(c, ["", "", "", "", ""][i]); });
+      $("paretoAdd").addEventListener("click", function(){ paretoAddRow("", ""); });
+      $("paretoLoad").addEventListener("click", function(){
+        var lines = $("paretoPaste").value.split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
+        var rows = [];
+        lines.forEach(function(line){
+          var parts = line.split(/[,;\t]/);
+          if(parts.length >= 2){ var cnt = Number(parts[parts.length-1]); var cat = parts.slice(0,-1).join(",").trim(); if(cat && isFinite(cnt)) rows.push({cat:cat, count:cnt}); }
+        });
+        if(!rows.length){ showMsg($("paretoMsg"), "Could not read any 'category, count' lines from the paste."); return; }
+        $("paretoRows").innerHTML = "";
+        rows.forEach(function(r){ paretoAddRow(r.cat, r.count); });
+        hideMsg($("paretoMsg")); buildPareto();
+      });
+      function buildPareto(){
+        var data = paretoReadRows(), msgEl = $("paretoMsg");
+        if(data.length < 2){ $("paretoResults").classList.add("hidden"); showMsg(msgEl, "Add at least 2 categories with counts above zero."); return; }
+        hideMsg(msgEl);
+        data.sort(function(a,b){ return b.count-a.count; });
+        var total = data.reduce(function(s,d){ return s+d.count; }, 0);
+        var cum = 0; data.forEach(function(d){ cum += d.count; d.cumPct = cum/total*100; });
+        paretoData = data;
+        var W=720, H=300, padL=44, padR=44, padT=16, padB=56, iw=W-padL-padR, ih=H-padT-padB;
+        var maxC = data[0].count;
+        var bw = iw/data.length;
+        var g = "";
+        data.forEach(function(d, i){
+          var x = padL + i*bw, h = ih*d.count/maxC;
+          g += '<rect x="'+(x+3)+'" y="'+(padT+ih-h)+'" width="'+Math.max(bw-6,2)+'" height="'+h+'" fill="#2fd4e8" opacity="0.88"/>';
+          g += '<text x="'+(x+bw/2)+'" y="'+(padT+ih-h-5)+'" fill="#dbe9f5" font-size="11.5" font-family="monospace" text-anchor="middle">'+d.count+'</text>';
+          var label = d.cat.length > 12 ? d.cat.slice(0,11)+"…" : d.cat;
+          g += '<text x="'+(x+bw/2)+'" y="'+(padT+ih+16)+'" fill="#8fb0c9" font-size="10.5" text-anchor="middle" transform="rotate(-18 '+(x+bw/2)+' '+(padT+ih+16)+')">'+esc(label)+'</text>';
+        });
+        var y80 = padT + ih*(1-0.8);
+        g += '<line x1="'+padL+'" y1="'+y80+'" x2="'+(W-padR)+'" y2="'+y80+'" stroke="#5f7f99" stroke-width="1.2" stroke-dasharray="6 4"/>';
+        g += '<text x="'+(W-padR+5)+'" y="'+(y80+3.5)+'" fill="#5f7f99" font-size="10.5" font-family="monospace">80%</text>';
+        var pts = data.map(function(d, i){ return (padL + i*bw + bw/2)+","+(padT + ih*(1-d.cumPct/100)); }).join(" ");
+        g += '<polyline points="'+pts+'" fill="none" stroke="#f5b83d" stroke-width="2"/>';
+        data.forEach(function(d, i){
+          g += '<circle cx="'+(padL + i*bw + bw/2)+'" cy="'+(padT + ih*(1-d.cumPct/100))+'" r="3.6" fill="#f5b83d"/>';
+          g += '<text x="'+(padL + i*bw + bw/2)+'" y="'+(padT + ih*(1-d.cumPct/100) - 9)+'" fill="#f5b83d" font-size="10.5" font-family="monospace" text-anchor="middle">'+fmt(d.cumPct,0)+'%</text>';
+        });
+        $("paretoChart").innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Pareto chart">'+g+'</svg>';
+        var vital = [], c2 = 0;
+        for(var i=0;i<data.length;i++){ vital.push(data[i].cat); c2 += data[i].count; if(c2/total >= 0.8) break; }
+        $("paretoCallout").innerHTML = '<div class="flag green"><strong>The vital few:</strong> '+esc(vital.join(", "))+' — together '+fmt(c2/total*100,0)+'% of all '+total+' counted defects. Fix these first; the rest is the useful many.</div>';
+        $("paretoResults").classList.remove("hidden");
+      }
+      $("paretoGo").addEventListener("click", buildPareto);
+      $("paretoCsv").addEventListener("click", function(){
+        if(!paretoData.length) return;
+        var total = paretoData.reduce(function(s,d){ return s+d.count; }, 0);
+        var lines = ["Category,Count,Percent,Cumulative percent"];
+        paretoData.forEach(function(d){ lines.push(csvq(d.cat)+","+d.count+","+fmt(d.count/total*100,1)+","+fmt(d.cumPct,1)); });
+        lines.push("Total,"+total+",100.0,");
+        downloadCSV("pareto.csv", lines.join("\n"));
+      });
+
+      /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
+      try {
+        if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjEiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
+        }
+      } catch(e) { /* offline install is a bonus, never a blocker */ }
+    </script>
+  </body>
+</html>
