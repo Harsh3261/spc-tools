@@ -2,36 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#08111d" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#e8edf1" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="SPC Tools" />
-    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjoiIzA4MTExZCIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8uIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImljb25zIjpbXSwibmFtZSI6IlNQQyBUb29scyIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJzY29wZSI6Ii4uLyIsInNob3J0X25hbWUiOiJTUEMgVG9vbHMiLCJzdGFydF91cmwiOiIuLi9pbmRleC5odG1sIiwidGhlbWVfY29sb3IiOiIjMDgxMTFkIn0=" />
+    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiNlOGVkZjEiLCAiZGVzY3JpcHRpb24iOiAiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8uIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImljb25zIjogW10sICJuYW1lIjogIlNQQyBUb29scyIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzY29wZSI6ICIuLi8iLCAic2hvcnRfbmFtZSI6ICJTUEMgVG9vbHMiLCAic3RhcnRfdXJsIjogIi4uL2luZGV4Lmh0bWwiLCAidGhlbWVfY29sb3IiOiAiI2U4ZWRmMSJ9" />
     <link rel="icon" href="data:," />
     <title>SPC Tools</title>
     <style>
       :root{
-        --bg:#08111d; --bg2:#0a1728; --panel:#0e1c2e; --panel2:#0b1828;
-        --line:#1e3a56; --line-soft:#16304a;
-        --ink:#dbe9f5; --ink-dim:#8fb0c9; --ink-faint:#5f7f99;
-        --cyan:#2fd4e8; --cyan-dim:#1789a0;
-        --amber:#f5b83d; --red:#ff6b6b; --green:#3ddc97;
+        --bg:#e8edf1; --bg2:#f4f7f9; --panel:#ffffff; --panel2:#eef3f6;
+        --line:#b9c9d6; --line-soft:#d3dee7;
+        --ink:#132635; --ink-dim:#3f5d73; --ink-faint:#6b8699;
+        --cyan:#0b7f95; --cyan-dim:#0b7f95;
+        --amber:#9a6f00; --red:#c93a3a; --green:#147a4f;
         --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
         --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
       }
       *{box-sizing:border-box}
-      html{-webkit-text-size-adjust:100%}
+      html{-webkit-text-size-adjust:100%; scroll-padding-top:14px; scroll-padding-bottom:42vh}
       body{
         margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
-        background-image:
-          linear-gradient(rgba(47,212,232,.045) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(47,212,232,.045) 1px, transparent 1px);
-        background-size:28px 28px;
+        background-image:radial-gradient(rgba(19,38,53,.08) 1px, transparent 1.15px);
+        background-size:22px 22px;
       }
-      .wrap{max-width:920px; margin:0 auto; padding:18px 14px 40px}
+      .wrap{max-width:920px; margin:0 auto; padding:18px 14px 52vh}
+      input, textarea, select{scroll-margin-top:18px; scroll-margin-bottom:42vh}
       header.top{padding:6px 2px 14px; border-bottom:1px solid var(--line)}
       header.top h1{margin:0; font-size:26px; letter-spacing:.04em; font-weight:800}
       header.top h1 .accent{color:var(--cyan)}
@@ -48,7 +47,7 @@
       nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       section.tool{display:none}
       section.tool.active{display:block}
-      .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px}
+      .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px; box-shadow:0 1px 4px rgba(19,38,53,.08), 0 8px 24px rgba(19,38,53,.05)}
       .card h2{margin:0 0 4px; font-size:19px; letter-spacing:.02em}
       .card h3{margin:18px 0 8px; font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim)}
       .card h3:first-of-type{margin-top:6px}
@@ -65,7 +64,7 @@
       .btnrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
       button.act{
         min-height:48px; padding:11px 18px; cursor:pointer; border-radius:8px; border:1px solid var(--cyan-dim);
-        background:var(--cyan); color:#04222b; font-weight:800; font-size:15px; font-family:var(--sans);
+        background:var(--cyan); color:#ffffff; font-weight:800; font-size:15px; font-family:var(--sans);
       }
       button.ghost{
         min-height:48px; padding:11px 16px; cursor:pointer; border-radius:8px; border:1px solid var(--line);
@@ -86,9 +85,9 @@
       .swatch{width:10px; height:10px; border-radius:50%; display:inline-block}
       .flags{margin-top:10px}
       .flag{border-radius:8px; padding:10px 12px; font-size:14px; line-height:1.5; margin-bottom:8px; border:1px solid}
-      .flag.red{background:rgba(255,107,107,.10); border-color:rgba(255,107,107,.45); color:#ffc9c9}
-      .flag.amber{background:rgba(245,184,61,.10); border-color:rgba(245,184,61,.45); color:#ffe1a1}
-      .flag.green{background:rgba(61,220,151,.10); border-color:rgba(61,220,151,.45); color:#b9f4da}
+      .flag.red{background:rgba(201,58,58,.08); border-color:rgba(201,58,58,.45); color:#7a1f1f}
+      .flag.amber{background:rgba(185,125,15,.10); border-color:rgba(185,125,15,.45); color:#6d4d05}
+      .flag.green{background:rgba(20,122,79,.08); border-color:rgba(20,122,79,.40); color:#145c3d}
       .snapshot{background:var(--bg2); border:1px dashed var(--cyan-dim); border-radius:8px; padding:14px; margin-top:12px}
       .snapshot h4{margin:0 0 8px; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan)}
       .snapshot table{width:100%; border-collapse:collapse; font-size:14px}
@@ -484,23 +483,23 @@
           g += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="'+color+'" stroke-width="1.4" '+(dash?'stroke-dasharray="6 4"':'')+'/>';
           g += '<text x="'+(padL-5)+'" y="'+(y+3.5)+'" fill="'+color+'" font-size="10.5" font-family="monospace" text-anchor="end">'+label+'</text>';
         }
-        hline(st.ucl, "#f5b83d", true, fmt(st.ucl));
-        hline(st.xbar, "#2fd4e8", false, fmt(st.xbar));
-        hline(st.lcl, "#f5b83d", true, fmt(st.lcl));
-        if(usl!==null) hline(usl, "#ff6b6b", true, fmt(usl));
-        if(lsl!==null) hline(lsl, "#ff6b6b", true, fmt(lsl));
+        hline(st.ucl, "#b97d0f", true, fmt(st.ucl));
+        hline(st.xbar, "#0b7f95", false, fmt(st.xbar));
+        hline(st.lcl, "#b97d0f", true, fmt(st.lcl));
+        if(usl!==null) hline(usl, "#c93a3a", true, fmt(usl));
+        if(lsl!==null) hline(lsl, "#c93a3a", true, fmt(lsl));
         var pts = "";
         for(var i=1;i<vals.length;i++)
-          pts += '<line x1="'+X(i-1)+'" y1="'+Y(vals[i-1])+'" x2="'+X(i)+'" y2="'+Y(vals[i])+'" stroke="#3d6a8f" stroke-width="1.2"/>';
+          pts += '<line x1="'+X(i-1)+'" y1="'+Y(vals[i-1])+'" x2="'+X(i)+'" y2="'+Y(vals[i])+'" stroke="#7aa3bd" stroke-width="1.2"/>';
         vals.forEach(function(v, i){
           var oos = (lsl!==null && v<lsl) || (usl!==null && v>usl);
           var ooc = !oos && (v>st.ucl || v<st.lcl);
-          var c = oos ? "#ff6b6b" : (ooc ? "#f5b83d" : "#2fd4e8");
-          pts += '<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="'+(oos||ooc?5:3.6)+'" fill="'+c+'" stroke="#08111d" stroke-width="1"/>';
+          var c = oos ? "#c93a3a" : (ooc ? "#b97d0f" : "#0b7f95");
+          pts += '<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="'+(oos||ooc?5:3.6)+'" fill="'+c+'" stroke="#ffffff" stroke-width="1"/>';
         });
         g += pts;
-        g += '<text x="'+padL+'" y="'+(H-8)+'" fill="#5f7f99" font-size="10.5">Part 1</text>';
-        g += '<text x="'+(W-padR)+'" y="'+(H-8)+'" fill="#5f7f99" font-size="10.5" text-anchor="end">Part '+vals.length+'</text>';
+        g += '<text x="'+padL+'" y="'+(H-8)+'" fill="#6b8699" font-size="10.5">Part 1</text>';
+        g += '<text x="'+(W-padR)+'" y="'+(H-8)+'" fill="#6b8699" font-size="10.5" text-anchor="end">Part '+vals.length+'</text>';
         return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Individuals control chart">'+g+'</svg>';
       }
       function capClass(v){ if(v===null||v===undefined) return ""; return v>=1.33 ? "good" : (v>=1.0 ? "warn" : "bad"); }
@@ -654,17 +653,17 @@
         var g = "";
         counts.forEach(function(c, i){
           var x = padL + iw*i/bins, w = iw/bins;
-          g += '<rect x="'+(x+1)+'" y="'+Y(c)+'" width="'+Math.max(w-2,1)+'" height="'+(padT+ih-Y(c))+'" fill="#2fd4e8" opacity="0.85"/>';
-          g += '<text x="'+(x+w/2)+'" y="'+(Y(c)-4)+'" fill="#8fb0c9" font-size="10.5" font-family="monospace" text-anchor="middle">'+(c||"")+'</text>';
-          g += '<text x="'+(x+w/2)+'" y="'+(H-16)+'" fill="#5f7f99" font-size="9.5" font-family="monospace" text-anchor="middle">'+fmt(min+i*bw,3)+'</text>';
+          g += '<rect x="'+(x+1)+'" y="'+Y(c)+'" width="'+Math.max(w-2,1)+'" height="'+(padT+ih-Y(c))+'" fill="#0b7f95" opacity="0.88"/>';
+          g += '<text x="'+(x+w/2)+'" y="'+(Y(c)-4)+'" fill="#3f5d73" font-size="10.5" font-family="monospace" text-anchor="middle">'+(c||"")+'</text>';
+          g += '<text x="'+(x+w/2)+'" y="'+(H-16)+'" fill="#6b8699" font-size="9.5" font-family="monospace" text-anchor="middle">'+fmt(min+i*bw,3)+'</text>';
         });
-        g += '<line x1="'+padL+'" y1="'+(padT+ih)+'" x2="'+(W-padR)+'" y2="'+(padT+ih)+'" stroke="#1e3a56"/>';
+        g += '<line x1="'+padL+'" y1="'+(padT+ih)+'" x2="'+(W-padR)+'" y2="'+(padT+ih)+'" stroke="#b9c9d6"/>';
         function specLine(v, label){
           if(v===null || !isFinite(v) || range<=0) return;
           var x = padL + iw*(v-min)/range;
           if(x<padL||x>W-padR) return;
-          g += '<line x1="'+x+'" y1="'+padT+'" x2="'+x+'" y2="'+(padT+ih)+'" stroke="#ff6b6b" stroke-width="1.6" stroke-dasharray="6 4"/>';
-          g += '<text x="'+x+'" y="'+(padT-3)+'" fill="#ff6b6b" font-size="10.5" font-family="monospace" text-anchor="middle">'+label+'</text>';
+          g += '<line x1="'+x+'" y1="'+padT+'" x2="'+x+'" y2="'+(padT+ih)+'" stroke="#c93a3a" stroke-width="1.6" stroke-dasharray="6 4"/>';
+          g += '<text x="'+x+'" y="'+(padT-3)+'" fill="#c93a3a" font-size="10.5" font-family="monospace" text-anchor="middle">'+label+'</text>';
         }
         specLine(sp.lsl, "LSL"); specLine(sp.usl, "USL");
         $("checkChart").innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Histogram of the measurements">'+g+'</svg>';
@@ -939,19 +938,19 @@
         var g = "";
         data.forEach(function(d, i){
           var x = padL + i*bw, h = ih*d.count/maxC;
-          g += '<rect x="'+(x+3)+'" y="'+(padT+ih-h)+'" width="'+Math.max(bw-6,2)+'" height="'+h+'" fill="#2fd4e8" opacity="0.88"/>';
-          g += '<text x="'+(x+bw/2)+'" y="'+(padT+ih-h-5)+'" fill="#dbe9f5" font-size="11.5" font-family="monospace" text-anchor="middle">'+d.count+'</text>';
+          g += '<rect x="'+(x+3)+'" y="'+(padT+ih-h)+'" width="'+Math.max(bw-6,2)+'" height="'+h+'" fill="#0b7f95" opacity="0.90"/>';
+          g += '<text x="'+(x+bw/2)+'" y="'+(padT+ih-h-5)+'" fill="#132635" font-size="11.5" font-family="monospace" text-anchor="middle">'+d.count+'</text>';
           var label = d.cat.length > 12 ? d.cat.slice(0,11)+"…" : d.cat;
-          g += '<text x="'+(x+bw/2)+'" y="'+(padT+ih+16)+'" fill="#8fb0c9" font-size="10.5" text-anchor="middle" transform="rotate(-18 '+(x+bw/2)+' '+(padT+ih+16)+')">'+esc(label)+'</text>';
+          g += '<text x="'+(x+bw/2)+'" y="'+(padT+ih+16)+'" fill="#3f5d73" font-size="10.5" text-anchor="middle" transform="rotate(-18 '+(x+bw/2)+' '+(padT+ih+16)+')">'+esc(label)+'</text>';
         });
         var y80 = padT + ih*(1-0.8);
         g += '<line x1="'+padL+'" y1="'+y80+'" x2="'+(W-padR)+'" y2="'+y80+'" stroke="#5f7f99" stroke-width="1.2" stroke-dasharray="6 4"/>';
-        g += '<text x="'+(W-padR+5)+'" y="'+(y80+3.5)+'" fill="#5f7f99" font-size="10.5" font-family="monospace">80%</text>';
+        g += '<text x="'+(W-padR+5)+'" y="'+(y80+3.5)+'" fill="#6b8699" font-size="10.5" font-family="monospace">80%</text>';
         var pts = data.map(function(d, i){ return (padL + i*bw + bw/2)+","+(padT + ih*(1-d.cumPct/100)); }).join(" ");
-        g += '<polyline points="'+pts+'" fill="none" stroke="#f5b83d" stroke-width="2"/>';
+        g += '<polyline points="'+pts+'" fill="none" stroke="#b97d0f" stroke-width="2"/>';
         data.forEach(function(d, i){
-          g += '<circle cx="'+(padL + i*bw + bw/2)+'" cy="'+(padT + ih*(1-d.cumPct/100))+'" r="3.6" fill="#f5b83d"/>';
-          g += '<text x="'+(padL + i*bw + bw/2)+'" y="'+(padT + ih*(1-d.cumPct/100) - 9)+'" fill="#f5b83d" font-size="10.5" font-family="monospace" text-anchor="middle">'+fmt(d.cumPct,0)+'%</text>';
+          g += '<circle cx="'+(padL + i*bw + bw/2)+'" cy="'+(padT + ih*(1-d.cumPct/100))+'" r="3.6" fill="#b97d0f"/>';
+          g += '<text x="'+(padL + i*bw + bw/2)+'" y="'+(padT + ih*(1-d.cumPct/100) - 9)+'" fill="#b97d0f" font-size="10.5" font-family="monospace" text-anchor="middle">'+fmt(d.cumPct,0)+'%</text>';
         });
         $("paretoChart").innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Pareto chart">'+g+'</svg>';
         var vital = [], c2 = 0;
@@ -969,10 +968,39 @@
         downloadCSV("pareto.csv", lines.join("\n"));
       });
 
+      /* ---------- keep the focused field visible above the on-screen keyboard ---------- */
+      (function(){
+        var activeField = null, timers = [];
+        function bringIntoView(){
+          if(!activeField || !document.contains(activeField)) return;
+          try { activeField.scrollIntoView({ block:"center", behavior:"smooth" }); } catch(e) { activeField.scrollIntoView(); }
+        }
+        function schedule(){
+          timers.forEach(function(t){ clearTimeout(t); });
+          timers = [ setTimeout(bringIntoView, 120), setTimeout(bringIntoView, 380), setTimeout(bringIntoView, 700) ];
+        }
+        document.addEventListener("focusin", function(ev){
+          var el = ev.target;
+          if(!el || !el.tagName) return;
+          var tag = el.tagName.toLowerCase();
+          if(tag !== "input" && tag !== "textarea" && tag !== "select") return;
+          activeField = el;
+          schedule();
+        });
+        document.addEventListener("focusout", function(){ activeField = null; timers.forEach(function(t){ clearTimeout(t); }); });
+        if(window.visualViewport){
+          var lastH = window.visualViewport.height;
+          window.visualViewport.addEventListener("resize", function(){
+            var h = window.visualViewport.height;
+            if(Math.abs(h - lastH) > 40){ lastH = h; if(activeField) schedule(); }
+          });
+        }
+      })();
+
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjEiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjIiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
