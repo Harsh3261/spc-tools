@@ -9,7 +9,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="SPC Tools" />
-    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiNlOGVkZjEiLCAiZGVzY3JpcHRpb24iOiAiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8uIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImljb25zIjogW10sICJuYW1lIjogIlNQQyBUb29scyIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzY29wZSI6ICIuLi8iLCAic2hvcnRfbmFtZSI6ICJTUEMgVG9vbHMiLCAic3RhcnRfdXJsIjogIi4uL2luZGV4Lmh0bWwiLCAidGhlbWVfY29sb3IiOiAiI2U4ZWRmMSJ9" />
+    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiNlOGVkZjEiLCAiZGVzY3JpcHRpb24iOiAiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8sIGluY2gtZnJhY3Rpb24gYW5kIGhhcmRuZXNzIGNvbnZlcnRlcnMuIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImljb25zIjogW10sICJuYW1lIjogIlNQQyBUb29scyIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzY29wZSI6ICIuLi8iLCAic2hvcnRfbmFtZSI6ICJTUEMgVG9vbHMiLCAic3RhcnRfdXJsIjogIi4uL2luZGV4Lmh0bWwiLCAidGhlbWVfY29sb3IiOiAiI2U4ZWRmMSJ9" />
     <link rel="icon" href="data:," />
     <title>SPC Tools</title>
     <style>
@@ -107,6 +107,12 @@
       .small{font-size:12.5px; color:var(--ink-faint); line-height:1.5}
       .cite{font-size:12.5px; color:var(--ink-faint); margin-top:10px}
       footer{margin-top:22px; padding-top:14px; border-top:1px solid var(--line); color:var(--ink-faint); font-size:12.5px; line-height:1.6}
+      .biginput{font-size:20px !important; padding:14px 12px !important; font-family:var(--mono) !important}
+      .bigres{font-family:var(--mono); font-size:32px; font-weight:700; color:var(--ink); line-height:1.25; overflow-wrap:break-word; margin:6px 0 4px}
+      .bigres small{font-size:15px; color:var(--ink-dim); font-weight:600}
+      .resultbox{background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px; padding:12px 14px; margin-top:12px}
+      .resultbox .rlab{font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); font-weight:700}
+      .frow{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
       .hidden{display:none !important}
     </style>
   </head>
@@ -123,6 +129,7 @@
         <button role="tab" id="tabbtn-grr" aria-selected="false" data-tab="grr">Gage R&amp;R</button>
         <button role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql">AQL Lookup</button>
         <button role="tab" id="tabbtn-pareto" aria-selected="false" data-tab="pareto">Pareto</button>
+        <button role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert">Convert</button>
       </nav>
 
       <!-- ============ TOOL 1 : SPC & CAPABILITY ============ -->
@@ -336,8 +343,108 @@
         </div>
       </section>
 
+      <!-- ============ TOOL 6 : CONVERT ============ -->
+      <section class="tool" id="tool-convert" role="tabpanel" aria-labelledby="tabbtn-convert">
+        <div class="card">
+          <h2>Inch ⇄ Fraction</h2>
+          <p class="small">Enter a decimal to get the nearest fraction, or enter a fraction to get the decimal. The error tile shows exactly how far the rounded fraction sits from the decimal you entered — nothing is hidden by the rounding.</p>
+
+          <div class="row2">
+            <div>
+              <label class="flabel" for="convDec">Decimal inches</label>
+              <input type="number" id="convDec" class="biginput" step="any" inputmode="decimal" placeholder="e.g. 4.4375" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="convPrec">Fraction precision</label>
+              <select id="convPrec" class="biginput">
+                <option value="16" selected>Nearest 1/16</option>
+                <option value="32">Nearest 1/32</option>
+                <option value="64">Nearest 1/64</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="convFracResults" class="hidden">
+            <div class="resultbox">
+              <span class="rlab">Nearest fraction — mixed number</span>
+              <div class="bigres" id="convFracOut">—</div>
+            </div>
+            <div class="stats" id="convFracTiles"></div>
+          </div>
+
+          <h3>Fraction → decimal</h3>
+          <div class="frow">
+            <div>
+              <label class="flabel" for="convWhole">Whole in</label>
+              <input type="number" id="convWhole" class="biginput" step="1" min="0" inputmode="numeric" placeholder="0" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="convNum">Numerator</label>
+              <input type="number" id="convNum" class="biginput" step="1" min="0" inputmode="numeric" placeholder="7" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="convDen">Denominator</label>
+              <input type="number" id="convDen" class="biginput" step="1" min="1" inputmode="numeric" placeholder="16" autocomplete="off" />
+            </div>
+          </div>
+          <div id="convRevResults" class="hidden">
+            <div class="resultbox">
+              <span class="rlab">Decimal inches</span>
+              <div class="bigres" id="convRevOut">—</div>
+            </div>
+            <div class="stats" id="convRevTiles"></div>
+          </div>
+          <div class="msg hidden" id="convMsg" role="status"></div>
+
+          <h3>Inch ⇄ mm</h3>
+          <div class="row2">
+            <div>
+              <label class="flabel" for="convIn">Inches</label>
+              <input type="number" id="convIn" class="biginput" step="any" inputmode="decimal" placeholder="in" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="convMm">Millimetres</label>
+              <input type="number" id="convMm" class="biginput" step="any" inputmode="decimal" placeholder="mm" autocomplete="off" />
+            </div>
+          </div>
+          <p class="small">1 inch = 25.4 mm exactly. Type in either field — the other updates.</p>
+        </div>
+
+        <div class="card">
+          <h2>Hardness conversion — steel</h2>
+          <p class="small">Enter a hardness value, pick its scale, and get the approximate equivalents in every other scale, plus approximate tensile strength where the standard table provides it.</p>
+
+          <div class="row2">
+            <div>
+              <label class="flabel" for="hardVal">Hardness value</label>
+              <input type="number" id="hardVal" class="biginput" step="any" inputmode="decimal" placeholder="e.g. 300" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="hardScale">Scale</label>
+              <select id="hardScale" class="biginput">
+                <option value="hb" selected>Brinell — HB (BHN)</option>
+                <option value="hrc">Rockwell C — HRC</option>
+                <option value="hrb">Rockwell B — HRB</option>
+                <option value="hv">Vickers — HV</option>
+              </select>
+            </div>
+          </div>
+          <div class="btnrow">
+            <button class="act" id="hardGo">Convert hardness</button>
+          </div>
+          <div class="msg hidden" id="hardMsg" role="status"></div>
+
+          <div id="hardResults" class="hidden">
+            <h3>Approximate equivalents</h3>
+            <div class="stats" id="hardTiles"></div>
+            <div class="flags" id="hardNote"></div>
+          </div>
+          <p class="cite">Approximate conversions for steel per ASTM E140 — for reference only, not for acceptance decisions.</p>
+        </div>
+      </section>
+
       <footer>
-        Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality. Estimates from your data — verify critical results before acting on them.
+        Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate). Estimates from your data — verify critical results before acting on them.
       </footer>
     </div>
 
@@ -411,7 +518,8 @@
         btn.addEventListener("click", function(){
           tabBtns.forEach(function(b){ b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
           document.querySelectorAll("section.tool").forEach(function(s){ s.classList.toggle("active", s.id === "tool-"+btn.getAttribute("data-tab")); });
-          window.scrollTo({top:0, behavior:"smooth"});
+          /* Deliberately no scrolling here: switching tabs swaps the panel in
+             place and the page stays exactly where it is. */
         });
       });
 
@@ -968,6 +1076,160 @@
         downloadCSV("pareto.csv", lines.join("\n"));
       });
 
+      /* ================= TOOL 6 : CONVERT ================= */
+      function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = a % b; a = b; b = t; } return a || 1; }
+      function signed4(x){ return (x < 0 ? "-" : "+") + Math.abs(x).toFixed(4); }
+      function trimNum(x, d){ return String(parseFloat(x.toFixed(d))); }
+
+      /* --- decimal inches -> nearest fraction --- */
+      function convDecToFrac(){
+        var raw = $("convDec").value.trim();
+        var prec = parseInt($("convPrec").value, 10) || 16;
+        if(raw === "" || !isFinite(Number(raw))){ $("convFracResults").classList.add("hidden"); return; }
+        var v = Number(raw);
+        var neg = v < 0;
+        var total = Math.round(Math.abs(v) * prec); /* in precision units */
+        var whole = Math.floor(total / prec);
+        var rem = total % prec;
+        var g = gcd(rem, prec);
+        var rn = rem / g, rd = prec / g;
+        var fracText;
+        if(rem === 0) fracText = String(whole);
+        else if(whole === 0) fracText = rn + "/" + rd;
+        else fracText = whole + " " + rn + "/" + rd;
+        if(neg && total !== 0) fracText = "-" + fracText;
+        var fracDec = (neg ? -1 : 1) * total / prec;
+        var err = v - fracDec;
+        $("convFracOut").innerHTML = esc(fracText) + " <small>in</small>";
+        $("convFracTiles").innerHTML =
+          statTile("Decimal of that fraction", fmt(fracDec)) +
+          statTile("Rounding error (entered − fraction)", signed4(err) + " in", err === 0 ? "good" : (Math.abs(err) <= 0.001 ? "" : "warn")) +
+          statTile("Precision", "1/" + prec + " in") +
+          statTile("Metric equivalent", fmt(v * 25.4, 3) + " mm");
+        $("convFracResults").classList.remove("hidden");
+      }
+      $("convDec").addEventListener("input", convDecToFrac);
+      $("convPrec").addEventListener("change", convDecToFrac);
+
+      /* --- fraction -> decimal inches --- */
+      function convFracToDec(){
+        var wRaw = $("convWhole").value.trim(), nRaw = $("convNum").value.trim(), dRaw = $("convDen").value.trim();
+        var msgEl = $("convMsg");
+        if(nRaw === "" && wRaw === ""){ $("convRevResults").classList.add("hidden"); hideMsg(msgEl); return; }
+        var w = wRaw === "" ? 0 : Number(wRaw), n = nRaw === "" ? 0 : Number(nRaw), d = Number(dRaw);
+        if(!isFinite(w) || !isFinite(n) || !isFinite(d) || d <= 0 || w < 0 || n < 0){
+          $("convRevResults").classList.add("hidden");
+          if(dRaw !== "" && (!isFinite(d) || d <= 0)) showMsg(msgEl, "Denominator must be a number above zero.");
+          return;
+        }
+        hideMsg(msgEl);
+        var dec = w + n / d;
+        var g = gcd(Math.round(n), Math.round(d));
+        var simple = (n % 1 === 0 && d % 1 === 0 && g > 1) ? ((w ? w + " " : "") + (n / g) + "/" + (d / g)) : null;
+        $("convRevOut").innerHTML = esc(fmt(dec)) + " <small>in</small>";
+        $("convRevTiles").innerHTML =
+          statTile("Millimetres", fmt(dec * 25.4, 3) + " mm") +
+          (simple ? statTile("Simplified fraction", simple + " in") : statTile("Fraction as entered", (w ? w + " " : "") + n + "/" + d + " in"));
+        $("convRevResults").classList.remove("hidden");
+      }
+      ["convWhole", "convNum", "convDen"].forEach(function(id){ $(id).addEventListener("input", convFracToDec); });
+
+      /* --- inch <-> mm pair (1 in = 25.4 mm exactly) --- */
+      var mmSync = false;
+      $("convIn").addEventListener("input", function(){
+        if(mmSync) return; mmSync = true;
+        var raw = $("convIn").value.trim();
+        $("convMm").value = (raw === "" || !isFinite(Number(raw))) ? "" : trimNum(Number(raw) * 25.4, 4);
+        mmSync = false;
+      });
+      $("convMm").addEventListener("input", function(){
+        if(mmSync) return; mmSync = true;
+        var raw = $("convMm").value.trim();
+        $("convIn").value = (raw === "" || !isFinite(Number(raw))) ? "" : trimNum(Number(raw) / 25.4, 5);
+        mmSync = false;
+      });
+
+      /* --- hardness conversion, ASTM E140 Table 1 (steel), interpolated ---
+         Rows: [HV, HB, HRC, HRB, approx UTS in MPa]; null = scale not covered
+         at that hardness in the standard table (never extrapolated). */
+      var E140 = [
+        [90,86,null,52,295],[100,95,null,58,325],[110,105,null,64,355],
+        [120,114,null,69,390],[130,124,null,73,420],[140,133,null,77,455],
+        [150,143,null,81,485],[160,152,null,84,520],[170,162,null,86,550],
+        [180,171,null,88,580],[190,181,null,90,615],[200,190,null,92,650],
+        [210,200,null,93,685],[220,209,null,95,715],[230,219,null,96,750],
+        [238,226,20,97,780],[248,237,22,98,815],[260,247,24,99,850],
+        [272,258,26,100,885],[286,271,28,null,930],[302,286,30,null,990],
+        [318,301,32,null,1035],[336,318,34,null,1095],[354,335,36,null,1155],
+        [372,352,38,null,1210],[392,371,40,null,1275],[412,390,42,null,1345],
+        [434,409,44,null,1415],[458,432,46,null,1500],[484,455,48,null,1595],
+        [513,481,50,null,1700],[544,512,52,null,1810],[577,543,54,null,1920],
+        [613,577,56,null,2035],[653,615,58,null,2165],[697,654,60,null,2300],
+        [746,688,62,null,2420],[800,739,64,null,null],[865,null,66,null,null],
+        [940,null,68,null,null],[1005,null,69,null,null],[1076,null,70,null,null]
+      ];
+      var HARD_KEYS = { hv:0, hb:1, hrc:2, hrb:3, uts:4 };
+      var HARD_LABEL = { hv:"Vickers HV", hb:"Brinell HB", hrc:"Rockwell C HRC", hrb:"Rockwell B HRB" };
+      function hardConvert(v, fromKey){
+        var fi = HARD_KEYS[fromKey];
+        var rows = E140.filter(function(r){ return r[fi] !== null; });
+        var lo = rows[0][fi], hi = rows[rows.length - 1][fi];
+        if(v < lo || v > hi) return { out:true, lo:lo, hi:hi };
+        var a = null, b = null, exact = null;
+        for(var i = 0; i < rows.length; i++){
+          if(rows[i][fi] === v){ exact = rows[i]; break; }
+          if(rows[i][fi] < v) a = rows[i];
+          if(rows[i][fi] > v && b === null) b = rows[i];
+        }
+        var out = {};
+        if(exact){ for(var k in HARD_KEYS) out[k] = exact[HARD_KEYS[k]]; return { out:false, vals:out }; }
+        var t = (v - a[fi]) / (b[fi] - a[fi]);
+        for(var k2 in HARD_KEYS){
+          var ti = HARD_KEYS[k2];
+          out[k2] = (a[ti] !== null && b[ti] !== null) ? a[ti] + t * (b[ti] - a[ti]) : null;
+        }
+        out[fromKey] = v;
+        return { out:false, vals:out };
+      }
+      function runHard(){
+        var msgEl = $("hardMsg"), raw = $("hardVal").value.trim(), scale = $("hardScale").value;
+        if(raw === "" || !isFinite(Number(raw))){
+          $("hardResults").classList.add("hidden");
+          showMsg(msgEl, "Enter a hardness value first.");
+          return;
+        }
+        var v = Number(raw), res = hardConvert(v, scale);
+        if(res.out){
+          $("hardResults").classList.add("hidden");
+          showMsg(msgEl, "Outside the standard table range for " + HARD_LABEL[scale] + " (" + res.lo + "–" + res.hi + ") — no conversion shown rather than a made-up number.");
+          return;
+        }
+        hideMsg(msgEl);
+        var hv = res.vals.hv, hb = res.vals.hb, hrc = res.vals.hrc, hrb = res.vals.hrb, uts = res.vals.uts;
+        function hvFmt(x){ return x === null ? "—" : String(Math.round(x)); }
+        function rcFmt(x){ return x === null ? "—" : fmt(x, 1); }
+        $("hardTiles").innerHTML =
+          statTile("Brinell HB (BHN)", hvFmt(hb), scale === "hb" ? "good" : "") +
+          statTile("Rockwell C (HRC)", rcFmt(hrc), scale === "hrc" ? "good" : "") +
+          statTile("Rockwell B (HRB)", rcFmt(hrb), scale === "hrb" ? "good" : "") +
+          statTile("Vickers (HV)", hvFmt(hv), scale === "hv" ? "good" : "") +
+          statTile("Approx tensile (UTS)", uts === null ? "—" : String(Math.round(uts)) + " MPa") +
+          statTile("Approx tensile (UTS)", uts === null ? "—" : fmt(uts / 6.89476, 0) + " ksi");
+        var missing = [];
+        if(hb === null) missing.push("Brinell HB");
+        if(hrc === null) missing.push("Rockwell C");
+        if(hrb === null) missing.push("Rockwell B");
+        if(hv === null) missing.push("Vickers HV");
+        if(uts === null) missing.push("tensile strength");
+        $("hardNote").innerHTML = (missing.length ?
+          '<div class="flag amber"><strong>Not covered at this hardness:</strong> ' + esc(missing.join(", ")) + ' — the standard table does not cover that scale at this hardness, so it is shown as — rather than extrapolated.</div>' : "") +
+          '<div class="flag green">Approximate conversions for steel per ASTM E140 — for reference only, not for acceptance decisions.</div>';
+        $("hardResults").classList.remove("hidden");
+      }
+      $("hardGo").addEventListener("click", runHard);
+      $("hardVal").addEventListener("input", function(){ if($("hardVal").value.trim() !== "") runHard(); });
+      $("hardScale").addEventListener("change", function(){ if($("hardVal").value.trim() !== "") runHard(); });
+
       /* ---------- keep the focused field visible above the on-screen keyboard ---------- */
       (function(){
         var activeField = null, timers = [];
@@ -1000,7 +1262,7 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjIiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjMiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
