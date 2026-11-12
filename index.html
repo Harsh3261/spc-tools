@@ -9,7 +9,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="SPC Tools" />
-    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiNkOGRmZTYiLCAiZGVzY3JpcHRpb24iOiAiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8sIGluY2gtZnJhY3Rpb24gYW5kIGhhcmRuZXNzIGNvbnZlcnRlcnMuIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImljb25zIjogW10sICJuYW1lIjogIlNQQyBUb29scyIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzY29wZSI6ICIuLi8iLCAic2hvcnRfbmFtZSI6ICJTUEMgVG9vbHMiLCAic3RhcnRfdXJsIjogIi4uL2luZGV4Lmh0bWwiLCAidGhlbWVfY29sb3IiOiAiI2Q4ZGZlNiJ9" />
+    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiNkOGRmZTYiLCAiZGVzY3JpcHRpb24iOiAiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8sIGluY2gtZnJhY3Rpb24gYW5kIGhhcmRuZXNzIGNvbnZlcnRlcnMsIHNpZ21hLVBQTSBjb252ZXJzaW9uLCB0aHJlYWQgYmFzaWMgZGlhbWV0ZXJzLCB0b2xlcmFuY2Ugc3RhY2stdXAgYW5kIHRydWUgcG9zaXRpb24uIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImljb25zIjogW10sICJuYW1lIjogIlNQQyBUb29scyIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzY29wZSI6ICIuLi8iLCAic2hvcnRfbmFtZSI6ICJTUEMgVG9vbHMiLCAic3RhcnRfdXJsIjogIi4uL2luZGV4Lmh0bWwiLCAidGhlbWVfY29sb3IiOiAiI2Q4ZGZlNiJ9" />
     <link rel="icon" href="data:," />
     <title>SPC Tools</title>
     <style>
@@ -23,14 +23,17 @@
         --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
       }
       *{box-sizing:border-box}
-      html{-webkit-text-size-adjust:100%; scroll-padding-top:14px; scroll-padding-bottom:42vh}
+      html{-webkit-text-size-adjust:100%; scroll-padding-top:14px; scroll-padding-bottom:18px}
       body{
         margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
         background-image:radial-gradient(rgba(19,38,53,.08) 1px, transparent 1.15px);
         background-size:22px 22px;
       }
       .wrap{max-width:920px; margin:0 auto; padding:18px 14px 52vh}
-      input, textarea, select{scroll-margin-top:18px; scroll-margin-bottom:42vh}
+      input, textarea{scroll-margin-top:18px; scroll-margin-bottom:42vh}
+      /* Selects open native pickers — no keyboard to clear — so they must
+         never demand keyboard clearance from native focus scrolling. */
+      select{scroll-margin-top:18px; scroll-margin-bottom:18px}
       header.top{padding:6px 2px 14px; border-bottom:1px solid var(--line)}
       header.top h1{margin:0; font-size:26px; letter-spacing:.04em; font-weight:800}
       header.top h1 .accent{color:var(--cyan)}
@@ -43,7 +46,7 @@
         background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
         border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:700; letter-spacing:.02em;
       }
-      nav.tabs button[aria-selected="true"]{background:var(--panel); color:var(--cyan); border-color:var(--cyan-dim); box-shadow:inset 0 -3px 0 var(--cyan)}
+      nav.tabs button[aria-selected="true"]{background:var(--cyan); color:#ffffff; border-color:var(--cyan-dim); box-shadow:0 2px 8px rgba(11,127,149,.35)}
       nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       section.tool{display:none}
       section.tool.active{display:block; min-height:calc(100dvh - 230px)}
@@ -115,6 +118,35 @@
       .resultbox .rlab{font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); font-weight:700}
       .frow{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
       .hidden{display:none !important}
+      /* Round 2 — meaning lines, verdict pills, design + motion (transform/opacity only) */
+      .explain{margin:10px 0 0; font-size:13.5px; line-height:1.55; color:var(--ink-dim); background:var(--panel2); border:1px solid var(--line-soft); border-radius:8px; padding:10px 12px}
+      .explain strong{color:var(--ink)}
+      .pill{display:inline-block; padding:5px 14px; border-radius:999px; font-size:14px; font-weight:800; letter-spacing:.03em; margin-top:10px}
+      .pill.good{background:rgba(20,122,79,.14); color:#145c3d; border:1px solid rgba(20,122,79,.5)}
+      .pill.bad{background:rgba(201,58,58,.12); color:#7a1f1f; border:1px solid rgba(201,58,58,.5)}
+      .dtable{width:100%; border-collapse:collapse; font-size:14.5px; margin-top:10px}
+      .dtable th,.dtable td{padding:8px 6px; border-bottom:1px solid var(--line-soft); text-align:right; font-family:var(--mono)}
+      .dtable th{color:var(--ink-dim); font-family:var(--sans); font-size:12px; letter-spacing:.05em; text-transform:uppercase}
+      .dtable td:first-child,.dtable th:first-child{text-align:left; font-family:var(--sans)}
+      .surow{display:grid; grid-template-columns:52px 1fr 1fr 64px 40px; gap:6px; margin-bottom:8px; align-items:center}
+      .surow input,.surow select{padding:10px 8px; font-size:15px}
+      .surow button{min-height:44px; padding:6px 0}
+      @media (max-width:520px){ .surow{grid-template-columns:40px 1fr 1fr 56px 36px} }
+      /* pinned result heights in Convert so re-renders never change block height */
+      #convFracResults .resultbox, #convRevResults .resultbox{min-height:104px}
+      #convFracResults .stats, #convRevResults .stats{min-height:76px}
+      #hardResults .stats{min-height:118px}
+      #sigResults .stats{min-height:76px}
+      section.tool.active{animation:panelIn .14s cubic-bezier(0.0,0.0,0.2,1)}
+      .chartbox{animation:panelIn .2s cubic-bezier(0.0,0.0,0.2,1)}
+      .flash{animation:resFlash .22s ease-out}
+      button.act, button.ghost, nav.tabs button{transition:transform .1s ease-out, background-color .12s ease-out, color .12s ease-out}
+      button.act:active, button.ghost:active{transform:scale(.98)}
+      @keyframes panelIn{from{opacity:0}to{opacity:1}}
+      @keyframes resFlash{from{opacity:.35}to{opacity:1}}
+      @media (prefers-reduced-motion: reduce){
+        *, *::before, *::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important}
+      }
     </style>
   </head>
   <body>
@@ -131,6 +163,8 @@
         <button role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql">AQL Lookup</button>
         <button role="tab" id="tabbtn-pareto" aria-selected="false" data-tab="pareto">Pareto</button>
         <button role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert">Convert</button>
+        <button role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads">Threads</button>
+        <button role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack">Stack-Up</button>
       </nav>
 
       <!-- ============ TOOL 1 : SPC & CAPABILITY ============ -->
@@ -191,10 +225,12 @@
             <div id="spcCapWrap" class="hidden">
               <h3>Capability (spec limits given)</h3>
               <div class="stats" id="spcCap"></div>
+              <p class="explain"><strong>What this means:</strong> Expected PPM is what the normal curve predicts from this data's spread and centring — it assumes the process stays stable and normally distributed.</p>
             </div>
 
             <h3>Capability snapshot</h3>
             <div class="snapshot" id="spcSnapshot"></div>
+            <p class="explain hidden" id="spcMeaning"></p>
 
             <div class="btnrow">
               <button class="ghost" id="spcCsv">Download CSV (data + results)</button>
@@ -327,6 +363,7 @@
             <h3>Sampling plan</h3>
             <div class="stats" id="aqlStats"></div>
             <div class="flags" id="aqlNote"></div>
+            <p class="explain"><strong>What this means:</strong> An AQL plan controls the odds of accepting lots at a stated quality level — accepting a lot does not certify that every part in it is good.</p>
           </div>
           <p class="cite">Single sampling plans, normal inspection — ANSI/ASQ Z1.4 (Tables I &amp; II-A). Arrow rules are followed to the first real plan, as the standard requires.</p>
         </div>
@@ -473,10 +510,163 @@
           </div>
           <p class="cite">Approximate conversions for steel per ASTM E140 — for reference only, not for acceptance decisions.</p>
         </div>
+
+        <div class="card">
+          <h2>Sigma ⇄ PPM — capability in plain numbers</h2>
+          <p class="small">Convert between Cpk, expected defects (PPM) and yield. With the shift <strong>off</strong>, the process is treated as centred and PPM counts both spec tails. With the shift <strong>on</strong>, the Motorola 1.5σ-shift convention applies and the result is quoted as DPMO (one tail) — the convention behind "6 sigma = 3.4 DPMO".</p>
+          <div class="row3">
+            <div>
+              <label class="flabel" for="sigFrom">Convert from</label>
+              <select id="sigFrom" class="biginput">
+                <option value="cpk" selected>Cpk</option>
+                <option value="ppm">PPM / DPMO</option>
+                <option value="yield">Yield %</option>
+              </select>
+            </div>
+            <div>
+              <label class="flabel" for="sigVal" id="sigValLabel">Cpk value</label>
+              <input type="number" id="sigVal" class="biginput" step="any" inputmode="decimal" placeholder="e.g. 1.33" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="sigShift">Include 1.5σ shift</label>
+              <select id="sigShift" class="biginput">
+                <option value="off" selected>Off — centred process</option>
+                <option value="on">On — Motorola convention</option>
+              </select>
+            </div>
+          </div>
+          <div class="msg hidden" id="sigMsg" role="status"></div>
+          <div id="sigResults" class="hidden">
+            <h3>Equivalent values</h3>
+            <div class="stats" id="sigTiles"></div>
+            <p class="explain" id="sigMeaning"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TOOL 7 : THREADS ============ -->
+      <section class="tool" id="tool-threads" role="tabpanel" aria-labelledby="tabbtn-threads">
+        <div class="card">
+          <h2>Thread basic diameters — metric &amp; UN</h2>
+          <p class="guru">Basic diameters are the standard's reference sizes before tolerances are applied — gauge selection, tap-drill sizing, and CMM nominals start here.</p>
+          <div class="row3">
+            <div>
+              <label class="flabel" for="thSystem">Thread system</label>
+              <select id="thSystem">
+                <option value="metric" selected>Metric ISO</option>
+                <option value="un">UN imperial (UNC / UNF)</option>
+              </select>
+            </div>
+            <div>
+              <label class="flabel" for="thPreset">Standard size</label>
+              <select id="thPreset"></select>
+            </div>
+            <div>
+              <label class="flabel" for="thType">Thread</label>
+              <select id="thType">
+                <option value="ext" selected>External (bolt / screw)</option>
+                <option value="int">Internal (nut / tapped hole)</option>
+              </select>
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label class="flabel" for="thD" id="thDLabel">Major diameter D (mm)</label>
+              <input type="number" id="thD" step="any" inputmode="decimal" placeholder="e.g. 10" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="thP" id="thPLabel">Pitch (mm)</label>
+              <input type="number" id="thP" step="any" inputmode="decimal" placeholder="e.g. 1.5" autocomplete="off" />
+            </div>
+          </div>
+          <div class="btnrow">
+            <button class="act" id="thGo">Get diameters</button>
+          </div>
+          <div class="msg hidden" id="thMsg" role="status"></div>
+          <div id="thResults" class="hidden">
+            <h3 id="thResTitle">Basic diameters</h3>
+            <table class="dtable" id="thTable" aria-label="Thread basic diameters"></table>
+            <p class="explain"><strong>What this means:</strong> Basic diameters are the standard's reference sizes before tolerances are applied — use the gauge certificate or the standard's tables for acceptance limits.</p>
+          </div>
+          <p class="cite">Basic dimensions per ISO 68-1 / ASME B1.1. For gauge acceptance limits (6H/6g, 2A/2B), the gauge certificate governs. Tapered pipe threads (NPT) are not covered — their diameters depend on axial position along the taper.</p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL 8 : STACK-UP ============ -->
+      <section class="tool" id="tool-stack" role="tabpanel" aria-labelledby="tabbtn-stack">
+        <div class="card">
+          <h2>Tolerance stack-up — 1D chain</h2>
+          <p class="guru">Add the dimensions that build the gap, in order. Direction + means a bigger dimension makes the gap bigger; − means it makes the gap smaller.</p>
+          <div class="surow" aria-hidden="true" style="margin-bottom:2px">
+            <span class="small">Name</span><span class="small">Nominal</span><span class="small">± Tol</span><span class="small">Dir</span><span></span>
+          </div>
+          <div id="suRows"></div>
+          <div class="btnrow">
+            <button class="ghost" id="suAdd" type="button">+ Add dimension</button>
+            <button class="ghost" id="suExample" type="button">Load example (demo)</button>
+            <button class="act" id="suGo" type="button">Calculate stack-up</button>
+          </div>
+          <div class="msg hidden" id="suMsg" role="status"></div>
+          <div class="demobanner hidden" id="suDemoBanner" role="status"><strong>EXAMPLE DATA</strong> — demonstration only, not real measurements.</div>
+          <div id="suResults" class="hidden">
+            <h3>Assembly gap</h3>
+            <div class="stats" id="suTiles"></div>
+            <p class="explain"><strong>Worst-case is a guarantee:</strong> if every part is within its own tolerance, the assembly gap stays inside these limits.</p>
+            <p class="explain"><strong>RSS is a prediction, not a guarantee:</strong> it assumes each process is centred, normal, and independent, with each tolerance equal to ±3σ.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>True position — with MMC / LMC bonus</h2>
+          <p class="small">Enter how far the measured feature centre sits from its true (basic) position, the stated position tolerance, and the feature's actual mating size. Bonus tolerance is how far the actual size has departed from the MMC (or LMC) size limit.</p>
+          <div class="row3">
+            <div>
+              <label class="flabel" for="tpDx">Δx (measured − true)</label>
+              <input type="number" id="tpDx" step="any" inputmode="decimal" placeholder="e.g. 0.03" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="tpDy">Δy (measured − true)</label>
+              <input type="number" id="tpDy" step="any" inputmode="decimal" placeholder="e.g. 0.04" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="tpTol">Stated position tolerance ⌀</label>
+              <input type="number" id="tpTol" step="any" inputmode="decimal" placeholder="e.g. 0.10" autocomplete="off" />
+            </div>
+          </div>
+          <div class="row3">
+            <div>
+              <label class="flabel" for="tpActual">Measured feature size</label>
+              <input type="number" id="tpActual" step="any" inputmode="decimal" placeholder="Actual mating size" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="tpLimit">Size limit at modifier</label>
+              <input type="number" id="tpLimit" step="any" inputmode="decimal" placeholder="MMC / LMC size" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="tpMod">Modifier</label>
+              <select id="tpMod">
+                <option value="mmc" selected>MMC Ⓜ</option>
+                <option value="lmc">LMC Ⓛ</option>
+                <option value="rfs">RFS (no bonus)</option>
+              </select>
+            </div>
+          </div>
+          <div class="btnrow">
+            <button class="act" id="tpGo">Check position</button>
+          </div>
+          <div class="msg hidden" id="tpMsg" role="status"></div>
+          <div id="tpResults" class="hidden">
+            <h3>Result</h3>
+            <div class="stats" id="tpTiles"></div>
+            <div id="tpVerdict"></div>
+            <p class="explain"><strong>What this means:</strong> the diametral deviation 2√(Δx² + Δy²) is the diameter of the smallest zone around true position that contains the measured centre; it must fit inside the stated tolerance plus any bonus the feature's size has earned.</p>
+          </div>
+          <p class="cite">Geometry per ASME Y14.5 — exact diametral deviation, no statistical assumptions. All values in the same unit (mm or in) as entered.</p>
+        </div>
       </section>
 
       <footer>
-        Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate). Estimates from your data — verify critical results before acting on them.
+        Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate) · Thread basics per ISO 68-1 / ASME B1.1 · True position per ASME Y14.5. Estimates from your data — verify critical results before acting on them.
       </footer>
     </div>
 
@@ -590,6 +780,28 @@
         setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 300);
       }
       function statTile(k, v, cls){ return '<div class="stat"><span class="k">'+esc(k)+'</span><span class="v'+(cls?' '+cls:'')+'">'+esc(v)+'</span></div>'; }
+      /* Scroll hold: run fn(), then restore the exact scroll position so a
+         control that re-renders content can never move the page (user rule:
+         operating any control leaves window.scrollY unchanged). */
+      function holdScroll(fn){
+        var y = window.scrollY || window.pageYOffset || 0;
+        var rootEl = document.documentElement;
+        var prevBehavior = rootEl.style.scrollBehavior;
+        rootEl.style.scrollBehavior = "auto";
+        fn();
+        window.scrollTo(0, y);
+        requestAnimationFrame(function(){
+          window.scrollTo(0, y);
+          setTimeout(function(){ window.scrollTo(0, y); rootEl.style.scrollBehavior = prevBehavior; }, 170);
+        });
+      }
+      function flash(el){ if(!el) return; el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+      function invNormCdf(p){
+        if(p <= 0) return -10; if(p >= 1) return 10;
+        var lo = -10, hi = 10;
+        for(var i = 0; i < 120; i++){ var mid = (lo + hi) / 2; if(normCdf(mid) < p) lo = mid; else hi = mid; }
+        return (lo + hi) / 2;
+      }
       /* regularised incomplete beta (for F-test p-values) */
       function betacf(a,b,x){
         var MAXIT=200, EPS=3e-12, FPMIN=1e-300, qab=a+b, qap=a+1, qam=a-1;
@@ -636,7 +848,7 @@
           window.scrollTo(0, savedY);
           requestAnimationFrame(function(){
             window.scrollTo(0, savedY);
-            rootEl.style.scrollBehavior = prevBehavior;
+            setTimeout(function(){ window.scrollTo(0, savedY); rootEl.style.scrollBehavior = prevBehavior; }, 170);
           });
         });
       });
@@ -772,7 +984,7 @@
             statTile("Pp (overall)", st.cap.pp===null?"—":fmt2(st.cap.pp), capClass(st.cap.pp)) +
             statTile("Ppk (overall)", st.cap.ppk===null?"—":fmt2(st.cap.ppk), capClass(st.cap.ppk)) +
             statTile("Out of spec", String(st.cap.oosCount), st.cap.oosCount? "bad":"good") +
-            statTile("Expected PPM (model estimate)", st.cap.ppm===null?"—":fmt(st.cap.ppm,0));
+            statTile("Expected PPM (from overall variation)", st.cap.ppm===null?"—":fmt(st.cap.ppm,0));
         } else $("spcCapWrap").classList.add("hidden");
         var verdict, vcls;
         if(st.cap){
@@ -782,6 +994,18 @@
           else { verdict = "Not capable (Cpk < 1.00) — the spread or centring must improve before this spec is safe."; vcls="bad"; }
         } else if(st.outCtrl.length || st.runs.length){ verdict = "Signals present — process may not be stable. Add spec limits for a capability verdict."; vcls="warn"; }
         else { verdict = "Stable on this data. Add spec limits (LSL/USL) for Cp/Cpk."; vcls="good"; }
+        var meaning = "";
+        if(st.cap && st.cap.cpk!==null){
+          if(st.cap.cp!==null && st.cap.cp - st.cap.cpk >= 0.3 && st.cap.cpk < 1.33) meaning = "Your process is consistent but aimed off-centre — recentring it buys capability without reducing variation. (Cp measures how much room the spread has inside the spec; Cpk measures that same room after accounting for where the process is actually centred.)";
+          else if(st.cap.cpk < 1.0) meaning = "The process is not capable — expect out-of-spec parts from normal variation, not just bad luck.";
+          else if(st.cap.cpk < 1.33) meaning = "Capable on paper, but with little margin — a small drift or shift can start producing defects.";
+          else if(st.cap.cpk <= 1.67) meaning = "Capable with a reasonable safety margin — this is the level most customer requirements ask for.";
+          else meaning = "Highly capable — normal variation would have to change a lot before defects appear.";
+        } else if(st.outCtrl.length) meaning = "Something changed in the process — a special cause is likely, so investigate before trusting parts made after that point.";
+        else meaning = "No special-cause signals on this data — keep sampling; stability is something you keep proving.";
+        var smEl = $("spcMeaning");
+        smEl.innerHTML = "<strong>What this means:</strong> " + esc(meaning);
+        smEl.classList.remove("hidden");
         $("spcSnapshot").innerHTML =
           "<h4>Capability snapshot</h4><table>" +
           "<tr><td>Characteristic</td><td>"+esc(name || "—")+"</td></tr>" +
@@ -796,6 +1020,7 @@
           "</table>" +
           '<div class="verdict '+vcls+'">'+esc(verdict)+"</div>";
         $("spcResults").classList.remove("hidden");
+        flash($("spcStats"));
       }
       $("spcAnalyse").addEventListener("click", analyseSPC);
       $("spcSample").addEventListener("click", function(){
@@ -822,7 +1047,7 @@
         if(st.cap){
           lines.push("Cp,"+(st.cap.cp===null?"":fmt2(st.cap.cp))); lines.push("Cpk,"+(st.cap.cpk===null?"":fmt2(st.cap.cpk)));
           lines.push("Pp,"+(st.cap.pp===null?"":fmt2(st.cap.pp))); lines.push("Ppk,"+(st.cap.ppk===null?"":fmt2(st.cap.ppk)));
-          lines.push("Out of spec count,"+st.cap.oosCount); lines.push("Expected PPM (model estimate),"+(st.cap.ppm===null?"":fmt(st.cap.ppm,0)));
+          lines.push("Out of spec count,"+st.cap.oosCount); lines.push("Expected PPM (from overall variation),"+(st.cap.ppm===null?"":fmt(st.cap.ppm,0)));
         }
         lines.push(""); lines.push("Part,Value,Status");
         s.vals.forEach(function(v,i){
@@ -906,8 +1131,9 @@
             statTile("A² (adjusted)", fmt(ad.A2s,3)) +
             statTile("p-value (approx.)", ad.p<0.001 ? "< 0.001" : fmt(ad.p,3));
           var html;
-          if(ad.p >= 0.05) html = '<div class="flag green"><strong>Normal-looking (p ≥ 0.05).</strong> No strong evidence against normality — capability indices (Cp/Cpk) rest on a reasonable assumption for this data.</div>';
-          else html = '<div class="flag amber"><strong>Not clearly normal (p &lt; 0.05).</strong> Cpk assumes a normal distribution — treat the index with caution and look at the histogram shape before quoting it. A skewed or two-humped shape often means mixed streams, two setups, or a process that shifted mid-run.</div>';
+          if(ad.p >= 0.05) html = '<div class="flag green"><strong>Normal-looking (p ≥ 0.05).</strong> No strong evidence against normality — the data is consistent with a normal shape, which is not the same as proving it is normal. Capability indices (Cp/Cpk) rest on a reasonable assumption for this data.</div>';
+          else html = '<div class="flag amber"><strong>Not clearly normal (p &lt; 0.05).</strong> The data departs from a normal shape, so capability numbers that assume normality (Cp/Cpk/PPM) should be treated with caution — look at the histogram shape before quoting them. A skewed or two-humped shape often means mixed streams, two setups, or a process that shifted mid-run.</div>';
+          if(ad.A2s >= 0.75 && ad.A2s <= 0.79) html += '<div class="flag amber"><strong>Borderline:</strong> this result sits near the 0.05 line (A²* = '+fmt(ad.A2s,3)+') — treat it as borderline rather than a clean pass or fail.</div>';
           if(bc > 0.555) html += '<div class="flag amber"><strong>Shape hint:</strong> the histogram\'s shape is consistent with more than one hump — check whether two machines, cavities, shifts, or setups were mixed into one dataset.</div>';
           else if(Math.abs(skew) > 1) html += '<div class="flag amber"><strong>Shape hint:</strong> strong skew ('+fmt(skew,2)+') — a one-sided tail. Look for a physical bound (e.g. runout, flatness) or parts sorted before measuring.</div>';
           $("checkVerdict").innerHTML = html;
@@ -936,7 +1162,7 @@
         els.info.textContent = "Imported " + vals.length + " values from " + filename + ".";
         els.info.classList.remove("hidden"); els.info.classList.add("ok");
         els.wrap.classList.add("hidden");
-        if(target === "check") refreshCheck(); else analyseSPC();
+        holdScroll(function(){ if(target === "check") refreshCheck(); else analyseSPC(); });
       }
       function handleImportFile(target, file){
         if(!file) return;
@@ -1049,9 +1275,9 @@
         html += "</tbody>";
         $("grrGrid").innerHTML = html;
       }
-      $("grrBuild").addEventListener("click", function(){ grrBuildGrid(true); hideMsg($("grrMsg")); });
-      ["grrOps","grrTrials"].forEach(function(id){ $(id).addEventListener("change", function(){ grrBuildGrid(true); }); });
-      $("grrParts").addEventListener("change", function(){ grrBuildGrid(true); });
+      $("grrBuild").addEventListener("click", function(){ holdScroll(function(){ grrBuildGrid(true); hideMsg($("grrMsg")); }); });
+      ["grrOps","grrTrials"].forEach(function(id){ $(id).addEventListener("change", function(){ holdScroll(function(){ grrBuildGrid(true); }); }); });
+      $("grrParts").addEventListener("change", function(){ holdScroll(function(){ grrBuildGrid(true); }); });
       $("grrFill").addEventListener("click", function(){
         var parsed = parseNumbers($("grrPaste").value);
         var need = grrDims.p*grrDims.o*grrDims.r;
@@ -1134,7 +1360,9 @@
         else if(basis <= 30){ verdict = "Marginal — %GRR "+fmt(basis,1)+"% ("+basisName+"). Usable with care: fine for sorting and SPC, risky for tight capability calls."; cls="amber"; }
         else { verdict = "Unacceptable — %GRR "+fmt(basis,1)+"% ("+basisName+"). Fix the gauge, the method, or the training before trusting any measurement from this system."; cls="red"; }
         var html = '<div class="flag '+cls+'"><strong>AIAG verdict:</strong> '+esc(verdict)+"</div>";
-        if(ndc!==null && ndc < 5) html += '<div class="flag amber"><strong>ndc = '+ndc+' (&lt; 5).</strong> The gauge can only sort parts into '+ndc+' distinct categories — too coarse to see process movement on a control chart.</div>';
+        var grrMeaning = basis===null ? "" : (basis < 10 ? "The measurement system contributes little variation — differences you see are mostly real part differences." : (basis <= 30 ? "The measurement system may be acceptable depending on how critical the feature is — it is blurring part differences somewhat." : "The measurement system is using up too much variation — it can hide real part differences and needs improvement before it can be trusted for decisions."));
+        if(grrMeaning) html += '<p class="explain"><strong>What this means:</strong> '+esc(grrMeaning)+"</p>";
+        if(ndc!==null && ndc < 5) html += '<div class="flag amber"><strong>ndc = '+ndc+' (&lt; 5).</strong> ndc below 5 means the gauge can only sort parts into a few rough groups — too coarse for process control.</div>';
         $("grrVerdict").innerHTML = html;
         $("grrNote").textContent = "ANOVA method per AIAG MSA. Operator × part interaction " + (pooled ? "was not significant at α = 0.25 and was pooled into the error term." : "was kept in the model (significant at α = 0.25).") + " AV combines operator and interaction variance, per the manual.";
         $("grrResults").classList.remove("hidden");
@@ -1226,7 +1454,7 @@
         div.innerHTML = '<input type="text" placeholder="Category (e.g. Scratches)" value="'+esc(cat||"")+'" aria-label="Category">' +
                         '<input type="number" step="any" min="0" inputmode="decimal" placeholder="Count" value="'+(count===undefined?"":count)+'" aria-label="Count">' +
                         '<button class="ghost" type="button" aria-label="Remove row">✕</button>';
-        div.querySelector("button").addEventListener("click", function(){ wrap.removeChild(div); });
+        div.querySelector("button").addEventListener("click", function(){ holdScroll(function(){ wrap.removeChild(div); }); });
         wrap.appendChild(div);
       }
       function paretoReadRows(){
@@ -1331,12 +1559,14 @@
         $("convFracResults").classList.remove("hidden");
       }
       $("convDec").addEventListener("input", convDecToFrac);
-      $("convPrec").addEventListener("change", convDecToFrac);
+      $("convPrec").addEventListener("change", function(){ holdScroll(convDecToFrac); });
       $("convUnit").addEventListener("change", function(){
-        var mm = $("convUnit").value === "mm";
-        $("convDecLabel").textContent = mm ? "Decimal millimetres" : "Decimal inches";
-        $("convDec").setAttribute("placeholder", mm ? "e.g. 25.4" : "e.g. 4.4375");
-        convDecToFrac();
+        holdScroll(function(){
+          var mm = $("convUnit").value === "mm";
+          $("convDecLabel").textContent = mm ? "Decimal millimetres" : "Decimal inches";
+          $("convDec").setAttribute("placeholder", mm ? "e.g. 25.4" : "e.g. 4.4375");
+          convDecToFrac();
+        });
       });
 
       /* --- fraction -> decimal inches --- */
@@ -1456,33 +1686,358 @@
       }
       $("hardGo").addEventListener("click", runHard);
       $("hardVal").addEventListener("input", function(){ if($("hardVal").value.trim() !== "") runHard(); });
-      $("hardScale").addEventListener("change", function(){ if($("hardVal").value.trim() !== "") runHard(); });
+      $("hardScale").addEventListener("change", function(){ holdScroll(function(){ if($("hardVal").value.trim() !== "") runHard(); }); });
 
-      /* ---------- keep the focused field visible above the on-screen keyboard ---------- */
+      /* ================= TOOL 6b : SIGMA ⇄ PPM ================= */
+      function fmtPpm(x){
+        if(!isFinite(x)) return "—";
+        if(x >= 100) return fmt(x, 0);
+        if(x >= 1) return fmt(x, 1);
+        if(x >= 0.01) return fmt(x, 2);
+        return fmt(x, 3);
+      }
+      function runSigma(){
+        var msgEl = $("sigMsg"), raw = $("sigVal").value.trim(), from = $("sigFrom").value, shift = $("sigShift").value === "on";
+        if(raw === "" || !isFinite(Number(raw))){
+          $("sigResults").classList.add("hidden");
+          if(raw !== "") showMsg(msgEl, "Enter a number to convert.");
+          return;
+        }
+        var v = Number(raw), Z = null, ppm = null;
+        if(from === "cpk"){
+          if(v < 0){ $("sigResults").classList.add("hidden"); showMsg(msgEl, "Cpk can't be negative for this conversion."); return; }
+          Z = 3 * v;
+          ppm = shift ? normCdf(-Z) * 1e6 : 2 * normCdf(-Z) * 1e6;
+        } else if(from === "ppm"){
+          if(v <= 0 || v >= 1e6){ $("sigResults").classList.add("hidden"); showMsg(msgEl, "Enter a PPM between 0 and 1,000,000."); return; }
+          ppm = v;
+          Z = shift ? invNormCdf(1 - ppm / 1e6) : invNormCdf(1 - ppm / 2e6);
+        } else { /* yield % */
+          if(v <= 0 || v >= 100){ $("sigResults").classList.add("hidden"); showMsg(msgEl, "Enter a yield between 0 and 100%."); return; }
+          ppm = (100 - v) * 10000;
+          Z = shift ? invNormCdf(1 - ppm / 1e6) : invNormCdf(1 - ppm / 2e6);
+        }
+        hideMsg(msgEl);
+        var cpk = Z / 3;
+        var sigmaLevel = shift ? Z + 1.5 : Z;
+        var yieldPct = 100 - ppm / 10000;
+        $("sigTiles").innerHTML =
+          statTile(shift ? "DPMO (shifted, one tail)" : "Expected PPM (centred, two tails)", fmtPpm(ppm), "good") +
+          statTile("Yield", fmt(yieldPct, yieldPct >= 99.99 ? 4 : 2) + "%") +
+          statTile("Cpk equivalent", fmt(cpk, 2)) +
+          statTile(shift ? "Sigma level (with 1.5σ shift)" : "Sigma level Z (= 3 × Cpk)", fmt(sigmaLevel, 2));
+        $("sigMeaning").innerHTML = "<strong>What this means:</strong> " + (shift
+          ? "With the 1.5σ shift, the quoted sigma level speaks the Motorola convention: a process centred today is assumed to drift 1.5σ long-term, so DPMO is counted on the near tail only. \"6 sigma = 3.4 DPMO\" is true only in this language."
+          : "Without a shift, PPM counts both spec tails of a centred process — the same convention the SPC tool uses. Cpk 1.33 means roughly 66 defective parts per million; 1.00 means roughly 2,700.");
+        $("sigResults").classList.remove("hidden");
+        flash($("sigTiles"));
+      }
+      $("sigFrom").addEventListener("change", function(){
+        holdScroll(function(){
+          var labels = { cpk:"Cpk value", ppm:"PPM / DPMO value", yield:"Yield % value" };
+          $("sigValLabel").textContent = labels[$("sigFrom").value] || "Value";
+          runSigma();
+        });
+      });
+      $("sigShift").addEventListener("change", function(){ holdScroll(runSigma); });
+      $("sigVal").addEventListener("input", runSigma);
+
+      /* ================= TOOL 7 : THREADS ================= */
+      var TH_METRIC = [
+        ["M3 × 0.5 — coarse", 3, 0.5], ["M4 × 0.7 — coarse", 4, 0.7], ["M5 × 0.8 — coarse", 5, 0.8],
+        ["M6 × 1 — coarse", 6, 1], ["M8 × 1.25 — coarse", 8, 1.25], ["M10 × 1.5 — coarse", 10, 1.5],
+        ["M12 × 1.75 — coarse", 12, 1.75], ["M16 × 2 — coarse", 16, 2], ["M20 × 2.5 — coarse", 20, 2.5],
+        ["M24 × 3 — coarse", 24, 3],
+        ["M8 × 1 — fine", 8, 1], ["M10 × 1.25 — fine", 10, 1.25], ["M10 × 1 — fine", 10, 1],
+        ["M12 × 1.5 — fine", 12, 1.5], ["M12 × 1.25 — fine", 12, 1.25], ["M16 × 1.5 — fine", 16, 1.5],
+        ["M20 × 1.5 — fine", 20, 1.5], ["M24 × 2 — fine", 24, 2]
+      ];
+      var TH_UNC = [
+        ["#4-40 UNC", 0.112, 40], ["#6-32 UNC", 0.138, 32], ["#8-32 UNC", 0.164, 32], ["#10-24 UNC", 0.190, 24],
+        ["1/4-20 UNC", 0.25, 20], ["5/16-18 UNC", 0.3125, 18], ["3/8-16 UNC", 0.375, 16], ["7/16-14 UNC", 0.4375, 14],
+        ["1/2-13 UNC", 0.5, 13], ["9/16-12 UNC", 0.5625, 12], ["5/8-11 UNC", 0.625, 11], ["3/4-10 UNC", 0.75, 10],
+        ["7/8-9 UNC", 0.875, 9], ["1-8 UNC", 1, 8]
+      ];
+      var TH_UNF = [
+        ["#4-48 UNF", 0.112, 48], ["#6-40 UNF", 0.138, 40], ["#8-36 UNF", 0.164, 36], ["#10-32 UNF", 0.190, 32],
+        ["1/4-28 UNF", 0.25, 28], ["5/16-24 UNF", 0.3125, 24], ["3/8-24 UNF", 0.375, 24], ["7/16-20 UNF", 0.4375, 20],
+        ["1/2-20 UNF", 0.5, 20], ["9/16-18 UNF", 0.5625, 18], ["5/8-18 UNF", 0.625, 18], ["3/4-16 UNF", 0.75, 16],
+        ["7/8-14 UNF", 0.875, 14], ["1-12 UNF", 1, 12]
+      ];
+      function thFillPresets(){
+        var sys = $("thSystem").value, sel = $("thPreset");
+        var list = sys === "metric" ? TH_METRIC : TH_UNC.concat(TH_UNF);
+        sel.innerHTML = "";
+        var custom = document.createElement("option");
+        custom.value = ""; custom.textContent = "Custom size…";
+        sel.appendChild(custom);
+        list.forEach(function(t, i){
+          var opt = document.createElement("option");
+          opt.value = String(i); opt.textContent = t[0];
+          sel.appendChild(opt);
+        });
+        $("thDLabel").textContent = sys === "metric" ? "Major diameter D (mm)" : "Major diameter D (in)";
+        $("thPLabel").textContent = sys === "metric" ? "Pitch (mm)" : "Threads per inch (TPI)";
+        $("thD").setAttribute("placeholder", sys === "metric" ? "e.g. 10" : "e.g. 0.25");
+        $("thP").setAttribute("placeholder", sys === "metric" ? "e.g. 1.5" : "e.g. 20");
+      }
+      function thApplyPreset(){
+        var sys = $("thSystem").value, sel = $("thPreset");
+        if(sel.value === "") return;
+        var list = sys === "metric" ? TH_METRIC : TH_UNC.concat(TH_UNF);
+        var t = list[parseInt(sel.value, 10)];
+        if(!t) return;
+        $("thD").value = t[1];
+        $("thP").value = t[2];
+      }
+      function runThreads(){
+        var msgEl = $("thMsg"), sys = $("thSystem").value, type = $("thType").value;
+        var D = Number($("thD").value), pv = Number($("thP").value);
+        if(!isFinite(D) || D <= 0 || !isFinite(pv) || pv <= 0){
+          $("thResults").classList.add("hidden");
+          showMsg(msgEl, sys === "metric" ? "Enter a major diameter and pitch (both above zero), or pick a standard size." : "Enter a major diameter and TPI (both above zero), or pick a standard size.");
+          return;
+        }
+        hideMsg(msgEl);
+        var P = sys === "metric" ? pv : 1 / pv; /* pitch in the thread's own units */
+        var pitch = D - 0.649519 * P;
+        var minorInt = D - 1.082532 * P;
+        var minorExt = D - 1.226869 * P;
+        var dec = sys === "metric" ? 3 : 4;
+        function row(label, valNative){
+          var mm = sys === "metric" ? valNative : valNative * 25.4;
+          var inch = sys === "metric" ? valNative / 25.4 : valNative;
+          return "<tr><td>" + esc(label) + "</td><td>" + fmt(mm, 3) + "</td><td>" + fmt(inch, 4) + "</td></tr>";
+        }
+        var minorLabel = type === "int" ? "Minor diameter D₁ — internal (basic min)" : "Minor diameter d₃ — external root (basic max)";
+        var minorVal = type === "int" ? minorInt : minorExt;
+        $("thResTitle").textContent = "Basic diameters — " + (sys === "metric" ? "M" + trimNum(D, 3) + " × " + trimNum(P, 3) : trimNum(D, 4) + " in × " + pv + " TPI") + (type === "int" ? " · internal" : " · external");
+        $("thTable").innerHTML =
+          "<tr><th>Diameter</th><th>mm</th><th>in</th></tr>" +
+          row("Major diameter " + (type === "int" ? "D" : "d") + " (nominal)", D) +
+          row("Pitch diameter " + (type === "int" ? "D₂" : "d₂"), pitch) +
+          row(minorLabel, minorVal) +
+          row(type === "int" ? "Minor d₃ — mating external root (basic max)" : "Minor D₁ — mating internal (basic min)", type === "int" ? minorExt : minorInt);
+        $("thResults").classList.remove("hidden");
+        flash($("thTable"));
+      }
+      $("thSystem").addEventListener("change", function(){ holdScroll(function(){ thFillPresets(); $("thD").value = ""; $("thP").value = ""; $("thResults").classList.add("hidden"); hideMsg($("thMsg")); }); });
+      $("thPreset").addEventListener("change", function(){ holdScroll(function(){ thApplyPreset(); if($("thD").value !== "") runThreads(); }); });
+      $("thType").addEventListener("change", function(){ holdScroll(function(){ if($("thD").value !== "" && $("thP").value !== "") runThreads(); }); });
+      $("thGo").addEventListener("click", function(){ holdScroll(runThreads); });
+      thFillPresets();
+
+      /* ================= TOOL 8a : TOLERANCE STACK-UP ================= */
+      var suCount = 0;
+      function suAddRow(name, nominal, tol, sign){
+        if($("suRows").children.length >= 10) { showMsg($("suMsg"), "Up to 10 dimensions in a chain."); return; }
+        suCount++;
+        var div = document.createElement("div");
+        div.className = "surow";
+        var nm = name !== undefined ? name : String.fromCharCode(64 + suCount);
+        div.innerHTML =
+          '<input type="text" value="' + esc(nm) + '" aria-label="Dimension name" autocomplete="off">' +
+          '<input type="number" step="any" inputmode="decimal" placeholder="Nominal" value="' + (nominal === undefined ? "" : nominal) + '" aria-label="Nominal dimension">' +
+          '<input type="number" step="any" min="0" inputmode="decimal" placeholder="± tol" value="' + (tol === undefined ? "" : tol) + '" aria-label="Plus/minus tolerance">' +
+          '<select aria-label="Direction"><option value="1"' + (sign === -1 ? "" : " selected") + '>+</option><option value="-1"' + (sign === -1 ? " selected" : "") + '>\u2212</option></select>' +
+          '<button class="ghost" type="button" aria-label="Remove row">✕</button>';
+        div.querySelector("button").addEventListener("click", function(){ holdScroll(function(){ div.remove(); $("suDemoBanner").classList.add("hidden"); }); });
+        div.querySelectorAll("input").forEach(function(inp){ inp.addEventListener("input", function(){ $("suDemoBanner").classList.add("hidden"); }); });
+        $("suRows").appendChild(div);
+      }
+      function runStack(){
+        var msgEl = $("suMsg"), rows = $("suRows").querySelectorAll(".surow");
+        var nom = 0, wc = 0, ss = 0, used = 0, bad = false;
+        rows.forEach(function(r){
+          var inputs = r.querySelectorAll("input");
+          var sign = Number(r.querySelector("select").value);
+          var nRaw = inputs[1].value.trim(), tRaw = inputs[2].value.trim();
+          if(nRaw === "" && tRaw === "") return;
+          var n = Number(nRaw), t = Number(tRaw);
+          if(!isFinite(n) || !isFinite(t) || t < 0){ bad = true; return; }
+          used++;
+          nom += sign * n; wc += t; ss += t * t;
+        });
+        if(bad || used < 2){
+          $("suResults").classList.add("hidden");
+          showMsg(msgEl, bad ? "Check the rows — nominals must be numbers and tolerances zero or above." : "Fill in at least 2 dimensions with nominal and tolerance.");
+          return;
+        }
+        hideMsg(msgEl);
+        var rss = Math.sqrt(ss);
+        $("suTiles").innerHTML =
+          statTile("Nominal gap", fmt(nom, 3), "good") +
+          statTile("Worst-case tolerance", "± " + fmt(wc, 4)) +
+          statTile("Worst-case min", fmt(nom - wc, 3), "warn") +
+          statTile("Worst-case max", fmt(nom + wc, 3), "warn") +
+          statTile("RSS tolerance", "± " + fmt(rss, 4)) +
+          statTile("RSS min", fmt(nom - rss, 3)) +
+          statTile("RSS max", fmt(nom + rss, 3));
+        $("suResults").classList.remove("hidden");
+        flash($("suTiles"));
+      }
+      $("suAdd").addEventListener("click", function(){ holdScroll(function(){ suAddRow(); }); });
+      $("suGo").addEventListener("click", function(){ holdScroll(runStack); });
+      $("suExample").addEventListener("click", function(){
+        holdScroll(function(){
+          $("suRows").innerHTML = ""; suCount = 0;
+          suAddRow("A", 50, 0.10, 1); suAddRow("B", 20, 0.05, -1); suAddRow("C", 15, 0.05, -1); suAddRow("D", 10, 0.08, -1); suAddRow("E", 2, 0.02, 1);
+          $("suDemoBanner").classList.remove("hidden");
+          runStack();
+        });
+      });
+      suAddRow(); suAddRow(); suAddRow();
+
+      /* ================= TOOL 8b : TRUE POSITION ================= */
+      function runTP(){
+        var msgEl = $("tpMsg");
+        var dx = Number($("tpDx").value), dy = Number($("tpDy").value), tol = Number($("tpTol").value);
+        var actual = Number($("tpActual").value), limit = Number($("tpLimit").value), mod = $("tpMod").value;
+        var hasDx = $("tpDx").value.trim() !== "", hasDy = $("tpDy").value.trim() !== "", hasTol = $("tpTol").value.trim() !== "";
+        if(!hasDx || !hasDy || !hasTol || !isFinite(dx) || !isFinite(dy) || !isFinite(tol) || tol < 0){
+          $("tpResults").classList.add("hidden");
+          showMsg(msgEl, "Enter Δx, Δy and the stated position tolerance.");
+          return;
+        }
+        var bonus = 0;
+        if(mod !== "rfs"){
+          if($("tpActual").value.trim() === "" || $("tpLimit").value.trim() === "" || !isFinite(actual) || !isFinite(limit)){
+            $("tpResults").classList.add("hidden");
+            showMsg(msgEl, "With MMC/LMC, also enter the measured feature size and the size limit at the modifier — bonus comes from those two.");
+            return;
+          }
+          bonus = Math.abs(actual - limit);
+        }
+        hideMsg(msgEl);
+        var dev = 2 * Math.sqrt(dx * dx + dy * dy);
+        var total = tol + bonus;
+        var pass = dev <= total + 1e-12;
+        $("tpTiles").innerHTML =
+          statTile("Diametral deviation ⌀", fmt(dev, 4), pass ? "good" : "bad") +
+          statTile("Bonus tolerance", mod === "rfs" ? "0 (RFS)" : fmt(bonus, 4)) +
+          statTile("Total allowable ⌀", fmt(total, 4)) +
+          statTile("Margin left", fmt(total - dev, 4), pass ? "good" : "bad");
+        $("tpVerdict").innerHTML = '<span class="pill ' + (pass ? "good" : "bad") + '">' + (pass ? "PASS — position conforms" : "FAIL — position exceeds the allowable zone") + "</span>";
+        $("tpResults").classList.remove("hidden");
+        flash($("tpTiles"));
+      }
+      $("tpGo").addEventListener("click", function(){ holdScroll(runTP); });
+      $("tpMod").addEventListener("change", function(){ holdScroll(function(){ if(!$("tpResults").classList.contains("hidden")) runTP(); }); });
+
+      /* ---------- focus scroll guard + keyboard visibility ----------
+         Standing rule: operating any control leaves the page where it is.
+         Root cause of the Convert-tab jump: the old helper scrolled EVERY
+         focused control (selects included) to the centre of the screen on
+         focus, so a control's first use teleported its section to the top;
+         the change-event holdScroll then snapshot that already-moved
+         position and "held" the wrong place. This block fixes the mechanism:
+         1) Scroll is captured on pointerdown / touchstart / mousedown —
+            BEFORE focus can move the page — and restored on focusin for
+            every form control in the app (delegated listeners, so dynamic
+            rows are covered too), immediately + rAF + ~170 ms with
+            scrollBehavior forced to auto while restoring.
+         2) <select> elements NEVER engage keyboard auto-scroll: they open
+            native pickers, there is no keyboard to clear.
+         3) Text / number inputs and textareas auto-scroll ONLY when the
+            on-screen keyboard is actually opening (visualViewport height
+            shrinking vs. its no-keyboard height) AND the focused field
+            would be covered — and then only the minimum amount that puts
+            the field just above the keyboard. A field that is already
+            fully visible never moves the page. */
       (function(){
-        var activeField = null, timers = [];
-        function bringIntoView(){
-          if(!activeField || !document.contains(activeField)) return;
-          try { activeField.scrollIntoView({ block:"center", behavior:"smooth" }); } catch(e) { activeField.scrollIntoView(); }
+        var activeField = null;
+        var guardY = null, guardAt = 0, restoreTimers = [];
+        var baseVVHeight = window.visualViewport ? window.visualViewport.height : null;
+
+        function isFormControl(el){
+          if(!el || !el.tagName) return false;
+          var tag = el.tagName.toLowerCase();
+          return tag === "input" || tag === "textarea" || tag === "select";
         }
-        function schedule(){
-          timers.forEach(function(t){ clearTimeout(t); });
-          timers = [ setTimeout(bringIntoView, 120), setTimeout(bringIntoView, 380), setTimeout(bringIntoView, 700) ];
+        function isTextField(el){
+          if(!el || !el.tagName) return false;
+          var tag = el.tagName.toLowerCase();
+          if(tag === "textarea") return true;
+          if(tag !== "input") return false;
+          var t = (el.getAttribute("type") || "text").toLowerCase();
+          return t === "text" || t === "number" || t === "search" || t === "tel" ||
+                 t === "url" || t === "email" || t === "password" || t === "date" || t === "";
         }
+        function keyboardOpen(){
+          if(!window.visualViewport || baseVVHeight === null) return false;
+          return (baseVVHeight - window.visualViewport.height) > 80;
+        }
+        function captureGuard(ev){
+          var t = ev.target;
+          if(!t || !t.closest) return;
+          /* Only taps aimed at a control (or its label) arm the guard, so a
+             stale capture from an unrelated tap can never yank the page. */
+          if(!t.closest("input, textarea, select, label")) return;
+          guardY = window.scrollY || window.pageYOffset || 0;
+          guardAt = Date.now();
+        }
+        document.addEventListener("pointerdown", captureGuard, true);
+        document.addEventListener("touchstart", captureGuard, { capture:true, passive:true });
+        document.addEventListener("mousedown", captureGuard, true);
+
+        function restoreGuard(){
+          if(guardY === null) return;
+          var y = guardY;
+          var rootEl = document.documentElement;
+          var prevBehavior = rootEl.style.scrollBehavior;
+          function restore(){
+            /* If the keyboard genuinely opened for a text field in the
+               meantime, its minimum-clearance scroll wins — don't fight it. */
+            if(activeField && keyboardOpen()) return;
+            rootEl.style.scrollBehavior = "auto";
+            window.scrollTo(0, y);
+          }
+          restore();
+          requestAnimationFrame(restore);
+          restoreTimers.forEach(function(t){ clearTimeout(t); });
+          restoreTimers = [
+            setTimeout(restore, 50),
+            setTimeout(function(){ restore(); rootEl.style.scrollBehavior = prevBehavior; }, 170),
+            setTimeout(restore, 320)
+          ];
+        }
+
         document.addEventListener("focusin", function(ev){
           var el = ev.target;
-          if(!el || !el.tagName) return;
-          var tag = el.tagName.toLowerCase();
-          if(tag !== "input" && tag !== "textarea" && tag !== "select") return;
-          activeField = el;
-          schedule();
+          if(!isFormControl(el)){ activeField = null; return; }
+          /* Belt and braces for selects and toggles alike: if the tap that
+             focused this control was just captured, put the page straight
+             back where the user left it — before any focus-time scrolling
+             (native or scripted) can become the new "held" position. */
+          if(Date.now() - guardAt < 1500) restoreGuard();
+          /* Only text-entry fields may ever need keyboard clearance;
+             selects get activeField = null, so they can never scroll. */
+          activeField = isTextField(el) ? el : null;
         });
-        document.addEventListener("focusout", function(){ activeField = null; timers.forEach(function(t){ clearTimeout(t); }); });
+        document.addEventListener("focusout", function(){ activeField = null; });
+
+        function ensureFieldVisibleAboveKeyboard(){
+          if(!activeField || !document.contains(activeField)) return;
+          var vv = window.visualViewport;
+          var visibleBottom = vv ? vv.height : window.innerHeight;
+          var rect = activeField.getBoundingClientRect();
+          var margin = 12;
+          if(rect.bottom <= visibleBottom - margin && rect.top >= 0) return; /* already fully visible: do nothing */
+          var delta = 0;
+          if(rect.bottom > visibleBottom - margin) delta = rect.bottom - (visibleBottom - margin);
+          else if(rect.top < margin) delta = rect.top - margin;
+          if(delta) window.scrollBy(0, delta); /* minimum scroll only */
+        }
+
         if(window.visualViewport){
-          var lastH = window.visualViewport.height;
           window.visualViewport.addEventListener("resize", function(){
             var h = window.visualViewport.height;
-            if(Math.abs(h - lastH) > 40){ lastH = h; if(activeField) schedule(); }
+            if(baseVVHeight === null || h > baseVVHeight) baseVVHeight = h;
+            if(keyboardOpen() && activeField){
+              /* Keyboard is opening: check now and once it has settled. */
+              setTimeout(ensureFieldVisibleAboveKeyboard, 60);
+              setTimeout(ensureFieldVisibleAboveKeyboard, 300);
+            }
           });
         }
       })();
@@ -1490,7 +2045,7 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjYiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjgiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
