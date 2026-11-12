@@ -12,3 +12,7 @@ Live: https://Harsh3261.github.io/spc-tools/
 - Pareto — sorted defect chart with cumulative % and the vital few
 
 Methods: AIAG SPC & MSA reference manuals · ANSI/ASQ Z1.4. Published 2026-11-09.
+
+## Publish record
+
+- 2026-11-11 — Convert tab added (inch⇄fraction with 16/32/64 precision and rounding error, inch⇄mm, hardness converter HB/HRC/HRB/HV + approx tensile per ASTM E140, reference only).
