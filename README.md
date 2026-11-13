@@ -23,3 +23,7 @@ Methods: AIAG SPC & MSA reference manuals · ANSI/ASQ Z1.4. Published 2026-11-09
 - Import now accepts Excel .xlsx files (on-device reader, nothing uploaded)
 - File picker no longer greys out other file types on iPhone
 - Friendly message for unreadable file types
+## Update — 2026-11-12 (v11)
+
+- Threads tab rebuilt as a catalogue: dropdowns (family, size, internal/external, class) with manufacturing limits (major/pitch/minor min-max) for Metric ISO 6H/6g and UN 2B/2A from published tables; Gauge verification view (ASME B1.2 values for UN; ISO 1502 nominals for metric); BSP G, Acme, Tr, BA included to verified depth; pipe threads show gauge-plane data with standoff note — no diameter limits.
+- AI analysis button on SPC, Data Check and Gage R&R tabs: packages computed results into a copyable prompt for Gemini or Muse; nothing is sent by the app.
