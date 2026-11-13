@@ -29,3 +29,8 @@ Methods: AIAG SPC & MSA reference manuals · ANSI/ASQ Z1.4. Published 2026-11-09
 - AI analysis button on SPC, Data Check and Gage R&R tabs: packages computed results into a copyable prompt for Gemini or Muse; nothing is sent by the app.
 ## Update — 2026-11-13 (v12)
 - SPC tab now detects trend-of-6 (six points steadily rising or falling, Western Electric / Nelson Rule 3) alongside the existing run-of-8: amber Trend signal flag, updated no-signals wording, and a trend line in the AI analysis package.
+
+## Update — 2026-11-13 (v13)
+- Threads Gauge verification now carries complete ASME B1.2 gauge limits (GO/NOGO plug and ring pitch diameters, plug majors, setting plugs) for all 28 UN size/class combinations; the 3/8-24 NOGO plug pitch diameter remains marked 'not included — under verification'.
+- Correction: the 1/4-20 NOGO ring pitch diameter is 0.2127/0.2130 per ASME B1.2 (v11/v12 showed 0.2123/0.2127, which appears in no B1.2 source).
+- Convert: fraction entry is now a single box typed as written (7/16, 1-7/16, 1 7/16) with a swap button between the two fraction directions.
