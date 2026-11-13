@@ -508,21 +508,13 @@
             <div class="stats" id="convFracTiles"></div>
           </div>
 
-          <h3>Fraction → decimal</h3>
-          <div class="frow">
-            <div>
-              <label class="flabel" for="convWhole">Whole in</label>
-              <input type="number" id="convWhole" class="biginput" step="1" min="0" inputmode="numeric" placeholder="0" autocomplete="off" />
-            </div>
-            <div>
-              <label class="flabel" for="convNum">Numerator</label>
-              <input type="number" id="convNum" class="biginput" step="1" min="0" inputmode="numeric" placeholder="7" autocomplete="off" />
-            </div>
-            <div>
-              <label class="flabel" for="convDen">Denominator</label>
-              <input type="number" id="convDen" class="biginput" step="1" min="1" inputmode="numeric" placeholder="16" autocomplete="off" />
-            </div>
+          <div class="btnrow">
+            <button class="ghost" id="convSwap" type="button">⇄ Swap — send the result to the other tool</button>
           </div>
+
+          <h3>Fraction → decimal</h3>
+          <label class="flabel" for="convFracText">Fraction (in) — type it as written on the drawing</label>
+          <input type="text" id="convFracText" class="biginput" inputmode="text" placeholder="e.g. 7/16 or 1-7/16" autocomplete="off" spellcheck="false" />
           <div id="convRevResults" class="hidden">
             <div class="resultbox">
               <span class="rlab">Decimal inches</span>
@@ -1842,11 +1834,17 @@
       function signed4(x){ return (x < 0 ? "-" : "+") + Math.abs(x).toFixed(4); }
       function trimNum(x, d){ return String(parseFloat(x.toFixed(d))); }
 
+      /* --- swap state: which side was used last, and each side's latest result --- */
+      var convLast = null;        /* "dec" | "frac" | null */
+      var convDecSwapText = null; /* fraction text from the decimal side, e.g. "1-7/16" */
+      var convFracDecVal = null;  /* decimal inches from the fraction side */
+
       /* --- decimal inches -> nearest fraction --- */
       function convDecToFrac(){
+        convLast = "dec";
         var raw = $("convDec").value.trim();
         var prec = parseInt($("convPrec").value, 10) || 16;
-        if(raw === "" || !isFinite(Number(raw))){ $("convFracResults").classList.add("hidden"); return; }
+        if(raw === "" || !isFinite(Number(raw))){ $("convFracResults").classList.add("hidden"); convDecSwapText = null; return; }
         var entered = Number(raw);
         var v = $("convUnit").value === "mm" ? entered / 25.4 : entered; /* work in inches */
         var mmVal = $("convUnit").value === "mm" ? entered : entered * 25.4;
@@ -1861,6 +1859,7 @@
         else if(whole === 0) fracText = rn + "/" + rd;
         else fracText = whole + " " + rn + "/" + rd;
         if(neg && total !== 0) fracText = "-" + fracText;
+        convDecSwapText = fracText.replace(" ", "-"); /* "1 7/16" -> "1-7/16" for the fraction box */
         var fracDec = (neg ? -1 : 1) * total / prec;
         var err = v - fracDec;
         $("convFracOut").innerHTML = esc(fracText) + " <small>in</small>";
@@ -1882,28 +1881,82 @@
         });
       });
 
-      /* --- fraction -> decimal inches --- */
+      /* --- fraction -> decimal inches: one box, typed as written --- */
+      function fracParts(sign, w, n, d){
+        if(d === 0) return { ok:false, div0:true };
+        var v = w + n / d;
+        if(sign === "-") v = -v;
+        return { ok:true, value:v, neg:sign === "-", whole:w, num:n, den:d };
+      }
+      function parseFractionText(text){
+        var s = String(text || "").trim();
+        if(s === "") return { ok:false, empty:true };
+        if(/^-?(\d+\.\d*|\.\d+)$/.test(s)) return { ok:false, decimal:true };
+        var m;
+        if((m = s.match(/^(-?)(\d+)[-\s](\d+)\/(\d+)$/))) return fracParts(m[1], Number(m[2]), Number(m[3]), Number(m[4]));
+        if((m = s.match(/^(-?)(\d+)\/(\d+)$/))) return fracParts(m[1], 0, Number(m[2]), Number(m[3]));
+        if((m = s.match(/^(-?)(\d+)$/))) return fracParts(m[1], Number(m[2]), 0, 1);
+        return { ok:false };
+      }
       function convFracToDec(){
-        var wRaw = $("convWhole").value.trim(), nRaw = $("convNum").value.trim(), dRaw = $("convDen").value.trim();
+        convLast = "frac";
         var msgEl = $("convMsg");
-        if(nRaw === "" && wRaw === ""){ $("convRevResults").classList.add("hidden"); hideMsg(msgEl); return; }
-        var w = wRaw === "" ? 0 : Number(wRaw), n = nRaw === "" ? 0 : Number(nRaw), d = Number(dRaw);
-        if(!isFinite(w) || !isFinite(n) || !isFinite(d) || d <= 0 || w < 0 || n < 0){
+        var p = parseFractionText($("convFracText").value);
+        if(p.empty){ $("convRevResults").classList.add("hidden"); hideMsg(msgEl); convFracDecVal = null; return; }
+        if(!p.ok){
           $("convRevResults").classList.add("hidden");
-          if(dRaw !== "" && (!isFinite(d) || d <= 0)) showMsg(msgEl, "Denominator must be a number above zero.");
+          convFracDecVal = null;
+          if(p.decimal) showMsg(msgEl, "That's a decimal — decimals belong in the Decimal box above. This box takes fractions typed as written, like 7/16 or 1-7/16.");
+          else if(p.div0) showMsg(msgEl, "The bottom number (denominator) can't be zero — a fraction needs a denominator above zero, like 7/16.");
+          else showMsg(msgEl, "Type a fraction like 7/16 or 1-7/16 — or a whole number like 3.");
           return;
         }
         hideMsg(msgEl);
-        var dec = w + n / d;
-        var g = gcd(Math.round(n), Math.round(d));
-        var simple = (n % 1 === 0 && d % 1 === 0 && g > 1) ? ((w ? w + " " : "") + (n / g) + "/" + (d / g)) : null;
+        var dec = p.value;
+        convFracDecVal = dec;
+        var g = gcd(p.num, p.den);
+        var rn = p.num / g, rd = p.den / g;
+        var norm;
+        if(p.num === 0) norm = String(p.whole);
+        else if(rd === 1) norm = String(p.whole + rn);
+        else if(p.whole === 0) norm = rn + "/" + rd;
+        else norm = p.whole + " " + rn + "/" + rd;
+        if(p.neg && dec !== 0) norm = "-" + norm;
         $("convRevOut").innerHTML = esc(fmt(dec)) + " <small>in</small>";
         $("convRevTiles").innerHTML =
           statTile("Millimetres", trimNum(dec * 25.4, 4) + " mm") +
-          (simple ? statTile("Simplified fraction", simple + " in") : statTile("Fraction as entered", (w ? w + " " : "") + n + "/" + d + " in"));
+          statTile(g > 1 ? "Simplified fraction" : "Fraction as entered", norm + " in");
         $("convRevResults").classList.remove("hidden");
       }
-      ["convWhole", "convNum", "convDen"].forEach(function(id){ $(id).addEventListener("input", convFracToDec); });
+      $("convFracText").addEventListener("input", function(){ holdScroll(convFracToDec); });
+
+      /* --- swap: send the last-used side's result into the other side --- */
+      function convSwapRun(){
+        var dir = convLast;
+        if(dir === null){
+          /* neither side used yet: act from whichever side holds a value */
+          if($("convDec").value.trim() !== "") dir = "dec";
+          else if($("convFracText").value.trim() !== "") dir = "frac";
+          else return;
+        }
+        if(dir === "dec"){
+          convDecToFrac(); /* refresh this side's result from its current input */
+          if(convDecSwapText === null) return;
+          $("convFracText").value = convDecSwapText;
+          convFracToDec();
+        } else {
+          convFracToDec(); /* refresh this side's result from its current input */
+          if(convFracDecVal === null) return;
+          if($("convUnit").value !== "in"){
+            $("convUnit").value = "in";
+            $("convDecLabel").textContent = "Decimal inches";
+            $("convDec").setAttribute("placeholder", "e.g. 4.4375");
+          }
+          $("convDec").value = trimNum(convFracDecVal, 6);
+          convDecToFrac();
+        }
+      }
+      $("convSwap").addEventListener("click", function(){ holdScroll(convSwapRun); });
 
       /* --- inch <-> mm pair (1 in = 25.4 mm exactly) --- */
       var mmSync = false;
@@ -2113,9 +2166,45 @@
         ["1-8 UNC",1,8,"UNC",0.002,0.998,0.983,0.9168,0.91,0.8492,1,0.9188,0.9276,0.865,0.89],
         ["1-12 UNF",1,12,"UNF",0.0018,0.9982,0.9868,0.9441,0.9382,0.899,1,0.9459,0.9535,0.91,0.928]
       ];
-      /* ASME B1.2 Table 6 X tolerances — verified in the research file for
-         these four sizes only; all other UN sizes show nominal gauge PDs. */
-      var TH_X = { "#4-40 UNC":0.0002, "#6-32 UNC":0.0003, "1/4-20 UNC":0.0003, "1-8 UNC":0.0004 };
+      /* ASME B1.2 gauge limits for all 28 UN combos — embedded verbatim from
+         the verified research file b12-gauges-full.md section 3 (generated
+         programmatically from that table, never hand-typed). All PD pairs are
+         X tolerance (working gauge); plug majors are limit pairs; setting
+         plugs are NOMINALS (W tolerance: GO minus, LO plus) — per-size W
+         limit pairs are not published in the research file and are not
+         invented here. ngP is null for 3/8-24 UNF only: that pair is
+         UNVERIFIED in the research file (D16) and is shown as
+         "not included — under verification", never as a candidate value. */
+      var TH_G = {
+        "#4-40 UNC": { x:0.0002, goP:[0.0958, 0.096], ngP:[0.0989, 0.0991], goM:[0.112, 0.1124], ngM:[0.1095, 0.1099], goR:[0.0948, 0.095], ngR:[0.0925, 0.0927], setGo:0.095, setLo:0.0925 },
+        "#4-48 UNF": { x:0.0002, goP:[0.0985, 0.0987], ngP:[0.1014, 0.1016], goM:[0.112, 0.1124], ngM:[0.1102, 0.1106], goR:[0.0976, 0.0978], ngR:[0.0954, 0.0956], setGo:0.0978, setLo:0.0954 },
+        "#6-32 UNC": { x:0.0003, goP:[0.1177, 0.118], ngP:[0.1211, 0.1214], goM:[0.138, 0.1385], ngM:[0.1344, 0.1349], goR:[0.1166, 0.1169], ngR:[0.1141, 0.1144], setGo:0.1169, setLo:0.1141 },
+        "#6-40 UNF": { x:0.0002, goP:[0.1218, 0.122], ngP:[0.125, 0.1252], goM:[0.138, 0.1384], ngM:[0.1356, 0.136], goR:[0.1208, 0.121], ngR:[0.1184, 0.1186], setGo:0.121, setLo:0.1184 },
+        "#8-32 UNC": { x:0.0003, goP:[0.1437, 0.144], ngP:[0.1472, 0.1475], goM:[0.164, 0.1645], ngM:[0.1605, 0.161], goR:[0.1425, 0.1428], ngR:[0.1399, 0.1402], setGo:0.1428, setLo:0.1399 },
+        "#8-36 UNF": { x:0.0002, goP:[0.146, 0.1462], ngP:[0.1494, 0.1496], goM:[0.164, 0.1644], ngM:[0.1612, 0.1616], goR:[0.145, 0.1452], ngR:[0.1424, 0.1426], setGo:0.1452, setLo:0.1424 },
+        "#10-24 UNC": { x:0.0003, goP:[0.1629, 0.1632], ngP:[0.1669, 0.1672], goM:[0.19, 0.1905], ngM:[0.1847, 0.1852], goR:[0.1616, 0.1619], ngR:[0.1586, 0.1589], setGo:0.1619, setLo:0.1586 },
+        "#10-32 UNF": { x:0.0003, goP:[0.1697, 0.17], ngP:[0.1733, 0.1736], goM:[0.19, 0.1905], ngM:[0.1866, 0.1871], goR:[0.1685, 0.1688], ngR:[0.1658, 0.1661], setGo:0.1688, setLo:0.1658 },
+        "1/4-20 UNC": { x:0.0003, goP:[0.2175, 0.2178], ngP:[0.2221, 0.2224], goM:[0.25, 0.2505], ngM:[0.2436, 0.2441], goR:[0.2161, 0.2164], ngR:[0.2127, 0.213], setGo:0.2164, setLo:0.2127 },
+        "1/4-28 UNF": { x:0.0003, goP:[0.2268, 0.2271], ngP:[0.2308, 0.2311], goM:[0.25, 0.2505], ngM:[0.2461, 0.2466], goR:[0.2255, 0.2258], ngR:[0.2225, 0.2228], setGo:0.2258, setLo:0.2225 },
+        "5/16-18 UNC": { x:0.0003, goP:[0.2764, 0.2767], ngP:[0.2814, 0.2817], goM:[0.3125, 0.313], ngM:[0.3053, 0.3058], goR:[0.2749, 0.2752], ngR:[0.2712, 0.2715], setGo:0.2752, setLo:0.2712 },
+        "5/16-24 UNF": { x:0.0003, goP:[0.2854, 0.2857], ngP:[0.2899, 0.2902], goM:[0.3125, 0.313], ngM:[0.3077, 0.3082], goR:[0.284, 0.2843], ngR:[0.2806, 0.2809], setGo:0.2843, setLo:0.2806 },
+        "3/8-16 UNC": { x:0.0003, goP:[0.3344, 0.3347], ngP:[0.3398, 0.3401], goM:[0.375, 0.3756], ngM:[0.3666, 0.3672], goR:[0.3328, 0.3331], ngR:[0.3287, 0.329], setGo:0.3331, setLo:0.3287 },
+        "3/8-24 UNF": { x:0.0003, goP:[0.3479, 0.3482], ngP:null, goM:[0.375, 0.3755], ngM:[0.3704, 0.3709], goR:[0.3465, 0.3468], ngR:[0.343, 0.3433], setGo:0.3468, setLo:0.343 },
+        "7/16-14 UNC": { x:0.0003, goP:[0.3911, 0.3914], ngP:[0.3969, 0.3972], goM:[0.4375, 0.4381], ngM:[0.4275, 0.4281], goR:[0.3894, 0.3897], ngR:[0.385, 0.3853], setGo:0.3897, setLo:0.385 },
+        "7/16-20 UNF": { x:0.0003, goP:[0.405, 0.4053], ngP:[0.4101, 0.4104], goM:[0.4375, 0.438], ngM:[0.4316, 0.4321], goR:[0.4034, 0.4037], ngR:[0.3995, 0.3998], setGo:0.4037, setLo:0.3995 },
+        "1/2-13 UNC": { x:0.0003, goP:[0.45, 0.4503], ngP:[0.4562, 0.4565], goM:[0.5, 0.5006], ngM:[0.4892, 0.4898], goR:[0.4482, 0.4485], ngR:[0.4435, 0.4438], setGo:0.4485, setLo:0.4435 },
+        "1/2-20 UNF": { x:0.0003, goP:[0.4675, 0.4678], ngP:[0.4728, 0.4731], goM:[0.5, 0.5005], ngM:[0.4943, 0.4948], goR:[0.4659, 0.4662], ngR:[0.4619, 0.4622], setGo:0.4662, setLo:0.4619 },
+        "9/16-12 UNC": { x:0.0003, goP:[0.5084, 0.5087], ngP:[0.5149, 0.5152], goM:[0.5625, 0.5631], ngM:[0.5507, 0.5513], goR:[0.5065, 0.5068], ngR:[0.5016, 0.5019], setGo:0.5068, setLo:0.5016 },
+        "9/16-18 UNF": { x:0.0003, goP:[0.5264, 0.5267], ngP:[0.532, 0.5323], goM:[0.5625, 0.563], ngM:[0.5559, 0.5564], goR:[0.5247, 0.525], ngR:[0.5205, 0.5208], setGo:0.525, setLo:0.5205 },
+        "5/8-11 UNC": { x:0.0003, goP:[0.566, 0.5663], ngP:[0.5729, 0.5732], goM:[0.625, 0.6256], ngM:[0.612, 0.6126], goR:[0.5641, 0.5644], ngR:[0.5589, 0.5592], setGo:0.5644, setLo:0.5589 },
+        "5/8-18 UNF": { x:0.0003, goP:[0.5889, 0.5892], ngP:[0.5946, 0.5949], goM:[0.625, 0.6255], ngM:[0.6185, 0.619], goR:[0.5872, 0.5875], ngR:[0.5828, 0.5831], setGo:0.5875, setLo:0.5828 },
+        "3/4-10 UNC": { x:0.0003, goP:[0.685, 0.6853], ngP:[0.6924, 0.6927], goM:[0.75, 0.7506], ngM:[0.7354, 0.736], goR:[0.6829, 0.6832], ngR:[0.6773, 0.6776], setGo:0.6832, setLo:0.6773 },
+        "3/4-16 UNF": { x:0.0003, goP:[0.7094, 0.7097], ngP:[0.7156, 0.7159], goM:[0.75, 0.7506], ngM:[0.7424, 0.743], goR:[0.7076, 0.7079], ngR:[0.7029, 0.7032], setGo:0.7079, setLo:0.7029 },
+        "7/8-9 UNC": { x:0.0003, goP:[0.8028, 0.8031], ngP:[0.8107, 0.811], goM:[0.875, 0.8757], ngM:[0.8584, 0.8591], goR:[0.8006, 0.8009], ngR:[0.7946, 0.7949], setGo:0.8009, setLo:0.7946 },
+        "7/8-14 UNF": { x:0.0003, goP:[0.8286, 0.8289], ngP:[0.8353, 0.8356], goM:[0.875, 0.8756], ngM:[0.8659, 0.8665], goR:[0.8267, 0.827], ngR:[0.8216, 0.8219], setGo:0.827, setLo:0.8216 },
+        "1-8 UNC": { x:0.0004, goP:[0.9188, 0.9192], ngP:[0.9272, 0.9276], goM:[1.0, 1.0007], ngM:[0.981, 0.9817], goR:[0.9164, 0.9168], ngR:[0.91, 0.9104], setGo:0.9168, setLo:0.91 },
+        "1-12 UNF": { x:0.0003, goP:[0.9459, 0.9462], ngP:[0.9532, 0.9535], goM:[1.0, 1.0006], ngM:[0.989, 0.9896], goR:[0.9438, 0.9441], ngR:[0.9382, 0.9385], setGo:0.9441, setLo:0.9382 }
+      };
       var TH_CAL_NOTE = "Reference values only — for calibration preparation. Acceptance of a thread gauge at calibration is governed by its certificate and the governing standard (ASME B1.2 for UN gauges, ISO 1502 for metric gauges, ISO 7-2 / ASME B1.20.5 for pipe thread gauges). If a measured gauge value disagrees with this app, the certificate and the standard govern.";
       var TH_MEAS_NOTE = "Plug gauge pitch diameter is measured directly (three-wire). A ring gauge is not measured directly — it is verified on its setting plug, and the setting plug's certified pitch diameter is the value of record for the ring.";
       var TH_PIPE_CAVEAT = "Tapered pipe threads (NPT, BSPT) are not accepted on diameter limits the way straight threads are. The standards publish basic dimensions at a reference plane only — outside diameter, pitch diameter at that plane, and the gauge length (L1). Acceptance is by a taper thread ring/plug gauge: the gauge must seat at a standoff within the standard's tolerance (NPT: ±1 turn from basic standoff; ISO 7-1: gauge-length tolerance ±1 pitch for sizes up to 2 in). Do not machine to a min/max diameter band from these numbers.";
@@ -2379,32 +2468,31 @@
         if(thIsCustom()) return "<h3>Gauge verification</h3><p>Gauge data is available for catalogue sizes only.</p>";
         var idx = parseInt($("thSize").value, 10) || 0;
         if(fam === "un"){
-          var u = TH_U[idx], X = TH_X[u[0]];
+          var u = TH_U[idx], g = TH_G[u[0]];
           function gRow(label, mn, mx, note){
             return "<tr><td>" + esc(label) + (note ? '<br><span class="small">' + esc(note) + "</span>" : "") + "</td><td>" +
               (mn === null ? "—" : fmt(mn, 4) + " in") + "</td><td>" + (mx === null ? "—" : fmt(mx, 4) + " in") + "</td></tr>";
           }
-          var h = "<h3>Gauge pitch diameters — " + esc(u[0]) + " (ASME B1.2)</h3>";
-          h += '<table class="dtable" aria-label="Gauge pitch diameters"><tr><th>Gauge</th><th>Min</th><th>Max</th></tr>';
-          if(X){
-            h += gRow("GO thread plug PD (internal 2B)", u[11], u[11] + X, "X tolerance " + fmt(X, 4) + " in");
-            h += gRow("NOT GO thread plug PD (internal 2B)", u[12] - X, u[12], "X tolerance " + fmt(X, 4) + " in");
-            h += gRow("GO thread ring PD (external 2A)", u[7] - X, u[7], "X tolerance " + fmt(X, 4) + " in");
-            h += gRow("NOT GO (LO) thread ring PD (external 2A)", u[8], u[8] + X, "X tolerance " + fmt(X, 4) + " in");
+          var xNote = "X tolerance " + fmt(g.x, 4) + " in (working gauge)";
+          var h = "<h3>Gauge limits — " + esc(u[0]) + " (ASME B1.2)</h3>";
+          h += '<table class="dtable" aria-label="Gauge limits"><tr><th>Gauge</th><th>Min</th><th>Max</th></tr>';
+          h += gRow("GO thread plug PD (internal 2B)", g.goP[0], g.goP[1], xNote);
+          h += gRow("GO thread plug major diameter", g.goM[0], g.goM[1], null);
+          if(g.ngP){
+            h += gRow("NOT GO (HI) thread plug PD (internal 2B)", g.ngP[0], g.ngP[1], xNote);
           } else {
-            h += gRow("GO thread plug PD (internal 2B) — nominal", u[11], u[11], "Sits at the product PD min");
-            h += gRow("NOT GO thread plug PD (internal 2B) — nominal", u[12], u[12], "Sits at the product PD max");
-            h += gRow("GO thread ring PD (external 2A) — nominal", u[7], u[7], "Sits at the product PD max");
-            h += gRow("NOT GO (LO) thread ring PD (external 2A) — nominal", u[8], u[8], "Sits at the product PD min");
+            h += '<tr><td>NOT GO (HI) thread plug PD (internal 2B)</td><td colspan="2">not included — under verification</td></tr>';
           }
-          h += gRow("GO setting plug PD — nominal", u[7], u[7], "W tolerance applied minus");
-          h += gRow("LO setting plug PD — nominal", u[8], u[8], "W tolerance applied plus");
+          h += gRow("NOT GO thread plug major diameter", g.ngM[0], g.ngM[1], null);
+          h += gRow("GO thread ring PD (external 2A)", g.goR[0], g.goR[1], xNote);
+          h += gRow("NOT GO (LO) thread ring PD (external 2A)", g.ngR[0], g.ngR[1], xNote);
+          h += gRow("GO setting plug PD — nominal", g.setGo, null, "Nominal — W tolerance applied minus");
+          h += gRow("LO setting plug PD — nominal", g.setLo, null, "Nominal — W tolerance applied plus");
           h += gRow("Plain plug for minor dia — GO / NOGO", u[13], u[14], "GO = internal minor min; NOGO = internal minor max");
           h += gRow("Plain ring for major dia — GO / NOGO", u[6], u[5], "GO = external major max; NOGO = external major min");
           h += "</table>";
-          if(!X) h += '<p class="small">Gauge tolerance (X) for this size is tabulated in ASME B1.2 Table 6 — not yet included; nominal values and wear limits shown.</p>';
-          h += '<p class="explain"><strong>Wear / retirement:</strong> a GO plug worn below the product PD min (' + fmt(u[11], 4) + ' in), or a NOT GO plug worn above the product PD max (' + fmt(u[12], 4) + ' in), is withdrawn. Ring gauges are verified on their setting plugs.</p>';
-          h += '<p class="explain"><strong>X vs W:</strong> X tolerance (ASME B1.2 Table 6) is the tolerance for working gauges — the plugs and rings that contact the product. W tolerance (Table 7) is smaller and is the tolerance for setting gauges (setting plugs and master rings) — the highest commercial grade. The shop shorthand “W = wear” is wrong: wear is handled by the retirement lines above, not by the W grade.</p>';
+          h += '<p class="explain"><strong>Wear / retirement:</strong> a GO plug worn below the product PD min (' + fmt(u[11], 4) + ' in), or a NOT GO plug worn above the product PD max (' + fmt(u[12], 4) + ' in), is withdrawn — the wear lines are the product limits themselves. Ring gauges are verified on their setting plugs.</p>';
+          h += '<p class="explain"><strong>X vs W:</strong> the plug and ring limit pairs above are X tolerance (ASME B1.2 Table 6) — the working-gauge grade, for the gauges that contact the product. W tolerance is the tighter grade, reserved for setting gauges (setting plugs and master rings): it applies minus on the GO setting plug and plus on the LO setting plug, from the nominals shown. The shop shorthand “W = wear” is wrong: wear is handled by the retirement lines above, not by the W grade.</p>';
           h += calP + '<p class="small">' + esc(TH_MEAS_NOTE) + "</p>";
           return h;
         }
@@ -2847,7 +2935,7 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjEyIjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjEzIjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
