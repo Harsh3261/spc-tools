@@ -92,6 +92,19 @@
       .flag.amber{background:rgba(185,125,15,.10); border-color:rgba(185,125,15,.45); color:#6d4d05}
       .flag.green{background:rgba(20,122,79,.08); border-color:rgba(20,122,79,.40); color:#145c3d}
       .demobanner{margin-top:12px; border-radius:8px; padding:11px 13px; font-size:14.5px; line-height:1.5; border:1.5px solid rgba(185,125,15,.65); background:rgba(185,125,15,.14); color:#6d4d05}
+      /* AI analysis prompt panels */
+      .aiwrap{margin-top:16px; border-top:1px dashed var(--line); padding-top:14px}
+      button.act:disabled{background:var(--panel2); color:var(--ink-faint); border-color:var(--line); cursor:not-allowed; box-shadow:none}
+      .aihint{margin:8px 0 0; font-size:13px; line-height:1.5; color:var(--ink-faint)}
+      .aipanel{margin-top:12px; background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px; padding:12px 14px}
+      .aiguidance{margin:0}
+      textarea.aitext{min-height:230px; font-size:13.5px; background:var(--panel)}
+      a.ghostlink{
+        min-height:48px; padding:11px 16px; border-radius:8px; border:1px solid var(--line);
+        background:var(--panel2); color:var(--ink); font-weight:700; font-size:14px; font-family:var(--sans);
+        display:inline-flex; align-items:center; text-decoration:none;
+      }
+      a.ghostlink:active{transform:translateY(1px)}
       .snapshot{background:var(--bg2); border:1px dashed var(--cyan-dim); border-radius:8px; padding:14px; margin-top:12px}
       .snapshot h4{margin:0 0 8px; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan)}
       .snapshot table{width:100%; border-collapse:collapse; font-size:14px}
@@ -236,6 +249,21 @@
               <button class="ghost" id="spcCsv">Download CSV (data + results)</button>
             </div>
           </div>
+
+          <div class="aiwrap">
+            <button class="act" id="spcAiBtn" type="button" disabled>Analyse with AI — copy prompt</button>
+            <p class="aihint" id="spcAiHint">Run Analyse first — the AI prompt unlocks once results are on screen.</p>
+            <div id="spcAiPanel" class="aipanel hidden">
+              <p class="small aiguidance">Paste this into Gemini or bring it to Muse for a full read. Nothing is sent anywhere by this app — you choose where to paste.</p>
+              <label class="flabel" for="spcAiText">Your AI prompt — SPC &amp; Capability</label>
+              <textarea id="spcAiText" class="aitext" readonly></textarea>
+              <div class="btnrow">
+                <button class="act" id="spcAiCopy" type="button">Copy</button>
+                <a class="ghostlink" href="https://gemini.google.com/app" target="_blank" rel="noopener">Open Gemini</a>
+              </div>
+              <div class="msg hidden" id="spcAiMsg" role="status"></div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -268,6 +296,21 @@
             <h3>Normality — Anderson–Darling test</h3>
             <div class="stats" id="checkAD"></div>
             <div class="flags" id="checkVerdict"></div>
+          </div>
+
+          <div class="aiwrap">
+            <button class="act" id="checkAiBtn" type="button" disabled>Analyse with AI — copy prompt</button>
+            <p class="aihint" id="checkAiHint">Run “Check my data” first — the AI prompt unlocks once results are on screen.</p>
+            <div id="checkAiPanel" class="aipanel hidden">
+              <p class="small aiguidance">Paste this into Gemini or bring it to Muse for a full read. Nothing is sent anywhere by this app — you choose where to paste.</p>
+              <label class="flabel" for="checkAiText">Your AI prompt — Data Check</label>
+              <textarea id="checkAiText" class="aitext" readonly></textarea>
+              <div class="btnrow">
+                <button class="act" id="checkAiCopy" type="button">Copy</button>
+                <a class="ghostlink" href="https://gemini.google.com/app" target="_blank" rel="noopener">Open Gemini</a>
+              </div>
+              <div class="msg hidden" id="checkAiMsg" role="status"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -323,6 +366,21 @@
             <p class="small" id="grrNote"></p>
             <div class="btnrow">
               <button class="ghost" id="grrCsv">Download CSV (grid + results)</button>
+            </div>
+          </div>
+
+          <div class="aiwrap">
+            <button class="act" id="grrAiBtn" type="button" disabled>Analyse with AI — copy prompt</button>
+            <p class="aihint" id="grrAiHint">Run “Calculate Gage R&amp;R” first — the AI prompt unlocks once results are on screen.</p>
+            <div id="grrAiPanel" class="aipanel hidden">
+              <p class="small aiguidance">Paste this into Gemini or bring it to Muse for a full read. Nothing is sent anywhere by this app — you choose where to paste.</p>
+              <label class="flabel" for="grrAiText">Your AI prompt — Gage R&amp;R</label>
+              <textarea id="grrAiText" class="aitext" readonly></textarea>
+              <div class="btnrow">
+                <button class="act" id="grrAiCopy" type="button">Copy</button>
+                <a class="ghostlink" href="https://gemini.google.com/app" target="_blank" rel="noopener">Open Gemini</a>
+              </div>
+              <div class="msg hidden" id="grrAiMsg" role="status"></div>
             </div>
           </div>
         </div>
@@ -945,7 +1003,7 @@
         var parsed = parseMeasurements($("spcData").value);
         var vals = parsed.vals, msgEl = $("spcMsg");
         if(vals.length < 2){
-          $("spcResults").classList.add("hidden"); spcState = null;
+          $("spcResults").classList.add("hidden"); spcState = null; syncAiButtons();
           showMsg(msgEl, "Enter at least 2 measurements to analyse." + (parsed.junk ? " ("+parsed.junk+" non-numeric item"+(parsed.junk>1?"s":"")+" ignored.)" : ""));
           return;
         }
@@ -953,7 +1011,7 @@
         if(sp.lsl!==null && !isFinite(sp.lsl)) sp.lsl = null;
         if(sp.usl!==null && !isFinite(sp.usl)) sp.usl = null;
         if(sp.lsl!==null && sp.usl!==null && sp.usl<=sp.lsl){
-          $("spcResults").classList.add("hidden"); spcState = null;
+          $("spcResults").classList.add("hidden"); spcState = null; syncAiButtons();
           showMsg(msgEl, "USL must be greater than LSL — check the spec limits.");
           return;
         }
@@ -1021,6 +1079,7 @@
           '<div class="verdict '+vcls+'">'+esc(verdict)+"</div>";
         $("spcResults").classList.remove("hidden");
         flash($("spcStats"));
+        syncAiButtons();
       }
       $("spcAnalyse").addEventListener("click", analyseSPC);
       $("spcSample").addEventListener("click", function(){
@@ -1032,7 +1091,7 @@
       });
       $("spcClear").addEventListener("click", function(){
         $("spcName").value=""; $("spcData").value=""; $("spcLSL").value=""; $("spcUSL").value="";
-        $("spcResults").classList.add("hidden"); hideMsg($("spcMsg")); spcState=null;
+        $("spcResults").classList.add("hidden"); hideMsg($("spcMsg")); spcState=null; syncAiButtons();
         hideMsg($("spcImportInfo")); $("spcPickerWrap").classList.add("hidden");
         clearDemo("data");
       });
@@ -1061,6 +1120,7 @@
       function csvq(s){ return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }
 
       /* ================= TOOL 2 : DATA CHECK ================= */
+      var checkState = null; // last computed Data Check results, for the AI prompt
       function andersonDarling(vals){
         var n = vals.length, m = mean(vals), sd = sampleSD(vals);
         if(sd<=0) return null;
@@ -1080,7 +1140,7 @@
       function refreshCheck(){
         var parsed = parseMeasurements($("spcData").value), vals = parsed.vals, msgEl = $("checkMsg");
         if(vals.length < 3){
-          $("checkResults").classList.add("hidden");
+          $("checkResults").classList.add("hidden"); checkState = null; syncAiButtons();
           showMsg(msgEl, "Enter at least 3 measurements in the SPC & Capability tab first — this tool reads the same data.");
           return;
         }
@@ -1141,7 +1201,18 @@
           $("checkAD").innerHTML = statTile("A²","—");
           $("checkVerdict").innerHTML = '<div class="flag amber">All readings are identical — no variation to test.</div>';
         }
+        checkState = {
+          vals: vals.slice(), n: n, mean: m, median: median, sd: sd, min: min, max: max, skew: skew,
+          ad: ad ? { A2s: ad.A2s, p: ad.p } : null,
+          verdict: ad ? (ad.p >= 0.05
+            ? "Normal-looking (p ≥ 0.05) — no strong evidence against normality; the data is consistent with a normal shape."
+            : "Not clearly normal (p < 0.05) — the data departs from a normal shape, so capability indices that assume normality should be treated with caution.")
+            : "Not testable — all readings are identical, so there is no variation to test.",
+          lsl: (sp.lsl !== null && isFinite(sp.lsl)) ? sp.lsl : null,
+          usl: (sp.usl !== null && isFinite(sp.usl)) ? sp.usl : null
+        };
         $("checkResults").classList.remove("hidden");
+        syncAiButtons();
       }
       $("checkRefresh").addEventListener("click", refreshCheck);
 
@@ -1444,14 +1515,14 @@
         $("checkDemoBanner").classList.toggle("hidden", !demoFlags.data);
         $("grrDemoBanner").classList.toggle("hidden", !demoFlags.grr);
       }
-      function setDemo(kind){ demoFlags[kind] = true; syncDemoBanners(); }
-      function clearDemo(kind){ if(demoFlags[kind]){ demoFlags[kind] = false; syncDemoBanners(); } }
+      function setDemo(kind){ demoFlags[kind] = true; syncDemoBanners(); syncAiButtons(); }
+      function clearDemo(kind){ if(demoFlags[kind]){ demoFlags[kind] = false; syncDemoBanners(); syncAiButtons(); } }
       $("spcData").addEventListener("input", function(){ clearDemo("data"); });
       $("grrGrid").addEventListener("input", function(){ clearDemo("grr"); });
       $("grrClear").addEventListener("click", function(){
         grrBuildGrid(false);
         $("grrPaste").value = ""; $("grrTol").value = "";
-        $("grrResults").classList.add("hidden"); hideMsg($("grrMsg")); grrLast = null;
+        $("grrResults").classList.add("hidden"); hideMsg($("grrMsg")); grrLast = null; syncAiButtons();
         clearDemo("grr");
       });
 
@@ -1512,7 +1583,7 @@
           var v = raw==="" ? NaN : Number(raw);
           if(!isFinite(v)) missing++; x[pi][oi].push(v);
         }}}
-        if(missing){ $("grrResults").classList.add("hidden"); showMsg(msgEl, "The study grid has "+missing+" empty or non-numeric cell"+(missing>1?"s":"")+" — every part needs every operator × trial filled before the ANOVA can run."); return; }
+        if(missing){ $("grrResults").classList.add("hidden"); grrLast = null; syncAiButtons(); showMsg(msgEl, "The study grid has "+missing+" empty or non-numeric cell"+(missing>1?"s":"")+" — every part needs every operator × trial filled before the ANOVA can run."); return; }
         hideMsg(msgEl);
         var N = p*o*r, grand = 0;
         var cellMean = [], partMean = new Array(p).fill(0), opMean = new Array(o).fill(0), opSum = new Array(o).fill(0);
@@ -1571,6 +1642,7 @@
         else if(basis < 10){ verdict = "Acceptable — %GRR "+fmt(basis,1)+"% ("+basisName+"). The measurement system is fine; variation you see is the process."; cls="green"; }
         else if(basis <= 30){ verdict = "Marginal — %GRR "+fmt(basis,1)+"% ("+basisName+"). Usable with care: fine for sorting and SPC, risky for tight capability calls."; cls="amber"; }
         else { verdict = "Unacceptable — %GRR "+fmt(basis,1)+"% ("+basisName+"). Fix the gauge, the method, or the training before trusting any measurement from this system."; cls="red"; }
+        grrLast.verdict = verdict; grrLast.basisName = basisName;
         var html = '<div class="flag '+cls+'"><strong>AIAG verdict:</strong> '+esc(verdict)+"</div>";
         var grrMeaning = basis===null ? "" : (basis < 10 ? "The measurement system contributes little variation — differences you see are mostly real part differences." : (basis <= 30 ? "The measurement system may be acceptable depending on how critical the feature is — it is blurring part differences somewhat." : "The measurement system is using up too much variation — it can hide real part differences and needs improvement before it can be trusted for decisions."));
         if(grrMeaning) html += '<p class="explain"><strong>What this means:</strong> '+esc(grrMeaning)+"</p>";
@@ -1578,6 +1650,7 @@
         $("grrVerdict").innerHTML = html;
         $("grrNote").textContent = "ANOVA method per AIAG MSA. Operator × part interaction " + (pooled ? "was not significant at α = 0.25 and was pooled into the error term." : "was kept in the model (significant at α = 0.25).") + " AV combines operator and interaction variance, per the manual.";
         $("grrResults").classList.remove("hidden");
+        syncAiButtons();
       }
       $("grrCalc").addEventListener("click", calcGRR);
       $("grrSample").addEventListener("click", function(){
@@ -2136,6 +2209,166 @@
       $("tpGo").addEventListener("click", function(){ holdScroll(runTP); });
       $("tpMod").addEventListener("change", function(){ holdScroll(function(){ if(!$("tpResults").classList.contains("hidden")) runTP(); }); });
 
+      /* ================= AI ANALYSIS PROMPTS =================
+         No backend and no API key lives in this page: each button
+         packages the results already computed on this device into a
+         plain-text prompt the user pastes into the AI of their choice.
+         Nothing is sent anywhere by this app, and the package contains
+         only what the user entered and computed in this session. */
+      function aiRawValues(vals){
+        var out = vals.slice(0, 200).map(function(v){ return String(v); }).join(", ");
+        if(vals.length > 200) out += "\n(Note: " + vals.length + " values were entered — only the first 200 are listed here; every statistic above was calculated from the full set.)";
+        return out;
+      }
+      function buildSpcAiText(){
+        var s = spcState, st = s.st, lines = [];
+        if(demoFlags.data) lines.push("NOTE: this is example/demo data.", "");
+        lines.push("You are a quality engineering assistant. Analyse this SPC data, explain what it means in plain language, and tell me what to do next.", "");
+        lines.push("SPC & CAPABILITY RESULTS — SPC Tools");
+        if(s.name) lines.push("Characteristic: " + s.name);
+        lines.push("N: " + st.n);
+        lines.push("Mean: " + fmt(st.xbar));
+        lines.push("Sigma within (MRbar/d2): " + fmt(st.sdW));
+        lines.push("Sigma overall (s): " + fmt(st.sdO));
+        lines.push("Control limits (UCL / LCL): " + fmt(st.ucl) + " / " + fmt(st.lcl));
+        lines.push("LSL: " + (s.lsl === null ? "not entered" : fmt(s.lsl)));
+        lines.push("USL: " + (s.usl === null ? "not entered" : fmt(s.usl)));
+        if(st.cap){
+          lines.push("Cp: " + (st.cap.cp === null ? "—" : fmt2(st.cap.cp)));
+          lines.push("Cpk: " + (st.cap.cpk === null ? "—" : fmt2(st.cap.cpk)));
+          lines.push("Pp: " + (st.cap.pp === null ? "—" : fmt2(st.cap.pp)));
+          lines.push("Ppk: " + (st.cap.ppk === null ? "—" : fmt2(st.cap.ppk)));
+          lines.push("Expected PPM (from overall variation): " + (st.cap.ppm === null ? "—" : fmt(st.cap.ppm, 0)));
+        } else {
+          lines.push("Capability indices: not calculated (no spec limits were entered).");
+        }
+        lines.push("Points out of spec: " + st.outSpec.length + (st.outSpec.length ? " (part " + st.outSpec.join(", ") + ")" : ""));
+        lines.push("Points out of control: " + st.outCtrl.length + (st.outCtrl.length ? " (part " + st.outCtrl.join(", ") + ")" : ""));
+        st.runs.forEach(function(r){ lines.push("Run signal: parts " + r.from + "–" + r.to + " sit on the " + r.side + " side of the centre line (8+ in a row)."); });
+        lines.push("", "Raw values (in measurement order):", aiRawValues(s.vals), "");
+        lines.push("Please answer:");
+        lines.push("1. Is the process capable and stable?");
+        lines.push("2. What is the biggest risk in this data?");
+        lines.push("3. What should be checked first?");
+        lines.push("4. What would you recommend doing next?", "");
+        lines.push("Data analysed on-device by SPC Tools.");
+        return lines.join("\n");
+      }
+      function buildCheckAiText(){
+        var c = checkState, lines = [];
+        if(demoFlags.data) lines.push("NOTE: this is example/demo data.", "");
+        lines.push("You are a quality engineering assistant. Analyse this data distribution check, explain what it means in plain language, and tell me what to do next.", "");
+        lines.push("DATA CHECK RESULTS — SPC Tools (descriptive statistics & normality)");
+        lines.push("N: " + c.n);
+        lines.push("Mean: " + fmt(c.mean));
+        lines.push("Median: " + fmt(c.median));
+        lines.push("Std dev (s): " + fmt(c.sd));
+        lines.push("Min: " + fmt(c.min));
+        lines.push("Max: " + fmt(c.max));
+        lines.push("Skewness: " + fmt(c.skew, 2));
+        if(c.lsl !== null || c.usl !== null) lines.push("Spec limits entered on the SPC tab — LSL: " + (c.lsl === null ? "not entered" : fmt(c.lsl)) + ", USL: " + (c.usl === null ? "not entered" : fmt(c.usl)));
+        lines.push("", "Normality — Anderson-Darling test:");
+        if(c.ad){
+          lines.push("A2 (adjusted): " + fmt(c.ad.A2s, 3));
+          lines.push("p-value (approx.): " + (c.ad.p < 0.001 ? "< 0.001" : fmt(c.ad.p, 3)));
+        } else {
+          lines.push("Not testable — all readings are identical.");
+        }
+        lines.push("Verdict: " + c.verdict);
+        lines.push("", "Raw values (in measurement order):", aiRawValues(c.vals), "");
+        lines.push("Please answer:");
+        lines.push("1. Does this data look normally distributed, and how much does that matter for the capability indices calculated from it?");
+        lines.push("2. What is the biggest risk in this data?");
+        lines.push("3. What should be checked first?");
+        lines.push("4. What would you recommend doing next?", "");
+        lines.push("Data analysed on-device by SPC Tools.");
+        return lines.join("\n");
+      }
+      function buildGrrAiText(){
+        var g = grrLast, lines = [];
+        if(demoFlags.grr) lines.push("NOTE: this is example/demo data.", "");
+        lines.push("You are a quality engineering assistant. Analyse this Gage R&R study, explain what it means in plain language, and tell me what to do next.", "");
+        lines.push("GAGE R&R RESULTS — SPC Tools (crossed study, ANOVA method, AIAG MSA)");
+        lines.push("Study setup: " + g.o + " operators × " + g.p + " parts × " + g.r + " trials");
+        lines.push("Tolerance (USL − LSL): " + (g.tol === null ? "not entered" : fmt(g.tol)));
+        lines.push("EV (repeatability, std dev): " + fmt(g.EV, 5));
+        lines.push("AV (reproducibility, std dev): " + fmt(g.AV, 5));
+        lines.push("GRR (combined, std dev): " + fmt(g.GRR, 5));
+        lines.push("PV (part variation, std dev): " + fmt(g.PV, 5));
+        lines.push("TV (total variation, std dev): " + fmt(g.TV, 5));
+        lines.push("%GRR of tolerance (6 sigma): " + (g.pctTol === null ? "— (no tolerance entered)" : fmt(g.pctTol, 1) + "%"));
+        lines.push("%GRR of study variation: " + (g.pctStudy === null ? "—" : fmt(g.pctStudy, 1) + "%"));
+        lines.push("ndc (number of distinct categories): " + (g.ndc === null ? "—" : g.ndc));
+        g.opMean.forEach(function(v, i){ lines.push("Operator " + "ABC"[i] + " average: " + fmt(v)); });
+        lines.push("Operator × part interaction: " + (g.pooled ? "not significant at alpha = 0.25 — pooled into the error term." : "kept in the model (significant at alpha = 0.25)."));
+        lines.push("AIAG verdict: " + (g.verdict || ""));
+        lines.push("", "Please answer:");
+        lines.push("1. Is this measurement system acceptable for its intended use?");
+        lines.push("2. Is the bigger problem repeatability (EV) or reproducibility (AV), and what does that point to?");
+        lines.push("3. What is the biggest risk of trusting measurements from this system?");
+        lines.push("4. What should be checked or fixed first?", "");
+        lines.push("Data analysed on-device by SPC Tools.");
+        return lines.join("\n");
+      }
+      function syncAiButtons(){
+        var spcReady = !!spcState;
+        $("spcAiBtn").disabled = !spcReady;
+        $("spcAiHint").textContent = spcReady
+          ? "Builds a prompt from the results above — nothing is sent anywhere; you paste it where you choose."
+          : "Run Analyse first — the AI prompt unlocks once results are on screen.";
+        if(!spcReady) $("spcAiPanel").classList.add("hidden");
+        else if(!$("spcAiPanel").classList.contains("hidden")) $("spcAiText").value = buildSpcAiText();
+
+        var checkReady = !!checkState;
+        $("checkAiBtn").disabled = !checkReady;
+        $("checkAiHint").textContent = checkReady
+          ? "Builds a prompt from the results above — nothing is sent anywhere; you paste it where you choose."
+          : "Run “Check my data” first — the AI prompt unlocks once results are on screen.";
+        if(!checkReady) $("checkAiPanel").classList.add("hidden");
+        else if(!$("checkAiPanel").classList.contains("hidden")) $("checkAiText").value = buildCheckAiText();
+
+        var grrReady = !!grrLast;
+        $("grrAiBtn").disabled = !grrReady;
+        $("grrAiHint").textContent = grrReady
+          ? "Builds a prompt from the results above — nothing is sent anywhere; you paste it where you choose."
+          : "Run “Calculate Gage R&R” first — the AI prompt unlocks once results are on screen.";
+        if(!grrReady) $("grrAiPanel").classList.add("hidden");
+        else if(!$("grrAiPanel").classList.contains("hidden")) $("grrAiText").value = buildGrrAiText();
+      }
+      function wireAi(prefix, builder, hasState){
+        $(prefix + "AiBtn").addEventListener("click", function(){
+          if(!hasState()) return;
+          holdScroll(function(){
+            $(prefix + "AiText").value = builder();
+            $(prefix + "AiPanel").classList.remove("hidden");
+            hideMsg($(prefix + "AiMsg"));
+          });
+        });
+        $(prefix + "AiCopy").addEventListener("click", function(){
+          var ta = $(prefix + "AiText"), msgEl = $(prefix + "AiMsg"), text = ta.value;
+          if(!text) return;
+          function fallback(){
+            /* Manual-select fallback (iOS Safari): highlight the whole
+               prompt so the user can tap Copy in the selection menu. */
+            holdScroll(function(){
+              try { ta.focus({ preventScroll: true }); } catch(e) { ta.focus(); }
+              ta.select();
+              try { ta.setSelectionRange(0, text.length); } catch(e) {}
+              showMsg(msgEl, "Clipboard wasn't available, so the prompt is selected — tap Copy in the menu to copy it manually.", false);
+            });
+          }
+          if(navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(text).then(function(){
+              holdScroll(function(){ showMsg(msgEl, "Copied — paste it into Gemini or Muse.", true); });
+            }, fallback);
+          } else fallback();
+        });
+      }
+      wireAi("spc", buildSpcAiText, function(){ return !!spcState; });
+      wireAi("check", buildCheckAiText, function(){ return !!checkState; });
+      wireAi("grr", buildGrrAiText, function(){ return !!grrLast; });
+      syncAiButtons();
+
       /* ---------- focus scroll guard + keyboard visibility ----------
          Standing rule: operating any control leaves the page where it is.
          Root cause of the Convert-tab jump: the old helper scrolled EVERY
@@ -2257,7 +2490,7 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjkiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjEwIjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
