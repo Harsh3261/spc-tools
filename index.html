@@ -1,7 +1,9 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Built by Harsh Patel, with Satureday (Muse) -->
     <meta charset="utf-8" />
+    <meta name="author" content="Harsh Patel" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#d8dfe6" />
@@ -127,6 +129,7 @@
       .small{font-size:12.5px; color:var(--ink-faint); line-height:1.5}
       .cite{font-size:12.5px; color:var(--ink-faint); margin-top:10px}
       footer{margin-top:22px; padding-top:14px; border-top:1px solid var(--line); color:var(--ink-faint); font-size:12.5px; line-height:1.6}
+      .makers-mark{margin:14px 0 4px; text-align:center; color:var(--ink-faint); font-size:11.5px; letter-spacing:.02em}
       .biginput{font-size:20px !important; padding:14px 12px !important; font-family:var(--mono) !important}
       .bigres{font-family:var(--mono); font-size:32px; font-weight:700; color:var(--ink); line-height:1.25; overflow-wrap:break-word; margin:6px 0 4px}
       .bigres small{font-size:15px; color:var(--ink-dim); font-weight:600}
@@ -750,6 +753,7 @@
       <footer>
         Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate) · Thread limits per ISO 965-2 / ASME B1.1, gauge values per ASME B1.2 / ISO 1502 · True position per ASME Y14.5. Estimates from your data — verify critical results before acting on them.
       </footer>
+      <p class="makers-mark">Built by Harsh Patel · with Satureday</p>
     </div>
 
     <script>
@@ -3306,7 +3310,7 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjE0IjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjE1IjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
