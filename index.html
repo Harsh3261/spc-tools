@@ -130,6 +130,15 @@
       .resultbox{background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px; padding:12px 14px; margin-top:12px}
       .resultbox .rlab{font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); font-weight:700}
       .frow{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
+      /* Threads view switch — segmented control */
+      .seg{display:flex; gap:6px; margin-top:16px}
+      .seg button{
+        flex:1 1 0; min-height:48px; padding:10px 8px; cursor:pointer;
+        background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
+        border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:700; letter-spacing:.02em;
+      }
+      .seg button[aria-pressed="true"]{background:var(--cyan); color:#ffffff; border-color:var(--cyan-dim); box-shadow:0 2px 8px rgba(11,127,149,.35)}
+      .seg button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       .hidden{display:none !important}
       /* Round 2 — meaning lines, verdict pills, design + motion (transform/opacity only) */
       .explain{margin:10px 0 0; font-size:13.5px; line-height:1.55; color:var(--ink-dim); background:var(--panel2); border:1px solid var(--line-soft); border-radius:8px; padding:10px 12px}
@@ -602,51 +611,59 @@
         </div>
       </section>
 
-      <!-- ============ TOOL 7 : THREADS ============ -->
+      <!-- ============ TOOL 7 : THREADS CATALOGUE ============ -->
       <section class="tool" id="tool-threads" role="tabpanel" aria-labelledby="tabbtn-threads">
         <div class="card">
-          <h2>Thread basic diameters — metric &amp; UN</h2>
-          <p class="guru">Basic diameters are the standard's reference sizes before tolerances are applied — gauge selection, tap-drill sizing, and CMM nominals start here.</p>
-          <div class="row3">
+          <h2>Threads — manufacturing limits &amp; gauge verification</h2>
+          <p class="guru">Two different sets of numbers for two different jobs: manufacturing limits judge the part you make; gauge limits judge the gauge itself. Pick the thread, then choose the view.</p>
+          <div class="row2">
             <div>
-              <label class="flabel" for="thSystem">Thread system</label>
-              <select id="thSystem">
+              <label class="flabel" for="thFam">Family</label>
+              <select id="thFam">
                 <option value="metric" selected>Metric ISO</option>
-                <option value="un">UN imperial (UNC / UNF)</option>
+                <option value="un">UN (UNC / UNF)</option>
+                <option value="bsp">BSP parallel (G)</option>
+                <option value="pipe">Pipe threads (NPT / BSPT)</option>
+                <option value="whitworth">Whitworth (BSW / BSF)</option>
+                <option value="acme">Acme / Stub Acme</option>
+                <option value="tr">Trapezoidal (Tr)</option>
+                <option value="ba">BA</option>
               </select>
             </div>
             <div>
-              <label class="flabel" for="thPreset">Standard size</label>
-              <select id="thPreset"></select>
-            </div>
-            <div>
-              <label class="flabel" for="thType">Thread</label>
-              <select id="thType">
-                <option value="ext" selected>External (bolt / screw)</option>
-                <option value="int">Internal (nut / tapped hole)</option>
-              </select>
+              <label class="flabel" for="thSize">Size</label>
+              <select id="thSize"></select>
             </div>
           </div>
           <div class="row2">
             <div>
-              <label class="flabel" for="thD" id="thDLabel">Major diameter D (mm)</label>
-              <input type="number" id="thD" step="any" inputmode="decimal" placeholder="e.g. 10" autocomplete="off" />
+              <label class="flabel" for="thSide">Thread</label>
+              <select id="thSide"></select>
             </div>
             <div>
-              <label class="flabel" for="thP" id="thPLabel">Pitch (mm)</label>
-              <input type="number" id="thP" step="any" inputmode="decimal" placeholder="e.g. 1.5" autocomplete="off" />
+              <label class="flabel" for="thClass">Class / fit</label>
+              <select id="thClass"></select>
             </div>
           </div>
-          <div class="btnrow">
-            <button class="act" id="thGo">Get diameters</button>
+          <div id="thCustom" class="hidden">
+            <div class="row2">
+              <div>
+                <label class="flabel" for="thCD" id="thCDLabel">Major diameter D (mm)</label>
+                <input type="number" id="thCD" step="any" inputmode="decimal" placeholder="e.g. 10" autocomplete="off" />
+              </div>
+              <div>
+                <label class="flabel" for="thCP" id="thCPLabel">Pitch (mm)</label>
+                <input type="number" id="thCP" step="any" inputmode="decimal" placeholder="e.g. 1.5" autocomplete="off" />
+              </div>
+            </div>
+            <p class="small">Custom sizes are calculated from the standard's own formulas and are labelled “calculated” in the results — catalogue sizes above use the published tables.</p>
           </div>
-          <div class="msg hidden" id="thMsg" role="status"></div>
-          <div id="thResults" class="hidden">
-            <h3 id="thResTitle">Basic diameters</h3>
-            <table class="dtable" id="thTable" aria-label="Thread basic diameters"></table>
-            <p class="explain"><strong>What this means:</strong> Basic diameters are the standard's reference sizes before tolerances are applied — use the gauge certificate or the standard's tables for acceptance limits.</p>
+          <div class="seg" role="group" aria-label="Threads view">
+            <button type="button" id="thSegMfg" aria-pressed="true">Manufacturing limits</button>
+            <button type="button" id="thSegGauge" aria-pressed="false">Gauge verification</button>
           </div>
-          <p class="cite">Basic dimensions per ISO 68-1 / ASME B1.1. For gauge acceptance limits (6H/6g, 2A/2B), the gauge certificate governs. Tapered pipe threads (NPT) are not covered — their diameters depend on axial position along the taper.</p>
+          <div id="thMfg"></div>
+          <div id="thGauge" class="hidden"></div>
         </div>
       </section>
 
@@ -724,7 +741,7 @@
       </section>
 
       <footer>
-        Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate) · Thread basics per ISO 68-1 / ASME B1.1 · True position per ASME Y14.5. Estimates from your data — verify critical results before acting on them.
+        Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate) · Thread limits per ISO 965-2 / ASME B1.1, gauge values per ASME B1.2 / ISO 1502 · True position per ASME Y14.5. Estimates from your data — verify critical results before acting on them.
       </footer>
     </div>
 
@@ -2027,90 +2044,418 @@
       $("sigShift").addEventListener("change", function(){ holdScroll(runSigma); });
       $("sigVal").addEventListener("input", runSigma);
 
-      /* ================= TOOL 7 : THREADS ================= */
-      var TH_METRIC = [
-        ["M3 × 0.5 — coarse", 3, 0.5], ["M4 × 0.7 — coarse", 4, 0.7], ["M5 × 0.8 — coarse", 5, 0.8],
-        ["M6 × 1 — coarse", 6, 1], ["M8 × 1.25 — coarse", 8, 1.25], ["M10 × 1.5 — coarse", 10, 1.5],
-        ["M12 × 1.75 — coarse", 12, 1.75], ["M16 × 2 — coarse", 16, 2], ["M20 × 2.5 — coarse", 20, 2.5],
-        ["M24 × 3 — coarse", 24, 3],
-        ["M8 × 1 — fine", 8, 1], ["M10 × 1.25 — fine", 10, 1.25], ["M10 × 1 — fine", 10, 1],
-        ["M12 × 1.5 — fine", 12, 1.5], ["M12 × 1.25 — fine", 12, 1.25], ["M16 × 1.5 — fine", 16, 1.5],
-        ["M20 × 1.5 — fine", 20, 1.5], ["M24 × 2 — fine", 24, 2]
+      /* ================= TOOL 7 : THREADS CATALOGUE =================
+         Data authority: verified research file (limits.md) — metric limits
+         ISO 965-2 §1, UN limits ASME B1.1 Table 3 §2, other families §7.2,
+         gauges ASME B1.2 / ISO 1502 §8. Values are embedded verbatim from
+         that file; the ONLY computed path is the labelled custom-size
+         formula path (§5.1 metric / §5.2 UN). */
+      /* TH_M row: label, D, P, extMajMax, extMajMin, extPdMax, extPdMin, extMinorMaxTab, intMinorMin, intMinorMax, intPdMin, intPdMax, intMajMin */
+      var TH_M = [
+        ["M3 × 0.5",3,0.5,2.98,2.874,2.655,2.58,2.437,2.459,2.599,2.675,2.775,3],
+        ["M4 × 0.7",4,0.7,3.978,3.838,3.523,3.433,3.22,3.242,3.422,3.545,3.663,4],
+        ["M5 × 0.8",5,0.8,4.976,4.826,4.456,4.361,4.11,4.134,4.334,4.48,4.605,5],
+        ["M6 × 1",6,1,5.974,5.794,5.324,5.212,4.891,4.917,5.153,5.35,5.5,6],
+        ["M8 × 1.25",8,1.25,7.972,7.76,7.16,7.042,6.619,6.647,6.912,7.188,7.348,8],
+        ["M10 × 1.5",10,1.5,9.968,9.732,8.994,8.862,8.344,8.376,8.676,9.026,9.206,10],
+        ["M12 × 1.75",12,1.75,11.966,11.701,10.829,10.679,10.072,10.106,10.441,10.863,11.063,12],
+        ["M16 × 2",16,2,15.962,15.682,14.663,14.503,13.797,13.835,14.21,14.701,14.913,16],
+        ["M20 × 2.5",20,2.5,19.958,19.623,18.334,18.164,17.252,17.294,17.744,18.376,18.6,20],
+        ["M24 × 3",24,3,23.952,23.577,22.003,21.803,20.704,20.752,21.252,22.051,22.316,24],
+        ["M8 × 1",8,1,7.974,7.794,7.324,7.212,6.891,6.917,7.153,7.35,7.5,8],
+        ["M10 × 1.25",10,1.25,9.972,9.76,9.16,9.042,8.619,8.647,8.912,9.188,9.348,10],
+        ["M10 × 1",10,1,9.974,9.794,9.324,9.212,8.891,8.917,9.153,9.35,9.5,10],
+        ["M12 × 1.5",12,1.5,11.968,11.732,10.994,10.854,10.344,10.376,10.676,11.026,11.216,12],
+        ["M12 × 1.25",12,1.25,11.972,11.76,11.16,11.028,10.619,10.647,10.912,11.188,11.368,12],
+        ["M14 × 1.5",14,1.5,13.968,13.732,12.994,12.854,12.344,12.376,12.676,13.026,13.216,14],
+        ["M16 × 1.5",16,1.5,15.968,15.732,14.994,14.854,14.344,14.376,14.676,15.026,15.216,16],
+        ["M20 × 1.5",20,1.5,19.968,19.732,18.994,18.854,18.344,18.376,18.676,19.026,19.216,20]
       ];
-      var TH_UNC = [
-        ["#4-40 UNC", 0.112, 40], ["#6-32 UNC", 0.138, 32], ["#8-32 UNC", 0.164, 32], ["#10-24 UNC", 0.190, 24],
-        ["1/4-20 UNC", 0.25, 20], ["5/16-18 UNC", 0.3125, 18], ["3/8-16 UNC", 0.375, 16], ["7/16-14 UNC", 0.4375, 14],
-        ["1/2-13 UNC", 0.5, 13], ["9/16-12 UNC", 0.5625, 12], ["5/8-11 UNC", 0.625, 11], ["3/4-10 UNC", 0.75, 10],
-        ["7/8-9 UNC", 0.875, 9], ["1-8 UNC", 1, 8]
+      /* TH_U row: label, D, TPI, series, allowance2A, extMajMax, extMajMin, extPdMax, extPdMin, extMinorMax, intMajMin, intPdMin, intPdMax, intMinorMin, intMinorMax */
+      var TH_U = [
+        ["#4-40 UNC",0.112,40,"UNC",0.0008,0.1112,0.1061,0.095,0.0925,0.0814,0.112,0.0958,0.0991,0.0849,0.0939],
+        ["#4-48 UNF",0.112,48,"UNF",0.0007,0.1113,0.1068,0.0978,0.0954,0.0864,0.112,0.0985,0.1016,0.0894,0.0968],
+        ["#6-32 UNC",0.138,32,"UNC",0.0008,0.1372,0.1312,0.1169,0.1141,0.1,0.138,0.1177,0.1214,0.104,0.114],
+        ["#6-40 UNF",0.138,40,"UNF",0.0008,0.1372,0.1321,0.121,0.1184,0.1074,0.138,0.1218,0.1252,0.111,0.119],
+        ["#8-32 UNC",0.164,32,"UNC",0.0009,0.1631,0.1571,0.1428,0.1399,0.1259,0.164,0.1437,0.1475,0.13,0.139],
+        ["#8-36 UNF",0.164,36,"UNF",0.0008,0.1632,0.1577,0.1452,0.1424,0.1301,0.164,0.146,0.1496,0.134,0.142],
+        ["#10-24 UNC",0.19,24,"UNC",0.001,0.189,0.1818,0.1619,0.1586,0.1394,0.19,0.1629,0.1672,0.145,0.156],
+        ["#10-32 UNF",0.19,32,"UNF",0.0009,0.1891,0.1831,0.1688,0.1658,0.1519,0.19,0.1697,0.1736,0.156,0.164],
+        ["1/4-20 UNC",0.25,20,"UNC",0.0011,0.2489,0.2408,0.2164,0.2127,0.1894,0.25,0.2175,0.2224,0.196,0.207],
+        ["1/4-28 UNF",0.25,28,"UNF",0.001,0.249,0.2425,0.2258,0.2225,0.2064,0.25,0.2268,0.2311,0.211,0.22],
+        ["5/16-18 UNC",0.3125,18,"UNC",0.0012,0.3113,0.3026,0.2752,0.2712,0.2452,0.3125,0.2764,0.2817,0.252,0.265],
+        ["5/16-24 UNF",0.3125,24,"UNF",0.0011,0.3114,0.3042,0.2843,0.2806,0.2618,0.3125,0.2854,0.2902,0.267,0.277],
+        ["3/8-16 UNC",0.375,16,"UNC",0.0013,0.3737,0.3643,0.3331,0.3287,0.2992,0.375,0.3344,0.3401,0.307,0.321],
+        ["3/8-24 UNF",0.375,24,"UNF",0.0011,0.3739,0.3667,0.3468,0.343,0.3243,0.375,0.3479,0.3529,0.33,0.34],
+        ["7/16-14 UNC",0.4375,14,"UNC",0.0014,0.4361,0.4258,0.3897,0.385,0.3511,0.4375,0.3911,0.3972,0.36,0.376],
+        ["7/16-20 UNF",0.4375,20,"UNF",0.0013,0.4362,0.4281,0.4037,0.3995,0.3767,0.4375,0.405,0.4104,0.383,0.395],
+        ["1/2-13 UNC",0.5,13,"UNC",0.0015,0.4985,0.4876,0.4485,0.4435,0.4069,0.5,0.45,0.4565,0.417,0.434],
+        ["1/2-20 UNF",0.5,20,"UNF",0.0013,0.4987,0.4906,0.4662,0.4619,0.4392,0.5,0.4675,0.4731,0.446,0.457],
+        ["9/16-12 UNC",0.5625,12,"UNC",0.0016,0.5609,0.5495,0.5068,0.5016,0.4617,0.5625,0.5084,0.5152,0.472,0.49],
+        ["9/16-18 UNF",0.5625,18,"UNF",0.0014,0.5611,0.5524,0.525,0.5205,0.495,0.5625,0.5264,0.5323,0.502,0.515],
+        ["5/8-11 UNC",0.625,11,"UNC",0.0016,0.6234,0.6113,0.5644,0.5589,0.5152,0.625,0.566,0.5732,0.527,0.546],
+        ["5/8-18 UNF",0.625,18,"UNF",0.0015,0.6236,0.6149,0.5875,0.5828,0.5575,0.625,0.5889,0.5949,0.565,0.578],
+        ["3/4-10 UNC",0.75,10,"UNC",0.0018,0.7482,0.7353,0.6832,0.6773,0.6291,0.75,0.685,0.6927,0.642,0.663],
+        ["3/4-16 UNF",0.75,16,"UNF",0.0015,0.7485,0.7391,0.7079,0.7029,0.674,0.75,0.7094,0.7159,0.682,0.696],
+        ["7/8-9 UNC",0.875,9,"UNC",0.0019,0.8731,0.8592,0.8009,0.7946,0.7408,0.875,0.8028,0.811,0.755,0.778],
+        ["7/8-14 UNF",0.875,14,"UNF",0.0016,0.8734,0.8631,0.827,0.8216,0.7884,0.875,0.8286,0.8356,0.798,0.814],
+        ["1-8 UNC",1,8,"UNC",0.002,0.998,0.983,0.9168,0.91,0.8492,1,0.9188,0.9276,0.865,0.89],
+        ["1-12 UNF",1,12,"UNF",0.0018,0.9982,0.9868,0.9441,0.9382,0.899,1,0.9459,0.9535,0.91,0.928]
       ];
-      var TH_UNF = [
-        ["#4-48 UNF", 0.112, 48], ["#6-40 UNF", 0.138, 40], ["#8-36 UNF", 0.164, 36], ["#10-32 UNF", 0.190, 32],
-        ["1/4-28 UNF", 0.25, 28], ["5/16-24 UNF", 0.3125, 24], ["3/8-24 UNF", 0.375, 24], ["7/16-20 UNF", 0.4375, 20],
-        ["1/2-20 UNF", 0.5, 20], ["9/16-18 UNF", 0.5625, 18], ["5/8-18 UNF", 0.625, 18], ["3/4-16 UNF", 0.75, 16],
-        ["7/8-14 UNF", 0.875, 14], ["1-12 UNF", 1, 12]
+      /* ASME B1.2 Table 6 X tolerances — verified in the research file for
+         these four sizes only; all other UN sizes show nominal gauge PDs. */
+      var TH_X = { "#4-40 UNC":0.0002, "#6-32 UNC":0.0003, "1/4-20 UNC":0.0003, "1-8 UNC":0.0004 };
+      var TH_CAL_NOTE = "Reference values only — for calibration preparation. Acceptance of a thread gauge at calibration is governed by its certificate and the governing standard (ASME B1.2 for UN gauges, ISO 1502 for metric gauges, ISO 7-2 / ASME B1.20.5 for pipe thread gauges). If a measured gauge value disagrees with this app, the certificate and the standard govern.";
+      var TH_MEAS_NOTE = "Plug gauge pitch diameter is measured directly (three-wire). A ring gauge is not measured directly — it is verified on its setting plug, and the setting plug's certified pitch diameter is the value of record for the ring.";
+      var TH_PIPE_CAVEAT = "Tapered pipe threads (NPT, BSPT) are not accepted on diameter limits the way straight threads are. The standards publish basic dimensions at a reference plane only — outside diameter, pitch diameter at that plane, and the gauge length (L1). Acceptance is by a taper thread ring/plug gauge: the gauge must seat at a standoff within the standard's tolerance (NPT: ±1 turn from basic standoff; ISO 7-1: gauge-length tolerance ±1 pitch for sizes up to 2 in). Do not machine to a min/max diameter band from these numbers.";
+      var TH_BSP = [
+        { label:"G1/4 — 19 TPI", pitch:1.337, major:13.157, pd:12.301, minorInt:11.445,
+          intPd:[12.301,12.426], intMinor:[11.445,11.890], extPdA:[12.176,12.301], extPdB:[12.051,12.301], extMajor:[12.907,13.157] }
       ];
-      function thFillPresets(){
-        var sys = $("thSystem").value, sel = $("thPreset");
-        var list = sys === "metric" ? TH_METRIC : TH_UNC.concat(TH_UNF);
-        sel.innerHTML = "";
-        var custom = document.createElement("option");
-        custom.value = ""; custom.textContent = "Custom size…";
-        sel.appendChild(custom);
-        list.forEach(function(t, i){
-          var opt = document.createElement("option");
-          opt.value = String(i); opt.textContent = t[0];
-          sel.appendChild(opt);
+      var TH_WHIT = [
+        { label:"BSW 1/4-20", major:0.25, pd:0.218, minor:0.186 },
+        { label:"BSF 1/4-26", major:0.25, pd:0.2254, minor:0.2007 }
+      ];
+      var TH_ACME = [
+        { label:"Acme 1/4-16 — class 2G", kind:"acme",
+          intMinor:[0.1875,0.1925], intPd:[0.2188,0.2293], intMajor:[0.26,0.27],
+          extPd:[0.2042,0.2147], extMajorBasic:0.25 },
+        { label:"Stub Acme 1/2-10 — basics only", kind:"stub", major:0.5, pd:0.47, minorInt:0.44 }
+      ];
+      var TH_TR = [
+        { label:"Tr20 × 4",
+          extMajor:[19.7,20], extPd:[17.64,17.905], extMinor:[15.074,15.5],
+          intPd:[18,18.355], intMinor:[16,16.375], intMajorMin:20.5 }
+      ];
+      var TH_BA = [
+        { label:"0 BA", extMajor:[5.92,6], extPd:[5.32,5.4], intPd:[5.4,5.48], intMinor:[4.85,4.92] }
+      ];
+      var TH_PIPE = [
+        { label:"NPT 1/2-14", std:"ASME B1.20.1",
+          fields:[["Pipe OD","0.8400 in"],["Threads per inch","14"],["Taper","1:16 on diameter"],
+            ["E0 — PD at beginning of external thread","0.75843 in"],
+            ["E1 — PD at handtight plane","0.77843 in"],
+            ["L1 — handtight engagement","0.3200 in (4.48 turns)"],
+            ["E2 — PD at effective thread","0.79178 in"],
+            ["L2 — effective thread length","0.5337 in"],
+            ["Thread height h","0.05714 in"],
+            ["K0 — basic minor at small end","0.7014 in"]],
+          note:"NPTF (ASME B1.20.3) uses the same basic dimensions with controlled crest/root truncations (dryseal).",
+          gauge:"Standoff acceptance: the L1 gauge must seat within ±1 turn from basic standoff. No pitch-diameter limit bands exist for tapered threads." },
+        { label:"BSPT R 1/4", std:"ISO 7-1",
+          fields:[["Threads per inch","19"],["Pitch","1.337 mm"],["Taper","1:16 on diameter"],
+            ["Major diameter at gauge plane","13.157 mm"],
+            ["Pitch diameter at gauge plane","12.301 mm"],
+            ["Minor diameter","11.445 mm"],
+            ["Basic gauge length","6.0 mm"],
+            ["Gauge-length tolerance","±1 pitch"]],
+          note:"",
+          gauge:"Standoff acceptance: gauge-length tolerance ±1 pitch (for sizes up to 2 in). No pitch-diameter limit bands exist for tapered threads." }
+      ];
+
+      /* ---------- threads helpers ---------- */
+      function thFmtVal(v, unit){
+        if(v === null || v === undefined) return "—";
+        if(typeof v === "string") return esc(v);
+        if(unit === "mm") return fmt(v, 3) + " mm (" + fmt(v / 25.4, 4) + " in)";
+        return fmt(v, 4) + " in (" + fmt(v * 25.4, 3) + " mm)";
+      }
+      function thLimTable(unit, rows){
+        var h = '<table class="dtable" aria-label="Thread limits"><tr><th>Diameter</th><th>Min</th><th>Max</th></tr>';
+        rows.forEach(function(r){
+          h += "<tr><td>" + esc(r[0]) + (r[3] ? '<br><span class="small">' + esc(r[3]) + "</span>" : "") + "</td><td>" +
+               thFmtVal(r[1], unit) + "</td><td>" + thFmtVal(r[2], unit) + "</td></tr>";
         });
-        $("thDLabel").textContent = sys === "metric" ? "Major diameter D (mm)" : "Major diameter D (in)";
-        $("thPLabel").textContent = sys === "metric" ? "Pitch (mm)" : "Threads per inch (TPI)";
-        $("thD").setAttribute("placeholder", sys === "metric" ? "e.g. 10" : "e.g. 0.25");
-        $("thP").setAttribute("placeholder", sys === "metric" ? "e.g. 1.5" : "e.g. 20");
+        return h + "</table>";
       }
-      function thApplyPreset(){
-        var sys = $("thSystem").value, sel = $("thPreset");
-        if(sel.value === "") return;
-        var list = sys === "metric" ? TH_METRIC : TH_UNC.concat(TH_UNF);
-        var t = list[parseInt(sel.value, 10)];
-        if(!t) return;
-        $("thD").value = t[1];
-        $("thP").value = t[2];
+      function thFieldTable(rows){
+        var h = '<table class="dtable" aria-label="Thread basic data">';
+        rows.forEach(function(r){ h += "<tr><td>" + esc(r[0]) + "</td><td>" + esc(r[1]) + "</td></tr>"; });
+        return h + "</table>";
       }
-      function runThreads(){
-        var msgEl = $("thMsg"), sys = $("thSystem").value, type = $("thType").value;
-        var D = Number($("thD").value), pv = Number($("thP").value);
-        if(!isFinite(D) || D <= 0 || !isFinite(pv) || pv <= 0){
-          $("thResults").classList.add("hidden");
-          showMsg(msgEl, sys === "metric" ? "Enter a major diameter and pitch (both above zero), or pick a standard size." : "Enter a major diameter and TPI (both above zero), or pick a standard size.");
-          return;
+      function thFillSelect(sel, opts, val){
+        sel.innerHTML = "";
+        opts.forEach(function(o){
+          var op = document.createElement("option");
+          op.value = o[0]; op.textContent = o[1];
+          sel.appendChild(op);
+        });
+        if(val !== undefined) sel.value = val;
+      }
+      /* ---------- custom-size formula path (research file §5.1 / §5.2) ---------- */
+      var TH_PREF = [50,53,56,60,63,67,71,75,80,85,90,95,100,106,112,118,125,132,140,150,160,170,180,190,200,212,224,236,250,265,280,300,315,335,355,375,400,425,450,475,500,530,560,600,630,670,710,750,800];
+      function thPref(x){
+        var best = TH_PREF[0], bd = Infinity;
+        TH_PREF.forEach(function(v){ var d = Math.abs(Math.log(x / v)); if(d < bd){ bd = d; best = v; } });
+        return best;
+      }
+      var TH_TD1 = [[0.5,140],[0.6,170],[0.7,180],[0.75,190],[0.8,200],[1,236],[1.25,265],[1.5,300],[1.75,335],[2,375],[2.5,450],[3,500],[3.5,560],[4,630]];
+      function thTD1(P){
+        var best = TH_TD1[0][1], bd = Infinity;
+        TH_TD1.forEach(function(t){ var d = Math.abs(P - t[0]); if(d < bd){ bd = d; best = t[1]; } });
+        return best;
+      }
+      function thCustomMetric(D, P){
+        var esUm = -(15 + 11 * P), es = esUm / 1000;
+        var pdB = D - 0.649519 * P, d1B = D - 1.082532 * P;
+        var steps = [[1.12,1.8],[1.8,2.8],[2.8,4.5],[4.5,7.1],[7.1,11.2],[11.2,18],[18,28],[28,45],[45,71],[71,112],[112,180],[180,280],[280,450]];
+        var d = D;
+        for(var i = 0; i < steps.length; i++){ if(D > steps[i][0] && D <= steps[i][1]){ d = Math.sqrt(steps[i][0] * steps[i][1]); break; } }
+        var td2raw = 90 * Math.pow(P, 0.4) * Math.pow(d, 0.1);
+        var td2 = thPref(td2raw), TD2 = thPref(1.32 * td2raw);
+        var Td = thPref(180 * Math.pow(P, 2 / 3) - 3.15 / Math.sqrt(P));
+        var TD1 = thTD1(P);
+        return {
+          extMajor:[D + es - Td / 1000, D + es], extPd:[pdB + es - td2 / 1000, pdB + es],
+          extMinorMax: D - 1.082532 * P - Math.abs(es),
+          intMinor:[d1B, d1B + TD1 / 1000], intPd:[pdB, pdB + TD2 / 1000], intMajorMin: D
+        };
+      }
+      function thCustomUN(D, TPI){
+        var p = 1 / TPI, LE = D;
+        var pdB = D - 0.649519 * p;
+        var td2 = 0.0015 * Math.cbrt(D) + 0.0015 * Math.sqrt(LE) + 0.015 * Math.pow(p, 2 / 3);
+        var allow = 0.300 * td2;
+        var TD2 = 0.00195 * Math.cbrt(D) + 0.00195 * Math.sqrt(LE) + 0.0195 * Math.pow(p, 2 / 3);
+        var majTol = 0.0600 * Math.pow(p, 2 / 3);
+        var pdMaxE = pdB - allow;
+        return {
+          extMajor:[D - allow - majTol, D - allow], extPd:[pdMaxE - td2, pdMaxE],
+          extMinorMax: pdMaxE - 0.541266 * p,
+          intMinorMin: D - 1.082532 * p, intPd:[pdB, pdB + TD2], intMajorMin: D
+        };
+      }
+      /* ---------- threads state & cascading dropdowns ---------- */
+      var thState = { view: "mfg" };
+      function thFam(){ return $("thFam").value; }
+      function thIsCustom(){ return $("thSize").value === "custom"; }
+      function thSizesFor(fam){
+        if(fam === "metric") return TH_M.map(function(r, i){ return [String(i), r[0]]; }).concat([["custom", "Custom size…"]]);
+        if(fam === "un") return TH_U.map(function(r, i){ return [String(i), r[0]]; }).concat([["custom", "Custom size…"]]);
+        if(fam === "bsp") return TH_BSP.map(function(r, i){ return [String(i), r.label]; });
+        if(fam === "pipe") return TH_PIPE.map(function(r, i){ return [String(i), r.label]; });
+        if(fam === "whitworth") return TH_WHIT.map(function(r, i){ return [String(i), r.label]; });
+        if(fam === "acme") return TH_ACME.map(function(r, i){ return [String(i), r.label]; });
+        if(fam === "tr") return TH_TR.map(function(r, i){ return [String(i), r.label]; });
+        return TH_BA.map(function(r, i){ return [String(i), r.label]; });
+      }
+      function thFillSizes(){
+        var fam = thFam();
+        thFillSelect($("thSize"), thSizesFor(fam), "0");
+        thFillSideClass();
+      }
+      function thFillSideClass(){
+        var fam = thFam(), custom = thIsCustom();
+        var sideOpts, clsOpts;
+        if(fam === "metric"){ sideOpts = [["ext","External (bolt / screw)"],["int","Internal (nut / tapped hole)"]]; clsOpts = null; }
+        else if(fam === "un"){ sideOpts = [["ext","External (bolt / screw)"],["int","Internal (nut / tapped hole)"]]; clsOpts = null; }
+        else if(fam === "bsp"){ sideOpts = [["int","Internal"],["ext","External"]]; clsOpts = null; }
+        else sideOpts = [["ext","External"],["int","Internal"]];
+        var prevSide = $("thSide").value;
+        thFillSelect($("thSide"), sideOpts, sideOpts.some(function(o){ return o[0] === prevSide; }) ? prevSide : sideOpts[0][0]);
+        var side = $("thSide").value;
+        if(fam === "metric") clsOpts = side === "int" ? [["6H","6H"]] : [["6g","6g"]];
+        else if(fam === "un") clsOpts = side === "int" ? [["2B","2B"]] : [["2A","2A"]];
+        else if(fam === "bsp") clsOpts = side === "int" ? [["int","Internal — one class (ISO 228-1)"]] : [["A","Class A"],["B","Class B"]];
+        else if(fam === "pipe"){ var pr = TH_PIPE[parseInt($("thSize").value, 10) || 0]; clsOpts = [[pr.std, pr.std]]; }
+        else if(fam === "whitworth") clsOpts = [["basic","Basic diameters only"]];
+        else if(fam === "acme"){ var ar = TH_ACME[parseInt($("thSize").value, 10) || 0]; clsOpts = ar.kind === "acme" ? [["2G","2G"]] : [["basic","Basics only"]]; }
+        else if(fam === "tr") clsOpts = side === "int" ? [["7H","7H (fit 7H / 7e)"]] : [["7e","7e (fit 7H / 7e)"]];
+        else if(fam === "ba") clsOpts = [["bs93","BS 93"]];
+        var prevCls = $("thClass").value;
+        thFillSelect($("thClass"), clsOpts, clsOpts.some(function(o){ return o[0] === prevCls; }) ? prevCls : clsOpts[0][0]);
+        var showCustom = custom && (fam === "metric" || fam === "un");
+        $("thCustom").classList.toggle("hidden", !showCustom);
+        if(fam === "metric"){ $("thCDLabel").textContent = "Major diameter D (mm)"; $("thCPLabel").textContent = "Pitch (mm)"; }
+        if(fam === "un"){ $("thCDLabel").textContent = "Major diameter D (in)"; $("thCPLabel").textContent = "Threads per inch (TPI)"; }
+        thRender();
+      }
+
+      /* ---------- manufacturing-limits models ---------- */
+      function thMfgModel(){
+        var fam = thFam(), side = $("thSide").value, cls = $("thClass").value;
+        if(thIsCustom()){
+          var D = Number($("thCD").value), pv = Number($("thCP").value);
+          if(!isFinite(D) || D <= 0 || !isFinite(pv) || pv <= 0) return null;
+          if(fam === "metric"){
+            var c = thCustomMetric(D, pv);
+            var rowsC = side === "int"
+              ? [["Minor diameter D₁", c.intMinor[0], c.intMinor[1]], ["Pitch diameter D₂", c.intPd[0], c.intPd[1]], ["Major diameter D", c.intMajorMin, null, "The standard gives no max for internal major."]]
+              : [["Major diameter d", c.extMajor[0], c.extMajor[1]], ["Pitch diameter d₂", c.extPd[0], c.extPd[1]], ["Minor diameter d₁ (max)", null, c.extMinorMax, "Tabulated flat-root basis; ISO 965-2 does not tabulate external minor limits."]];
+            return { unit:"mm", title:"M" + trimNum(D, 3) + " × " + trimNum(pv, 3) + " — " + (side === "int" ? "internal 6H" : "external 6g") + " · calculated", rows:rowsC, custom:true,
+              meaning:"These limits are calculated from the ISO 965-1 formulas — the printed ISO 965-2 table governs for catalogue sizes, and formula results can sit a few micrometres from the table.",
+              source:"Calculated per ISO 965-1 (fundamental deviations and grade-6 tolerances) for classes 6H / 6g. Labelled calculated — verify against the standard for acceptance." };
+          }
+          var cu = thCustomUN(D, pv);
+          var rowsU = side === "int"
+            ? [["Minor diameter", cu.intMinorMin, "from B1.1 table only"], ["Pitch diameter", cu.intPd[0], cu.intPd[1]], ["Major diameter", cu.intMajorMin, null, "The standard gives no max for internal major."]]
+            : [["Major diameter", cu.extMajor[0], cu.extMajor[1], "Major tolerance ≈ 0.0600·p^(2/3) — approximate."], ["Pitch diameter", cu.extPd[0], cu.extPd[1]], ["Minor diameter (max)", null, cu.extMinorMax, "ASME B1.1 gives no min for the external minor — the root is controlled by form."]];
+          return { unit:"in", title:trimNum(D, 4) + " in — " + pv + " TPI — " + (side === "int" ? "internal 2B" : "external 2A") + " · calculated", rows:rowsU, custom:true,
+            meaning:"These limits are calculated from the ASME B1.1 tolerance formulas (length of engagement taken as the nominal diameter) — the printed B1.1 Table 3 governs for catalogue sizes.",
+            source:"Calculated per ASME B1.1 §5.2 formulas for classes 2A / 2B. Labelled calculated — verify against the standard for acceptance." };
         }
-        hideMsg(msgEl);
-        var P = sys === "metric" ? pv : 1 / pv; /* pitch in the thread's own units */
-        var pitch = D - 0.649519 * P;
-        var minorInt = D - 1.082532 * P;
-        var minorExt = D - 1.226869 * P;
-        var dec = sys === "metric" ? 3 : 4;
-        function row(label, valNative){
-          var mm = sys === "metric" ? valNative : valNative * 25.4;
-          var inch = sys === "metric" ? valNative / 25.4 : valNative;
-          return "<tr><td>" + esc(label) + "</td><td>" + fmt(mm, 3) + "</td><td>" + fmt(inch, 4) + "</td></tr>";
+        var idx = parseInt($("thSize").value, 10) || 0;
+        if(fam === "metric"){
+          var r = TH_M[idx];
+          var rowsM = side === "int"
+            ? [["Minor diameter D₁", r[8], r[9]], ["Pitch diameter D₂", r[10], r[11]], ["Major diameter D", r[12], null, "The standard gives no max for internal major."]]
+            : [["Major diameter d", r[4], r[3]], ["Pitch diameter d₂", r[6], r[5]], ["Minor diameter d₁ (max)", null, r[7], "Minor max (tabulated, flat-root basis) — ISO 965-2 does not tabulate external minor limits."]];
+          return { unit:"mm", title:r[0] + " — " + (side === "int" ? "internal 6H" : "external 6g"), rows:rowsM,
+            meaning:"Machine and inspect the part to these limits — a diameter outside its band is a nonconforming thread, whatever the gauge says.",
+            source:"Limits per ISO 965-2 (classes 6H / 6g). For gauge acceptance, the gauge certificate governs." };
         }
-        var minorLabel = type === "int" ? "Minor diameter D₁ — internal (basic min)" : "Minor diameter d₃ — external root (basic max)";
-        var minorVal = type === "int" ? minorInt : minorExt;
-        $("thResTitle").textContent = "Basic diameters — " + (sys === "metric" ? "M" + trimNum(D, 3) + " × " + trimNum(P, 3) : trimNum(D, 4) + " in × " + pv + " TPI") + (type === "int" ? " · internal" : " · external");
-        $("thTable").innerHTML =
-          "<tr><th>Diameter</th><th>mm</th><th>in</th></tr>" +
-          row("Major diameter " + (type === "int" ? "D" : "d") + " (nominal)", D) +
-          row("Pitch diameter " + (type === "int" ? "D₂" : "d₂"), pitch) +
-          row(minorLabel, minorVal) +
-          row(type === "int" ? "Minor d₃ — mating external root (basic max)" : "Minor D₁ — mating internal (basic min)", type === "int" ? minorExt : minorInt);
-        $("thResults").classList.remove("hidden");
-        flash($("thTable"));
+        if(fam === "un"){
+          var u = TH_U[idx];
+          var rowsN = side === "int"
+            ? [["Minor diameter", u[13], u[14]], ["Pitch diameter", u[11], u[12]], ["Major diameter", u[10], null, "The standard gives no max for internal major."]]
+            : [["Major diameter", u[6], u[5]], ["Pitch diameter", u[8], u[7]], ["Minor diameter (max)", null, u[9], "ASME B1.1 gives no min for the external minor — the root is controlled by form."]];
+          return { unit:"in", title:u[0] + " — " + (side === "int" ? "internal 2B" : "external 2A"), rows:rowsN,
+            meaning:"Machine and inspect the part to these limits — a diameter outside its band is a nonconforming thread, whatever the gauge says.",
+            source:"Limits per ASME B1.1 Table 3 (classes 2A / 2B). For gauge acceptance, the gauge certificate governs." };
+        }
+        if(fam === "bsp"){
+          var b = TH_BSP[idx];
+          var rowsB = side === "int"
+            ? [["Minor diameter", b.intMinor[0], b.intMinor[1]], ["Pitch diameter", b.intPd[0], b.intPd[1]], ["Major diameter", null, null, "Internal major limits are not given in the verified data."]]
+            : [["Major diameter", b.extMajor[0], b.extMajor[1]], ["Pitch diameter", cls === "B" ? b.extPdB[0] : b.extPdA[0], cls === "B" ? b.extPdB[1] : b.extPdA[1]], ["Minor diameter", null, null, "External minor limits are not given in the verified data."]];
+          return { unit:"mm", title:b.label + " — " + (side === "int" ? "internal" : "external Class " + cls), rows:rowsB,
+            meaning:"BSP parallel (G) threads seal on a washer or face, not on the thread — these are the part limits for the thread itself.",
+            source:"Basics and limits per ISO 228-1 (G1/4: 19 TPI, pitch 1.337 mm; pitch diameter 12.301 mm)." };
+        }
+        if(fam === "whitworth"){
+          var w = TH_WHIT[idx];
+          return { unit:"in", title:w.label + " — basic diameters — limit tables not yet included", basics:true,
+            rows:[["Major diameter", w.major, w.major], ["Pitch diameter", w.pd, w.pd], ["Minor diameter", w.minor, w.minor]],
+            meaning:"These are the BS 84 basic (reference) diameters. Class limit tables (Close / Medium / Free) are not yet included, so there is no acceptance band to machine to here.",
+            source:"Basic diameters per BS 84 relations (PD = D − 0.640327·P, minor = D − 1.280654·P). Limit tables not yet included." };
+        }
+        if(fam === "acme"){
+          var a = TH_ACME[idx];
+          if(a.kind === "stub"){
+            return { unit:"in", title:a.label, basics:true,
+              rows:[["Major diameter", a.major, a.major], ["Pitch diameter (basic)", a.pd, a.pd], ["Minor diameter — internal (basic)", a.minorInt, a.minorInt]],
+              meaning:"Stub Acme basics only — the published limit tables are not yet included.",
+              source:"Basics per ASME B1.8 (h = 0.3P; PD = D − 0.3P; internal minor basic = D − 0.6P)." };
+          }
+          var rowsA = side === "int"
+            ? [["Minor diameter", a.intMinor[0], a.intMinor[1]], ["Pitch diameter", a.intPd[0], a.intPd[1]], ["Major diameter", a.intMajor[0], a.intMajor[1]]]
+            : [["Major diameter (basic)", a.extMajorBasic, a.extMajorBasic], ["Pitch diameter", a.extPd[0], a.extPd[1]], ["Minor diameter", null, null, "Only the internal minor basic (0.1875) is printed in the verified data."]];
+          return { unit:"in", title:a.label + " — " + (side === "int" ? "internal" : "external"), rows:rowsA,
+            meaning:"Acme class 2G is the general-purpose clearance fit — the PD band is where the fit is controlled.",
+            source:"Limits per ASME B1.5, class 2G (1/4-16 row as published)." };
+        }
+        if(fam === "tr"){
+          var t = TH_TR[idx];
+          var rowsT = side === "int"
+            ? [["Minor diameter", t.intMinor[0], t.intMinor[1]], ["Pitch diameter", t.intPd[0], t.intPd[1]], ["Major diameter", t.intMajorMin, null, "The standard gives no max for internal major."]]
+            : [["Major diameter", t.extMajor[0], t.extMajor[1]], ["Pitch diameter", t.extPd[0], t.extPd[1]], ["Minor diameter", t.extMinor[0], t.extMinor[1]]];
+          return { unit:"mm", title:t.label + " — " + (side === "int" ? "internal 7H" : "external 7e"), rows:rowsT,
+            meaning:"Trapezoidal threads carry load on the flanks — the pitch diameter band controls the fit of the 7H / 7e pair.",
+            source:"Limits per ISO 2903 (profile ISO 2904), fit 7H / 7e." };
+        }
+        var ba = TH_BA[idx];
+        var rowsBA = side === "int"
+          ? [["Minor diameter", ba.intMinor[0], ba.intMinor[1]], ["Pitch diameter", ba.intPd[0], ba.intPd[1]], ["Major diameter", null, null, "Not given in the verified data."]]
+          : [["Major diameter", ba.extMajor[0], ba.extMajor[1]], ["Pitch diameter", ba.extPd[0], ba.extPd[1]], ["Minor diameter", null, null, "Not given in the verified data."]];
+        return { unit:"mm", title:ba.label + " — " + (side === "int" ? "internal" : "external"), rows:rowsBA,
+          meaning:"BA is a legacy instrument thread — 0 BA is the largest of the series (6.000 mm major, 1.000 mm pitch).",
+          source:"Limits per BS 93 (0 BA row as published)." };
       }
-      $("thSystem").addEventListener("change", function(){ holdScroll(function(){ thFillPresets(); $("thD").value = ""; $("thP").value = ""; $("thResults").classList.add("hidden"); hideMsg($("thMsg")); }); });
-      $("thPreset").addEventListener("change", function(){ holdScroll(function(){ thApplyPreset(); if($("thD").value !== "") runThreads(); }); });
-      $("thType").addEventListener("change", function(){ holdScroll(function(){ if($("thD").value !== "" && $("thP").value !== "") runThreads(); }); });
-      $("thGo").addEventListener("click", function(){ holdScroll(runThreads); });
-      thFillPresets();
+      /* ---------- gauge-verification models ---------- */
+      function thGaugeHTML(){
+        var fam = thFam();
+        var calP = '<p class="small">' + esc(TH_CAL_NOTE) + "</p>";
+        if(thIsCustom()) return "<h3>Gauge verification</h3><p>Gauge data is available for catalogue sizes only.</p>";
+        var idx = parseInt($("thSize").value, 10) || 0;
+        if(fam === "un"){
+          var u = TH_U[idx], X = TH_X[u[0]];
+          function gRow(label, mn, mx, note){
+            return "<tr><td>" + esc(label) + (note ? '<br><span class="small">' + esc(note) + "</span>" : "") + "</td><td>" +
+              (mn === null ? "—" : fmt(mn, 4) + " in") + "</td><td>" + (mx === null ? "—" : fmt(mx, 4) + " in") + "</td></tr>";
+          }
+          var h = "<h3>Gauge pitch diameters — " + esc(u[0]) + " (ASME B1.2)</h3>";
+          h += '<table class="dtable" aria-label="Gauge pitch diameters"><tr><th>Gauge</th><th>Min</th><th>Max</th></tr>';
+          if(X){
+            h += gRow("GO thread plug PD (internal 2B)", u[11], u[11] + X, "X tolerance " + fmt(X, 4) + " in");
+            h += gRow("NOT GO thread plug PD (internal 2B)", u[12] - X, u[12], "X tolerance " + fmt(X, 4) + " in");
+            h += gRow("GO thread ring PD (external 2A)", u[7] - X, u[7], "X tolerance " + fmt(X, 4) + " in");
+            h += gRow("NOT GO (LO) thread ring PD (external 2A)", u[8], u[8] + X, "X tolerance " + fmt(X, 4) + " in");
+          } else {
+            h += gRow("GO thread plug PD (internal 2B) — nominal", u[11], u[11], "Sits at the product PD min");
+            h += gRow("NOT GO thread plug PD (internal 2B) — nominal", u[12], u[12], "Sits at the product PD max");
+            h += gRow("GO thread ring PD (external 2A) — nominal", u[7], u[7], "Sits at the product PD max");
+            h += gRow("NOT GO (LO) thread ring PD (external 2A) — nominal", u[8], u[8], "Sits at the product PD min");
+          }
+          h += gRow("GO setting plug PD — nominal", u[7], u[7], "W tolerance applied minus");
+          h += gRow("LO setting plug PD — nominal", u[8], u[8], "W tolerance applied plus");
+          h += gRow("Plain plug for minor dia — GO / NOGO", u[13], u[14], "GO = internal minor min; NOGO = internal minor max");
+          h += gRow("Plain ring for major dia — GO / NOGO", u[6], u[5], "GO = external major max; NOGO = external major min");
+          h += "</table>";
+          if(!X) h += '<p class="small">Gauge tolerance (X) for this size is tabulated in ASME B1.2 Table 6 — not yet included; nominal values and wear limits shown.</p>';
+          h += '<p class="explain"><strong>Wear / retirement:</strong> a GO plug worn below the product PD min (' + fmt(u[11], 4) + ' in), or a NOT GO plug worn above the product PD max (' + fmt(u[12], 4) + ' in), is withdrawn. Ring gauges are verified on their setting plugs.</p>';
+          h += '<p class="explain"><strong>X vs W:</strong> X tolerance (ASME B1.2 Table 6) is the tolerance for working gauges — the plugs and rings that contact the product. W tolerance (Table 7) is smaller and is the tolerance for setting gauges (setting plugs and master rings) — the highest commercial grade. The shop shorthand “W = wear” is wrong: wear is handled by the retirement lines above, not by the W grade.</p>';
+          h += calP + '<p class="small">' + esc(TH_MEAS_NOTE) + "</p>";
+          return h;
+        }
+        if(fam === "metric"){
+          var r = TH_M[idx];
+          var h2 = "<h3>Gauge pitch diameters — " + esc(r[0]) + " (ISO 1502)</h3>";
+          h2 += '<table class="dtable" aria-label="Gauge pitch diameters"><tr><th>Gauge</th><th>Nominal PD</th></tr>';
+          h2 += "<tr><td>GO thread plug (internal 6H)</td><td>" + fmt(r[10], 3) + " mm</td></tr>";
+          h2 += "<tr><td>NOGO thread plug (internal 6H)</td><td>" + fmt(r[11], 3) + " mm</td></tr>";
+          h2 += "<tr><td>GO thread ring (external 6g)</td><td>" + fmt(r[5], 3) + " mm</td></tr>";
+          h2 += "<tr><td>NOGO thread ring (external 6g)</td><td>" + fmt(r[6], 3) + " mm</td></tr>";
+          h2 += "</table>";
+          h2 += '<p class="explain"><strong>How ISO 1502 works:</strong> ISO 1502 publishes no per-size gauge tables — gauge limits are calculated from tolerance zones (T_PL for plugs, T_R for rings) placed relative to the workpiece limits (displacements Z_PL / Z_R). GO gauges carry a permissible wear W_GO — a GO gauge may wear slightly beyond the product limit, and the wear limit is the retirement line; NOT GO gauges carry a smaller wear W_NGO, and check plugs take an extra displacement m. Ring gauges are verified with GO / NOGO check plugs and wear check plugs. A NOGO gauge may enter ≤ 2 turns.</p>';
+          h2 += '<p class="small">Micrometre-level ISO 1502 gauge limits are not yet included.</p>';
+          h2 += calP + '<p class="small">' + esc(TH_MEAS_NOTE) + "</p>";
+          return h2;
+        }
+        if(fam === "pipe"){
+          var pr = TH_PIPE[idx];
+          return "<h3>Gauge verification — " + esc(pr.label) + " (" + esc(pr.std) + ")</h3>" +
+            '<p class="explain">' + esc(pr.gauge) + "</p>" + calP;
+        }
+        return "<h3>Gauge verification</h3><p>Gauge data not included for this family</p>" + calP;
+      }
+      /* ---------- render ---------- */
+      function thRender(){
+        var fam = thFam();
+        var mfgEl = $("thMfg"), gaugeEl = $("thGauge");
+        if(fam === "pipe"){
+          var pr = TH_PIPE[parseInt($("thSize").value, 10) || 0];
+          mfgEl.innerHTML = "<h3>" + esc(pr.label) + " — basic dimensions at the gauge plane (" + esc(pr.std) + ")</h3>" +
+            thFieldTable(pr.fields) +
+            (pr.note ? '<p class="small">' + esc(pr.note) + "</p>" : "") +
+            '<div class="flag amber"><strong>Tapered pipe threads:</strong> ' + esc(TH_PIPE_CAVEAT) + "</div>";
+        } else {
+          var m = thMfgModel();
+          if(!m){
+            mfgEl.innerHTML = '<p class="small">Enter a major diameter and ' + (fam === "metric" ? "pitch" : "TPI") + " above zero to calculate this custom size.</p>";
+          } else {
+            mfgEl.innerHTML = "<h3>" + esc(m.title) + "</h3>" +
+              (m.custom ? '<div class="flag amber"><strong>Calculated</strong> — verify against the standard for acceptance.</div>' : "") +
+              thLimTable(m.unit, m.rows) +
+              '<p class="explain"><strong>What this means:</strong> ' + esc(m.meaning) + "</p>" +
+              '<p class="cite">' + esc(m.source) + "</p>";
+          }
+        }
+        gaugeEl.innerHTML = thGaugeHTML();
+        var isMfg = thState.view === "mfg";
+        mfgEl.classList.toggle("hidden", !isMfg);
+        gaugeEl.classList.toggle("hidden", isMfg);
+        $("thSegMfg").setAttribute("aria-pressed", isMfg ? "true" : "false");
+        $("thSegGauge").setAttribute("aria-pressed", isMfg ? "false" : "true");
+      }
+      $("thFam").addEventListener("change", function(){ holdScroll(function(){ thFillSizes(); }); });
+      $("thSize").addEventListener("change", function(){ holdScroll(function(){ thFillSideClass(); }); });
+      $("thSide").addEventListener("change", function(){ holdScroll(function(){ thFillSideClass(); }); });
+      $("thClass").addEventListener("change", function(){ holdScroll(function(){ thRender(); }); });
+      $("thCD").addEventListener("input", function(){ holdScroll(function(){ thRender(); }); });
+      $("thCP").addEventListener("input", function(){ holdScroll(function(){ thRender(); }); });
+      $("thSegMfg").addEventListener("click", function(){ holdScroll(function(){ thState.view = "mfg"; thRender(); }); });
+      $("thSegGauge").addEventListener("click", function(){ holdScroll(function(){ thState.view = "gauge"; thRender(); }); });
+      thFillSizes();
 
       /* ================= TOOL 8a : TOLERANCE STACK-UP ================= */
       var suCount = 0;
@@ -2490,7 +2835,7 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjEwIjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjExIjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
