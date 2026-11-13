@@ -178,10 +178,10 @@
 
           <label class="flabel" for="spcData">Measurements — paste or type, any mix of spaces, commas, lines</label>
           <textarea id="spcData" placeholder="4.5021, 4.5030, 4.5018 …" spellcheck="false"></textarea>
-          <p class="small" style="margin:6px 0 0">Tip: you can paste a column straight from Excel or Google Sheets.</p>
+          <p class="small" style="margin:6px 0 0">Tip: you can paste a column straight from Excel or Google Sheets, or import a spreadsheet file — CSV or Excel (.xlsx).</p>
           <div class="btnrow">
-            <button class="ghost" id="spcImportBtn" type="button">Import spreadsheet (CSV)</button>
-            <input type="file" id="spcFile" accept=".csv,.txt,text/csv,text/plain" class="hidden" aria-label="Import spreadsheet file for SPC and Capability" />
+            <button class="ghost" id="spcImportBtn" type="button">Import spreadsheet (CSV or Excel)</button>
+            <input type="file" id="spcFile" accept="*/*" class="hidden" aria-label="Import spreadsheet file for SPC and Capability" />
           </div>
           <div class="msg hidden" id="spcImportInfo" role="status"></div>
           <div id="spcPickerWrap" class="hidden" style="margin-top:10px">
@@ -245,10 +245,10 @@
           <h2>Data Check — histogram &amp; normality</h2>
           <p class="guru">Montgomery: check the distribution before you trust the index.</p>
           <p class="small">Uses the same measurements you entered in <strong>SPC &amp; Capability</strong> — one data entry drives both tools. Spec lines are drawn when LSL/USL are set there.</p>
-          <p class="small">Tip: you can paste a column straight from Excel or Google Sheets.</p>
+          <p class="small">Tip: you can paste a column straight from Excel or Google Sheets, or import a spreadsheet file — CSV or Excel (.xlsx).</p>
           <div class="btnrow">
-            <button class="ghost" id="checkImportBtn" type="button">Import spreadsheet (CSV)</button>
-            <input type="file" id="checkFile" accept=".csv,.txt,text/csv,text/plain" class="hidden" aria-label="Import spreadsheet file for Data Check" />
+            <button class="ghost" id="checkImportBtn" type="button">Import spreadsheet (CSV or Excel)</button>
+            <input type="file" id="checkFile" accept="*/*" class="hidden" aria-label="Import spreadsheet file for Data Check" />
           </div>
           <div class="msg hidden" id="checkImportInfo" role="status"></div>
           <div id="checkPickerWrap" class="hidden" style="margin-top:10px">
@@ -1164,21 +1164,24 @@
         els.wrap.classList.add("hidden");
         holdScroll(function(){ if(target === "check") refreshCheck(); else analyseSPC(); });
       }
-      function handleImportFile(target, file){
-        if(!file) return;
+      function showImportInfo(els, text, ok){
+        els.info.textContent = text;
+        els.info.classList.remove("hidden");
+        els.info.classList.toggle("ok", !!ok);
+      }
+      /* Feed a parsed column analysis (from CSV text or an Excel grid) into
+         the shared pipeline: one candidate auto-loads, several show the
+         column picker, none shows the no-data message. */
+      function presentParsedImport(target, parsed, filename){
         var els = importEls(target);
-        var reader = new FileReader();
-        reader.onload = function(){
-          var parsed = null;
-          try { parsed = parseSpreadsheetText(String(reader.result || "")); } catch(e) { parsed = null; }
+        holdScroll(function(){
           if(!parsed || !parsed.candidates.length){
-            els.info.textContent = "No numeric data found in that file.";
-            els.info.classList.remove("hidden"); els.info.classList.remove("ok");
+            showImportInfo(els, "No numeric data found in that file.", false);
             els.wrap.classList.add("hidden");
             return;
           }
-          if(parsed.candidates.length === 1){ loadImportedValues(target, parsed.candidates[0].vals, file.name); return; }
-          pendingImports[target] = { filename: file.name, candidates: parsed.candidates };
+          if(parsed.candidates.length === 1){ loadImportedValues(target, parsed.candidates[0].vals, filename); return; }
+          pendingImports[target] = { filename: filename, candidates: parsed.candidates };
           els.sel.innerHTML = "";
           var ph = document.createElement("option");
           ph.value = ""; ph.textContent = "Choose a column…";
@@ -1190,8 +1193,217 @@
             els.sel.appendChild(opt);
           });
           els.wrap.classList.remove("hidden");
-          els.info.textContent = "That file has more than one numeric column — pick the one to analyse.";
-          els.info.classList.remove("hidden"); els.info.classList.remove("ok");
+          showImportInfo(els, "That file has more than one numeric column — pick the one to analyse.", false);
+        });
+      }
+      var IMPORT_CANT_READ = "That file type can't be read — in Numbers/Excel use Share → Export as CSV (or .xlsx for Excel) and pick that file.";
+      var IMPORT_NO_EXCEL = "This browser can't open Excel files — export the sheet as CSV and import that instead.";
+
+      /* ---------- minimal .xlsx reader (plain JS, on-device, no libraries) ----------
+         An .xlsx is a ZIP of XML parts. The ZIP is parsed by hand from its
+         End-of-Central-Directory record; deflated entries are inflated with
+         DecompressionStream('deflate-raw'). Only xl/sharedStrings.xml and
+         the first worksheet are read, and the result is the same row/column
+         grid of cell strings the CSV path produces. */
+      function xmlDecode(s){
+        return String(s).replace(/&#x([0-9a-fA-F]+);/g, function(m, h){ return String.fromCharCode(parseInt(h, 16)); })
+                        .replace(/&#(\d+);/g, function(m, d){ return String.fromCharCode(parseInt(d, 10)); })
+                        .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+                        .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+      }
+      function zipEntries(buf){
+        var bytes = new Uint8Array(buf), view = new DataView(buf);
+        var eocd = -1;
+        var scanFrom = Math.max(0, bytes.length - 22 - 65536);
+        for(var i = bytes.length - 22; i >= scanFrom; i--){
+          if(view.getUint32(i, true) === 0x06054b50){ eocd = i; break; }
+        }
+        if(eocd < 0) return null;
+        var count = view.getUint16(eocd + 10, true);
+        var pos = view.getUint32(eocd + 16, true);
+        var dec = new TextDecoder("utf-8");
+        var map = {};
+        for(var n = 0; n < count; n++){
+          if(pos + 46 > bytes.length || view.getUint32(pos, true) !== 0x02014b50) return null;
+          var nameLen = view.getUint16(pos + 28, true);
+          var extraLen = view.getUint16(pos + 30, true);
+          var commentLen = view.getUint16(pos + 32, true);
+          var name = dec.decode(bytes.subarray(pos + 46, pos + 46 + nameLen));
+          map[name] = {
+            method: view.getUint16(pos + 10, true),
+            size: view.getUint32(pos + 20, true),
+            offset: view.getUint32(pos + 42, true)
+          };
+          pos += 46 + nameLen + extraLen + commentLen;
+        }
+        return map;
+      }
+      function zipEntryBytes(buf, entry){
+        var view = new DataView(buf);
+        if(entry.offset + 30 > buf.byteLength || view.getUint32(entry.offset, true) !== 0x04034b50)
+          return Promise.reject(new Error("bad local header"));
+        var nameLen = view.getUint16(entry.offset + 26, true);
+        var extraLen = view.getUint16(entry.offset + 28, true);
+        var start = entry.offset + 30 + nameLen + extraLen;
+        var comp = new Uint8Array(buf, start, entry.size);
+        if(entry.method === 0) return Promise.resolve(comp.slice().buffer);
+        if(entry.method === 8){
+          if(typeof DecompressionStream === "undefined")
+            return Promise.reject(new Error("no DecompressionStream"));
+          var stream = new Blob([comp]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+          return new Response(stream).arrayBuffer();
+        }
+        return Promise.reject(new Error("unsupported compression method " + entry.method));
+      }
+      function zipEntryText(buf, entries, name){
+        if(!entries[name]) return Promise.resolve(null);
+        return zipEntryBytes(buf, entries[name]).then(function(ab){
+          return new TextDecoder("utf-8").decode(ab);
+        });
+      }
+      function parseSharedStrings(xml){
+        var out = [];
+        if(!xml) return out;
+        var siRe = /<si\b[^>]*>([\s\S]*?)<\/si>/g, m;
+        while((m = siRe.exec(xml)) !== null){
+          var text = "", tRe = /<t\b[^>]*>([\s\S]*?)<\/t>/g, tm;
+          while((tm = tRe.exec(m[1])) !== null) text += xmlDecode(tm[1]);
+          out.push(text);
+        }
+        return out;
+      }
+      function sheetPathFromWorkbook(workbookXml, relsXml, entries){
+        try {
+          if(workbookXml && relsXml){
+            var sm = /<sheet\b[^>]*\br:id="([^"]+)"/.exec(workbookXml);
+            if(sm){
+              var rels = {}, rRe = /<Relationship\b[^>]*>/g, rm;
+              while((rm = rRe.exec(relsXml)) !== null){
+                var idM = /\bId="([^"]+)"/.exec(rm[0]);
+                var tgM = /\bTarget="([^"]+)"/.exec(rm[0]);
+                if(idM && tgM) rels[idM[1]] = tgM[1];
+              }
+              var target = rels[sm[1]];
+              if(target){
+                target = target.replace(/^\//, "");
+                var path = target.indexOf("xl/") === 0 ? target : "xl/" + target.replace(/^\.\//, "");
+                if(entries[path]) return path;
+              }
+            }
+          }
+        } catch(e) { /* fall through to the default sheet name */ }
+        if(entries["xl/worksheets/sheet1.xml"]) return "xl/worksheets/sheet1.xml";
+        for(var name in entries){
+          if(/^xl\/worksheets\/[^/]+\.xml$/.test(name)) return name;
+        }
+        return null;
+      }
+      function colIndexFromRef(ref){
+        var m = /^([A-Za-z]+)/.exec(ref || "");
+        if(!m) return -1;
+        var idx = 0, letters = m[1].toUpperCase();
+        for(var i = 0; i < letters.length; i++) idx = idx * 26 + (letters.charCodeAt(i) - 64);
+        return idx - 1;
+      }
+      function parseWorksheetGrid(xml, shared){
+        var grid = [];
+        var rowRe = /<row\b[^>]*>([\s\S]*?)<\/row>/g, rm;
+        while((rm = rowRe.exec(xml)) !== null){
+          var cells = [], maxCol = -1;
+          var cRe = /<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g, cm;
+          var nextCol = 0;
+          while((cm = cRe.exec(rm[1])) !== null){
+            var attrs = cm[1] || "", inner = cm[2] || "";
+            var rM = /\br="([^"]+)"/.exec(attrs);
+            var col = rM ? colIndexFromRef(rM[1]) : nextCol;
+            if(col < 0) col = nextCol;
+            nextCol = col + 1;
+            var tM = /\bt="([^"]+)"/.exec(attrs);
+            var type = tM ? tM[1] : "";
+            var value = "";
+            if(type === "inlineStr"){
+              var isM = /<is\b[^>]*>([\s\S]*?)<\/is>/.exec(inner);
+              var isText = "", tRe2 = /<t\b[^>]*>([\s\S]*?)<\/t>/g, tm2;
+              var isBody = isM ? isM[1] : "";
+              while((tm2 = tRe2.exec(isBody)) !== null) isText += xmlDecode(tm2[1]);
+              value = isText;
+            } else {
+              /* A cell with a formula (<f>) uses its cached <v>, which is
+                 exactly what this reads. */
+              var vM = /<v\b[^>]*>([\s\S]*?)<\/v>/.exec(inner);
+              var raw = vM ? xmlDecode(vM[1]) : "";
+              if(type === "s"){
+                var si = parseInt(raw, 10);
+                value = (isFinite(si) && shared[si] !== undefined) ? shared[si] : "";
+              } else value = raw;
+            }
+            cells[col] = value;
+            if(col > maxCol) maxCol = col;
+          }
+          var rowArr = [];
+          for(var j = 0; j <= maxCol; j++) rowArr.push(cells[j] === undefined ? "" : cells[j]);
+          grid.push(rowArr);
+        }
+        return grid;
+      }
+      /* Resolves to { grid } on success, { error:"unsupported" } when this
+         browser / file can't be inflated or parsed as a ZIP, or
+         { error:"notxlsx" } when the ZIP holds no xl/ worksheet entries
+         (e.g. a .numbers package renamed .xlsx). */
+      function readXlsxGrid(buf){
+        var entries = null;
+        try { entries = zipEntries(buf); } catch(e) { entries = null; }
+        if(!entries) return Promise.resolve({ error: "unsupported" });
+        var hasXl = false;
+        for(var name in entries){ if(name.indexOf("xl/") === 0){ hasXl = true; break; } }
+        if(!hasXl) return Promise.resolve({ error: "notxlsx" });
+        return zipEntryText(buf, entries, "xl/workbook.xml").then(function(workbookXml){
+          return zipEntryText(buf, entries, "xl/_rels/workbook.xml.rels").then(function(relsXml){
+            var sheetPath = sheetPathFromWorkbook(workbookXml, relsXml, entries);
+            if(!sheetPath) return { error: "notxlsx" };
+            return zipEntryText(buf, entries, "xl/sharedStrings.xml").then(function(sharedXml){
+              return zipEntryText(buf, entries, sheetPath).then(function(sheetXml){
+                if(sheetXml === null) return { error: "notxlsx" };
+                return { grid: parseWorksheetGrid(sheetXml, parseSharedStrings(sharedXml)) };
+              });
+            });
+          });
+        }).catch(function(){ return { error: "unsupported" }; });
+      }
+      function handleImportFile(target, file){
+        if(!file) return;
+        var els = importEls(target);
+        var name = String(file.name || "").toLowerCase();
+        var type = String(file.type || "").toLowerCase();
+        var isXlsx = /\.xlsx$/.test(name) || type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        var isText = /\.(csv|txt|tsv)$/.test(name) || type === "text/csv" || type === "text/plain" ||
+                     type === "text/tab-separated-values" || type.indexOf("text/") === 0;
+        if(isXlsx){
+          var xreader = new FileReader();
+          xreader.onload = function(){
+            readXlsxGrid(xreader.result).then(function(res){
+              if(res.error === "notxlsx"){
+                holdScroll(function(){ showImportInfo(els, IMPORT_CANT_READ, false); els.wrap.classList.add("hidden"); });
+              } else if(res.error){
+                holdScroll(function(){ showImportInfo(els, IMPORT_NO_EXCEL, false); els.wrap.classList.add("hidden"); });
+              } else {
+                presentParsedImport(target, analyseColumns(res.grid), file.name);
+              }
+            });
+          };
+          xreader.onerror = function(){ showImportInfo(els, IMPORT_NO_EXCEL, false); };
+          xreader.readAsArrayBuffer(file);
+          return;
+        }
+        if(!isText){
+          holdScroll(function(){ showImportInfo(els, IMPORT_CANT_READ, false); els.wrap.classList.add("hidden"); });
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function(){
+          var parsed = null;
+          try { parsed = parseSpreadsheetText(String(reader.result || "")); } catch(e) { parsed = null; }
+          presentParsedImport(target, parsed, file.name);
         };
         reader.onerror = function(){
           els.info.textContent = "That file could not be read.";
@@ -2045,7 +2257,7 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjgiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjkiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
