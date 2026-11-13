@@ -27,3 +27,5 @@ Methods: AIAG SPC & MSA reference manuals · ANSI/ASQ Z1.4. Published 2026-11-09
 
 - Threads tab rebuilt as a catalogue: dropdowns (family, size, internal/external, class) with manufacturing limits (major/pitch/minor min-max) for Metric ISO 6H/6g and UN 2B/2A from published tables; Gauge verification view (ASME B1.2 values for UN; ISO 1502 nominals for metric); BSP G, Acme, Tr, BA included to verified depth; pipe threads show gauge-plane data with standoff note — no diameter limits.
 - AI analysis button on SPC, Data Check and Gage R&R tabs: packages computed results into a copyable prompt for Gemini or Muse; nothing is sent by the app.
+## Update — 2026-11-13 (v12)
+- SPC tab now detects trend-of-6 (six points steadily rising or falling, Western Electric / Nelson Rule 3) alongside the existing run-of-8: amber Trend signal flag, updated no-signals wording, and a trend line in the AI analysis package.
