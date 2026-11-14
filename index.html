@@ -2,34 +2,126 @@
 <html lang="en">
   <head>
     <!-- Built by Harsh Patel, with Satureday (Muse) -->
+    <!--
+    ======================================================================
+    SPC TOOLS · FILE MAP
+    Code-organization pass on the v18 live build, 2026-11-14. This pass
+    added comments only. No executable code, data, ID, class or
+    user-visible text was changed.
+    v19 (2026-11-14): dark "instrument" redesign. Presentation only —
+    theme, fonts, motion, chart layers, SPC headline, status ring and
+    Sightline Mode (see SECTION · v19 PRESENTATION). Data, maths, status
+    rules and the open-empty / EXAMPLE behaviour are unchanged.
+    ======================================================================
+    One self-contained file. The <style> block holds the theme and layout,
+    the <body> holds the markup for every tool, and one classic <script>
+    wires everything. It uses no libraries and no storage; its only network request is
+    the IBM Plex webfont stylesheet (system fonts are the fallback).
+    Every calculation runs on the device.
+
+    CLUSTER NAVIGATION
+      There are two tab rows. nav.clusters has five group buttons
+      (data-cluster = process | analyse | measure | sampling | reference).
+      nav.tabs has one button per tool (data-tab plus data-cluster).
+      showTool(tab) shows only the active cluster's tool buttons, hides the
+      second row for clusters with one tool, toggles section.tool.active,
+      and holds the scroll position so the page never moves. clusterLast
+      remembers the last tool used in each cluster.
+
+    TOOL REGISTRY
+      The registry is the markup itself. There is no JS table.
+      tool      section          cluster     script SECTION
+      spc       #tool-spc        process     SPC
+      check     #tool-check      analyse     DATA CHECK
+      pareto    #tool-pareto     analyse     PARETO
+      grr       #tool-grr        measure     GAGE R&R
+      tp        #tool-tp         measure     TRUE POSITION
+      aql       #tool-aql        sampling    AQL MODEL
+      threads   #tool-threads    reference   THREADS
+      convert   #tool-convert    reference   CONVERT (with hardness)
+      stack     #tool-stack      reference   STACK-UP
+      sigma     #tool-sigma      reference   SIGMA / PPM
+      A tool is a #tabbtn-<id> button (data-tab, data-cluster) plus a
+      section#tool-<id>. showTool() finds both by that naming convention.
+
+    COMPUTE / RENDER SPLIT
+      Where the maths is substantial it sits in a pure function that takes
+      values, returns numbers or objects, and never touches the DOM:
+      computeSPC, andersonDarling, aqlCell, hardConvert, thCustomMetric,
+      thCustomUN, and the sheet parsers and assessments. Render/event
+      functions (analyseSPC, refreshCheck, calcGRR, buildPareto, thRender,
+      runTP and others) read the inputs, call the maths, and write HTML
+      through statTile() and esc(). calcGRR is the one exception: it
+      computes its ANOVA inline before rendering.
+
+    SHEET INPUT (Map & Preview)
+      SPC, Data Check, Gage R&R and Pareto accept a file or a pasted table.
+      It is parsed into a grid of raw strings, mapped onto the tool, and
+      previewed with read / used / rejected counts. It loads only after an
+      explicit accept. Hard stops refuse the load (see SECTION SHEET INPUT).
+
+    EXAMPLE / DEMO SYSTEM
+      Every data box opens empty. The Example buttons load fixed demo data
+      and set demoFlags.data or demoFlags.grr. A set flag shows the EXAMPLE
+      DATA banners, draws a watermark INTO the chart SVGs, and heads the CSV
+      exports and interpretation summaries with EXAMPLE DATA. The flag
+      clears as soon as the user types, pastes, imports or clears. Stack-up
+      has its own banner (suDemoBanner).
+
+    DATA
+      Each reference table in the script sits between BEGIN DATA and
+      END DATA markers that state its provenance. Data changes go in only
+      as verified data changes, never as hand-tuned numbers.
+      selftest/run.js checks the sha256 of every fenced table.
+
+    SCRIPT SECTIONS (search for "SECTION ·")
+      CORE HELPERS, NAV / EVENTS, SPC, DATA CHECK, SHEET INPUT,
+      EXAMPLE / DEMO STATE, GAGE R&R, AQL MODEL (data), PARETO,
+      CONVERT (data), SIGMA / PPM, THREADS (data), STACK-UP, TRUE POSITION,
+      INTERPRETATION SUMMARIES, NAV / EVENTS (focus guard), PWA.
+    ======================================================================
+    -->
     <meta charset="utf-8" />
     <meta name="author" content="Harsh Patel" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
-    <meta name="color-scheme" content="light" />
-    <meta name="theme-color" content="#d8dfe6" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0a1118" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="SPC Tools" />
-    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjoiI2Q4ZGZlNiIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8sIGluY2gtZnJhY3Rpb24gYW5kIGhhcmRuZXNzIGNvbnZlcnRlcnMsIHNpZ21hLVBQTSBjb252ZXJzaW9uLCB0aHJlYWQgYmFzaWMgZGlhbWV0ZXJzLCB0b2xlcmFuY2Ugc3RhY2stdXAgYW5kIHRydWUgcG9zaXRpb24uIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImljb25zIjpbeyJwdXJwb3NlIjoiYW55Iiwic2l6ZXMiOiIxOTJ4MTkyIiwic3JjIjoiaWNvbi0xOTIucG5nIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsicHVycG9zZSI6ImFueSIsInNpemVzIjoiNTEyeDUxMiIsInNyYyI6Imljb24tNTEyLnBuZyIsInR5cGUiOiJpbWFnZS9wbmcifV0sIm5hbWUiOiJTUEMgVG9vbHMiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0Iiwic2NvcGUiOiIuLi8iLCJzaG9ydF9uYW1lIjoiU1BDIFRvb2xzIiwic3RhcnRfdXJsIjoiLi4vaW5kZXguaHRtbCIsInRoZW1lX2NvbG9yIjoiI2Q4ZGZlNiJ9" />
+    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBhMTExOCIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8sIGluY2gtZnJhY3Rpb24gYW5kIGhhcmRuZXNzIGNvbnZlcnRlcnMsIHNpZ21hLVBQTSBjb252ZXJzaW9uLCB0aHJlYWQgYmFzaWMgZGlhbWV0ZXJzLCB0b2xlcmFuY2Ugc3RhY2stdXAgYW5kIHRydWUgcG9zaXRpb24uIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImljb25zIjpbeyJwdXJwb3NlIjoiYW55Iiwic2l6ZXMiOiIxOTJ4MTkyIiwic3JjIjoiaWNvbi0xOTIucG5nIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsicHVycG9zZSI6ImFueSIsInNpemVzIjoiNTEyeDUxMiIsInNyYyI6Imljb24tNTEyLnBuZyIsInR5cGUiOiJpbWFnZS9wbmcifV0sIm5hbWUiOiJTUEMgVG9vbHMiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0Iiwic2NvcGUiOiIuLi8iLCJzaG9ydF9uYW1lIjoiU1BDIFRvb2xzIiwic3RhcnRfdXJsIjoiLi4vaW5kZXguaHRtbCIsInRoZW1lX2NvbG9yIjoiIzBhMTExOCJ9" />
     <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
     <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <title>SPC Tools</title>
     <style>
+      /* ===== v19 · dark "instrument" theme =====
+         Palette (SPEC §1): bg #0a1118 · panel #101b25 · raised #172634 ·
+         grid #1f3242 · text #e2ecf2 · muted #8aa3b5 · accent #2ec4d6 ·
+         centre #8aa3b5 · pass #3ddc97 · warn #ffb020 · fail #ff4d5e.
+         The old variable NAMES are kept (markup uses var(--cyan) etc. inline),
+         only their values change. Layout rules are unchanged from v18. */
       :root{
-        --bg:#d8dfe6; --bg2:#f4f7f9; --panel:#ffffff; --panel2:#eef3f6;
-        --line:#b9c9d6; --line-soft:#d3dee7;
-        --ink:#132635; --ink-dim:#3f5d73; --ink-faint:#6b8699;
-        --cyan:#0b7f95; --cyan-dim:#0b7f95;
-        --amber:#9a6f00; --red:#c93a3a; --green:#147a4f;
-        --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-        --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+        color-scheme:dark;
+        --bg:#0a1118; --bg2:#0a1118; --panel:#101b25; --panel2:#172634;
+        --line:#4a6a82; --line-soft:#1f3242;
+        --ink:#e2ecf2; --ink-dim:#8aa3b5; --ink-faint:#7590a3;
+        --cyan:#2ec4d6; --cyan-dim:#2ec4d6; --on-accent:#06222a;
+        --amber:#ffb020; --red:#ff4d5e; --green:#3ddc97;
+        --centre:#8aa3b5; --grid:#1f3242; --raised:#172634;
+        --amber-ink:#ffd27a; --red-ink:#ffb3bb; --green-ink:#9cf0c9;
+        --mono:"IBM Plex Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+        --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+        --ease:cubic-bezier(.2,.7,.2,1);
       }
       *{box-sizing:border-box}
-      html{-webkit-text-size-adjust:100%; scroll-padding-top:14px; scroll-padding-bottom:18px}
+      html{-webkit-text-size-adjust:100%; scroll-padding-top:14px; scroll-padding-bottom:18px; background:var(--bg)}
       body{
         margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
-        background-image:radial-gradient(rgba(19,38,53,.08) 1px, transparent 1.15px);
+        background-image:radial-gradient(rgba(138,163,181,.07) 1px, transparent 1.15px);
         background-size:22px 22px;
       }
       .wrap{max-width:920px; margin:0 auto; padding:18px 14px 36px}
@@ -37,52 +129,58 @@
       /* Selects open native pickers — no keyboard to clear — so they must
          never demand keyboard clearance from native focus scrolling. */
       select{scroll-margin-top:18px; scroll-margin-bottom:18px}
-      header.top{padding:6px 2px 14px; border-bottom:1px solid var(--line)}
-      header.top h1{margin:0; font-size:26px; letter-spacing:.04em; font-weight:800}
+      header.top{padding:6px 2px 14px; border-bottom:1px solid var(--line-soft)}
+      header.top h1{margin:0; font-size:26px; letter-spacing:.04em; font-weight:600}
       header.top h1 .accent{color:var(--cyan)}
       header.top p{margin:6px 0 0; color:var(--ink-dim); font-size:13.5px; line-height:1.5; max-width:60ch}
-      header.top p strong{color:var(--ink)}
+      header.top p strong{color:var(--ink); font-weight:600}
+      h1, h2, h3, h4{font-weight:600}
+      strong, b{font-weight:600}
       /* Tabs */
       nav.tabs{display:flex; gap:6px; flex-wrap:wrap; margin:16px 0 14px}
       nav.tabs button{
         flex:1 1 auto; min-height:48px; padding:10px 8px; cursor:pointer;
         background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
-        border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:700; letter-spacing:.02em;
+        border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:600; letter-spacing:.02em;
       }
-      nav.tabs button[aria-selected="true"]{background:var(--cyan); color:#ffffff; border-color:var(--cyan-dim); box-shadow:0 2px 8px rgba(11,127,149,.35)}
+      nav.tabs button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(46,196,214,.28)}
       nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       section.tool{display:none}
       section.tool.active{display:block; min-height:calc(100dvh - 230px)}
-      .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px; box-shadow:0 1px 4px rgba(19,38,53,.08), 0 8px 24px rgba(19,38,53,.05)}
+      .card{background:var(--panel); border:1px solid var(--line-soft); border-radius:10px; padding:16px; margin-bottom:14px; box-shadow:0 1px 0 rgba(255,255,255,.02) inset, 0 10px 28px rgba(0,0,0,.28)}
       .card h2{margin:0 0 4px; font-size:19px; letter-spacing:.02em}
       .card h3{margin:18px 0 8px; font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim)}
       .card h3:first-of-type{margin-top:6px}
       .guru{margin:0 0 12px; color:var(--ink-faint); font-size:13px; line-height:1.55; font-style:italic; border-left:3px solid var(--cyan-dim); padding-left:10px}
-      label.flabel{display:block; font-size:12.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-dim); margin:12px 0 5px}
+      label.flabel{display:block; font-size:12.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-dim); margin:12px 0 5px}
       input[type="text"], input[type="number"], textarea, select{
         width:100%; background:var(--bg2); color:var(--ink); border:1px solid var(--line);
         border-radius:7px; padding:11px 12px; font-size:16px; font-family:var(--sans);
       }
-      textarea{font-family:var(--mono); font-size:14.5px; line-height:1.5; min-height:110px; resize:vertical}
+      input[type="number"]{font-family:var(--mono); font-variant-numeric:tabular-nums}
+      input::placeholder, textarea::placeholder{color:#5d7688; opacity:1}
+      select option{background:var(--panel); color:var(--ink)}
+      input[type="checkbox"], input[type="radio"]{accent-color:var(--cyan)}
+      textarea{font-family:var(--mono); font-size:14.5px; line-height:1.5; min-height:110px; resize:vertical; font-variant-numeric:tabular-nums}
       .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
       .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
       @media (max-width:520px){ .row3{grid-template-columns:1fr 1fr} }
       .btnrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
       button.act{
         min-height:48px; padding:11px 18px; cursor:pointer; border-radius:8px; border:1px solid var(--cyan-dim);
-        background:var(--cyan); color:#ffffff; font-weight:800; font-size:15px; font-family:var(--sans);
+        background:var(--cyan); color:var(--on-accent); font-weight:600; font-size:15px; font-family:var(--sans);
       }
       button.ghost{
         min-height:48px; padding:11px 16px; cursor:pointer; border-radius:8px; border:1px solid var(--line);
-        background:var(--panel2); color:var(--ink); font-weight:700; font-size:14px; font-family:var(--sans);
+        background:var(--panel2); color:var(--ink); font-weight:600; font-size:14px; font-family:var(--sans);
       }
       button.act:active, button.ghost:active{transform:translateY(1px)}
       .msg{margin-top:12px; font-size:14px; line-height:1.5; color:var(--amber)}
       .msg.ok{color:var(--ink-dim)}
       .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(104px,1fr)); gap:8px; margin-top:6px}
       .stat{background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px; padding:9px 10px}
-      .stat .k{display:block; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; overflow-wrap:break-word; line-height:1.35}
-      .stat .v{display:block; margin-top:3px; font-family:var(--mono); font-size:17px; color:var(--ink)}
+      .stat .k{display:block; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); font-weight:600; overflow-wrap:break-word; line-height:1.35}
+      .stat .v{display:block; margin-top:3px; font-family:var(--mono); font-size:17px; color:var(--ink); font-variant-numeric:tabular-nums}
       .stat .v.good{color:var(--green)} .stat .v.warn{color:var(--amber)} .stat .v.bad{color:var(--red)}
       .chartbox{background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px; padding:8px 4px 2px; margin-top:10px}
       .chartbox svg{width:100%; height:auto; display:block}
@@ -91,13 +189,15 @@
       .swatch{width:10px; height:10px; border-radius:50%; display:inline-block}
       .flags{margin-top:10px}
       .flag{border-radius:8px; padding:10px 12px; font-size:14px; line-height:1.5; margin-bottom:8px; border:1px solid}
-      .flag.red{background:rgba(201,58,58,.08); border-color:rgba(201,58,58,.45); color:#7a1f1f}
-      .flag.amber{background:rgba(185,125,15,.10); border-color:rgba(185,125,15,.45); color:#6d4d05}
-      .flag.green{background:rgba(20,122,79,.08); border-color:rgba(20,122,79,.40); color:#145c3d}
-      .badge{display:inline-block; padding:5px 12px; border-radius:6px; font-size:13px; font-weight:800; letter-spacing:.02em; margin-top:10px}
+      .flag.red{background:rgba(255,77,94,.09); border-color:rgba(255,77,94,.48); color:var(--red-ink)}
+      .flag.amber{background:rgba(255,176,32,.08); border-color:rgba(255,176,32,.45); color:var(--amber-ink)}
+      .flag.green{background:rgba(61,220,151,.07); border-color:rgba(61,220,151,.42); color:var(--green-ink)}
+      .flag strong{color:inherit}
+      .badge{display:inline-block; padding:5px 12px; border-radius:6px; font-size:13px; font-weight:600; letter-spacing:.02em; margin-top:10px}
       .badge.table{border:2px solid var(--cyan); color:var(--cyan); background:transparent}
-      .badge.calc{border:2px dashed #b57d0f; color:#6d4d05; background:rgba(185,125,15,.12)}
-      .demobanner{margin-top:12px; border-radius:8px; padding:11px 13px; font-size:14.5px; line-height:1.5; border:1.5px solid rgba(185,125,15,.65); background:rgba(185,125,15,.14); color:#6d4d05}
+      .badge.calc{border:2px dashed var(--amber); color:var(--amber-ink); background:rgba(255,176,32,.10)}
+      .demobanner{margin-top:12px; border-radius:8px; padding:11px 13px; font-size:14.5px; line-height:1.5; border:1.5px solid rgba(255,176,32,.65); background:rgba(255,176,32,.11); color:var(--amber-ink)}
+      .demobanner strong{color:var(--amber); font-family:var(--mono); font-weight:500; letter-spacing:.06em}
       /* AI analysis prompt panels */
       .aiwrap{margin-top:16px; border-top:1px dashed var(--line); padding-top:14px}
       button.act:disabled{background:var(--panel2); color:var(--ink-faint); border-color:var(--line); cursor:not-allowed; box-shadow:none}
@@ -107,49 +207,51 @@
       textarea.aitext{min-height:230px; font-size:13.5px; background:var(--panel)}
       a.ghostlink{
         min-height:48px; padding:11px 16px; border-radius:8px; border:1px solid var(--line);
-        background:var(--panel2); color:var(--ink); font-weight:700; font-size:14px; font-family:var(--sans);
+        background:var(--panel2); color:var(--ink); font-weight:600; font-size:14px; font-family:var(--sans);
         display:inline-flex; align-items:center; text-decoration:none;
       }
       a.ghostlink:active{transform:translateY(1px)}
-      .snapshot{background:var(--bg2); border:1px dashed var(--cyan-dim); border-radius:8px; padding:14px; margin-top:12px}
+      a{color:var(--cyan)}
+      .snapshot{background:var(--bg2); border:1px dashed rgba(46,196,214,.55); border-radius:8px; padding:14px; margin-top:12px}
       .snapshot h4{margin:0 0 8px; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan)}
-      .snapshot table{width:100%; border-collapse:collapse; font-size:14px}
+      .snapshot table{width:100%; border-collapse:collapse; font-size:14px; font-family:var(--mono); font-variant-numeric:tabular-nums}
       .snapshot td{padding:3px 0; vertical-align:top}
       .snapshot td:first-child{color:var(--ink-dim); width:42%}
-      .snapshot td:last-child{font-family:var(--mono)}
-      .verdict{font-size:16px; font-weight:800; margin-top:10px; line-height:1.45}
+      .snapshot td:last-child{font-family:var(--mono); font-variant-numeric:tabular-nums}
+      .verdict{font-size:16px; font-weight:600; margin-top:10px; line-height:1.45}
       .verdict.good{color:var(--green)} .verdict.warn{color:var(--amber)} .verdict.bad{color:var(--red)}
-      table.grid{border-collapse:collapse; width:100%; font-size:13px}
+      table.grid{border-collapse:collapse; width:100%; font-size:13px; font-family:var(--mono); font-variant-numeric:tabular-nums}
       table.grid th, table.grid td{border:1px solid var(--line-soft); padding:3px; text-align:center}
-      table.grid th{background:var(--bg2); color:var(--ink-dim); font-size:11.5px; letter-spacing:.03em}
-      table.grid input{width:100%; min-width:44px; background:transparent; border:none; color:var(--ink); font-family:var(--mono); font-size:13.5px; padding:7px 2px; text-align:center}
+      table.grid th{background:var(--panel2); color:var(--ink-dim); font-size:11.5px; letter-spacing:.03em; font-weight:500}
+      table.grid tr:nth-child(even) td{background:rgba(23,38,52,.45)}
+      table.grid input{width:100%; min-width:44px; background:transparent; border:none; color:var(--ink); font-family:var(--mono); font-size:13.5px; padding:7px 2px; text-align:center; font-variant-numeric:tabular-nums}
       table.grid input:focus{outline:2px solid var(--cyan); outline-offset:-2px}
       .gridscroll{overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--line-soft); border-radius:8px}
       .prow{display:grid; grid-template-columns:1fr 110px 44px; gap:8px; margin-bottom:8px; align-items:center}
       .prow button{min-height:44px}
       .small{font-size:12.5px; color:var(--ink-faint); line-height:1.5}
       .cite{font-size:12.5px; color:var(--ink-faint); margin-top:10px}
-      footer{margin-top:22px; padding-top:14px; border-top:1px solid var(--line); color:var(--ink-faint); font-size:12.5px; line-height:1.6}
+      footer{margin-top:22px; padding-top:14px; border-top:1px solid var(--line-soft); color:var(--ink-faint); font-size:12.5px; line-height:1.6}
       .makers-mark{margin:14px 0 4px; text-align:center; color:var(--ink-faint); font-size:11.5px; letter-spacing:.02em}
       .biginput{font-size:20px !important; padding:14px 12px !important; font-family:var(--mono) !important}
-      .bigres{font-family:var(--mono); font-size:32px; font-weight:700; color:var(--ink); line-height:1.25; overflow-wrap:break-word; margin:6px 0 4px}
-      .bigres small{font-size:15px; color:var(--ink-dim); font-weight:600}
+      .bigres{font-family:var(--mono); font-size:32px; font-weight:500; color:var(--ink); line-height:1.25; overflow-wrap:break-word; margin:6px 0 4px; font-variant-numeric:tabular-nums}
+      .bigres small{font-size:15px; color:var(--ink-dim); font-weight:400}
       .resultbox{background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px; padding:12px 14px; margin-top:12px}
-      .resultbox .rlab{font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); font-weight:700}
+      .resultbox .rlab{font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); font-weight:600}
       .frow{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
       /* Threads view switch — segmented control */
       .seg{display:flex; gap:6px; margin-top:16px}
       .seg button{
         flex:1 1 0; min-height:48px; padding:10px 8px; cursor:pointer;
         background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
-        border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:700; letter-spacing:.02em;
+        border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:600; letter-spacing:.02em;
       }
-      .seg button[aria-pressed="true"]{background:var(--cyan); color:#ffffff; border-color:var(--cyan-dim); box-shadow:0 2px 8px rgba(11,127,149,.35)}
+      .seg button[aria-pressed="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(46,196,214,.28)}
       .seg button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       .hidden{display:none !important}
       /* Sheet input (Map & Preview) overlay */
-      .sheetoverlay{position:fixed; inset:0; z-index:60; background:rgba(19,38,53,.55); overflow-y:auto; padding:12px}
-      .sheetcard{background:var(--panel); border:1px solid var(--line); border-radius:10px; max-width:780px; margin:12px auto; padding:16px; box-shadow:0 14px 44px rgba(19,38,53,.35)}
+      .sheetoverlay{position:fixed; inset:0; z-index:60; background:rgba(4,8,12,.74); overflow-y:auto; padding:12px}
+      .sheetcard{background:var(--panel); border:1px solid var(--line); border-radius:10px; max-width:780px; margin:12px auto; padding:16px; box-shadow:0 14px 44px rgba(0,0,0,.55)}
       .sheethead{display:flex; justify-content:space-between; align-items:center; gap:10px}
       .sheethead h3{margin:0; font-size:16px; letter-spacing:.02em; text-transform:none; color:var(--ink)}
       .sheetradio{display:block; font-size:14px; line-height:1.5; margin:7px 0; color:var(--ink)}
@@ -157,13 +259,14 @@
       /* Round 2 — meaning lines, verdict pills, design + motion (transform/opacity only) */
       .explain{margin:10px 0 0; font-size:13.5px; line-height:1.55; color:var(--ink-dim); background:var(--panel2); border:1px solid var(--line-soft); border-radius:8px; padding:10px 12px}
       .explain strong{color:var(--ink)}
-      .pill{display:inline-block; padding:5px 14px; border-radius:999px; font-size:14px; font-weight:800; letter-spacing:.03em; margin-top:10px}
-      .pill.good{background:rgba(20,122,79,.14); color:#145c3d; border:1px solid rgba(20,122,79,.5)}
-      .pill.bad{background:rgba(201,58,58,.12); color:#7a1f1f; border:1px solid rgba(201,58,58,.5)}
-      .dtable{width:100%; border-collapse:collapse; font-size:14.5px; margin-top:10px}
+      .pill{display:inline-block; padding:5px 14px; border-radius:999px; font-size:14px; font-weight:500; letter-spacing:.03em; margin-top:10px; font-family:var(--mono)}
+      .pill.good{background:rgba(61,220,151,.12); color:var(--green); border:1px solid rgba(61,220,151,.55)}
+      .pill.bad{background:rgba(255,77,94,.12); color:var(--red); border:1px solid rgba(255,77,94,.55)}
+      .dtable{width:100%; border-collapse:collapse; font-size:14.5px; margin-top:10px; font-variant-numeric:tabular-nums}
       .dtable th,.dtable td{padding:8px 6px; border-bottom:1px solid var(--line-soft); text-align:right; font-family:var(--mono)}
-      .dtable th{color:var(--ink-dim); font-family:var(--sans); font-size:12px; letter-spacing:.05em; text-transform:uppercase}
-      .dtable td:first-child,.dtable th:first-child{text-align:left; font-family:var(--sans)}
+      .dtable th{color:var(--ink-dim); font-family:var(--sans); font-size:12px; letter-spacing:.05em; text-transform:uppercase; font-weight:600}
+      .dtable td:first-child,.dtable th:first-child{text-align:left}
+      .dtable tr:nth-child(even) td{background:rgba(23,38,52,.45)}
       .surow{display:grid; grid-template-columns:52px 1fr 1fr 64px 40px; gap:6px; margin-bottom:8px; align-items:center}
       .surow input,.surow select{padding:10px 8px; font-size:15px}
       .surow button{min-height:44px; padding:6px 0}
@@ -173,40 +276,27 @@
       #convFracResults .stats, #convRevResults .stats{min-height:76px}
       #hardResults .stats{min-height:118px}
       #sigResults .stats{min-height:76px}
-      section.tool.active{animation:panelIn .14s cubic-bezier(0.0,0.0,0.2,1)}
-      .chartbox{animation:panelIn .2s cubic-bezier(0.0,0.0,0.2,1)}
-      .flash{animation:resFlash .22s ease-out}
-      button.act, button.ghost, nav.tabs button{transition:transform .1s ease-out, background-color .12s ease-out, color .12s ease-out}
-      button.act:active, button.ghost:active{transform:scale(.98)}
-      @keyframes panelIn{from{opacity:0}to{opacity:1}}
-      @keyframes resFlash{from{opacity:.35}to{opacity:1}}
-      @media (prefers-reduced-motion: reduce){
-        *, *::before, *::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important}
-      }
-      /* ===== Stage 2 — cluster navigation + polish, same palette & fonts =====
-         Rules below only refine the existing identity (light steel-blue page,
-         white cards, cyan accent, system sans + mono). Not sticky, no bottom
-         bar. Every tap target is >= 44 px. */
+      /* ===== Stage 2 — cluster navigation + polish =====
+         Not sticky, no bottom bar. Every tap target is >= 44 px. */
       .wrap{padding:18px 14px calc(40px + env(safe-area-inset-bottom))}
       header.top{padding:6px 2px 16px}
       /* primary: five clusters in one segmented track */
       nav.clusters{
         display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; margin:16px 0 0; padding:4px;
-        background:var(--panel2); border:1px solid var(--line); border-radius:12px;
-        box-shadow:inset 0 1px 2px rgba(19,38,53,.06);
+        background:var(--panel); border:1px solid var(--line-soft); border-radius:12px;
+        box-shadow:inset 0 1px 2px rgba(0,0,0,.35);
       }
       nav.clusters button{
         min-height:56px; padding:8px 6px; cursor:pointer; border:1px solid transparent; border-radius:9px;
         background:transparent; color:var(--ink-dim); font-family:var(--sans); text-align:center;
         display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-        transition:background-color .12s ease-out, color .12s ease-out, box-shadow .12s ease-out;
       }
-      nav.clusters .cl-name{font-size:14px; font-weight:800; letter-spacing:.02em; line-height:1.2}
-      nav.clusters .cl-sub{font-size:11px; font-weight:600; color:var(--ink-faint); line-height:1.25}
-      nav.clusters button[aria-selected="true"]{background:var(--cyan); color:#ffffff; border-color:var(--cyan-dim); box-shadow:0 2px 8px rgba(11,127,149,.35)}
-      nav.clusters button[aria-selected="true"] .cl-sub{color:rgba(255,255,255,.86)}
+      nav.clusters .cl-name{font-size:14px; font-weight:600; letter-spacing:.02em; line-height:1.2}
+      nav.clusters .cl-sub{font-size:11px; font-weight:400; color:var(--ink-faint); line-height:1.25}
+      nav.clusters button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(46,196,214,.28)}
+      nav.clusters button[aria-selected="true"] .cl-sub{color:rgba(6,34,42,.82)}
       nav.clusters button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
-      @media (hover:hover){ nav.clusters button[aria-selected="false"]:hover{background:var(--panel); color:var(--ink)} }
+      @media (hover:hover){ nav.clusters button[aria-selected="false"]:hover{background:var(--panel2); color:var(--ink)} }
       @media (max-width:560px){
         /* phone: 3 + 2 layout, short labels only */
         nav.clusters{grid-template-columns:repeat(6, 1fr)}
@@ -220,7 +310,7 @@
         flex:1 1 0; min-width:max-content; min-height:44px; padding:8px 14px; border-radius:999px;
         background:var(--panel); color:var(--ink-dim); border:1px solid var(--line); font-size:13.5px;
       }
-      nav.tabs button[aria-selected="true"]{background:rgba(11,127,149,.10); color:var(--cyan); border-color:var(--cyan); box-shadow:inset 0 0 0 1px var(--cyan)}
+      nav.tabs button[aria-selected="true"]{background:rgba(46,196,214,.12); color:var(--cyan); border-color:var(--cyan); box-shadow:inset 0 0 0 1px var(--cyan)}
       section.tool{padding-top:14px}
       /* cards: calmer rhythm, clearer hierarchy */
       .card{border-radius:12px; padding:18px 16px 16px; margin-bottom:16px}
@@ -229,11 +319,11 @@
       .card h2 + .guru, .card h2 + .small{margin-top:4px}
       .card h3{margin:22px 0 8px; padding-top:14px; border-top:1px solid var(--line-soft)}
       .card h3:first-of-type{margin-top:10px}
-      .card h3 + .stats, .card h3 + .chartbox{margin-top:4px}
-      /* buttons: primary = filled cyan, secondary = white with a clear border */
-      button.ghost, a.ghostlink{background:var(--panel); border-color:var(--line); box-shadow:0 1px 2px rgba(19,38,53,.06)}
-      @media (hover:hover){ button.ghost:hover, a.ghostlink:hover{border-color:var(--cyan); color:var(--cyan)} button.act:hover:not(:disabled){filter:brightness(1.06)} }
-      button.act{box-shadow:0 2px 6px rgba(11,127,149,.28)}
+      .card h3 + .stats, .card h3 + .chartbox, .card h3 + .spcchart{margin-top:4px}
+      /* buttons: primary = filled accent, secondary = raised with a clear border */
+      button.ghost, a.ghostlink{background:var(--panel2); border-color:var(--line); box-shadow:0 1px 2px rgba(0,0,0,.3)}
+      @media (hover:hover){ button.ghost:hover, a.ghostlink:hover{border-color:var(--cyan); color:var(--cyan)} button.act:hover:not(:disabled){filter:brightness(1.08)} }
+      button.act{box-shadow:0 2px 10px rgba(46,196,214,.22)}
       .btnrow{gap:10px}
       /* form controls: >= 44 px everywhere */
       input[type="text"], input[type="number"], select{min-height:46px}
@@ -243,6 +333,141 @@
       .sheetradio input{width:22px; height:22px; flex:0 0 auto}
       /* footer: rights line sits directly under the maker's mark */
       .makers-mark.rights{margin:0 0 4px}
+
+      /* ===== v19 · numbers: Plex Mono, tabular, key results larger (SPEC §2) ===== */
+      .chartbox svg text, .spcchart svg text{font-family:var(--mono); font-variant-numeric:tabular-nums}
+      #spcCap .stat .v, #grrPct .stat .v, #checkAD .stat .v, #tpTiles .stat .v, #aqlStats .stat .v, #suTiles .stat .v{font-weight:500; font-size:21px; letter-spacing:-.01em}
+      #grrVerdict .flag, #checkVerdict .flag{font-family:var(--sans)}
+      .verdict{font-family:var(--mono); font-weight:500}
+
+      /* ===== v19 · SPC result headline (SPEC §3) ===== */
+      .headline{margin:4px 0 2px; padding:12px 14px; border-radius:10px; background:var(--bg2); border:1px solid var(--line-soft);
+        font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:22px; line-height:1.35; color:var(--ink); overflow-wrap:break-word}
+      .headline .hl-k{color:var(--ink-dim); font-weight:400}
+      .headline .hl-v{font-weight:500; font-size:30px; letter-spacing:-.01em}
+      .headline .hl-sep{color:var(--ink-faint); padding:0 .25em}
+      .headline .hl-t{font-family:var(--mono); font-weight:500; font-size:15px; display:inline}
+      .headline.good{border-color:rgba(61,220,151,.45)} .headline.good .hl-v, .headline.good .hl-t{color:var(--green)}
+      .headline.warn{border-color:rgba(255,176,32,.45)} .headline.warn .hl-v, .headline.warn .hl-t{color:var(--amber)}
+      .headline.bad{border-color:rgba(255,77,94,.5)} .headline.bad .hl-v, .headline.bad .hl-t{color:var(--red)}
+
+      /* ===== v19 · individuals chart: frame, zone bands, rings, status ring (SPEC §3, §8b) =====
+         #spcChart keeps exactly the SVG v18 drew. Zone bands sit in an
+         aria-hidden layer UNDER it and fail-colour rings in a layer OVER it;
+         both use the same viewBox and the same scale, so they register 1:1. */
+      .spcchart{position:relative; margin-top:10px; background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px}
+      .spcchart > #spcChart{position:relative; z-index:1; margin:0; background:transparent; border:0; border-radius:8px}
+      .spcchart .zlayer{position:absolute; top:8px; left:4px; right:4px; pointer-events:none}
+      .spcchart .zlayer svg{width:100%; height:auto; display:block}
+      .spcchart .zlayer.under{z-index:0} .spcchart .zlayer.over{z-index:2}
+      .zone-c{fill:#2ec4d6; fill-opacity:.075} .zone-b{fill:#2ec4d6; fill-opacity:.04} .zone-a{fill:#172634; fill-opacity:.85}
+      .ooc-ring{fill:none; stroke:#ff4d5e; stroke-width:1.8}
+      .spcchart::after{content:""; position:absolute; inset:-1px; border-radius:9px; pointer-events:none; box-shadow:0 0 0 2px var(--ring, transparent); z-index:3}
+      .spcchart.ring-pass{--ring:#3ddc97}
+      .spcchart.ring-warn{--ring:#ffb020}
+      .spcchart.ring-fail{--ring:#ff4d5e}
+      .spcchart.ring-warn::after, .spcchart.ring-fail::after{animation:ringPulse 1.8s ease-in-out infinite}
+      @keyframes ringPulse{0%,100%{box-shadow:0 0 0 2px var(--ring)} 50%{box-shadow:0 0 0 2px var(--ring), 0 0 14px 2px var(--ring)}}
+
+      /* ===== v19 · chart colours (screen only; print keeps the original light chart colours) =====
+         The chart SVGs are generated exactly as in v18; their presentation
+         attributes are re-mapped here by role (CSS beats SVG attributes). */
+      @media screen{
+        /* SPC individuals chart */
+        #spcChart line[stroke="#b97d0f"]{stroke:#ffb020; stroke-opacity:.85}
+        #spcChart text[fill="#b97d0f"]{fill:#ffb020}
+        #spcChart line[stroke="#0b7f95"]{stroke:#8aa3b5}
+        #spcChart text[fill="#0b7f95"]{fill:#8aa3b5}
+        #spcChart line[stroke="#c93a3a"]{stroke:#ff4d5e}
+        #spcChart text[fill="#c93a3a"]{fill:#ff4d5e}
+        #spcChart line[stroke="#7aa3bd"]{stroke:#2ec4d6; stroke-opacity:.75; stroke-width:1.6}
+        #spcChart circle[fill="#0b7f95"]{fill:#2ec4d6}
+        #spcChart circle[fill="#b97d0f"]{fill:#ffb020}
+        #spcChart circle[fill="#c93a3a"]{fill:#ff4d5e}
+        #spcChart circle[stroke="#ffffff"]{stroke:#101b25; stroke-width:1.4}
+        #spcChart text[fill="#6b8699"]{fill:#8aa3b5}
+        /* Data Check histogram */
+        #checkChart rect[fill="#0b7f95"]{fill:#2ec4d6; opacity:.82}
+        #checkChart text[fill="#3f5d73"]{fill:#e2ecf2}
+        #checkChart text[fill="#6b8699"]{fill:#8aa3b5}
+        #checkChart line[stroke="#b9c9d6"]{stroke:#2a4255}
+        #checkChart line[stroke="#c93a3a"]{stroke:#ff4d5e}
+        #checkChart text[fill="#c93a3a"]{fill:#ff4d5e}
+        /* Pareto */
+        #paretoChart rect[fill="#0b7f95"]{fill:#2ec4d6; opacity:.82}
+        #paretoChart text[fill="#132635"]{fill:#e2ecf2}
+        #paretoChart text[fill="#3f5d73"]{fill:#8aa3b5}
+        #paretoChart line[stroke="#5f7f99"]{stroke:#8aa3b5}
+        #paretoChart text[fill="#6b8699"]{fill:#8aa3b5}
+        #paretoChart polyline[stroke="#b97d0f"]{stroke:#ffb020}
+        #paretoChart circle[fill="#b97d0f"]{fill:#ffb020}
+        #paretoChart text[fill="#b97d0f"]{fill:#ffb020}
+        /* EXAMPLE DATA watermark (drawn into the SVG): fail colour, a touch stronger on dark */
+        .chartbox text[fill="#c93a3a"][fill-opacity]{fill:#ff4d5e; fill-opacity:.2}
+      }
+
+      /* ===== v19 · Sightline Mode (SPEC §8a) ===== */
+      .sightline{position:fixed; inset:0; z-index:80; background:#0a1118; color:#e2ecf2; overflow:auto;
+        display:flex; flex-direction:column; justify-content:center; padding:max(18px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
+        font-family:var(--mono); font-variant-numeric:tabular-nums; cursor:pointer; -webkit-tap-highlight-color:transparent}
+      .sightline:focus{outline:none}
+      .sightline .sl-tag{font-family:var(--sans); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#2ec4d6; margin:0 0 6px}
+      .sightline .sl-title{font-size:clamp(26px, 6.2vw, 64px); font-weight:500; line-height:1.1; margin:0 0 14px; color:#e2ecf2}
+      .sightline table{border-collapse:collapse; width:100%}
+      .sightline th{font-family:var(--sans); font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#8aa3b5; text-align:right; padding:0 0 6px 18px}
+      .sightline th:first-child{text-align:left; padding-left:0}
+      .sightline td{border-top:1px solid #1f3242; padding:10px 0 10px 18px; text-align:right; font-size:clamp(22px, 5vw, 54px); font-weight:500; line-height:1.15; color:#e2ecf2; white-space:nowrap}
+      .sightline td:first-child{text-align:left; padding-left:0; font-weight:400; font-size:clamp(13px, 2.2vw, 20px); color:#8aa3b5; white-space:normal}
+      .sightline tr.sl-pd td:not(:first-child){color:#2ec4d6}
+      .sightline .sl-hint{font-family:var(--sans); font-size:12px; color:#7590a3; margin:14px 0 0}
+
+      /* ===== v19 · motion (SPEC §4): 160–220 ms, transform/opacity only ===== */
+      section.tool.active{animation:panelIn .18s var(--ease)}
+      section.tool.active > .card{animation:cardIn .2s var(--ease) both}
+      section.tool.active > .card + .card{animation-delay:.02s}
+      .chartbox{animation:fadeIn .2s var(--ease)}
+      #spcChart svg{animation:drawIn .22s var(--ease)}
+      .spcchart .zlayer svg{animation:fadeIn .22s var(--ease)}
+      #spcResults:not(.hidden), #checkResults:not(.hidden), #grrResults:not(.hidden), #aqlResults:not(.hidden),
+      #paretoResults:not(.hidden), #tpResults:not(.hidden), #sigResults:not(.hidden){animation:reveal .2s var(--ease)}
+      .headline{animation:reveal .22s var(--ease)}
+      .sightline{animation:fadeIn .18s var(--ease)}
+      .flash{animation:resFlash .2s ease-out}
+      button.act, button.ghost, nav.tabs button, nav.clusters button, .seg button, a.ghostlink{transition:transform .16s var(--ease), background-color .16s var(--ease), color .16s var(--ease), border-color .16s var(--ease), box-shadow .16s var(--ease), filter .16s var(--ease)}
+      button.act:active, button.ghost:active, a.ghostlink:active, .seg button:active, nav.clusters button:active, nav.tabs button:active{transform:scale(.98)}
+      @keyframes panelIn{from{opacity:0}to{opacity:1}}
+      @keyframes cardIn{from{opacity:0; transform:translateY(6px)}to{opacity:1; transform:none}}
+      @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+      @keyframes drawIn{from{opacity:.2; clip-path:inset(0 100% 0 0)}to{opacity:1; clip-path:inset(0 0 0 0)}}
+      @keyframes reveal{from{opacity:0; transform:translateY(4px)}to{opacity:1; transform:none}}
+      @keyframes resFlash{from{opacity:.35}to{opacity:1}}
+      @media (prefers-reduced-motion: reduce){
+        *, *::before, *::after{animation:none !important; transition:none !important; scroll-behavior:auto !important}
+        .spcchart.ring-warn::after, .spcchart.ring-fail::after{animation:none !important; box-shadow:0 0 0 2px var(--ring) !important}
+      }
+
+      /* ===== v19 · print: light theme on white paper ===== */
+      @media print{
+        :root{
+          color-scheme:light;
+          --bg:#ffffff; --bg2:#ffffff; --panel:#ffffff; --panel2:#f3f5f7;
+          --line:#9aa9b5; --line-soft:#c9d3db;
+          --ink:#111a22; --ink-dim:#36495a; --ink-faint:#55687a;
+          --cyan:#0b6f82; --cyan-dim:#0b6f82; --on-accent:#ffffff;
+          --amber:#8a6200; --red:#b3302f; --green:#136b45;
+          --amber-ink:#6d4d05; --red-ink:#7a1f1f; --green-ink:#145c3d;
+        }
+        html, body{background:#ffffff !important; color:#111a22}
+        body{background-image:none !important}
+        .card, .sheetcard{box-shadow:none !important; break-inside:avoid}
+        *, *::before, *::after{animation:none !important; transition:none !important}
+        .spcchart::after{display:none}
+        .zone-c{fill:#0b6f82; fill-opacity:.06} .zone-b{fill:#0b6f82; fill-opacity:.03} .zone-a{fill:#e9eef2; fill-opacity:.7}
+        .ooc-ring{stroke:#b3302f}
+        .sightline{display:none !important}
+        .headline .hl-v, .headline .hl-t{color:#111a22 !important}
+        .dtable tr:nth-child(even) td, table.grid tr:nth-child(even) td{background:#f3f5f7}
+      }
     </style>
   </head>
   <body>
@@ -313,13 +538,18 @@
           <div class="demobanner hidden" id="spcDemoBanner" role="status"><strong>EXAMPLE DATA</strong> — demonstration only, not real measurements.</div>
 
           <div id="spcResults" class="hidden">
+            <div class="headline hidden" id="spcHeadline" role="status"></div>
             <h3>Individuals (I) chart</h3>
-            <div class="chartbox" id="spcChart"></div>
+            <div class="spcchart" id="spcChartFrame">
+              <div class="zlayer under" id="spcZones" aria-hidden="true"></div>
+              <div class="chartbox" id="spcChart"></div>
+              <div class="zlayer over" id="spcRings" aria-hidden="true"></div>
+            </div>
             <div class="legend">
               <span><i class="swatch" style="background:var(--cyan)"></i> In control</span>
               <span><i class="swatch" style="background:var(--amber)"></i> Out of control</span>
               <span><i class="swatch" style="background:var(--red)"></i> Out of spec</span>
-              <span>— Centre line x̄</span><span>– – Control limits (x̄ ± 3σ within)</span><span>– – Spec limits</span>
+              <span>— Centre line x̄</span><span>– – Control limits (x̄ ± 3σ within)</span><span>– – Spec limits</span><span>Bands: zones C / B / A (±1σ / ±2σ / ±3σ)</span><span>◯ Ringed: flagged point</span>
             </div>
             <div class="flags" id="spcFlags"></div>
 
@@ -877,9 +1107,23 @@
       <p class="makers-mark">Built by Harsh Patel · with Satureday</p>
       <p class="makers-mark rights">© 2026 Harsh Patel · All rights reserved</p>
     </div>
+    <div class="sightline hidden" id="sightline" role="dialog" aria-modal="true" aria-label="Sightline Mode — thread limits" tabindex="-1"></div>
 
     <script>
       "use strict";
+      /* SCRIPT MAP. The architecture overview is the FILE MAP comment in <head>.
+         This is one classic script that runs once, top to bottom, at load.
+         Top-level var and function names are page globals, so declaration
+         order matters: helpers come first, then each tool declares its state
+         and wires its own listeners. Sections are marked "SECTION ·" and
+         reference tables "BEGIN DATA" / "END DATA". */
+      /* ======================================================================
+         SECTION · CORE HELPERS
+         Formatting (fmt, esc, statTile), text-to-number parsing, basic
+         statistics (mean, sampleSD, normCdf, invNormCdf), scroll holding, the
+         EXAMPLE chart watermark, and the incomplete beta / F-distribution maths
+         used by the Gage R&R interaction test.
+         ====================================================================== */
       /* ---------- helpers ---------- */
       var $ = function(id){ return document.getElementById(id); };
       function fmt(x, d){ if(x===null||x===undefined||!isFinite(x)) return "—"; return Number(x).toFixed(d===undefined?4:d); }
@@ -964,6 +1208,10 @@
       /* EXAMPLE DATA watermark for charts: drawn INTO the SVG (not a
          croppable overlay) whenever the demo flag for the shared data is
          on, so a screenshot or export of the chart carries the mark. */
+      /* Callers append this LAST to the SVG body, so the mark is drawn on top
+         of the data, and only while demoFlags.data is set (SPC chart and Data
+         Check histogram). The Gage R&R and Stack-up tools have no chart; their
+         EXAMPLE state is the banner. */
       function demoMarkSVG(w, h){
         return '<text x="' + (w / 2) + '" y="' + (h / 2) + '" fill="#c93a3a" fill-opacity="0.14" font-size="46" font-weight="700" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle" transform="rotate(-11 ' + (w / 2) + ' ' + (h / 2) + ')">EXAMPLE DATA</text>';
       }
@@ -1006,6 +1254,12 @@
       }
       function fUpperP(f, d1, d2){ if(f<=0) return 1; var x = d2/(d2 + d1*f); return ibeta(d2/2, d1/2, x); }
 
+      /* ======================================================================
+         SECTION · NAV / EVENTS: cluster navigation
+         The tool registry is the markup (see FILE MAP). showTool(tab) is the
+         only way the visible tool changes. It is used by both tab rows, the
+         arrow-key handler and the initial showTool("spc", true) at load.
+         ====================================================================== */
       /* ---------- tabs ---------- */
       /* Stage 2 navigation: five clusters (nav.clusters) and the tools inside
          the chosen cluster (nav.tabs — only that cluster's buttons show, and
@@ -1073,6 +1327,18 @@
       wireTabKeys(tabBtns, function(b){ showTool(b.getAttribute("data-tab")); });
       showTool("spc", true);
 
+      /* ======================================================================
+         SECTION · SPC (tool spc): individuals chart and capability
+         compute: computeSPC(vals, lsl, usl) is pure. It returns I-MR limits
+                  (sigma within = MRbar / d2, d2 = 1.128 for moving ranges of 2),
+                  sigma overall = sample s, out-of-spec / out-of-control points,
+                  run (8 on one side) and trend (6 rising or falling) signals, and
+                  capability (Cp/Cpk on sigma within, Pp/Ppk on sigma overall, PPM
+                  from the normal tails of the overall fit).
+         render:  analyseSPC() reads the inputs, guards, then fills the tiles,
+                  chart, snapshot and meaning. Zero variation never reaches
+                  computeSPC: noVariation() short-circuits to one plain state.
+         ====================================================================== */
       /* ================= TOOL 1 : SPC ================= */
       var spcState = null; // {name, vals, lsl, usl, stats...}
       function getSpecs(){
@@ -1137,7 +1403,9 @@
         return { n:n, xbar:xbar, sdW:sdW, sdO:sdO, mrBar:mrBar, ucl:ucl, lcl:lcl,
                  outSpec:outSpec, outCtrl:outCtrl, runs:runs, trends:trends, cap:cap };
       }
-      function spcChartSVG(vals, st, lsl, usl){
+      /* v19: the chart's scale, unchanged, lifted into one function so the
+         v19 zone / ring layers use exactly the same geometry. */
+      function spcChartFrame(vals, st, lsl, usl){
         var W=720, H=300, padL=58, padR=14, padT=16, padB=30;
         var iw = W-padL-padR, ih = H-padT-padB;
         var lo = Math.min.apply(null, vals.concat([st.lcl])), hi = Math.max.apply(null, vals.concat([st.ucl]));
@@ -1145,6 +1413,11 @@
         var span = hi-lo || 1; lo -= span*0.10; hi += span*0.10; span = hi-lo;
         function X(i){ return padL + (vals.length===1 ? iw/2 : iw*i/(vals.length-1)); }
         function Y(v){ return padT + ih*(1-(v-lo)/span); }
+        return { W:W, H:H, padL:padL, padR:padR, padT:padT, padB:padB, X:X, Y:Y };
+      }
+      function spcChartSVG(vals, st, lsl, usl){
+        var F = spcChartFrame(vals, st, lsl, usl);
+        var W = F.W, H = F.H, padL = F.padL, padR = F.padR, X = F.X, Y = F.Y;
         var g = "";
         function hline(v, color, dash, label){
           var y = Y(v);
@@ -1187,6 +1460,7 @@
         $("spcMeaning").classList.add("hidden"); $("spcMeaning").innerHTML = "";
         $("spcAiText").value = ""; hideMsg($("spcAiMsg"));
         spcState = null; syncAiButtons();
+        spcV19Clear();
       }
       function capClass(v){ if(v===null||v===undefined) return ""; return v>=1.33 ? "good" : (v>=1.0 ? "warn" : "bad"); }
       function analyseSPC(){
@@ -1276,12 +1550,18 @@
         $("spcResults").classList.remove("hidden");
         flash($("spcStats"));
         syncAiButtons();
+        spcV19Decorate();
       }
       $("spcAnalyse").addEventListener("click", analyseSPC);
       $("spcSample").addEventListener("click", function(){
+        /* BEGIN DATA DEMO_SPC: SPC / Data Check Example: 30 readings and spec limits.
+           Provenance: fixed demonstration data (not measurements); its published results are
+           Cp 1.2224, Cpk 1.2126, Pp 1.4554, Ppk 1.4437, PPM 13, A2* 0.3020, p 0.577; verified 2026-11.
+           Edit data only via a verified data change, never by hand-tuning numbers. */
         $("spcName").value = "Hone bore Ø (in)";
         $("spcData").value = "4.5021, 4.5030, 4.5018, 4.5026, 4.5034, 4.5022, 4.5015, 4.5029, 4.5031, 4.5024, 4.5019, 4.5027, 4.5033, 4.5020, 4.5016, 4.5028, 4.5032, 4.5023, 4.5017, 4.5025, 4.5030, 4.5021, 4.5018, 4.5026, 4.5035, 4.5022, 4.5019, 4.5028, 4.5031, 4.5024";
         $("spcLSL").value = "4.5000"; $("spcUSL").value = "4.5050";
+        /* END DATA DEMO_SPC */
         setDemo("data");
         analyseSPC();
       });
@@ -1316,6 +1596,13 @@
       });
       function csvq(s){ return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }
 
+      /* ======================================================================
+         SECTION · DATA CHECK (tool check): descriptives, histogram, normality
+         Reads the SAME data box as SPC (#spcData), so the SPC Example also
+         drives this tool and both share demoFlags.data. andersonDarling() is
+         pure: A2 with the small-sample adjustment A2* = A2(1 + 0.75/n + 2.25/n^2)
+         and the piecewise p-value approximation (four ranges of A2*).
+         ====================================================================== */
       /* ================= TOOL 2 : DATA CHECK ================= */
       var checkState = null; // last computed Data Check results, for the AI prompt
       function andersonDarling(vals){
@@ -1422,6 +1709,16 @@
       }
       $("checkRefresh").addEventListener("click", refreshCheck);
 
+      /* ======================================================================
+         SECTION · SHEET INPUT: file / paste, then Map & Preview, then explicit accept
+         Pipeline: raw text or .xlsx -> grid of cell strings (sheetTextToGrid,
+         readXlsxGrid) -> sheetAnalyseGrid (header detection and per-column
+         profile) -> per-tool assessment (sheetSpcAssessment,
+         sheetGrrAssessment, sheetParetoAssessment) -> renderSheetMap ->
+         sheetAccept. Each assessment returns { vals or pairs, counts, stops,
+         notes }. A non-empty stops list IS the hard stop (see the contract
+         note above sheetSpcAssessment).
+         ====================================================================== */
       /* ================= UNIVERSAL SHEET INPUT (Map & Preview) =================
          The primary data-entry path for SPC & Capability, Data Check,
          Gage R&R and Pareto. (AQL is attribute sampling — two typed
@@ -1734,6 +2031,16 @@
       }
 
       /* ---------- assessments: mapping + validation, per tool ---------- */
+      /* HARD-STOP CONTRACT, shared by the three assessments below. Each returns
+         a stops[] list. Any entry means the load is refused: renderSheetMap
+         disables #sheetAccept, and sheetAccept() re-runs the assessment and
+         returns early, so a stop cannot be bypassed by enabling the button.
+         Rejected cells are keyed ("r<row>" or "c<col>") so the user can exclude
+         them one by one through sheetCtx.excluded. Blanks are skipped and
+         counted, and never read as 0.
+         SPC / Data Check mapping: a single data row is read as a series, left
+         to right. Otherwise exactly one numeric column feeds the tool. Two or
+         more plausible columns with no choice made is a stop. */
       function sheetSpcAssessment(){
         var a = sheetCtx.analysis, stops = [], warnings = [], notes = [];
         var plausible = a.cols.filter(function(c){ return c.numeric >= 2; });
@@ -1777,6 +2084,12 @@
         return { mode:seriesMode ? "row" : "column", vals:vals, rejected:rejected, read:read,
                  used:vals.length, blanks:blanks, stops:stops, warnings:warnings, notes:notes, plausible:plausible };
       }
+      /* Gage R&R mapping: layout "rows" = one row per part, "columns" = one
+         column per part. Within a part, reading k runs operator-major:
+         operator = floor(k / r), trial = k % r (A's trials, then B's, then C's).
+         The sheet must match the study set in the tab exactly (p parts x o x r).
+         Any blank or non-number cell is a stop: an unbalanced study cannot be
+         analysed, so cells cannot be excluded here. */
       function sheetGrrAssessment(){
         var a = sheetCtx.analysis, stops = [], notes = [];
         var o = grrDims.o, p = grrDims.p, r = grrDims.r, per = o * r;
@@ -1813,6 +2126,10 @@
         if(commaN) notes.push(sheetCommaNote(commaN));
         return { vals:vals, read:read, used:used, problems:problems, stops:stops, notes:notes, warnings:[] };
       }
+      /* Pareto mapping: one category column plus one count column, which must
+         differ. Fully blank rows are ignored. Rows with a blank category, a
+         non-number count or a count of 0 or less are rejected and must each be
+         excluded explicitly. */
       function sheetParetoAssessment(){
         var a = sheetCtx.analysis, stops = [], notes = [];
         var pairs = [], rejected = [], read = 0, commaN = 0;
@@ -2082,6 +2399,14 @@
         if(ev.key === "Escape" && sheetCtx) closeSheet();
       });
 
+      /* ======================================================================
+         SECTION · EXAMPLE / DEMO STATE
+         demoFlags.data covers SPC and Data Check (one shared data box).
+         demoFlags.grr covers Gage R&R. setDemo() is called only by the Example
+         loaders. clearDemo() is called by any user edit, paste, import or
+         clear. Every EXAMPLE label (banner, chart watermark, CSV and summary
+         heading) reads these flags, so they cannot disagree.
+         ====================================================================== */
       /* ================= EXAMPLE (DEMO) DATA STATE =================
          The example loaders mark their tool's data as demo; a visible banner
          sits above the results until the user replaces the values with their
@@ -2104,6 +2429,12 @@
         clearDemo("grr");
       });
 
+      /* ======================================================================
+         SECTION · GAGE R&R (tool grr): crossed study, ANOVA method (AIAG MSA)
+         grrBuildGrid builds the part x operator x trial input grid
+         (ids grr_<part>_<op>_<trial>). calcGRR reads it, runs the two-way
+         ANOVA with interaction (see the intent note inside), and renders.
+         ====================================================================== */
       /* ================= TOOL 3 : GAGE R&R (ANOVA) ================= */
       var grrDims = { o:3, p:10, r:2 };
       function grrBuildGrid(keep){
@@ -2163,6 +2494,18 @@
         }}}
         if(missing){ $("grrResults").classList.add("hidden"); grrLast = null; syncAiButtons(); showMsg(msgEl, "The study grid has "+missing+" empty or non-numeric cell"+(missing>1?"s":"")+" — every part needs every operator × trial filled before the ANOVA can run."); return; }
         hideMsg(msgEl);
+        /* ANOVA, crossed two-way with interaction (AIAG MSA, ANOVA method).
+           Factors: part (p levels), operator (o), replicate trials (r).
+           SS: total, part, operator, cells (part x operator means), with
+           interaction = cells - part - operator (floored at 0 against rounding),
+           and error (equipment) = within-cell scatter.
+           df: part p-1, operator o-1, interaction (p-1)(o-1), error po(r-1).
+           Interaction test: F = MS_I / MS_E. If its p-value > 0.25 (AIAG), the
+           interaction is pooled into error. Variance components then follow
+           from the expected mean squares (negative estimates clipped to 0):
+           repeatability EV^2 = MS_E, reproducibility AV^2 = operator + interaction,
+           part PV^2. GRR = sqrt(EV^2 + AV^2), TV = sqrt(GRR^2 + PV^2),
+           %Tol = 6 GRR / tolerance, ndc = floor(1.41 PV / GRR). */
         var N = p*o*r, grand = 0;
         var cellMean = [], partMean = new Array(p).fill(0), opMean = new Array(o).fill(0), opSum = new Array(o).fill(0);
         for(var a=0;a<p;a++){ cellMean.push([]); for(var b=0;b<o;b++){ var s=0; for(var c=0;c<r;c++){ s+=x[a][b][c]; grand+=x[a][b][c]; } cellMean[a].push(s/r); partMean[a]+= (s/r); opSum[b]+=s; } partMean[a]/=o; }
@@ -2232,6 +2575,10 @@
       }
       $("grrCalc").addEventListener("click", calcGRR);
       $("grrSample").addEventListener("click", function(){
+        /* BEGIN DATA DEMO_GRR: Gage R&R Example: 5 parts x 3 operators x 2 trials, tolerance 1.00.
+           Provenance: fixed demonstration data (not measurements); its published results are
+           EV 0.00859, AV 0.02537, GRR 0.02678, %Tol 16.1%, ndc 17; verified 2026-11.
+           Edit data only via a verified data change, never by hand-tuning numbers. */
         $("grrOps").value = "3"; $("grrTrials").value = "2"; $("grrParts").value = "5"; $("grrTol").value = "1.00";
         grrBuildGrid(false);
         /* [part][operator][trial] — fixed demo study */
@@ -2242,6 +2589,7 @@
           [[9.65,9.66],[9.68,9.67],[9.62,9.64]],
           [[10.08,10.09],[10.11,10.10],[10.05,10.07]]
         ];
+        /* END DATA DEMO_GRR */
         for(var pi=0;pi<5;pi++) for(var oi=0;oi<3;oi++) for(var ti=0;ti<2;ti++) $("grr_"+pi+"_"+oi+"_"+ti).value = data[pi][oi][ti];
         hideMsg($("grrMsg")); setDemo("grr"); calcGRR();
       });
@@ -2264,27 +2612,74 @@
       });
       grrBuildGrid(false);
 
+      /* ======================================================================
+         SECTION · AQL MODEL (tool aql): ANSI/ASQ Z1.4 single sampling, normal inspection
+         Data: AQL_LETTERS, AQL_N, AQL_TABLE1, AQL_ACSEQ, AQL_START, AQL_SPECIAL
+         (each fenced below). Model: aqlCell() returns one raw Table II-A cell
+         (an Ac number, "D" for a down arrow or "U" for an up arrow). The
+         click handler resolves arrows to the plan that is actually used.
+         ====================================================================== */
       /* ================= TOOL 4 : AQL (ANSI/ASQ Z1.4) ================= */
+      /* BEGIN DATA AQL_LETTERS: the 16 sample-size code letters, A to R (I and O are not used).
+         Provenance: ANSI/ASQ Z1.4 Table II-A; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       var AQL_LETTERS = ["A","B","C","D","E","F","G","H","J","K","L","M","N","P","Q","R"];
+      /* END DATA AQL_LETTERS */
+      /* BEGIN DATA AQL_N: sample size n for each code letter.
+         Provenance: ANSI/ASQ Z1.4 Table II-A; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       var AQL_N = {A:2,B:3,C:5,D:8,E:13,F:20,G:32,H:50,J:80,K:125,L:200,M:315,N:500,P:800,Q:1250,R:2000};
+      /* END DATA AQL_N */
+      /* BEGIN DATA AQL_TABLE1: lot-size bands mapped to code letters for general inspection levels I, II and III.
+         Provenance: ANSI/ASQ Z1.4 Table I (sample size code letters); verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* Table I — general inspection levels: [max lot size, I, II, III] */
       var AQL_TABLE1 = [
         [8,"A","A","B"],[15,"A","B","C"],[25,"B","C","D"],[50,"C","D","E"],[90,"C","E","F"],
         [150,"D","F","G"],[280,"E","G","H"],[500,"F","H","J"],[1200,"G","J","K"],[3200,"H","K","L"],
         [10000,"H","L","M"],[35000,"J","M","N"],[150000,"K","N","P"],[500000,"L","P","Q"],[Infinity,"M","Q","R"]
       ];
+      /* END DATA AQL_TABLE1 */
+      /* BEGIN DATA AQL_ACSEQ: the acceptance-number sequence along every Table II-A diagonal.
+         Provenance: ANSI/ASQ Z1.4 Table II-A; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* Table II-A master table. Plans sit on a constant diagonal: for each AQL,
          the letter index where the 0/1 plan sits; Ac follows 0,1,2,3,5,7,10,14,21.
          Above the first plan = down arrow, beyond the last = up arrow (per the standard). */
       var AQL_ACSEQ = [0,1,2,3,5,7,10,14,21];
+      /* END DATA AQL_ACSEQ */
+      /* BEGIN DATA AQL_START: for each AQL, the code-letter index where the Ac 0 / Re 1 plan sits.
+         Provenance: ANSI/ASQ Z1.4 Table II-A; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       var AQL_START = { "0.065":11, "0.10":10, "0.15":9, "0.25":8, "0.40":7, "0.65":7, "1.0":6, "1.5":5, "2.5":4, "4.0":3, "6.5":2 };
+      /* END DATA AQL_START */
+      /* BEGIN DATA AQL_SPECIAL: explicit Table II-A cells that are not on the clean diagonal.
+         Provenance: ANSI/ASQ Z1.4 Table II-A; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* Stage 2 (B1): the 0.65 column of Table II-A is NOT a clean diagonal.
          Its 0/1 plan sits at F (n = 20); G carries an UP arrow (back to F's
          plan) and H a DOWN arrow (on to J's plan, Ac 1); from J onward the
          diagonal runs from start 7 (J Ac1 … R Ac21). These three cells are
          encoded explicitly here; every other cell still comes from the
          AQL_START diagonal. "U" = arrow up, "D" = arrow down. */
+      /* ADJUDICATED BEHAVIOUR: the AQL 0.65 fix (stage 2, B1). Do not "tidy" it away.
+         AQL_START "0.65":7 and AQL_SPECIAL["0.65"] work together. Reason: the
+         published Z1.4 Table II-A 0.65 column breaks the diagonal pattern. A pure
+         diagonal from 7 would put the Ac 0 plan at H (n = 50), and from 6 it
+         would shift J..R one step. Both differ from the standard. The
+         adjudicated encoding keeps the diagonal from 7 (so J = Ac 1 ... R = Ac 21
+         match the table) and overrides F, G and H explicitly, which gives
+         A..G -> F plan (n 20, 0/1) and H -> J plan (n 80, 1/2), as printed.
+         selftest/golden.json holds this column (aql.adjudicated065), entered
+         by hand from the adjudicated Z1.4 values, not derived from these tables. */
       var AQL_SPECIAL = { "0.65": { F:0, G:"U", H:"D" } };
+      /* END DATA AQL_SPECIAL */
+      /* aqlCell: one RAW Table II-A cell for (code-letter index, AQL string).
+         Lookup order: an explicit AQL_SPECIAL entry wins. Otherwise the cell
+         is k = letterIdx - AQL_START[aql] steps along the diagonal. k < 0 means
+         above the first plan ("D", go down), k past the end of AQL_ACSEQ means
+         beyond the last plan ("U", go up), anything else is Ac = AQL_ACSEQ[k].
+         Callers must resolve arrows; this never returns a plan by itself. */
       function aqlCell(letterIdx, aql){
         var sp = AQL_SPECIAL[aql], L = AQL_LETTERS[letterIdx];
         if(sp && L !== undefined && Object.prototype.hasOwnProperty.call(sp, L)) return sp[L];
@@ -2302,6 +2697,13 @@
         var row = null;
         for(var i=0;i<AQL_TABLE1.length;i++){ if(lot <= AQL_TABLE1[i][0]){ row = AQL_TABLE1[i]; break; } }
         var letter = level==="I" ? row[1] : (level==="II" ? row[2] : row[3]);
+        /* Arrow resolution, as Z1.4 instructs: follow the arrow one letter at a
+           time (D = next letter, U = previous letter) until a cell holds an Ac
+           number, and use THAT letter's sample size n with that Ac (Re = Ac + 1).
+           The reported code letter stays the Table I letter. steps and
+           firstArrow only feed the explanatory note. The table never sends an
+           arrow back and forth, so the loop always ends (the self-test resolves
+           the full 16 x 11 grid). */
         var idx = AQL_LETTERS.indexOf(letter), cell = aqlCell(idx, aql), steps = 0, firstArrow = null;
         while(cell === "D" || cell === "U"){ if(firstArrow === null) firstArrow = cell; idx += (cell === "D" ? 1 : -1); cell = aqlCell(idx, aql); steps++; }
         var planLetter = AQL_LETTERS[idx], n = AQL_N[planLetter], ac = cell, re = cell + 1;
@@ -2318,6 +2720,12 @@
         $("aqlResults").classList.remove("hidden");
       });
 
+      /* ======================================================================
+         SECTION · PARETO (tool pareto)
+         Rows come from typed rows, a paste or sheet input. buildPareto sorts
+         the rows, draws bars plus the cumulative % line, and names the vital
+         few (the categories up to the 80% line).
+         ====================================================================== */
       /* ================= TOOL 5 : PARETO ================= */
       var paretoData = [];
       function paretoAddRow(cat, count){
@@ -2397,6 +2805,12 @@
         downloadCSV("pareto.csv", lines.join("\n"));
       });
 
+      /* ======================================================================
+         SECTION · CONVERT (tool convert): fractions, in / mm, hardness
+         Decimal to fraction, fraction to decimal (with a swap between the two
+         sides), a live in / mm pair, and hardness conversion by interpolation
+         in ASTM E140 (data fenced below).
+         ====================================================================== */
       /* ================= TOOL 6 : CONVERT ================= */
       function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t = a % b; a = b; b = t; } return a || 1; }
       function signed4(x){ return (x < 0 ? "-" : "+") + Math.abs(x).toFixed(4); }
@@ -2541,6 +2955,9 @@
         mmSync = false;
       });
 
+      /* BEGIN DATA E140: hardness rows [HV, HB, HRC, HRB, approx UTS MPa], null = not covered.
+         Provenance: ASTM E140 Table 1 (non-austenitic steels); verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* --- hardness conversion, ASTM E140 Table 1 (steel), interpolated ---
          Rows: [HV, HB, HRC, HRB, approx UTS in MPa]; null = scale not covered
          at that hardness in the standard table (never extrapolated). */
@@ -2560,8 +2977,17 @@
         [746,688,62,null,2420],[800,739,64,null,null],[865,null,66,null,null],
         [940,null,68,null,null],[1005,null,69,null,null],[1076,null,70,null,null]
       ];
+      /* END DATA E140 */
+      /* BEGIN DATA HARD_KEYS: column index of each hardness scale in E140 rows.
+         Provenance: layout key for the ASTM E140 table above; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       var HARD_KEYS = { hv:0, hb:1, hrc:2, hrb:3, uts:4 };
+      /* END DATA HARD_KEYS */
+      /* BEGIN DATA HARD_LABEL: display names of the hardness scales.
+         Provenance: ASTM E140 scale names; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       var HARD_LABEL = { hv:"Vickers HV", hb:"Brinell HB", hrc:"Rockwell C HRC", hrb:"Rockwell B HRB" };
+      /* END DATA HARD_LABEL */
       function hardConvert(v, fromKey){
         var fi = HARD_KEYS[fromKey];
         var rows = E140.filter(function(r){ return r[fi] !== null; });
@@ -2622,6 +3048,11 @@
       $("hardVal").addEventListener("input", function(){ if($("hardVal").value.trim() !== "") runHard(); });
       $("hardScale").addEventListener("change", function(){ holdScroll(function(){ if($("hardVal").value.trim() !== "") runHard(); }); });
 
+      /* ======================================================================
+         SECTION · SIGMA / PPM (tool sigma)
+         Converts between Cpk, PPM/DPMO and yield, with an optional 1.5 sigma
+         long-term shift (one tail when shifted).
+         ====================================================================== */
       /* ================= TOOL 6b : SIGMA ⇄ PPM ================= */
       function fmtPpm(x){
         if(!isFinite(x)) return "—";
@@ -2676,12 +3107,24 @@
       $("sigShift").addEventListener("change", function(){ holdScroll(runSigma); });
       $("sigVal").addEventListener("input", runSigma);
 
+      /* ======================================================================
+         SECTION · THREADS (tool threads): manufacturing limits and gauge values
+         Data: TH_M, TH_U, TH_BSP2, TH_W2, TH_A2, TH_S2, TH_TR2, TH_BAN, TH_BAC,
+         TH_U_ADD, TH_U_NOTE, TH_G, TH_PIPE, the TH_*_NOTE strings and TH_PREF
+         (each fenced below). The only computed values come from the labelled
+         custom-size formula path (thCustomMetric, thCustomUN). Models:
+         thMfgModel (manufacturing limits), thGaugeHTML (gauge view). Render:
+         thRender. Cascading selects: family, size, side, class.
+         ====================================================================== */
       /* ================= TOOL 7 : THREADS CATALOGUE =================
          Data authority: verified research file (limits.md) — metric limits
          ISO 965-2 §1, UN limits ASME B1.1 Table 3 §2, other families §7.2,
          gauges ASME B1.2 / ISO 1502 §8. Values are embedded verbatim from
          that file; the ONLY computed path is the labelled custom-size
          formula path (§5.1 metric / §5.2 UN). */
+      /* BEGIN DATA TH_M: ISO metric coarse/fine thread limits, 6g / 6H.
+         Provenance: ISO 965-2 via verified research file limits.md (see the THREADS section note above); verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* TH_M row: label, D, P, extMajMax, extMajMin, extPdMax, extPdMin, extMinorMaxTab, intMinorMin, intMinorMax, intPdMin, intPdMax, intMajMin */
       var TH_M = [
         ["M3 × 0.5",3,0.5,2.98,2.874,2.655,2.58,2.437,2.459,2.599,2.675,2.775,3],
@@ -2703,6 +3146,10 @@
         ["M16 × 1.5",16,1.5,15.968,15.732,14.994,14.854,14.344,14.376,14.676,15.026,15.216,16],
         ["M20 × 1.5",20,1.5,19.968,19.732,18.994,18.854,18.344,18.376,18.676,19.026,19.216,20]
       ];
+      /* END DATA TH_M */
+      /* BEGIN DATA TH_U: UNC/UNF limits, classes 2A / 2B.
+         Provenance: ASME B1.1 Table 3 via verified research file limits.md (see the THREADS section note above); verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* TH_U row: label, D, TPI, series, allowance2A, extMajMax, extMajMin, extPdMax, extPdMin, extMinorMax, intMajMin, intPdMin, intPdMax, intMinorMin, intMinorMax */
       var TH_U = [
         ["#4-40 UNC",0.112,40,"UNC",0.0008,0.1112,0.1061,0.095,0.0925,0.0814,0.112,0.0958,0.0991,0.0849,0.0939],
@@ -2734,9 +3181,13 @@
         ["1-8 UNC",1,8,"UNC",0.002,0.998,0.983,0.9168,0.91,0.8492,1,0.9188,0.9276,0.865,0.89],
         ["1-12 UNF",1,12,"UNF",0.0018,0.9982,0.9868,0.9441,0.9382,0.899,1,0.9459,0.9535,0.91,0.928]
       ];
+      /* END DATA TH_U */
       /* ===== v14 expansion data — generated programmatically from
          manufacturing-expansion.md CSVs (BSP G §3, Whitworth §4, Acme/Stub §5,
          Tr/BA §6, UN series §7). Values verbatim; do not hand-edit. ===== */
+      /* BEGIN DATA TH_BSP2: BSP parallel (G) limits.
+         Provenance: verified research file manufacturing-expansion.md (generated programmatically, see the v14 note) §3; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* TH_BSP2 row: label, TPI, pitch, intMajMin, intPdMin, intPdMax, intMinorMin, intMinorMax, extMajMin, extMajMax, extPdMax, extPdMinA, extPdMinB, note */
       var TH_BSP2 = [
         ["G1/8 \u2014 28 TPI", 28, 0.907, 9.728, 9.147, 9.254, 8.566, 8.848, 9.514, 9.728, 9.147, 9.04, 8.933, null],
@@ -2754,6 +3205,10 @@
         ["G1-3/4 \u2014 11 TPI", 11, 2.309, 53.746, 52.267, 52.447, 50.788, 51.428, 53.386, 53.746, 52.267, 52.087, 51.907, null],
         ["G2 \u2014 11 TPI", 11, 2.309, 59.614, 58.135, 58.315, 56.656, 57.296, 59.254, 59.614, 58.135, 57.955, 57.775, null]
       ];
+      /* END DATA TH_BSP2 */
+      /* BEGIN DATA TH_W2: Whitworth BSW / BSF limits by class.
+         Provenance: verified research file manufacturing-expansion.md (generated programmatically, see the v14 note) §4; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* TH_W2 row: label, D, ext[Close,Medium,Free], int[Medium,Normal];
          ext class = [[majMin,majMax],[pdMin,pdMax],[minorMin,minorMax]];
          int class = [[pdMin,pdMax],[minorMin,minorMax]] (int major min = D) */
@@ -2782,6 +3237,10 @@
         ["1-8 BSW", 1, [[[0.992, 1], [0.9155, 0.92], [0.8309, 0.84]], [[0.9897, 1], [0.9132, 0.92], [0.8261, 0.84]], [[0.9863, 1], [0.9098, 0.92], [0.8227, 0.84]]], [[[0.92, 0.9268], [0.84, 0.872]], [[0.92, 0.9302], [0.84, 0.872]]]],
         ["1-10 BSF", 1, [[[0.9924, 1], [0.9316, 0.936], [0.8635, 0.872]], [[0.9902, 1], [0.9294, 0.936], [0.8591, 0.872]], [[0.9869, 1], [0.9261, 0.936], [0.8558, 0.872]]], [[[0.936, 0.9426], [0.872, 0.899]], [[0.936, 0.9459], [0.872, 0.899]]]]
       ];
+      /* END DATA TH_W2 */
+      /* BEGIN DATA TH_A2: Acme limits.
+         Provenance: verified research file manufacturing-expansion.md (generated programmatically, see the v14 note) §5 (includes the D32 Acme PD correction); verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* TH_A2 row: label, extMaj, extPd, extMinor, intMaj, intPd, intMinor — each [min, max] */
       var TH_A2 = [
         ["Acme 1/4-16", [0.245, 0.25], [0.2043, 0.2148], [0.1618, 0.1775], [0.26, 0.27], [0.2188, 0.2293], [0.1875, 0.1925]],
@@ -2800,6 +3259,10 @@
         ["Acme 1-3/4-4", [1.7375, 1.75], [1.5916, 1.6145], [1.4456, 1.48], [1.77, 1.79], [1.625, 1.6479], [1.5, 1.5125]],
         ["Acme 2-4", [1.9875, 2], [1.8402, 1.8637], [1.6948, 1.73], [2.02, 2.04], [1.875, 1.8985], [1.75, 1.7625]]
       ];
+      /* END DATA TH_A2 */
+      /* BEGIN DATA TH_S2: Stub Acme limits.
+         Provenance: verified research file manufacturing-expansion.md (generated programmatically, see the v14 note) §5; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* TH_S2 row: label, extMaj, extPd, extMinor, intMaj, intPd, intMinor — each [min, max] */
       var TH_S2 = [
         ["Stub Acme 1/4-16", [0.2469, 0.25], [0.2167, 0.2272], [0.1919, 0.2024], [0.26, 0.2705], [0.2312, 0.2417], [0.2125, 0.2156]],
@@ -2818,6 +3281,10 @@
         ["Stub Acme 1-3/4-4", [1.7375, 1.75], [1.6416, 1.6645], [1.5571, 1.58], [1.77, 1.7929], [1.675, 1.6979], [1.6, 1.6125]],
         ["Stub Acme 2-4", [1.9875, 2], [1.8902, 1.9137], [1.8065, 1.83], [2.02, 2.0435], [1.925, 1.9485], [1.85, 1.8625]]
       ];
+      /* END DATA TH_S2 */
+      /* BEGIN DATA TH_TR2: Trapezoidal (Tr) limits.
+         Provenance: verified research file manufacturing-expansion.md (generated programmatically, see the v14 note) §6; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* TH_TR2 row: label, extMaj, extPd, extMinor, intMajMin, intPd, intMinor — pairs [min, max] */
       var TH_TR2 = [
         ["Tr10 \u00d7 2", [9.82, 10], [8.739, 8.929], [7.191, 7.5], 10.5, [9, 9.25], [8, 8.236]],
@@ -2840,6 +3307,10 @@
         ["Tr55 \u00d7 9", [54.5, 55], [49.935, 50.36], [44.329, 45], 56, [50.5, 51.06], [46, 46.67]],
         ["Tr60 \u00d7 9", [59.5, 60], [54.935, 55.36], [49.329, 50], 61, [55.5, 56.06], [51, 51.67]]
       ];
+      /* END DATA TH_TR2 */
+      /* BEGIN DATA TH_BAN: BA thread limits, normal class.
+         Provenance: verified research file manufacturing-expansion.md (generated programmatically, see the v14 note) §6, BS 93:2008 (includes the D43 0 BA correction); verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* TH_BAN row: label, pitch, extMaj, extPd, extMinor, intMajMin, intPd, intMinor — pairs [min, max] */
       var TH_BAN = [
         ["0 BA", 1, [5.775, 5.975], [5.25, 5.375], [4.525, 4.775], 6, [5.4, 5.55], [4.8, 5.175]],
@@ -2860,6 +3331,10 @@
         ["15 BA", 0.21, [0.845, 0.9], [0.73, 0.775], [0.56, 0.65], 0.9, [0.775, 0.83], [0.65, 0.73]],
         ["16 BA", 0.19, [0.74, 0.79], [0.63, 0.675], [0.47, 0.56], 0.79, [0.675, 0.73], [0.56, 0.63]]
       ];
+      /* END DATA TH_BAN */
+      /* BEGIN DATA TH_BAC: BA thread limits, close class external (0 to 10 BA).
+         Provenance: verified research file manufacturing-expansion.md (generated programmatically, see the v14 note) §6, BS 93:2008; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* TH_BAC row: label, extMaj, extPd, extMinor — pairs [min, max] (Close external, 0–10 BA) */
       var TH_BAC = [
         ["0 BA", [5.85, 6], [5.3, 5.4], [4.6, 4.8]],
@@ -2874,6 +3349,10 @@
         ["9 BA", [1.84, 1.9], [1.615, 1.665], [1.33, 1.43]],
         ["10 BA", [1.645, 1.7], [1.44, 1.49], [1.185, 1.28]]
       ];
+      /* END DATA TH_BAC */
+      /* BEGIN DATA TH_U_ADD: additional UN-series rows (UNEF, 8/12/16-UN, UNS), same fields as TH_U.
+         Provenance: verified research file manufacturing-expansion.md (generated programmatically, see the v14 note) §7, ASME B1.1; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* TH_U_ADD rows: same field order as TH_U (label, D, TPI, series, allowance2A,
          extMajMax, extMajMin, extPdMax, extPdMin, extMinorMax, intMajMin, intPdMin,
          intPdMax, intMinorMin, intMinorMax). The 5 rows duplicating limits.md §2
@@ -3026,6 +3505,10 @@
         ["5-3/4-16 16-UN", 5.75, 16, "16-UN", 0.0019, 5.7481, 5.7387, 5.7075, 5.7013, 5.6736, 5.75, 5.7094, 5.7175, 5.682, 5.696],
         ["6-16 16-UN", 6, 16, "16-UN", 0.0019, 5.9981, 5.9887, 5.9575, 5.9513, 5.9236, 6, 5.9594, 5.9675, 5.932, 5.946]
       ];
+      /* END DATA TH_U_ADD */
+      /* BEGIN DATA TH_U_NOTE: per-row single-source flags for TH_U_ADD.
+         Provenance: verified research file manufacturing-expansion.md (generated programmatically, see the v14 note) §7; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* Per-row sourcing notes for TH_U_ADD rows: "int" = internal minor values rest on a
          single printed source; "ext" = external minor max is a construction value,
          single source. Shown in the row — never silently upgraded. */
@@ -3051,6 +3534,10 @@
         "4-1/4-12 12-UN": "int",
         "4-1/4-16 16-UN": "int"
       };
+      /* END DATA TH_U_NOTE */
+      /* BEGIN DATA TH_G: UN thread gauge values (GO/NOT GO plugs, rings, setting plugs).
+         Provenance: ASME B1.2 (ISO 1502 framework for metric gauges), research file b12-gauges-full.md §3, D16 ruling; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* ASME B1.2 gauge limits for all 28 UN combos — embedded verbatim from
          the verified research file b12-gauges-full.md section 3 (generated
          programmatically from that table, never hand-typed). All PD pairs are
@@ -3092,9 +3579,25 @@
         "1-8 UNC": { x:0.0004, goP:[0.9188, 0.9192], ngP:[0.9272, 0.9276], goM:[1.0, 1.0007], ngM:[0.981, 0.9817], goR:[0.9164, 0.9168], ngR:[0.91, 0.9104], setGo:0.9168, setLo:0.91 },
         "1-12 UNF": { x:0.0003, goP:[0.9459, 0.9462], ngP:[0.9532, 0.9535], goM:[1.0, 1.0006], ngM:[0.989, 0.9896], goR:[0.9438, 0.9441], ngR:[0.9382, 0.9385], setGo:0.9441, setLo:0.9382 }
       };
+      /* END DATA TH_G */
+      /* BEGIN DATA TH_CAL_NOTE: calibration disclaimer text shown in the gauge view.
+         Provenance: ASME B1.2 / ISO 1502 / ISO 7-2 / ASME B1.20.5 references; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       var TH_CAL_NOTE = "Reference values only — for calibration preparation. Acceptance of a thread gauge at calibration is governed by its certificate and the governing standard (ASME B1.2 for UN gauges, ISO 1502 for metric gauges, ISO 7-2 / ASME B1.20.5 for pipe thread gauges). If a measured gauge value disagrees with this app, the certificate and the standard govern.";
+      /* END DATA TH_CAL_NOTE */
+      /* BEGIN DATA TH_MEAS_NOTE: plug / ring measurement-method text.
+         Provenance: ASME B1.2 practice; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       var TH_MEAS_NOTE = "Plug gauge pitch diameter is measured directly (three-wire). A ring gauge is not measured directly — it is verified on its setting plug, and the setting plug's certified pitch diameter is the value of record for the ring.";
+      /* END DATA TH_MEAS_NOTE */
+      /* BEGIN DATA TH_PIPE_CAVEAT: tapered pipe thread acceptance caveat text.
+         Provenance: ASME B1.20.1 / ISO 7-1; verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       var TH_PIPE_CAVEAT = "Tapered pipe threads (NPT, BSPT) are not accepted on diameter limits the way straight threads are. The standards publish basic dimensions at a reference plane only — outside diameter, pitch diameter at that plane, and the gauge length (L1). Acceptance is by a taper thread ring/plug gauge: the gauge must seat at a standoff within the standard's tolerance (NPT: ±1 turn from basic standoff; ISO 7-1: gauge-length tolerance ±1 pitch for sizes up to 2 in). Do not machine to a min/max diameter band from these numbers.";
+      /* END DATA TH_PIPE_CAVEAT */
+      /* BEGIN DATA TH_PIPE: NPT / BSPT basic dimensions at the reference plane.
+         Provenance: ASME B1.20.1 (NPT), ISO 7-1 (BSPT); verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       /* v14: the v13 single-row TH_BSP / TH_WHIT / TH_ACME / TH_TR / TH_BA arrays
          were replaced by the full verified tables above (TH_BSP2, TH_W2, TH_A2,
          TH_S2, TH_TR2, TH_BAN / TH_BAC) — including the D32 Acme PD correction
@@ -3121,6 +3624,7 @@
           note:"",
           gauge:"Standoff acceptance: gauge-length tolerance ±1 pitch (for sizes up to 2 in). No pitch-diameter limit bands exist for tapered threads." }
       ];
+      /* END DATA TH_PIPE */
 
       /* ---------- threads helpers ---------- */
       function thFmtVal(v, unit){
@@ -3152,7 +3656,11 @@
         if(val !== undefined) sel.value = val;
       }
       /* ---------- custom-size formula path (research file §5.1 / §5.2) ---------- */
+      /* BEGIN DATA TH_PREF: ISO 965-1 preferred-number series for rounding tolerances (micrometres).
+         Provenance: ISO 965-1 via research file §5.1 (expansion research D65); verified 2026-11.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
       var TH_PREF = [50,53,56,60,63,67,71,75,80,85,90,95,100,106,112,118,125,132,140,150,160,170,180,190,200,212,224,236,250,265,280,300,315,335,355,375,400,425,450,475,500,530,560,600,630,670,710,750,800,850,900,950,1000,1060,1120,1180,1250];
+      /* END DATA TH_PREF */
       function thPref(x){
         var best = TH_PREF[0], bd = Infinity;
         TH_PREF.forEach(function(v){ var d = Math.abs(Math.log(x / v)); if(d < bd){ bd = d; best = v; } });
@@ -3168,7 +3676,11 @@
       function thCustomMetric(D, P){
         var esUm = -(15 + 11 * P), es = esUm / 1000;
         var pdB = D - 0.649519 * P, d1B = D - 1.082532 * P;
+        /* BEGIN DATA steps: ISO 965-1 diameter steps used by the custom metric formula.
+           Provenance: ISO 965-1 via research file §5.1; verified 2026-11.
+           Edit data only via a verified data change, never by hand-tuning numbers. */
         var steps = [[1.12,1.8],[1.8,2.8],[2.8,4.5],[4.5,7.1],[7.1,11.2],[11.2,18],[18,28],[28,45],[45,71],[71,112],[112,180],[180,280],[280,450]];
+        /* END DATA steps */
         var d = D;
         for(var i = 0; i < steps.length; i++){ if(D > steps[i][0] && D <= steps[i][1]){ d = Math.sqrt(steps[i][0] * steps[i][1]); break; } }
         var td2raw = 90 * Math.pow(P, 0.4) * Math.pow(d, 0.1);
@@ -3483,6 +3995,11 @@
       $("thSegGauge").addEventListener("click", function(){ holdScroll(function(){ thState.view = "gauge"; thRender(); }); });
       thFillSizes();
 
+      /* ======================================================================
+         SECTION · STACK-UP (tool stack)
+         Linear chain of up to 10 dimensions: worst-case and RSS. The Example
+         shows suDemoBanner, which clears when a row is removed (see suAddRow).
+         ====================================================================== */
       /* ================= TOOL 8a : TOLERANCE STACK-UP ================= */
       var suCount = 0;
       function suAddRow(name, nominal, tol, sign){
@@ -3537,13 +4054,23 @@
       $("suExample").addEventListener("click", function(){
         holdScroll(function(){
           $("suRows").innerHTML = ""; suCount = 0;
+          /* BEGIN DATA DEMO_STACKUP: Stack-up Example: 5-dimension chain.
+             Provenance: fixed demonstration data; verified 2026-11.
+             Edit data only via a verified data change, never by hand-tuning numbers. */
           suAddRow("A", 50, 0.10, 1); suAddRow("B", 20, 0.05, -1); suAddRow("C", 15, 0.05, -1); suAddRow("D", 10, 0.08, -1); suAddRow("E", 2, 0.02, 1);
+          /* END DATA DEMO_STACKUP */
           $("suDemoBanner").classList.remove("hidden");
           runStack();
         });
       });
       suAddRow(); suAddRow(); suAddRow();
 
+      /* ======================================================================
+         SECTION · TRUE POSITION (tool tp): ASME Y14.5 diametral position, bonus
+         runTP: diametral deviation = 2 * sqrt(dx^2 + dy^2). Bonus applies only
+         with MMC/LMC and its direction depends on hole vs shaft (see the B3
+         note inside). Out of size means no bonus and never a PASS.
+         ====================================================================== */
       /* ================= TOOL 8b : TRUE POSITION ================= */
       function runTP(){
         var msgEl = $("tpMsg");
@@ -3628,6 +4155,9 @@
       $("tpFeat").addEventListener("change", function(){ holdScroll(function(){ if(!$("tpResults").classList.contains("hidden")) runTP(); }); });
       tpSyncOtherLabel();
 
+      /* ======================================================================
+         SECTION · INTERPRETATION SUMMARIES (copy-only, nothing is sent)
+         ====================================================================== */
       /* ================= INTERPRETATION SUMMARIES =================
          No backend and no API key lives in this page. Each of SPC, Data
          Check and Gage R&R offers ONE quiet secondary action — "Get an
@@ -3779,6 +4309,9 @@
       wireAi("grr", buildGrrAiText, function(){ return !!grrLast; });
       syncAiButtons();
 
+      /* ======================================================================
+         SECTION · NAV / EVENTS: focus scroll guard and on-screen keyboard
+         ====================================================================== */
       /* ---------- focus scroll guard + keyboard visibility ----------
          Standing rule: operating any control leaves the page where it is.
          Root cause of the Convert-tab jump: the old helper scrolled EVERY
@@ -3897,6 +4430,191 @@
         }
       })();
 
+      /* ======================================================================
+         SECTION · v19 PRESENTATION (chart layers, result headline, status
+         ring, Sightline Mode)
+         Presentation only. Nothing here computes a statistic, changes a
+         status rule or stores anything: every value shown is read from state
+         the existing code already computed (spcState) or from text the
+         existing views already rendered (the verdict line, the Cpk tile, the
+         flags, the thread limit tables). No web storage of any kind.
+         ====================================================================== */
+      /* Individuals-chart layers. spcChartFrame() is the chart's own scale
+         (shared with spcChartSVG), so the zone bands UNDER the chart and the
+         fail-colour rings OVER it register 1:1 with the v18 SVG, which is
+         drawn unchanged. Zones: C = x̄ ± 1σ, B = 1σ–2σ, A = 2σ–3σ (σ within,
+         the same σ the control limits use). */
+      function spcLayerSVG(F, body){
+        return '<svg viewBox="0 0 ' + F.W + ' ' + F.H + '" aria-hidden="true" focusable="false">' + body + "</svg>";
+      }
+      function spcV19Clear(){
+        $("spcZones").innerHTML = ""; $("spcRings").innerHTML = "";
+        $("spcChartFrame").classList.remove("ring-pass", "ring-warn", "ring-fail");
+        var h = $("spcHeadline"); h.textContent = ""; h.className = "headline hidden";
+      }
+      function spcV19Decorate(){
+        var s = spcState;
+        if(!s){ spcV19Clear(); return; }
+        var st = s.st, F = spcChartFrame(s.vals, st, s.lsl, s.usl);
+        var x0 = F.padL, wd = F.W - F.padR - F.padL;
+        function band(a, b, cls){
+          var ya = F.Y(a), yb = F.Y(b);
+          return '<rect class="' + cls + '" x="' + x0 + '" y="' + Math.min(ya, yb) + '" width="' + wd + '" height="' + Math.abs(yb - ya) + '"/>';
+        }
+        var c = st.xbar, sg = st.sdW, z = "";
+        z += band(c + 2 * sg, st.ucl, "zone-a") + band(st.lcl, c - 2 * sg, "zone-a");
+        z += band(c + sg, c + 2 * sg, "zone-b") + band(c - 2 * sg, c - sg, "zone-b");
+        z += band(c - sg, c + sg, "zone-c");
+        $("spcZones").innerHTML = spcLayerSVG(F, z);
+        /* ring every point the existing classification flagged */
+        var rings = "";
+        st.outCtrl.concat(st.outSpec).forEach(function(n){
+          var i = n - 1;
+          rings += '<circle class="ooc-ring" cx="' + F.X(i) + '" cy="' + F.Y(s.vals[i]) + '" r="8.5"/>';
+        });
+        $("spcRings").innerHTML = spcLayerSVG(F, rings);
+        /* status ring: read from the flags the existing code rendered
+           (red = out of spec, amber = out of control / run / trend, green = no signals) */
+        var fl = $("spcFlags"), ring = fl.querySelector(".flag.red") ? "fail" : (fl.querySelector(".flag.amber") ? "warn" : "pass");
+        var fr = $("spcChartFrame");
+        fr.classList.remove("ring-pass", "ring-warn", "ring-fail");
+        fr.classList.add("ring-" + ring);
+        /* headline: "Cpk <tile value> · <existing verdict wording>" */
+        var h = $("spcHeadline"), vEl = $("spcSnapshot").querySelector(".verdict");
+        h.textContent = "";
+        if(!vEl){ h.className = "headline hidden"; return; }
+        var vcls = vEl.classList.contains("good") ? "good" : (vEl.classList.contains("warn") ? "warn" : "bad");
+        var cpkText = null;
+        Array.prototype.forEach.call($("spcCap").querySelectorAll(".stat"), function(t){
+          var k = t.querySelector(".k"), v = t.querySelector(".v");
+          if(k && v && k.textContent === "Cpk (within)") cpkText = v.textContent;
+        });
+        function span(cls, txt){ var e = document.createElement("span"); e.className = cls; e.textContent = txt; h.appendChild(e); }
+        if(st.cap && cpkText !== null){
+          span("hl-k", "Cpk"); h.appendChild(document.createTextNode(" "));
+          span("hl-v", cpkText); h.appendChild(document.createTextNode(" "));
+          span("hl-sep", "·"); h.appendChild(document.createTextNode(" "));
+        }
+        span("hl-t", vEl.textContent);
+        h.className = "headline " + vcls;
+      }
+
+      /* ---------- Sightline Mode (Threads) ----------
+         A full-screen, large-type copy of the limit rows the CURRENT Threads
+         view already shows for the selected size. It copies the rendered
+         title and table cells as text — it never looks anything up and never
+         recomputes. No limit table on screen = nothing to show = it stays shut.
+         Opens: landscape on a touch (coarse-pointer) device, or Space on a
+         fine-pointer device. Closes: portrait, Space, Esc, or a tap/click.
+         It is position:fixed and only takes focus with preventScroll, so the
+         page underneath never moves. */
+      var slEl = $("sightline"), slOpen = false, slPrevFocus = null, slSavedY = 0;
+      function slMQ(q){ try { return typeof window.matchMedia === "function" ? window.matchMedia(q) : null; } catch(e){ return null; } }
+      var slLandMQ = slMQ("(orientation: landscape) and (pointer: coarse)");
+      var slFineMQ = slMQ("(pointer: fine)");
+      function slThreadsActive(){ return $("tool-threads").classList.contains("active"); }
+      function slCapture(){
+        if(!slThreadsActive()) return null;
+        var isMfg = !$("thMfg").classList.contains("hidden");
+        var view = isMfg ? $("thMfg") : $("thGauge");
+        var h3 = view.querySelector("h3"), tbl = view.querySelector("table.dtable");
+        if(!h3 || !tbl) return null;
+        var head = [], rows = [], headPD = false, KEY = /pitch diam|major|minor|\bPD\b/i;
+        Array.prototype.forEach.call(tbl.rows, function(tr){
+          var ths = tr.querySelectorAll("th");
+          if(ths.length){
+            head = Array.prototype.map.call(ths, function(th){ return th.textContent; });
+            headPD = head.slice(1).some(function(t){ return KEY.test(t); });
+            return;
+          }
+          var tds = tr.cells;
+          if(tds.length < 2) return;
+          var label = tds[0].firstChild ? tds[0].firstChild.textContent : "";
+          if(!headPD && !KEY.test(label)) return;
+          rows.push({
+            label: label,
+            cells: Array.prototype.slice.call(tds, 1).map(function(td){ return { text: td.textContent, span: td.colSpan || 1 }; }),
+            pd: /pitch diam|\bPD\b/i.test(label) || headPD
+          });
+        });
+        if(!rows.length) return null;
+        return { view: isMfg ? $("thSegMfg").textContent : $("thSegGauge").textContent, title: h3.textContent, head: head, rows: rows };
+      }
+      function slRender(cap){
+        slEl.textContent = "";
+        function el(tag, cls, txt, parent){ var e = document.createElement(tag); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; (parent || slEl).appendChild(e); return e; }
+        el("p", "sl-tag", "Sightline · " + cap.view);
+        el("p", "sl-title", cap.title);
+        var t = el("table", "sl-table");
+        if(cap.head.length){ var hr = el("tr", "", undefined, el("thead", "", undefined, t)); cap.head.forEach(function(x){ el("th", "", x, hr); }); }
+        var tb = el("tbody", "", undefined, t);
+        cap.rows.forEach(function(r){
+          var tr = el("tr", r.pd ? "sl-pd" : "", undefined, tb);
+          el("td", "", r.label, tr);
+          r.cells.forEach(function(c){ var td = el("td", "", c.text, tr); if(c.span > 1) td.colSpan = c.span; });
+        });
+        el("p", "sl-hint", "Tap, Esc or Space to close · rotate to portrait to close");
+      }
+      function slShow(){
+        if(slOpen) return true;
+        if(typeof sheetCtx !== "undefined" && sheetCtx) return false;
+        var cap = slCapture();
+        if(!cap) return false;
+        slSavedY = window.scrollY || window.pageYOffset || 0;
+        slPrevFocus = document.activeElement;
+        slRender(cap);
+        slEl.classList.remove("hidden");
+        slOpen = true;
+        try { slEl.focus({ preventScroll: true }); } catch(e) {}
+        return true;
+      }
+      function slHide(){
+        if(!slOpen) return;
+        slEl.classList.add("hidden");
+        slEl.textContent = "";
+        slOpen = false;
+        var p = slPrevFocus; slPrevFocus = null;
+        /* hand focus back (never to a text field: that would raise the phone keyboard) */
+        if(p && p !== document.body && document.contains(p) && !/^(INPUT|TEXTAREA)$/.test(p.tagName)){
+          try { p.focus({ preventScroll: true }); } catch(e) {}
+        } else if(document.activeElement === slEl){ slEl.blur(); }
+        var y = window.scrollY || window.pageYOffset || 0;
+        if(y !== slSavedY) window.scrollTo(0, slSavedY);
+      }
+      slEl.addEventListener("click", function(){ slHide(); });
+      document.addEventListener("keydown", function(ev){
+        var isSpace = ev.key === " " || ev.key === "Spacebar";
+        if(slOpen){
+          if(ev.key === "Escape" || isSpace){ ev.preventDefault(); slHide(); }
+          else if(ev.key === "Tab") ev.preventDefault();
+          return;
+        }
+        if(!isSpace || ev.repeat || ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
+        if(!slFineMQ || !slFineMQ.matches) return;
+        var t = ev.target;
+        if(t && t.closest && t.closest("input, textarea, select, button, a, [contenteditable]")) return;
+        if(slShow()) ev.preventDefault();
+      });
+      function slSyncOrientation(){
+        if(!slLandMQ) return;
+        if(slLandMQ.matches){ if(slThreadsActive()) slShow(); }
+        else slHide();
+      }
+      if(slLandMQ){
+        if(slLandMQ.addEventListener) slLandMQ.addEventListener("change", slSyncOrientation);
+        else if(slLandMQ.addListener) slLandMQ.addListener(slSyncOrientation);
+      }
+      /* arriving in Threads while already in landscape (runs after showTool) */
+      Array.prototype.forEach.call(document.querySelectorAll("nav.clusters button, nav.tabs button"), function(b){
+        b.addEventListener("click", function(){ if(slLandMQ && slLandMQ.matches && slThreadsActive()) slShow(); });
+      });
+
+      /* ======================================================================
+         SECTION · PWA
+         The service worker is inlined as a base64 data: URL, and its CACHE name
+         lives inside that base64. Do not edit it in this pass. Registration is
+         wrapped in try/catch and never blocks the app.
+         ====================================================================== */
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
