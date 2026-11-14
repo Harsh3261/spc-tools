@@ -183,6 +183,66 @@
       @media (prefers-reduced-motion: reduce){
         *, *::before, *::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important}
       }
+      /* ===== Stage 2 — cluster navigation + polish, same palette & fonts =====
+         Rules below only refine the existing identity (light steel-blue page,
+         white cards, cyan accent, system sans + mono). Not sticky, no bottom
+         bar. Every tap target is >= 44 px. */
+      .wrap{padding:18px 14px calc(40px + env(safe-area-inset-bottom))}
+      header.top{padding:6px 2px 16px}
+      /* primary: five clusters in one segmented track */
+      nav.clusters{
+        display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; margin:16px 0 0; padding:4px;
+        background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+        box-shadow:inset 0 1px 2px rgba(19,38,53,.06);
+      }
+      nav.clusters button{
+        min-height:56px; padding:8px 6px; cursor:pointer; border:1px solid transparent; border-radius:9px;
+        background:transparent; color:var(--ink-dim); font-family:var(--sans); text-align:center;
+        display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+        transition:background-color .12s ease-out, color .12s ease-out, box-shadow .12s ease-out;
+      }
+      nav.clusters .cl-name{font-size:14px; font-weight:800; letter-spacing:.02em; line-height:1.2}
+      nav.clusters .cl-sub{font-size:11px; font-weight:600; color:var(--ink-faint); line-height:1.25}
+      nav.clusters button[aria-selected="true"]{background:var(--cyan); color:#ffffff; border-color:var(--cyan-dim); box-shadow:0 2px 8px rgba(11,127,149,.35)}
+      nav.clusters button[aria-selected="true"] .cl-sub{color:rgba(255,255,255,.86)}
+      nav.clusters button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
+      @media (hover:hover){ nav.clusters button[aria-selected="false"]:hover{background:var(--panel); color:var(--ink)} }
+      @media (max-width:560px){
+        /* phone: 3 + 2 layout, short labels only */
+        nav.clusters{grid-template-columns:repeat(6, 1fr)}
+        nav.clusters button{grid-column:span 2; min-height:48px}
+        nav.clusters button:nth-child(4), nav.clusters button:nth-child(5){grid-column:span 3}
+        nav.clusters .cl-sub{display:none}
+      }
+      /* secondary: tools inside the chosen cluster */
+      nav.tabs{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0 0; padding:0}
+      nav.tabs button{
+        flex:1 1 0; min-width:max-content; min-height:44px; padding:8px 14px; border-radius:999px;
+        background:var(--panel); color:var(--ink-dim); border:1px solid var(--line); font-size:13.5px;
+      }
+      nav.tabs button[aria-selected="true"]{background:rgba(11,127,149,.10); color:var(--cyan); border-color:var(--cyan); box-shadow:inset 0 0 0 1px var(--cyan)}
+      section.tool{padding-top:14px}
+      /* cards: calmer rhythm, clearer hierarchy */
+      .card{border-radius:12px; padding:18px 16px 16px; margin-bottom:16px}
+      @media (min-width:640px){ .card{padding:22px 22px 20px} }
+      .card h2{font-size:20px; margin:0 0 6px; line-height:1.3}
+      .card h2 + .guru, .card h2 + .small{margin-top:4px}
+      .card h3{margin:22px 0 8px; padding-top:14px; border-top:1px solid var(--line-soft)}
+      .card h3:first-of-type{margin-top:10px}
+      .card h3 + .stats, .card h3 + .chartbox{margin-top:4px}
+      /* buttons: primary = filled cyan, secondary = white with a clear border */
+      button.ghost, a.ghostlink{background:var(--panel); border-color:var(--line); box-shadow:0 1px 2px rgba(19,38,53,.06)}
+      @media (hover:hover){ button.ghost:hover, a.ghostlink:hover{border-color:var(--cyan); color:var(--cyan)} button.act:hover:not(:disabled){filter:brightness(1.06)} }
+      button.act{box-shadow:0 2px 6px rgba(11,127,149,.28)}
+      .btnrow{gap:10px}
+      /* form controls: >= 44 px everywhere */
+      input[type="text"], input[type="number"], select{min-height:46px}
+      table.grid input{min-height:44px}
+      .surow input, .surow select{min-height:44px}
+      .sheetradio{display:flex; align-items:center; min-height:44px; margin:2px 0}
+      .sheetradio input{width:22px; height:22px; flex:0 0 auto}
+      /* footer: rights line sits directly under the maker's mark */
+      .makers-mark.rights{margin:0 0 4px}
     </style>
   </head>
   <body>
@@ -192,15 +252,27 @@
         <p><strong>Your data never leaves this device.</strong> All calculations run in your browser — paste your values, get your answers. Nothing is uploaded, stored on a server, or kept after you close the tab.</p>
       </header>
 
-      <nav class="tabs" role="tablist" aria-label="Tools">
-        <button role="tab" id="tabbtn-spc" aria-selected="true" data-tab="spc">SPC &amp; Capability</button>
-        <button role="tab" id="tabbtn-check" aria-selected="false" data-tab="check">Data Check</button>
-        <button role="tab" id="tabbtn-grr" aria-selected="false" data-tab="grr">Gage R&amp;R</button>
-        <button role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql">AQL Lookup</button>
-        <button role="tab" id="tabbtn-pareto" aria-selected="false" data-tab="pareto">Pareto</button>
-        <button role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert">Convert</button>
-        <button role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads">Threads</button>
-        <button role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack">Stack-Up</button>
+      <!-- Stage 2: five task clusters (top segmented control) + a secondary
+           switch inside clusters that hold more than one tool. Every tool keeps
+           its original tabbtn-* / tool-* IDs. Not sticky, no bottom bar. -->
+      <nav class="clusters" role="tablist" aria-label="Tool groups">
+        <button type="button" role="tab" id="clbtn-process" aria-selected="true" data-cluster="process"><span class="cl-name">Process</span><span class="cl-sub">SPC &amp; capability</span></button>
+        <button type="button" role="tab" id="clbtn-analyse" aria-selected="false" data-cluster="analyse"><span class="cl-name">Analyse</span><span class="cl-sub">Data Check · Pareto</span></button>
+        <button type="button" role="tab" id="clbtn-measure" aria-selected="false" data-cluster="measure"><span class="cl-name">Measurement</span><span class="cl-sub">Gage R&amp;R · Position</span></button>
+        <button type="button" role="tab" id="clbtn-sampling" aria-selected="false" data-cluster="sampling"><span class="cl-name">Sampling</span><span class="cl-sub">AQL lookup</span></button>
+        <button type="button" role="tab" id="clbtn-reference" aria-selected="false" data-cluster="reference"><span class="cl-name">Reference</span><span class="cl-sub">Threads · Convert · more</span></button>
+      </nav>
+      <nav class="tabs" role="tablist" aria-label="Tools in this group">
+        <button type="button" role="tab" id="tabbtn-spc" aria-selected="true" data-tab="spc" data-cluster="process">SPC &amp; Capability</button>
+        <button type="button" role="tab" id="tabbtn-check" aria-selected="false" data-tab="check" data-cluster="analyse">Data Check</button>
+        <button type="button" role="tab" id="tabbtn-pareto" aria-selected="false" data-tab="pareto" data-cluster="analyse">Pareto</button>
+        <button type="button" role="tab" id="tabbtn-grr" aria-selected="false" data-tab="grr" data-cluster="measure">Gage R&amp;R</button>
+        <button type="button" role="tab" id="tabbtn-tp" aria-selected="false" data-tab="tp" data-cluster="measure">True Position</button>
+        <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
+        <button type="button" role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads" data-cluster="reference">Threads</button>
+        <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Convert</button>
+        <button type="button" role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack" data-cluster="reference">Stack-Up</button>
+        <button type="button" role="tab" id="tabbtn-sigma" aria-selected="false" data-tab="sigma" data-cluster="reference">Sigma ⇄ PPM</button>
       </nav>
 
       <!-- ============ TOOL 1 : SPC & CAPABILITY ============ -->
@@ -576,37 +648,6 @@
           <p class="cite">Approximate conversions for steel per ASTM E140 — for reference only, not for acceptance decisions.</p>
         </div>
 
-        <div class="card">
-          <h2>Sigma ⇄ PPM — capability in plain numbers</h2>
-          <p class="small">Convert between Cpk, expected defects (PPM) and yield. With the shift <strong>off</strong>, the process is treated as centred and PPM counts both spec tails. With the shift <strong>on</strong>, the Motorola 1.5σ-shift convention applies and the result is quoted as DPMO (one tail) — the convention behind "6 sigma = 3.4 DPMO".</p>
-          <div class="row3">
-            <div>
-              <label class="flabel" for="sigFrom">Convert from</label>
-              <select id="sigFrom" class="biginput">
-                <option value="cpk" selected>Cpk</option>
-                <option value="ppm">PPM / DPMO</option>
-                <option value="yield">Yield %</option>
-              </select>
-            </div>
-            <div>
-              <label class="flabel" for="sigVal" id="sigValLabel">Cpk value</label>
-              <input type="number" id="sigVal" class="biginput" step="any" inputmode="decimal" placeholder="e.g. 1.33" autocomplete="off" />
-            </div>
-            <div>
-              <label class="flabel" for="sigShift">Include 1.5σ shift</label>
-              <select id="sigShift" class="biginput">
-                <option value="off" selected>Off — centred process</option>
-                <option value="on">On — Motorola convention</option>
-              </select>
-            </div>
-          </div>
-          <div class="msg hidden" id="sigMsg" role="status"></div>
-          <div id="sigResults" class="hidden">
-            <h3>Equivalent values</h3>
-            <div class="stats" id="sigTiles"></div>
-            <p class="explain" id="sigMeaning"></p>
-          </div>
-        </div>
       </section>
 
       <!-- ============ TOOL 7 : THREADS CATALOGUE ============ -->
@@ -701,6 +742,45 @@
           </div>
         </div>
 
+      </section>
+
+      <!-- ============ TOOL 6b : SIGMA ⇄ PPM (own view, Reference cluster) ============ -->
+      <section class="tool" id="tool-sigma" role="tabpanel" aria-labelledby="tabbtn-sigma">
+        <div class="card">
+          <h2>Sigma ⇄ PPM — capability in plain numbers</h2>
+          <p class="small">Convert between Cpk, expected defects (PPM) and yield. With the shift <strong>off</strong>, the process is treated as centred and PPM counts both spec tails. With the shift <strong>on</strong>, the Motorola 1.5σ-shift convention applies and the result is quoted as DPMO (one tail) — the convention behind "6 sigma = 3.4 DPMO".</p>
+          <div class="row3">
+            <div>
+              <label class="flabel" for="sigFrom">Convert from</label>
+              <select id="sigFrom" class="biginput">
+                <option value="cpk" selected>Cpk</option>
+                <option value="ppm">PPM / DPMO</option>
+                <option value="yield">Yield %</option>
+              </select>
+            </div>
+            <div>
+              <label class="flabel" for="sigVal" id="sigValLabel">Cpk value</label>
+              <input type="number" id="sigVal" class="biginput" step="any" inputmode="decimal" placeholder="e.g. 1.33" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="sigShift">Include 1.5σ shift</label>
+              <select id="sigShift" class="biginput">
+                <option value="off" selected>Off — centred process</option>
+                <option value="on">On — Motorola convention</option>
+              </select>
+            </div>
+          </div>
+          <div class="msg hidden" id="sigMsg" role="status"></div>
+          <div id="sigResults" class="hidden">
+            <h3>Equivalent values</h3>
+            <div class="stats" id="sigTiles"></div>
+            <p class="explain" id="sigMeaning"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TOOL 8b : TRUE POSITION (own view, Measurement cluster) ============ -->
+      <section class="tool" id="tool-tp" role="tabpanel" aria-labelledby="tabbtn-tp">
         <div class="card">
           <h2>True position — with MMC / LMC bonus</h2>
           <p class="small">Enter how far the measured feature centre sits from its true (basic) position, the stated position tolerance, and the feature's actual mating size. Bonus tolerance is how far the actual size has departed from the MMC (or LMC) size limit.</p>
@@ -736,6 +816,20 @@
               </select>
             </div>
           </div>
+          <div class="row2">
+            <div>
+              <label class="flabel" for="tpFeat">Feature type — sets the bonus direction</label>
+              <select id="tpFeat">
+                <option value="hole" selected>Hole (internal — MMC is the smallest size)</option>
+                <option value="shaft">Shaft / pin (external — MMC is the largest size)</option>
+              </select>
+            </div>
+            <div>
+              <label class="flabel" for="tpOther" id="tpOtherLabel">Other size limit (LMC) — optional</label>
+              <input type="number" id="tpOther" step="any" inputmode="decimal" placeholder="Checks the far size limit" autocomplete="off" />
+            </div>
+          </div>
+          <p class="small" style="margin:6px 0 0">Bonus is earned only while the measured size is inside its limits, moving away from the modifier limit (Ⓜ: toward LMC; Ⓛ: toward MMC). A size beyond the modifier limit — or beyond the other limit, when you enter it — is <strong>out of size</strong>: no bonus and no PASS.</p>
           <div class="btnrow">
             <button class="act" id="tpGo">Check position</button>
           </div>
@@ -781,6 +875,7 @@
         Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate) · Thread limits per ISO 965-2 / ASME B1.1, gauge values per ASME B1.2 / ISO 1502 · True position per ASME Y14.5. Estimates from your data — verify critical results before acting on them.
       </footer>
       <p class="makers-mark">Built by Harsh Patel · with Satureday</p>
+      <p class="makers-mark rights">© 2026 Harsh Patel · All rights reserved</p>
     </div>
 
     <script>
@@ -912,22 +1007,71 @@
       function fUpperP(f, d1, d2){ if(f<=0) return 1; var x = d2/(d2 + d1*f); return ibeta(d2/2, d1/2, x); }
 
       /* ---------- tabs ---------- */
+      /* Stage 2 navigation: five clusters (nav.clusters) and the tools inside
+         the chosen cluster (nav.tabs — only that cluster's buttons show, and
+         the row hides entirely for one-tool clusters). Switching never moves
+         the page: the scroll position is captured first, the page is given
+         enough height that the browser cannot clamp it (a shorter tool view
+         would otherwise pull the page up), and the position is re-asserted
+         immediately, on the next frame and after ~170 ms with smooth
+         scrolling forced off. Each cluster remembers its last-used tool. */
+      var clusterBtns = document.querySelectorAll("nav.clusters button");
       var tabBtns = document.querySelectorAll("nav.tabs button");
-      tabBtns.forEach(function(btn){
-        btn.addEventListener("click", function(){
-          var savedY = window.scrollY || window.pageYOffset || 0;
-          var rootEl = document.documentElement;
-          var prevBehavior = rootEl.style.scrollBehavior;
-          rootEl.style.scrollBehavior = "auto";
-          tabBtns.forEach(function(b){ b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
-          document.querySelectorAll("section.tool").forEach(function(s){ s.classList.toggle("active", s.id === "tool-"+btn.getAttribute("data-tab")); });
+      var clusterLast = { process:"spc", analyse:"check", measure:"grr", sampling:"aql", reference:"threads" };
+      function clusterOfTool(tab){ var b = $("tabbtn-" + tab); return b ? b.getAttribute("data-cluster") : null; }
+      function showTool(tab, initial){
+        var cluster = clusterOfTool(tab);
+        if(!cluster) return;
+        var savedY = window.scrollY || window.pageYOffset || 0;
+        var rootEl = document.documentElement, bodyEl = document.body;
+        var prevBehavior = rootEl.style.scrollBehavior;
+        rootEl.style.scrollBehavior = "auto";
+        clusterLast[cluster] = tab;
+        clusterBtns.forEach(function(b){ b.setAttribute("aria-selected", b.getAttribute("data-cluster") === cluster ? "true" : "false"); });
+        var inCluster = 0;
+        tabBtns.forEach(function(b){
+          var mine = b.getAttribute("data-cluster") === cluster;
+          b.classList.toggle("hidden", !mine);
+          if(mine) inCluster++;
+          b.setAttribute("aria-selected", b.getAttribute("data-tab") === tab ? "true" : "false");
+          b.tabIndex = mine ? 0 : -1;
+        });
+        document.querySelector("nav.tabs").classList.toggle("hidden", inCluster < 2);
+        /* hold the page height so the saved position stays reachable */
+        bodyEl.style.minHeight = "";
+        document.querySelectorAll("section.tool").forEach(function(s){ s.classList.toggle("active", s.id === "tool-" + tab); });
+        var need = savedY + (window.innerHeight || 0);
+        if(rootEl.scrollHeight < need) bodyEl.style.minHeight = need + "px";
+        if(initial){ rootEl.style.scrollBehavior = prevBehavior; return; }
+        window.scrollTo(0, savedY);
+        requestAnimationFrame(function(){
           window.scrollTo(0, savedY);
-          requestAnimationFrame(function(){
-            window.scrollTo(0, savedY);
-            setTimeout(function(){ window.scrollTo(0, savedY); rootEl.style.scrollBehavior = prevBehavior; }, 170);
+          setTimeout(function(){ window.scrollTo(0, savedY); rootEl.style.scrollBehavior = prevBehavior; }, 170);
+        });
+      }
+      clusterBtns.forEach(function(btn){
+        btn.addEventListener("click", function(){ showTool(clusterLast[btn.getAttribute("data-cluster")]); });
+      });
+      tabBtns.forEach(function(btn){
+        btn.addEventListener("click", function(){ showTool(btn.getAttribute("data-tab")); });
+      });
+      /* Arrow keys move along either tab row (focus without scrolling). */
+      function wireTabKeys(list, activate){
+        list.forEach(function(btn){
+          btn.addEventListener("keydown", function(ev){
+            if(ev.key !== "ArrowRight" && ev.key !== "ArrowLeft") return;
+            var vis = Array.prototype.filter.call(list, function(b){ return !b.classList.contains("hidden"); });
+            var i = vis.indexOf(btn); if(i < 0) return;
+            var next = vis[(i + (ev.key === "ArrowRight" ? 1 : vis.length - 1)) % vis.length];
+            ev.preventDefault();
+            activate(next);
+            try { next.focus({ preventScroll: true }); } catch(e) { next.focus(); }
           });
         });
-      });
+      }
+      wireTabKeys(clusterBtns, function(b){ showTool(clusterLast[b.getAttribute("data-cluster")]); });
+      wireTabKeys(tabBtns, function(b){ showTool(b.getAttribute("data-tab")); });
+      showTool("spc", true);
 
       /* ================= TOOL 1 : SPC ================= */
       var spcState = null; // {name, vals, lsl, usl, stats...}
@@ -988,7 +1132,7 @@
             if(usl!==null) p += 1-normCdf((usl-xbar)/sdO);
             ppm = p*1e6;
           }
-          cap = { cp:w.cp, cpk:w.cpk, pp:o.cp, ppk:o.cpk, ppm:ppm, oosCount: outSpec.length };
+          cap = { cp:w?w.cp:null, cpk:w?w.cpk:null, pp:o?o.cp:null, ppk:o?o.cpk:null, ppm:ppm, oosCount: outSpec.length };
         }
         return { n:n, xbar:xbar, sdW:sdW, sdO:sdO, mrBar:mrBar, ucl:ucl, lcl:lcl,
                  outSpec:outSpec, outCtrl:outCtrl, runs:runs, trends:trends, cap:cap };
@@ -1027,6 +1171,23 @@
         if(demoFlags.data) g += demoMarkSVG(W, H);
         return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Individuals control chart">'+g+'</svg>';
       }
+      /* Stage 2 (B2): zero variation. With identical readings sd = 0, so the
+         control limits collapse and Cp/Cpk/Pp/Ppk divide by zero — they are
+         not defined. Show one plain state and wipe every stale result
+         (chart, tiles, snapshot, interpretation summary) instead. */
+      var NO_VARIATION_MSG = "No variation — all readings are identical, so control limits and capability indices are not defined.";
+      function noVariation(vals){
+        for(var i = 1; i < vals.length; i++) if(vals[i] !== vals[0]) return false;
+        return vals.length > 0;
+      }
+      function clearSpcResults(){
+        $("spcResults").classList.add("hidden");
+        ["spcChart","spcFlags","spcStats","spcCap","spcSnapshot"].forEach(function(id){ $(id).innerHTML = ""; });
+        $("spcCapWrap").classList.add("hidden");
+        $("spcMeaning").classList.add("hidden"); $("spcMeaning").innerHTML = "";
+        $("spcAiText").value = ""; hideMsg($("spcAiMsg"));
+        spcState = null; syncAiButtons();
+      }
       function capClass(v){ if(v===null||v===undefined) return ""; return v>=1.33 ? "good" : (v>=1.0 ? "warn" : "bad"); }
       function analyseSPC(){
         var parsed = parseMeasurements($("spcData").value);
@@ -1042,6 +1203,11 @@
         if(sp.lsl!==null && sp.usl!==null && sp.usl<=sp.lsl){
           $("spcResults").classList.add("hidden"); spcState = null; syncAiButtons();
           showMsg(msgEl, "USL must be greater than LSL — check the spec limits.");
+          return;
+        }
+        if(noVariation(vals)){
+          clearSpcResults();
+          showMsg(msgEl, NO_VARIATION_MSG);
           return;
         }
         var st = computeSPC(vals, sp.lsl, sp.usl);
@@ -1173,6 +1339,14 @@
         if(vals.length < 3){
           $("checkResults").classList.add("hidden"); checkState = null; syncAiButtons();
           showMsg(msgEl, "Enter at least 3 measurements in the SPC & Capability tab first — this tool reads the same data.");
+          return;
+        }
+        if(noVariation(vals)){
+          $("checkResults").classList.add("hidden");
+          ["checkChart","checkStats","checkAD","checkVerdict"].forEach(function(id){ $(id).innerHTML = ""; });
+          $("checkAiText").value = ""; hideMsg($("checkAiMsg"));
+          checkState = null; syncAiButtons();
+          showMsg(msgEl, NO_VARIATION_MSG.replace("control limits and capability indices are", "the histogram shape, skewness and the Anderson–Darling normality test are"));
           return;
         }
         hideMsg(msgEl);
@@ -2103,8 +2277,17 @@
          the letter index where the 0/1 plan sits; Ac follows 0,1,2,3,5,7,10,14,21.
          Above the first plan = down arrow, beyond the last = up arrow (per the standard). */
       var AQL_ACSEQ = [0,1,2,3,5,7,10,14,21];
-      var AQL_START = { "0.065":11, "0.10":10, "0.15":9, "0.25":8, "0.40":7, "0.65":6, "1.0":6, "1.5":5, "2.5":4, "4.0":3, "6.5":2 };
+      var AQL_START = { "0.065":11, "0.10":10, "0.15":9, "0.25":8, "0.40":7, "0.65":7, "1.0":6, "1.5":5, "2.5":4, "4.0":3, "6.5":2 };
+      /* Stage 2 (B1): the 0.65 column of Table II-A is NOT a clean diagonal.
+         Its 0/1 plan sits at F (n = 20); G carries an UP arrow (back to F's
+         plan) and H a DOWN arrow (on to J's plan, Ac 1); from J onward the
+         diagonal runs from start 7 (J Ac1 … R Ac21). These three cells are
+         encoded explicitly here; every other cell still comes from the
+         AQL_START diagonal. "U" = arrow up, "D" = arrow down. */
+      var AQL_SPECIAL = { "0.65": { F:0, G:"U", H:"D" } };
       function aqlCell(letterIdx, aql){
+        var sp = AQL_SPECIAL[aql], L = AQL_LETTERS[letterIdx];
+        if(sp && L !== undefined && Object.prototype.hasOwnProperty.call(sp, L)) return sp[L];
         var start = AQL_START[aql], k = letterIdx - start;
         if(k < 0) return "D";
         if(k >= AQL_ACSEQ.length) return "U";
@@ -2119,8 +2302,8 @@
         var row = null;
         for(var i=0;i<AQL_TABLE1.length;i++){ if(lot <= AQL_TABLE1[i][0]){ row = AQL_TABLE1[i]; break; } }
         var letter = level==="I" ? row[1] : (level==="II" ? row[2] : row[3]);
-        var idx = AQL_LETTERS.indexOf(letter), cell = aqlCell(idx, aql), steps = 0;
-        while(cell === "D" || cell === "U"){ idx += (cell === "D" ? 1 : -1); cell = aqlCell(idx, aql); steps++; }
+        var idx = AQL_LETTERS.indexOf(letter), cell = aqlCell(idx, aql), steps = 0, firstArrow = null;
+        while(cell === "D" || cell === "U"){ if(firstArrow === null) firstArrow = cell; idx += (cell === "D" ? 1 : -1); cell = aqlCell(idx, aql); steps++; }
         var planLetter = AQL_LETTERS[idx], n = AQL_N[planLetter], ac = cell, re = cell + 1;
         $("aqlStats").innerHTML =
           statTile("Code letter", letter) +
@@ -2129,7 +2312,7 @@
           statTile("Reject (Re)", String(re), "bad");
         var note;
         if(n >= lot) note = '<div class="flag amber"><strong>Inspect 100% of the lot.</strong> The plan\'s sample size ('+n+') meets or exceeds the lot size ('+lot+') — sampling saves nothing here.</div>';
-        else if(steps > 0) note = '<div class="flag green">Arrow rule applied: code letter '+letter+' has no plan at AQL '+aql+', so the standard\'s arrow leads to code <strong>'+planLetter+'</strong> (n = '+n+', Ac '+ac+', Re '+re+'). Inspect '+n+' pieces: accept the lot on '+ac+' or fewer defectives, reject on '+re+' or more.</div>';
+        else if(steps > 0) note = '<div class="flag green">Arrow rule applied: code letter '+letter+' has no plan at AQL '+aql+', so the standard\'s arrow '+(firstArrow === "U" ? "(↑ up)" : "(↓ down)")+' leads to code <strong>'+planLetter+'</strong> (n = '+n+', Ac '+ac+', Re '+re+'). Inspect '+n+' pieces: accept the lot on '+ac+' or fewer defectives, reject on '+re+' or more.</div>';
         else note = '<div class="flag green">Inspect <strong>'+n+'</strong> pieces from the lot of '+lot+': accept on <strong>'+ac+'</strong> or fewer defectives, reject on <strong>'+re+'</strong> or more.</div>';
         $("aqlNote").innerHTML = note;
         $("aqlResults").classList.remove("hidden");
@@ -3372,30 +3555,78 @@
           showMsg(msgEl, "Enter Δx, Δy and the stated position tolerance.");
           return;
         }
-        var bonus = 0;
+        /* Stage 2 (B3): bonus direction follows the feature type.
+           Ⓜ — hole: bonus = actual − MMC (MMC = smallest hole);
+               shaft: bonus = MMC − actual (MMC = largest shaft).
+           Ⓛ — hole: bonus = LMC − actual (LMC = largest hole);
+               shaft: bonus = actual − LMC (LMC = smallest shaft).
+           A negative departure means the size is beyond the modifier limit;
+           a size beyond the optional other limit is also out of size. Out of
+           size = no bonus and never a PASS from this calculator. */
+        var feat = $("tpFeat").value, isHole = feat !== "shaft";
+        var otherRaw = $("tpOther").value.trim(), other = Number(otherRaw), hasOther = otherRaw !== "" && isFinite(other);
+        var bonus = 0, outOfSize = false, sizeWhy = "";
         if(mod !== "rfs"){
           if($("tpActual").value.trim() === "" || $("tpLimit").value.trim() === "" || !isFinite(actual) || !isFinite(limit)){
             $("tpResults").classList.add("hidden");
             showMsg(msgEl, "With MMC/LMC, also enter the measured feature size and the size limit at the modifier — bonus comes from those two.");
             return;
           }
-          bonus = Math.abs(actual - limit);
+          var mmc = mod === "mmc" ? limit : (hasOther ? other : null);
+          var lmc = mod === "lmc" ? limit : (hasOther ? other : null);
+          if(mmc !== null && lmc !== null && (isHole ? lmc < mmc : lmc > mmc)){
+            $("tpResults").classList.add("hidden");
+            showMsg(msgEl, isHole
+              ? "For a hole the LMC size must be the larger limit and MMC the smaller — check the two size limits (or the feature type)."
+              : "For a shaft the MMC size must be the larger limit and LMC the smaller — check the two size limits (or the feature type).");
+            return;
+          }
+          var departure = mod === "mmc" ? (isHole ? actual - limit : limit - actual)
+                                        : (isHole ? limit - actual : actual - limit);
+          var tolSz = 1e-12;
+          if(departure < -tolSz){
+            outOfSize = true;
+            sizeWhy = mod === "mmc"
+              ? (isHole ? "the hole is smaller than its MMC (smallest allowed) size" : "the shaft is larger than its MMC (largest allowed) size")
+              : (isHole ? "the hole is larger than its LMC (largest allowed) size" : "the shaft is smaller than its LMC (smallest allowed) size");
+          } else if(hasOther && (mod === "mmc"
+                    ? (isHole ? actual > other + tolSz : actual < other - tolSz)
+                    : (isHole ? actual < other - tolSz : actual > other + tolSz))){
+            outOfSize = true;
+            sizeWhy = mod === "mmc"
+              ? (isHole ? "the hole is larger than its LMC (largest allowed) size" : "the shaft is smaller than its LMC (smallest allowed) size")
+              : (isHole ? "the hole is smaller than its MMC (smallest allowed) size" : "the shaft is larger than its MMC (largest allowed) size");
+          }
+          bonus = outOfSize ? 0 : Math.max(0, departure);
         }
         hideMsg(msgEl);
         var dev = 2 * Math.sqrt(dx * dx + dy * dy);
         var total = tol + bonus;
-        var pass = dev <= total + 1e-12;
+        var pass = !outOfSize && dev <= total + 1e-12;
+        var posOk = dev <= total + 1e-12;
         $("tpTiles").innerHTML =
-          statTile("Diametral deviation ⌀", fmt(dev, 4), pass ? "good" : "bad") +
-          statTile("Bonus tolerance", mod === "rfs" ? "0 (RFS)" : fmt(bonus, 4)) +
+          statTile("Diametral deviation ⌀", fmt(dev, 4), posOk && !outOfSize ? "good" : "bad") +
+          statTile("Bonus tolerance", mod === "rfs" ? "0 (RFS)" : (outOfSize ? "0 (out of size)" : fmt(bonus, 4))) +
           statTile("Total allowable ⌀", fmt(total, 4)) +
-          statTile("Margin left", fmt(total - dev, 4), pass ? "good" : "bad");
-        $("tpVerdict").innerHTML = '<span class="pill ' + (pass ? "good" : "bad") + '">' + (pass ? "PASS — position conforms" : "FAIL — position exceeds the allowable zone") + "</span>";
+          statTile("Margin left", outOfSize ? "—" : fmt(total - dev, 4), pass ? "good" : "bad") +
+          (mod === "rfs" ? "" : statTile("Feature size", outOfSize ? "OUT OF SIZE" : "Within size" + (hasOther ? "" : " (modifier side)"), outOfSize ? "bad" : "good"));
+        var verdictHtml;
+        if(outOfSize) verdictHtml = '<span class="pill bad">OUT OF SIZE — no bonus, position not accepted</span>' +
+          '<div class="flag red" style="margin-top:10px"><strong>Size nonconformance:</strong> ' + esc(sizeWhy) + ' (' + (isHole ? "hole" : "shaft") + ', measured ' + esc(fmt(actual, 4)) + '). A feature outside its size limits is rejected on size before position is judged, so this calculator grants no bonus and no PASS.</div>';
+        else {
+          verdictHtml = '<span class="pill ' + (pass ? "good" : "bad") + '">' + (pass ? "PASS — position conforms" : "FAIL — position exceeds the allowable zone") + "</span>";
+          if(mod !== "rfs" && !hasOther) verdictHtml += '<p class="small" style="margin:8px 0 0">Size checked against the ' + (mod === "mmc" ? "MMC" : "LMC") + ' limit only — enter the other size limit to confirm the feature is fully within size.</p>';
+        }
+        $("tpVerdict").innerHTML = verdictHtml;
         $("tpResults").classList.remove("hidden");
         flash($("tpTiles"));
       }
       $("tpGo").addEventListener("click", function(){ holdScroll(runTP); });
       $("tpMod").addEventListener("change", function(){ holdScroll(function(){ if(!$("tpResults").classList.contains("hidden")) runTP(); }); });
+      function tpSyncOtherLabel(){ $("tpOtherLabel").textContent = $("tpMod").value === "lmc" ? "Other size limit (MMC) — optional" : "Other size limit (LMC) — optional"; }
+      $("tpMod").addEventListener("change", tpSyncOtherLabel);
+      $("tpFeat").addEventListener("change", function(){ holdScroll(function(){ if(!$("tpResults").classList.contains("hidden")) runTP(); }); });
+      tpSyncOtherLabel();
 
       /* ================= INTERPRETATION SUMMARIES =================
          No backend and no API key lives in this page. Each of SPC, Data
