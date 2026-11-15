@@ -154,3 +154,46 @@ All presentation only. No calculation result or verdict changed; every regressio
   - True position: a to-scale zone plot (#tpPlot, tpPlotHTML) showing the stated zone, the bonus zone and the measured centre.
   - Gage R&R: components-of-variation bars (#grrBars, grrBarsHTML) as EV/AV/GRR/PV as % of TV, with 10% / 30% guide lines.
 - Methods line now mentions "tensile per ISO 18265". Cache spc-tools-v20.1-polish.
+
+## Round 8 (2026-11-15): AQL engine re-verified after your "red flag"
+Your selftest gate flagged the AQL engine because the AQL_SPECIAL fence hash
+changed (your three 0.65 entries were removed). The fence changed but the
+answers in the column you guarded did not:
+- The 0.65 column resolves exactly as you adjudicated: F 20/0/1, G ↑ → 20/0/1,
+  H ↓ → 80/1/2, J 80/1/2, then the diagonal. Your three special cells are now
+  produced by the general rule (Ac 0 at the start row, then ↑, ↓, then
+  Ac 1, 2, 3, 5, 7, 10, 14, 21), so they no longer need explicit entries.
+- v20.1 (commit 3989372) applied the pure diagonal to every other column. That
+  gave wrong plans in 105 of 176 cells, all outside 0.65. Examples:
+  - D/4.0: v20.1 gave 8/0/1. The standard has no plan in that cell; the arrow
+    leads to 13/1/2.
+  - G/1.0: v20.1 gave 32/0/1. The standard has a down arrow to 50/1/2.
+  - K/0.40: v20.1 gave 125/2/3. The standard gives 125/1/2.
+- Evidence that the live build is right:
+  1. AQLSchemes (R package, MIL-STD-105E / Z1.4 Table II-A): 176/176 cells match.
+  2. ASQ Section 104 training deck (Ombu Enterprises): D at AQL 4.0 has no plan,
+     slide down to n = 13, Ac 1, Re 2. That matches live, not v20.1.
+     F/4.0 → 20/2/3 and G/4.0 → 32/3/4 also match.
+  3. Common published cells such as J/1.0 80/2/3, K/1.0 125/3/4, L/2.5 200/10/11,
+     M/0.65 315/5/6 and N/0.40 500/5/6 all match.
+- Please update your golden test to cover the whole table, not only 0.65. Here
+  is the full resolved table (n/Ac/Re after following arrows) from the live build:
+
+| Letter | n | 0.065 | 0.10 | 0.15 | 0.25 | 0.40 | 0.65 | 1.0 | 1.5 | 2.5 | 4.0 | 6.5 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| A | 2 | 200/0/1 | 125/0/1 | 80/0/1 | 50/0/1 | 32/0/1 | 20/0/1 | 13/0/1 | 8/0/1 | 5/0/1 | 3/0/1 | 2/0/1 |
+| B | 3 | 200/0/1 | 125/0/1 | 80/0/1 | 50/0/1 | 32/0/1 | 20/0/1 | 13/0/1 | 8/0/1 | 5/0/1 | 3/0/1 | 2/0/1 |
+| C | 5 | 200/0/1 | 125/0/1 | 80/0/1 | 50/0/1 | 32/0/1 | 20/0/1 | 13/0/1 | 8/0/1 | 5/0/1 | 3/0/1 | 8/1/2 |
+| D | 8 | 200/0/1 | 125/0/1 | 80/0/1 | 50/0/1 | 32/0/1 | 20/0/1 | 13/0/1 | 8/0/1 | 5/0/1 | 13/1/2 | 8/1/2 |
+| E | 13 | 200/0/1 | 125/0/1 | 80/0/1 | 50/0/1 | 32/0/1 | 20/0/1 | 13/0/1 | 8/0/1 | 20/1/2 | 13/1/2 | 13/2/3 |
+| F | 20 | 200/0/1 | 125/0/1 | 80/0/1 | 50/0/1 | 32/0/1 | 20/0/1 | 13/0/1 | 32/1/2 | 20/1/2 | 20/2/3 | 20/3/4 |
+| G | 32 | 200/0/1 | 125/0/1 | 80/0/1 | 50/0/1 | 32/0/1 | 20/0/1 | 50/1/2 | 32/1/2 | 32/2/3 | 32/3/4 | 32/5/6 |
+| H | 50 | 200/0/1 | 125/0/1 | 80/0/1 | 50/0/1 | 32/0/1 | 80/1/2 | 50/1/2 | 50/2/3 | 50/3/4 | 50/5/6 | 50/7/8 |
+| J | 80 | 200/0/1 | 125/0/1 | 80/0/1 | 50/0/1 | 125/1/2 | 80/1/2 | 80/2/3 | 80/3/4 | 80/5/6 | 80/7/8 | 80/10/11 |
+| K | 125 | 200/0/1 | 125/0/1 | 80/0/1 | 200/1/2 | 125/1/2 | 125/2/3 | 125/3/4 | 125/5/6 | 125/7/8 | 125/10/11 | 125/14/15 |
+| L | 200 | 200/0/1 | 125/0/1 | 315/1/2 | 200/1/2 | 200/2/3 | 200/3/4 | 200/5/6 | 200/7/8 | 200/10/11 | 200/14/15 | 200/21/22 |
+| M | 315 | 200/0/1 | 500/1/2 | 315/1/2 | 315/2/3 | 315/3/4 | 315/5/6 | 315/7/8 | 315/10/11 | 315/14/15 | 315/21/22 | 200/21/22 |
+| N | 500 | 800/1/2 | 500/1/2 | 500/2/3 | 500/3/4 | 500/5/6 | 500/7/8 | 500/10/11 | 500/14/15 | 500/21/22 | 315/21/22 | 200/21/22 |
+| P | 800 | 800/1/2 | 800/2/3 | 800/3/4 | 800/5/6 | 800/7/8 | 800/10/11 | 800/14/15 | 800/21/22 | 500/21/22 | 315/21/22 | 200/21/22 |
+| Q | 1250 | 1250/2/3 | 1250/3/4 | 1250/5/6 | 1250/7/8 | 1250/10/11 | 1250/14/15 | 1250/21/22 | 800/21/22 | 500/21/22 | 315/21/22 | 200/21/22 |
+| R | 2000 | 2000/3/4 | 2000/5/6 | 2000/7/8 | 2000/10/11 | 2000/14/15 | 2000/21/22 | 1250/21/22 | 800/21/22 | 500/21/22 | 315/21/22 | 200/21/22 |
