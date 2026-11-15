@@ -2165,6 +2165,27 @@
         }
         return out;
       }
+      /* All visible sheets, in workbook order: [{ name, path }]. */
+      function sheetListFromWorkbook(workbookXml, relsXml, entries){
+        var out = [];
+        try {
+          var rels = {}, rRe = /<Relationship\b[^>]*>/g, rm;
+          while((rm = rRe.exec(relsXml || "")) !== null){
+            var idM = /\bId="([^"]+)"/.exec(rm[0]), tgM = /\bTarget="([^"]+)"/.exec(rm[0]);
+            if(idM && tgM) rels[idM[1]] = tgM[1];
+          }
+          var sRe = /<sheet\b[^>]*>/g, sm;
+          while((sm = sRe.exec(workbookXml || "")) !== null){
+            if(/\bstate="(hidden|veryHidden)"/.test(sm[0])) continue;
+            var nm = /\bname="([^"]*)"/.exec(sm[0]), rid = /\br:id="([^"]+)"/.exec(sm[0]);
+            if(!nm || !rid || !rels[rid[1]]) continue;
+            var t = rels[rid[1]].replace(/^\//, "");
+            var path = t.indexOf("xl/") === 0 ? t : "xl/" + t.replace(/^\.\//, "");
+            if(entries[path]) out.push({ name: xmlDecode(nm[1]), path: path });
+          }
+        } catch(e){ return []; }
+        return out;
+      }
       function sheetPathFromWorkbook(workbookXml, relsXml, entries){
         try {
           if(workbookXml && relsXml){
@@ -2254,10 +2275,21 @@
           return zipEntryText(buf, entries, "xl/_rels/workbook.xml.rels").then(function(relsXml){
             var sheetPath = sheetPathFromWorkbook(workbookXml, relsXml, entries);
             if(!sheetPath) return { error: "notxlsx" };
+            var list = sheetListFromWorkbook(workbookXml, relsXml, entries);
             return zipEntryText(buf, entries, "xl/sharedStrings.xml").then(function(sharedXml){
+              var shared = parseSharedStrings(sharedXml);
               return zipEntryText(buf, entries, sheetPath).then(function(sheetXml){
                 if(sheetXml === null) return { error: "notxlsx" };
-                return { grid: parseWorksheetGrid(sheetXml, parseSharedStrings(sharedXml)) };
+                var first = parseWorksheetGrid(sheetXml, shared);
+                if(list.length < 2) return { grid: first };
+                /* 2026-11-15: every sheet of a multi-sheet workbook is read, so
+                   the user can pick one or combine them (was: first sheet only). */
+                var sheets = [], chain = Promise.resolve();
+                list.forEach(function(sh){
+                  chain = chain.then(function(){ return zipEntryText(buf, entries, sh.path).then(function(x){
+                    if(x !== null) sheets.push({ name: sh.name, grid: parseWorksheetGrid(x, shared) }); }); });
+                });
+                return chain.then(function(){ return { grid: first, sheets: sheets }; });
               });
             });
           });
@@ -2488,7 +2520,7 @@
         } else {
           for(var i = a.dataStart; i < a.rows.length; i++){
             var catRaw = String(a.rows[i][sheetCtx.catCol]).trim();
-            var cntRaw = String(a.rows[i][sheetCtx.cntCol]).trim();
+            var cntRaw = sheetCtx.cntCol === "rows" ? (catRaw === "" ? "" : "1") : String(a.rows[i][sheetCtx.cntCol]).trim();
             if(catRaw === "" && cntRaw === "") continue;
             read++;
             var pc = sheetParseCell(cntRaw);
@@ -2502,6 +2534,13 @@
             stops.push(unexcluded.length + " row" + (unexcluded.length > 1 ? "s cannot" : " cannot") + " be read and not excluded — exclude each one explicitly below, or fix the sheet. Nothing loads while any remain.");
           if(!pairs.length && !unexcluded.length) stops.push("No readable category / count rows.");
         }
+        /* 2026-11-15: a log has one row per event, so the same category
+           repeats. Repeats are added together (case and spacing ignored; the
+           first spelling is kept) so each category is ONE bar. */
+        var merged = [], idx = {}, nRows = pairs.length;
+        pairs.forEach(function(pr){ var k = pr.cat.toLowerCase().replace(/\s+/g, " "); if(idx[k] === undefined){ idx[k] = merged.length; merged.push({ cat: pr.cat, count: pr.count }); } else merged[idx[k]].count = +(merged[idx[k]].count + pr.count).toFixed(6); });
+        if(merged.length < nRows) notes.push(nRows + " rows were added together into " + merged.length + " categories (repeats of the same category, case and spacing ignored).");
+        pairs = merged;
         var hn = sheetHeaderNote(a); if(hn) notes.push(hn);
         if(commaN) notes.push(sheetCommaNote(commaN));
         return { pairs:pairs, rejected:rejected, read:read, used:pairs.length, stops:stops, notes:notes, warnings:[] };
@@ -2534,6 +2573,9 @@
       function sheetRejectedHtml(rejected){
         if(!rejected.length) return "";
         var h = "<h3>Rejected cells — exclude explicitly to load the rest</h3>";
+        var open = rejected.filter(function(rj){ return !sheetCtx.excluded[rj.key]; });
+        sheetCtx.lastRejected = rejected;
+        if(open.length > 1) h += '<button type="button" class="ghost" id="sheetRejAll">Exclude all ' + open.length + " listed rows</button>";
         rejected.forEach(function(rj){
           h += '<label class="sheetradio"><input type="checkbox" data-rej="' + esc(rj.key) + '"' + (sheetCtx.excluded[rj.key] ? " checked" : "") + "> Exclude — " + esc(rj.where) + ": “" + esc(rj.raw) + "” (" + esc(rj.reason) + ")</label>";
         });
@@ -2548,7 +2590,18 @@
       }
       function renderSheetMap(){
         var a = sheetCtx.analysis, target = sheetCtx.target, as = null;
-        var h = '<p class="small">Source: ' + esc(sheetCtx.sourceName) + " — " + a.dataRowCount + " data row" + (a.dataRowCount === 1 ? "" : "s") + " × " + a.width + " column" + (a.width === 1 ? "" : "s") + ". Check the mapping below, then confirm.</p>";
+        var h = "";
+        if(sheetCtx.sheets){
+          h += '<label class="flabel" for="sheetSheetSel">Sheet (' + sheetCtx.sheets.length + ' in this workbook)</label><select id="sheetSheetSel">';
+          h += '<option value="all"' + (sheetCtx.sheetSel === "all" ? " selected" : "") + ">All " + sheetCtx.sheets.length + " sheets combined (columns matched by header)</option>";
+          sheetCtx.sheets.forEach(function(sh, i){ h += '<option value="' + i + '"' + (sheetCtx.sheetSel === String(i) ? " selected" : "") + ">" + esc(sh.name) + "</option>"; });
+          h += "</select>";
+        }
+        if(sheetCtx.skippedSheets && sheetCtx.skippedSheets.length)
+          h += '<p class="small">Not combined (different layout, e.g. a summary tab): ' + esc(sheetCtx.skippedSheets.join(", ")) + ". Pick it on its own above if you need it.</p>";
+        if(sheetCtx.dropped && sheetCtx.dropped.length)
+          h += '<p class="small">Left out ' + sheetCtx.dropped.length + " row" + (sheetCtx.dropped.length > 1 ? "s that look" : " that looks") + " like totals or notes (first column blank, at most 2 cells filled), e.g. " + esc(sheetCtx.dropped.slice(0, 3).map(function(d){ return d.row + ": \u201c" + d.text + "\u201d"; }).join("; ")) + ".</p>";
+        h += '<p class="small">Source: ' + esc(sheetCtx.sourceName) + " — " + a.dataRowCount + " data row" + (a.dataRowCount === 1 ? "" : "s") + " × " + a.width + " column" + (a.width === 1 ? "" : "s") + ". Check the mapping below, then confirm.</p>";
         if(target === "spc" || target === "check"){
           as = sheetSpcAssessment();
           if(as.mode === "row"){
@@ -2580,7 +2633,7 @@
         } else if(target === "pareto"){
           as = sheetParetoAssessment();
           h += '<div class="row2"><div><label class="flabel" for="sheetCatSel">Category column</label><select id="sheetCatSel">' + sheetColOptions(sheetCtx.catCol) + "</select></div>";
-          h += '<div><label class="flabel" for="sheetCntSel">Count column</label><select id="sheetCntSel">' + sheetColOptions(sheetCtx.cntCol) + "</select></div></div>";
+          h += '<div><label class="flabel" for="sheetCntSel">Count column</label><select id="sheetCntSel">' + sheetColOptions(sheetCtx.cntCol).replace('<option value="">Choose…</option>', '<option value="">Choose…</option><option value="rows"' + (sheetCtx.cntCol === "rows" ? " selected" : "") + ">Count rows (each row = 1)</option>") + "</select></div></div>";
           h += sheetCountsTiles(as.read, as.used, as.rejected.length, null);
           if(as.pairs.length)
             h += '<p class="small">First rows: ' + esc(as.pairs.slice(0, 4).map(function(pr){ return pr.cat + " — " + pr.count; }).join(" · ")) + "</p>";
@@ -2597,15 +2650,24 @@
       function sheetWireMapControls(){
         var cs = $("sheetColSel");
         if(cs) cs.addEventListener("change", function(){ sheetCtx.chosenCol = cs.value === "" ? null : parseInt(cs.value, 10); renderSheetMap(); });
+        var ss = $("sheetSheetSel");
+        if(ss) ss.addEventListener("change", function(){
+          var v = ss.value, keepSheets = sheetCtx.sheets, name = sheetCtx.sourceName.split(" — ")[0];
+          if(v === "all"){ var cmb = sheetCombine(keepSheets); sheetSetGrid(cmb.grid, name + " — all sheets"); sheetCtx.dropped = cmb.dropped.concat(sheetCtx.dropped || []); sheetCtx.skippedSheets = cmb.skipped; }
+          else { sheetCtx.skippedSheets = null; sheetSetGrid(keepSheets[+v].grid, name + " — " + keepSheets[+v].name); }
+          sheetCtx.sheetSel = v; renderSheetMap();
+        });
         var cat = $("sheetCatSel");
         if(cat) cat.addEventListener("change", function(){ sheetCtx.catCol = cat.value === "" ? null : parseInt(cat.value, 10); renderSheetMap(); });
         var cnt = $("sheetCntSel");
-        if(cnt) cnt.addEventListener("change", function(){ sheetCtx.cntCol = cnt.value === "" ? null : parseInt(cnt.value, 10); renderSheetMap(); });
+        if(cnt) cnt.addEventListener("change", function(){ sheetCtx.cntCol = cnt.value === "" ? null : cnt.value === "rows" ? "rows" : parseInt(cnt.value, 10); renderSheetMap(); });
         document.querySelectorAll('input[name="sheetLayout"]').forEach(function(rd){
           rd.addEventListener("change", function(){ sheetCtx.layout = rd.value; renderSheetMap(); });
         });
         var sk = $("sheetSkipLabel");
         if(sk) sk.addEventListener("change", function(){ sheetCtx.skipLabel = sk.checked; renderSheetMap(); });
+        var ra = $("sheetRejAll");
+        if(ra) ra.addEventListener("click", function(){ (sheetCtx.lastRejected || []).forEach(function(rj){ sheetCtx.excluded[rj.key] = true; }); renderSheetMap(); });
         $("sheetMap").querySelectorAll("input[data-rej]").forEach(function(cb){
           cb.addEventListener("change", function(){
             sheetCtx.excluded[cb.getAttribute("data-rej")] = cb.checked;
@@ -2644,9 +2706,70 @@
         $("sheetActions").classList.add("hidden");
         $("sheetSource").classList.remove("hidden");
       }
-      function sheetSetGrid(grid, sourceName){
+      /* 2026-11-15 · rows that look like totals or notes are left out, and
+         disclosed: in a table whose first column is filled on ≥ 80 % of data
+         rows, a row with that column blank and at most 2 cells filled (a
+         weekly "1267.26" total, an "EXCELLENT WEEK!!" note) is not a reading. */
+      function sheetFilled(c){ return String(c === undefined || c === null ? "" : c).trim() !== ""; }
+      function sheetHeaderIndex(g){
+        for(var i = 0; i < Math.min(g.length, 10); i++){
+          var r = g[i] || [], filled = r.filter(sheetFilled), txt = filled.filter(function(c){ return !isFinite(Number(String(c).trim())); });
+          if(filled.length >= 2 && txt.length >= filled.length * 0.6) return i;
+          if(filled.length) return -1;
+        }
+        return -1;
+      }
+      function sheetDropTotals(grid){
+        var hi = sheetHeaderIndex(grid), start = hi + 1, data = [];
+        for(var i = start; i < grid.length; i++) if((grid[i] || []).some(sheetFilled)) data.push(i);
+        var isCand = function(i){ var r = grid[i] || []; return !sheetFilled(r[0]) && r.filter(sheetFilled).length <= 2; };
+        var rest = data.filter(function(i){ return !isCand(i); });
+        /* judged on the OTHER rows: at least 2 of them, ≥ 80 % with the first column filled */
+        if(hi < 0 || rest.length < 2) return { grid: grid, dropped: [] };
+        var withFirst = rest.filter(function(i){ return sheetFilled((grid[i] || [])[0]); }).length;
+        if(withFirst / rest.length < 0.8) return { grid: grid, dropped: [] };
+        var dropped = [], out = [];
+        grid.forEach(function(r, i){
+          r = r || [];
+          var n = r.filter(sheetFilled).length;
+          if(i > hi && n > 0 && !sheetFilled(r[0]) && n <= 2){ dropped.push({ row: i + 1, text: r.filter(sheetFilled).join(" · ") }); return; }
+          out.push(r);
+        });
+        return { grid: out, dropped: dropped };
+      }
+      /* All sheets stacked: columns are matched by header name (case and
+         spacing ignored), a "Sheet" column is added first, totals are dropped
+         per sheet. */
+      function sheetCombine(sheets){
+        var cols = [], key = function(h){ return String(h).trim().toLowerCase().replace(/\s+/g, " "); }, rows = [], dropped = [], skipped = [];
+        /* the common layout: header names found on at least half the sheets.
+           A sheet sharing less than half of them (a summary/TREND tab) is skipped and named. */
+        var freq = {}, prep = sheets.map(function(sh){ var d = sheetDropTotals(sh.grid), hi = sheetHeaderIndex(d.grid), keys = {};
+          if(hi >= 0) (d.grid[hi] || []).forEach(function(h){ if(sheetFilled(h)) keys[key(h)] = 1; });
+          Object.keys(keys).forEach(function(k){ freq[k] = (freq[k] || 0) + 1; }); return { sh: sh, d: d, hi: hi, keys: keys }; });
+        var common = Object.keys(freq).filter(function(k){ return freq[k] >= sheets.length / 2; });
+        prep.forEach(function(P){
+          var sh = P.sh, d = P.d, g = d.grid, hi = P.hi;
+          var shared = common.filter(function(k){ return P.keys[k]; }).length;
+          if(hi < 0 || shared < common.length / 2){ skipped.push(sh.name); return; }
+          d.dropped.forEach(function(x){ dropped.push({ row: sh.name + " row " + x.row, text: x.text }); });
+          var map = (g[hi] || []).map(function(h){ if(!sheetFilled(h)) return -1; var k = key(h), j = cols.findIndex(function(c){ return c.k === k; }); if(j < 0){ cols.push({ k: k, label: String(h).trim() }); j = cols.length - 1; } return j; });
+          for(var i = hi + 1; i < g.length; i++){
+            var r = g[i] || []; if(!r.some(sheetFilled)) continue;
+            /* a header repeated in one sheet ("Cost" … "COST"): the first column wins */
+            var out = []; map.forEach(function(j, c){ if(j >= 0 && out[j] === undefined) out[j] = r[c] === undefined ? "" : r[c]; });
+            rows.push([sh.name].concat(cols.map(function(c, j){ return out[j] === undefined ? "" : out[j]; })));
+          }
+        });
+        var w = cols.length + 1;
+        return { grid: [["Sheet"].concat(cols.map(function(c){ return c.label; }))].concat(rows.map(function(r){ while(r.length < w) r.push(""); return r; })), dropped: dropped, skipped: skipped };
+      }
+      function sheetSetGrid(grid, sourceName, sheets){
         if(!sheetCtx) return;
         if(!grid || !grid.length){ showMsg($("sheetMsg"), "No data found in that — nothing to map.", false); return; }
+        if(sheets !== undefined){ sheetCtx.sheets = sheets && sheets.length > 1 ? sheets : null; sheetCtx.sheetSel = "0"; }
+        var dt = sheetDropTotals(grid);
+        grid = dt.grid; sheetCtx.dropped = dt.dropped;
         sheetCtx.grid = grid;
         sheetCtx.sourceName = sourceName || "sheet";
         sheetCtx.analysis = sheetAnalyseGrid(grid);
@@ -2673,7 +2796,7 @@
             readXlsxGrid(xreader.result).then(function(res){
               if(res.error === "notxlsx") showMsg($("sheetMsg"), IMPORT_CANT_READ, false);
               else if(res.error) showMsg($("sheetMsg"), IMPORT_NO_EXCEL, false);
-              else sheetSetGrid(res.grid, file.name);
+              else sheetSetGrid(res.grid, file.name, res.sheets);
             });
           };
           xreader.onerror = function(){ showMsg($("sheetMsg"), IMPORT_NO_EXCEL, false); };
@@ -6659,14 +6782,16 @@
 
       /* ======================================================================
          SECTION · PWA
-         The service worker is inlined as a base64 data: URL, and its CACHE name
-         lives inside that base64. Do not edit it in this pass. Registration is
+         2026-11-15: the service worker WAS inlined as a base64 data: URL, but
+         browsers refuse data: service-worker scripts ("URL protocol not
+         supported"), so the app never worked offline. It now registers the
+         repo's sw.js (bump CACHE there on every publish). Registration is
          wrapped in try/catch and never blocks the app.
          ====================================================================== */
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjIwLjMtdGhzZWFyY2giOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
+          navigator.serviceWorker.register("sw.js").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>

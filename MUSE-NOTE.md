@@ -220,3 +220,28 @@ Presentation only. No calculation changed; the AQL comparison (176/176) and all 
 - Picking a result sets thFam, calls thFillSizes(), sets thSize, then thFillSideClass().
 - Tested queries: M10, 1/2-13, 3/4 NPT (E1 0.98887), G 1/4, Tr20, 1/4-28 UNJ, MJ10, Pg 9.
 - Cache spc-tools-v20.3-thsearch, in sw.js and the inlined SW.
+
+## Round 11 (2026-11-15, ~16:35): multi-sheet workbooks, totals rows, Pareto repeats, OFFLINE FIX
+A multi-sheet workbook: many weekly sheets plus a summary tab. Each week has a total row and some note rows.
+
+**Fixes:**
+- **Every sheet is read.** readXlsxGrid now returns every visible sheet (sheetListFromWorkbook). It used to read the first sheet only, silently: "JAN 4-10", 1 row.
+- **Sheet picker.** Map & Preview has a Sheet selector with an "All N sheets combined" option (sheetCombine):
+  - Columns are matched by header name, case and spacing ignored.
+  - A "Sheet" column is added first.
+  - Within a sheet, the first of two same-named columns wins ("Cost" … "COST").
+  - Sheets that share under half of the common headers (the TREND tab) are skipped and named.
+- **Totals and notes rows are left out** (sheetDropTotals): first column blank and at most 2 cells filled, judged against the other rows (≥2 rows, ≥80 % with the first column filled). They are listed in the preview. Before, each week's total cost would have entered SPC or Pareto as a reading.
+- **Pareto:**
+  - Repeated categories are added together, case and spacing ignored, with a note. Before, every log row became its own bar.
+  - New count option "Count rows (each row = 1)".
+  - "Exclude all N listed rows" button. Excluding is still an explicit user action.
+- **Verified against an independent Python computation:** all 36 Root Cause categories match (count and cost). The TREND sheet gives 42 weekly costs. A single-sheet total row is excluded. CSV is unchanged.
+
+**OFFLINE: SPC NEVER WORKED OFFLINE.**
+- The service worker was registered from a data: URL, and Chrome refuses that: "URL protocol of the script is not supported".
+- It now registers the repo's sw.js. Bump CACHE in sw.js on every publish; the inlined base64 copy is no longer used.
+- Tested: with the network cut after the first visit, the app reloads and imports the 44-sheet workbook.
+- Note: manifest.json in the repo is EMPTY (0 bytes). The page still uses the data: manifest link.
+
+Cache spc-tools-v20.4-offline.
