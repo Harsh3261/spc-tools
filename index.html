@@ -1506,12 +1506,21 @@
       function chFS(big){ return chN() ? (big ? 15 : 14) : (big ? 11.5 : 10.5); }
       function mean(a){ var s=0; for(var i=0;i<a.length;i++) s+=a[i]; return s/a.length; }
       function sampleSD(a){ if(a.length<2) return 0; var m=mean(a), s=0; for(var i=0;i<a.length;i++){ var d=a[i]-m; s+=d*d; } return Math.sqrt(s/(a.length-1)); }
-      function normCdf(z){
-        var s = z<0 ? -1 : 1, x = Math.abs(z)/Math.SQRT2;
-        var t = 1/(1+0.3275911*x);
-        var y = 1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
-        return 0.5*(1+s*y);
+      /* 2026-11-15: normal CDF via the complementary error function with
+         FRACTIONAL error < 1.2e-7 everywhere (Numerical Recipes erfcc,
+         Chebyshev fit). The previous Abramowitz–Stegun 7.1.26 form had an
+         ABSOLUTE error of ~1.5e-7, so small tails were off in the 3rd–4th
+         significant figure (Cpk 1.33 → 63.4 PPM instead of 63.3). The small
+         tail is now computed directly, never as 1 − (nearly 1). */
+      function erfcNR(x){
+        var z = Math.abs(x), t = 1/(1+0.5*z);
+        var r = t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277)))))))));
+        return x >= 0 ? r : 2 - r;
       }
+      function normCdf(z){
+        return z < 0 ? 0.5*erfcNR(-z/Math.SQRT2) : 1 - 0.5*erfcNR(z/Math.SQRT2);
+      }
+      function normSf(z){ return z > 0 ? 0.5*erfcNR(z/Math.SQRT2) : 1 - 0.5*erfcNR(-z/Math.SQRT2); }
       function downloadCSV(name, text){
         var blob = new Blob([text], {type:"text/csv;charset=utf-8"});
         var url = URL.createObjectURL(blob);
@@ -1742,7 +1751,7 @@
           if(sdO>0){
             var p = 0;
             if(lsl!==null) p += normCdf((lsl-xbar)/sdO);
-            if(usl!==null) p += 1-normCdf((usl-xbar)/sdO);
+            if(usl!==null) p += normSf((usl-xbar)/sdO);
             ppm = p*1e6;
           }
           cap = { cp:w?w.cp:null, cpk:w?w.cpk:null, pp:o?o.cp:null, ppk:o?o.cpk:null, ppm:ppm, oosCount: outSpec.length };

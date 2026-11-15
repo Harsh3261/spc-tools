@@ -1,4 +1,4 @@
-const CACHE = "spc-tools-v20.4-offline";
+const CACHE = "spc-tools-v20.5-normcdf";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

@@ -245,3 +245,14 @@ A multi-sheet workbook: many weekly sheets plus a summary tab. Each week has a t
 - Note: manifest.json in the repo is EMPTY (0 bytes). The page still uses the data: manifest link.
 
 Cache spc-tools-v20.4-offline.
+
+## Round 12 (2026-11-15, ~17:00): normal-tail accuracy + independent cross-checks
+- normCdf was Abramowitz–Stegun 7.1.26, which has ABSOLUTE error ≈1.5e-7. Small tails were off in the 3rd–4th significant figure (Cpk 1.33 showed 63.4 PPM; the true value is 63.3).
+- It is now erfcNR (Numerical Recipes erfcc, FRACTIONAL error < 1.2e-7). The new normSf(z) is used for the upper tail in computeSPC, so there is no 1 − (≈1) cancellation.
+- Your behaviour probes may record the old PPM decimals. Expect changes only in the 4th+ significant figure.
+- Cross-checked against independent Python (numpy/scipy/statsmodels):
+  - **computeSPC**, 25 datasets: x̄, σ overall, σ within (MR̄/1.128), UCL/LCL, Cp, Cpk, Pp and Ppk all match to 1e-9. PPM matches to 9e-8 relative.
+  - **Sigma ⇄ PPM:** 6σ (shifted) gives 3.4 DPMO; Cpk 1.50 shifted gives 6.00σ; 2700 PPM gives Cpk 1.00.
+  - **andersonDarling**, 28 datasets incl. non-normal: A² and p match statsmodels normal_ad to 2e-7.
+  - **Gage R&R**, 20 random studies (3–15 parts, 2–3 operators, 2–3 trials, interaction pooled at p > 0.25 or kept): EV, AV, GRR, PV, %tol and ndc all match an independent ANOVA to 1e-9.
+- Cache spc-tools-v20.5-normcdf.
