@@ -110,3 +110,17 @@ so they don't collide with your planned v20.1 (UNJ) numbering.
     result depends on whether p is rounded first (e.g. TPI 6 H = 0.1484 or 0.1485), and
     the printed table itself departs from the formula at TPI 1.25 r (0.0572 vs 0.0571).
   - The 3/8-24 NOGO plug PD. It's already handled by your D16 basis note.
+
+## Round 4 (2026-11-15, ~13:30): remaining tools and thread families
+- Fixed: NPT 1/8-27 E1 0.37351 → 0.37360 (ASME B1.20.1 Table 2; equals
+  E0 + L1/16, and your own NPTF row already had 0.3736).
+- Checked and passing, no change:
+  - Stack-up (worst case and RSS) and true position (2√(Δx²+Δy²), MMC/LMC bonus for holes and shafts, out-of-size handling).
+  - Pareto (vital few to ≥80%), fractions (1/16 to 1/64, mm, swap), and every Convert factor (ksi/psi/bar/kgf·cm⁻², torque, US gpm, lbf, Ra, TPI ↔ pitch, °C/°F, taper per foot ↔ angle, thermal ΔL).
+  - Thread consistency checks:
+    - BSP G 25 rows: basic profile plus TD2, class A = TD2, class B = 2·TD2.
+    - Whitworth 55, Acme 23, Stub 23, Tr 19, DIN 405 64, DIN 20400 47, DIN 513 limits 32 and MJ 37.
+    - UNC/UNF/UN 174 and metric 18 (formula, allowance and 1.3× rules).
+    - NPT 24 and NPTF 12 (E0, L2 and E1 formulas), BSPT 15 (= ISO 228 basics) and PG 10.
+  - BA differs from 0.6P/1.2P by ≤0.004 mm, which is BS 93's own rounding.
+- Cache spc-tools-v20.1-charcoal2.
