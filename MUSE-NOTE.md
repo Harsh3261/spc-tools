@@ -135,3 +135,22 @@ so they don't collide with your planned v20.1 (UNJ) numbering.
   Table 2 prints steel-ball HBS (higher in the HRB range).
 - Cache spc-tools-v20.1-charcoal3. The four B1.9 Table 2 cells stay blank: no
   public reproduction exists, and the formula result depends on rounding.
+
+## Round 7 (2026-11-15, ~13:40): SPC polish + four visual additions
+All presentation only. No calculation result or verdict changed; every regression test still passes.
+- Bottom cluster bar: the five sections now fit on a phone. Columns are minmax(0,1fr), labels 13px nowrap, and "Measurement" is shortened to "Measure". It used to scroll sideways and hide "Reference".
+- Charts (SPC, Data Check histogram, Pareto): phones get a narrower viewBox (460 vs 720) and larger text via the new helpers chN() / chFS() in CORE HELPERS. Axis labels went from about 5 px to about 10 px.
+- Sticky SPC headline: on phones it's one line with an ellipsis (it was 4 lines and covered the chart).
+- Button rows:
+  - On phones, buttons share a row (flex 1 1 140px); ghost buttons are 48px tall.
+  - The two import rows (spcImportBtn, checkImportBtn) get class "imp" and are no longer sticky. Only the main action row sticks, now with a soft top shadow.
+- Stat labels shortened: "σ within (MR̄/d₂)" → "σ within"; "Expected PPM (from overall variation)" → "Expected PPM". The CSV and AI-summary text is unchanged.
+- showTool(): when the incoming tool would sit entirely above the viewport at the
+  saved scroll position (blank screen after a long Gage R&R result), it now lands
+  at the top of that tool. Otherwise the page still doesn't move.
+- New (SECTION · 2026-11-15 ADDITIONS, just before grrCalc wiring):
+  - SPC chart: transparent hit circles (class "hit") let you tap a point to show "Point n: value — status" in #spcPointInfo.
+  - AQL: an OC curve (#aqlOC, aqlOCHTML). Binomial Pa(p) for the resolved n/Ac, marking Pa at the AQL and LQ10. Verified: n 125 Ac 1 at 0.40% → Pa 0.9101 (hand 0.9101); LQ10 = 3.08%.
+  - True position: a to-scale zone plot (#tpPlot, tpPlotHTML) showing the stated zone, the bonus zone and the measured centre.
+  - Gage R&R: components-of-variation bars (#grrBars, grrBarsHTML) as EV/AV/GRR/PV as % of TV, with 10% / 30% guide lines.
+- Methods line now mentions "tensile per ISO 18265". Cache spc-tools-v20.1-polish.

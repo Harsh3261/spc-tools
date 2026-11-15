@@ -468,7 +468,9 @@
           nav.clusters{grid-template-columns:repeat(5,1fr)}
           nav.clusters button, nav.clusters button:nth-child(4), nav.clusters button:nth-child(5){grid-column:auto; min-height:56px}
           nav.clusters .cl-sub{display:none}
-          nav.clusters .cl-name{font-size:13.5px}
+          nav.clusters .cl-name{font-size:13px; white-space:nowrap}
+          nav.clusters{grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; padding-left:6px; padding-right:6px}
+          nav.clusters button{padding:8px 2px}
         }
         .wrap{padding-bottom:calc(124px + env(safe-area-inset-bottom))}
         html{scroll-padding-bottom:150px}
@@ -536,6 +538,29 @@
         nav.tabs{position:static; opacity:1; transform:none; pointer-events:auto}
         .headline{position:static}
       }
+
+      @media (max-width:560px){
+        .btnrow > button, .btnrow > a{flex:1 1 140px; min-width:0; white-space:normal; line-height:1.2}
+        .btnrow .act{min-width:0}
+        button.ghost{min-height:48px}
+      }
+      @media screen{ .btnrow:not(.imp){box-shadow:0 -10px 18px -8px rgba(0,0,0,.55)} }
+      .btnrow.imp{position:static; background:none; border-top:0; padding:0}
+      /* ===== 2026-11-15 polish + additions ===== */
+      @media (max-width:560px){
+        .headline{padding:8px 12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+        .headline .hl-v{font-size:22px}
+        .headline .hl-t{font-size:13px}
+      }
+      #spcZones, #spcRings{pointer-events:none}
+      #spcChart circle.hit{cursor:pointer}
+      #spcChart circle.hit:focus{outline:none}
+      .ptinfo{margin:6px 2px 0; min-height:1.4em}
+      .viz{margin:14px 0 4px; padding:10px; border:1px solid var(--line-soft); border-radius:10px; background:var(--bg2)}
+      .viz h4{margin:0 0 6px; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim)}
+      .viz svg{display:block; width:100%; height:auto}
+      .viz .vcap{margin:8px 2px 0; font-size:13.5px; color:var(--ink-dim); line-height:1.45}
+      .viz .vcap strong{color:var(--ink)}
     </style>
   </head>
   <body>
@@ -551,7 +576,7 @@
       <nav class="clusters" role="tablist" aria-label="Tool groups">
         <button type="button" role="tab" id="clbtn-process" aria-selected="true" data-cluster="process"><span class="cl-name">Process</span><span class="cl-sub">SPC &amp; capability</span></button>
         <button type="button" role="tab" id="clbtn-analyse" aria-selected="false" data-cluster="analyse"><span class="cl-name">Analyse</span><span class="cl-sub">Data Check · Pareto</span></button>
-        <button type="button" role="tab" id="clbtn-measure" aria-selected="false" data-cluster="measure"><span class="cl-name">Measurement</span><span class="cl-sub">Gage R&amp;R · Position</span></button>
+        <button type="button" role="tab" id="clbtn-measure" aria-selected="false" data-cluster="measure"><span class="cl-name">Measure</span><span class="cl-sub">Gage R&amp;R · Position</span></button>
         <button type="button" role="tab" id="clbtn-sampling" aria-selected="false" data-cluster="sampling"><span class="cl-name">Sampling</span><span class="cl-sub">AQL lookup</span></button>
         <button type="button" role="tab" id="clbtn-reference" aria-selected="false" data-cluster="reference"><span class="cl-name">Reference</span><span class="cl-sub">Threads · Convert · more</span></button>
       </nav>
@@ -584,7 +609,7 @@
           <label class="flabel" for="spcData">Measurements — paste or type, any mix of spaces, commas, lines</label>
           <textarea id="spcData" placeholder="4.5021, 4.5030, 4.5018 …" spellcheck="false"></textarea>
           <p class="small" style="margin:6px 0 0">Tip: you can paste a column straight from Excel or Google Sheets, or import a spreadsheet file — CSV or Excel (.xlsx).</p>
-          <div class="btnrow">
+          <div class="btnrow imp">
             <button class="ghost" id="spcImportBtn" type="button">Import spreadsheet (CSV or Excel)</button>
             <button class="ghost" id="spcSheetBtn" type="button">Paste sheet data</button>
           </div>
@@ -616,6 +641,7 @@
               <div class="chartbox" id="spcChart"></div>
               <div class="zlayer over" id="spcRings" aria-hidden="true"></div>
             </div>
+            <p class="small ptinfo" id="spcPointInfo" aria-live="polite">Tap a point on the chart to see its reading.</p>
             <div class="legend">
               <span><i class="swatch" style="background:var(--cyan)"></i> In control</span>
               <span><i class="swatch" style="background:var(--amber)"></i> Out of control</span>
@@ -664,7 +690,7 @@
           <p class="guru">Montgomery: check the distribution before you trust the index.</p>
           <p class="small">Uses the same measurements you entered in <strong>SPC &amp; Capability</strong> — one data entry drives both tools. Spec lines are drawn when LSL/USL are set there.</p>
           <p class="small">Tip: you can paste a column straight from Excel or Google Sheets, or import a spreadsheet file — CSV or Excel (.xlsx).</p>
-          <div class="btnrow">
+          <div class="btnrow imp">
             <button class="ghost" id="checkImportBtn" type="button">Import spreadsheet (CSV or Excel)</button>
             <button class="ghost" id="checkSheetBtn" type="button">Paste sheet data</button>
           </div>
@@ -750,6 +776,7 @@
             <h3>Against tolerance &amp; study variation</h3>
             <div class="stats" id="grrPct"></div>
             <div class="flags" id="grrVerdict"></div>
+            <div id="grrBars"></div>
             <p class="small" id="grrNote"></p>
             <div class="btnrow">
               <button class="ghost" id="grrCsv">Download CSV (grid + results)</button>
@@ -806,6 +833,7 @@
             <h3>Sampling plan</h3>
             <div class="stats" id="aqlStats"></div>
             <div class="flags" id="aqlNote"></div>
+            <div id="aqlOC"></div>
             <p class="explain"><strong>What this means:</strong> An AQL plan controls the odds of accepting lots at a stated quality level — accepting a lot does not certify that every part in it is good.</p>
           </div>
           <p class="cite">Single sampling plans, normal inspection — ANSI/ASQ Z1.4 (Tables I &amp; II-A). Arrow rules are followed to the first real plan, as the standard requires.</p>
@@ -1333,6 +1361,7 @@
           <div id="tpResults" class="hidden">
             <h3>Result</h3>
             <div class="stats" id="tpTiles"></div>
+            <div id="tpPlot"></div>
             <div id="tpVerdict"></div>
             <p class="explain"><strong>What this means:</strong> the diametral deviation 2√(Δx² + Δy²) is the diameter of the smallest zone around true position that contains the measured centre; it must fit inside the stated tolerance plus any bonus the feature's size has earned.</p>
           </div>
@@ -1368,7 +1397,7 @@
         </div>
       </div>
       <footer>
-        Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate) · Thread limits per ISO 965-2 / ASME B1.1, gauge values per ASME B1.2 / ISO 1502 · True position per ASME Y14.5. Estimates from your data — verify critical results before acting on them.
+        Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate; tensile per ISO 18265) · Thread limits per ISO 965-2 / ASME B1.1, gauge values per ASME B1.2 / ISO 1502 · True position per ASME Y14.5. Estimates from your data — verify critical results before acting on them.
       </footer>
       <p class="makers-mark">Built by Harsh Patel · with Satureday</p>
       <p class="makers-mark rights">© 2026 Harsh Patel · All rights reserved</p>
@@ -1439,6 +1468,9 @@
         return rows.filter(function(r){ return r.some(function(c){ return String(c).trim() !== ""; }); });
       }
       function colLetter(i){ var s = ""; i++; while(i > 0){ var m = (i-1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i-1) / 26); } return s; }
+      /* 2026-11-15 polish: charts use a narrower viewBox and larger text on phones so labels stay readable. */
+      function chN(){ return (window.innerWidth || 1024) < 560; }
+      function chFS(big){ return chN() ? (big ? 15 : 14) : (big ? 11.5 : 10.5); }
       function mean(a){ var s=0; for(var i=0;i<a.length;i++) s+=a[i]; return s/a.length; }
       function sampleSD(a){ if(a.length<2) return 0; var m=mean(a), s=0; for(var i=0;i<a.length;i++){ var d=a[i]-m; s+=d*d; } return Math.sqrt(s/(a.length-1)); }
       function normCdf(z){
@@ -1560,7 +1592,16 @@
         /* hold the page height so the saved position stays reachable */
         bodyEl.style.minHeight = "";
         document.querySelectorAll("section.tool").forEach(function(s){ s.classList.toggle("active", s.id === "tool-" + tab); });
-        var need = savedY + (window.innerHeight || 0);
+        /* 2026-11-15: keep the scroll position only while the incoming tool is
+           still on screen there. If it would sit entirely above the viewport
+           (e.g. switching away from a long Gage R&R result), land at the top of
+           the incoming tool instead of on blank space. */
+        var panelEl = $("tool-" + tab), vh = window.innerHeight || 0;
+        if(panelEl && !initial){
+          var pTop = panelEl.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0), pBottom = pTop + panelEl.offsetHeight;
+          if(pBottom < savedY + vh * 0.35) savedY = Math.max(0, pTop - 12);
+        }
+        var need = savedY + vh;
         if(rootEl.scrollHeight < need) bodyEl.style.minHeight = need + "px";
         if(initial){ rootEl.style.scrollBehavior = prevBehavior; return; }
         window.scrollTo(0, savedY);
@@ -1672,7 +1713,7 @@
       /* v19: the chart's scale, unchanged, lifted into one function so the
          v19 zone / ring layers use exactly the same geometry. */
       function spcChartFrame(vals, st, lsl, usl){
-        var W=720, H=300, padL=58, padR=14, padT=16, padB=30;
+        var W=chN()?460:720, H=chN()?300:300, padL=chN()?74:58, padR=14, padT=16, padB=chN()?34:30;
         var iw = W-padL-padR, ih = H-padT-padB;
         var lo = Math.min.apply(null, vals.concat([st.lcl])), hi = Math.max.apply(null, vals.concat([st.ucl]));
         if(lsl!==null) lo = Math.min(lo, lsl); if(usl!==null) hi = Math.max(hi, usl);
@@ -1688,7 +1729,7 @@
         function hline(v, color, dash, label){
           var y = Y(v);
           g += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="'+color+'" stroke-width="1.4" '+(dash?'stroke-dasharray="6 4"':'')+'/>';
-          g += '<text x="'+(padL-5)+'" y="'+(y+3.5)+'" fill="'+color+'" font-size="10.5" font-family="monospace" text-anchor="end">'+label+'</text>';
+          g += '<text x="'+(padL-5)+'" y="'+(y+3.5)+'" fill="'+color+'" font-size="'+chFS()+'" font-family="monospace" text-anchor="end">'+label+'</text>';
         }
         hline(st.ucl, "#b97d0f", true, fmt(st.ucl));
         hline(st.xbar, "#0b7f95", false, fmt(st.xbar));
@@ -1703,10 +1744,11 @@
           var ooc = !oos && (v>st.ucl || v<st.lcl);
           var c = oos ? "#c93a3a" : (ooc ? "#b97d0f" : "#0b7f95");
           pts += '<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="'+(oos||ooc?5:3.6)+'" fill="'+c+'" stroke="#ffffff" stroke-width="1"/>';
+          pts += '<circle class="hit" tabindex="0" data-i="'+(i+1)+'" data-v="'+v+'" data-s="'+(oos?"out of spec":(ooc?"beyond a control limit":"within control limits"))+'" cx="'+X(i)+'" cy="'+Y(v)+'" r="'+(chN()?13:9)+'" fill="transparent"><title>Point '+(i+1)+': '+v+'</title></circle>';
         });
         g += pts;
-        g += '<text x="'+padL+'" y="'+(H-8)+'" fill="#6b8699" font-size="10.5">Part 1</text>';
-        g += '<text x="'+(W-padR)+'" y="'+(H-8)+'" fill="#6b8699" font-size="10.5" text-anchor="end">Part '+vals.length+'</text>';
+        g += '<text x="'+padL+'" y="'+(H-8)+'" fill="#6b8699" font-size="'+chFS()+'">Part 1</text>';
+        g += '<text x="'+(W-padR)+'" y="'+(H-8)+'" fill="#6b8699" font-size="'+chFS()+'" text-anchor="end">Part '+vals.length+'</text>';
         if(demoFlags.data) g += demoMarkSVG(W, H);
         return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Individuals control chart">'+g+'</svg>';
       }
@@ -1766,7 +1808,7 @@
         $("spcStats").innerHTML =
           statTile("n", String(st.n)) +
           statTile("Mean x̄", fmt(st.xbar)) +
-          statTile("σ within (MR̄/d₂)", fmt(st.sdW)) +
+          statTile("σ within", fmt(st.sdW)) +
           statTile("σ overall (s)", fmt(st.sdO)) +
           statTile("UCL", fmt(st.ucl)) +
           statTile("LCL", fmt(st.lcl));
@@ -1778,7 +1820,7 @@
             statTile("Pp (overall)", st.cap.pp===null?"—":fmt2(st.cap.pp), capClass(st.cap.pp)) +
             statTile("Ppk (overall)", st.cap.ppk===null?"—":fmt2(st.cap.ppk), capClass(st.cap.ppk)) +
             statTile("Out of spec", String(st.cap.oosCount), st.cap.oosCount? "bad":"good") +
-            statTile("Expected PPM (from overall variation)", st.cap.ppm===null?"—":fmt(st.cap.ppm,0));
+            statTile("Expected PPM", st.cap.ppm===null?"—":fmt(st.cap.ppm,0));
         } else $("spcCapWrap").classList.add("hidden");
         var verdict, vcls;
         if(st.cap){
@@ -1920,13 +1962,13 @@
         var counts = new Array(bins).fill(0);
         vals.forEach(function(v){ var b = range>0 ? Math.min(bins-1, Math.floor((v-min)/bw)) : 0; counts[b]++; });
         var maxC = Math.max.apply(null, counts.concat([1]));
-        var W=720, H=260, padL=44, padR=14, padT=14, padB=34, iw=W-padL-padR, ih=H-padT-padB;
+        var W=chN()?460:720, H=chN()?300:260, padL=44, padR=14, padT=chN()?20:14, padB=chN()?40:34, iw=W-padL-padR, ih=H-padT-padB;
         function Y(c){ return padT + ih*(1-c/maxC); }
         var g = "";
         counts.forEach(function(c, i){
           var x = padL + iw*i/bins, w = iw/bins;
           g += '<rect x="'+(x+1)+'" y="'+Y(c)+'" width="'+Math.max(w-2,1)+'" height="'+(padT+ih-Y(c))+'" fill="#0b7f95" opacity="0.88"/>';
-          g += '<text x="'+(x+w/2)+'" y="'+(Y(c)-4)+'" fill="#3f5d73" font-size="10.5" font-family="monospace" text-anchor="middle">'+(c||"")+'</text>';
+          g += '<text x="'+(x+w/2)+'" y="'+(Y(c)-4)+'" fill="#3f5d73" font-size="'+chFS()+'" font-family="monospace" text-anchor="middle">'+(c||"")+'</text>';
           g += '<text x="'+(x+w/2)+'" y="'+(H-16)+'" fill="#6b8699" font-size="9.5" font-family="monospace" text-anchor="middle">'+fmt(min+i*bw,3)+'</text>';
         });
         g += '<line x1="'+padL+'" y1="'+(padT+ih)+'" x2="'+(W-padR)+'" y2="'+(padT+ih)+'" stroke="#b9c9d6"/>';
@@ -1935,7 +1977,7 @@
           var x = padL + iw*(v-min)/range;
           if(x<padL||x>W-padR) return;
           g += '<line x1="'+x+'" y1="'+padT+'" x2="'+x+'" y2="'+(padT+ih)+'" stroke="#c93a3a" stroke-width="1.6" stroke-dasharray="6 4"/>';
-          g += '<text x="'+x+'" y="'+(padT-3)+'" fill="#c93a3a" font-size="10.5" font-family="monospace" text-anchor="middle">'+label+'</text>';
+          g += '<text x="'+x+'" y="'+(padT-3)+'" fill="#c93a3a" font-size="'+chFS()+'" font-family="monospace" text-anchor="middle">'+label+'</text>';
         }
         specLine(sp.lsl, "LSL"); specLine(sp.usl, "USL");
         if(demoFlags.data) g += demoMarkSVG(W, H);
@@ -2835,9 +2877,85 @@
         if(grrMeaning) html += '<p class="explain"><strong>What this means:</strong> '+esc(grrMeaning)+"</p>";
         if(ndc!==null && ndc < 5) html += '<div class="flag amber"><strong>ndc = '+ndc+' (&lt; 5).</strong> ndc below 5 means the gauge can only sort parts into a few rough groups — too coarse for process control.</div>';
         $("grrVerdict").innerHTML = html;
+        $("grrBars").innerHTML = grrBarsHTML(EV, AV, GRR, PV, TV);
         $("grrNote").textContent = "ANOVA method per AIAG MSA. Operator × part interaction " + (pooled ? "was not significant at α = 0.25 and was pooled into the error term." : "was kept in the model (significant at α = 0.25).") + " AV combines operator and interaction variance, per the manual.";
         $("grrResults").classList.remove("hidden");
         syncAiButtons();
+      }
+
+      /* ======================================================================
+         SECTION · 2026-11-15 ADDITIONS (presentation only — no calculation
+         feeds a verdict from here): chart point readout, AQL OC curve,
+         true-position target plot, Gage R&R variation bars.
+         ====================================================================== */
+      $("spcChart").addEventListener("click", function(e){
+        var c = e.target.closest ? e.target.closest("circle.hit") : null; if(!c) return;
+        $("spcPointInfo").innerHTML = "Point <strong>" + esc(c.getAttribute("data-i")) + "</strong>: <strong>" + esc(c.getAttribute("data-v")) + "</strong> — " + esc(c.getAttribute("data-s"));
+      });
+      $("spcChart").addEventListener("keydown", function(e){ if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("hit")){ e.preventDefault(); e.target.dispatchEvent(new MouseEvent("click", {bubbles:true})); } });
+      /* OC curve for a single-sampling plan: binomial probability of acceptance
+         Pa(p) = sum_{k<=Ac} C(n,k) p^k (1-p)^(n-k), p = fraction defective. */
+      function aqlPa(n, ac, p){
+        if(p <= 0) return 1; if(p >= 1) return 0;
+        var s = 0, ln = lgamma(n + 1);
+        for(var k = 0; k <= ac; k++) s += Math.exp(ln - lgamma(k + 1) - lgamma(n - k + 1) + k * Math.log(p) + (n - k) * Math.log(1 - p));
+        return Math.min(1, s);
+      }
+      function aqlPaInv(n, ac, t){ var lo = 0, hi = 1; for(var i = 0; i < 70; i++){ var m = (lo + hi) / 2; if(aqlPa(n, ac, m) > t) lo = m; else hi = m; } return (lo + hi) / 2; }
+      function aqlOCHTML(n, ac, aqlPct){
+        var N = chN(), W = N ? 460 : 720, H = N ? 300 : 280, pL = N ? 54 : 48, pR = 16, pT = 14, pB = N ? 44 : 38, iw = W - pL - pR, ih = H - pT - pB, fs = chFS();
+        var lq = aqlPaInv(n, ac, 0.10), pmax = Math.min(1, aqlPaInv(n, ac, 0.01) * 1.08), aq = aqlPct / 100;
+        if(aq * 1.25 > pmax) pmax = Math.min(1, aq * 1.25);
+        function X(p){ return pL + iw * p / pmax; } function Y(pa){ return pT + ih * (1 - pa); }
+        var g = "", d = "";
+        [0, 0.25, 0.5, 0.75, 1].forEach(function(t){ g += '<line x1="'+pL+'" y1="'+Y(t)+'" x2="'+(W-pR)+'" y2="'+Y(t)+'" style="stroke:var(--grid)" stroke-width="1"/><text x="'+(pL-6)+'" y="'+(Y(t)+4)+'" text-anchor="end" font-size="'+fs+'" font-family="monospace" style="fill:var(--ink-faint)">'+Math.round(t*100)+'%</text>'; });
+        for(var i = 0; i <= 160; i++){ var p = pmax * i / 160; d += (i ? "L" : "M") + X(p).toFixed(1) + " " + Y(aqlPa(n, ac, p)).toFixed(1); }
+        g += '<path d="'+d+'" fill="none" style="stroke:var(--cyan)" stroke-width="2.4"/>';
+        var paA = aqlPa(n, ac, aq);
+        g += '<line x1="'+X(aq)+'" y1="'+Y(0)+'" x2="'+X(aq)+'" y2="'+Y(paA)+'" style="stroke:var(--green)" stroke-dasharray="5 4" stroke-width="1.4"/><circle cx="'+X(aq)+'" cy="'+Y(paA)+'" r="5" style="fill:var(--green)"/>';
+        if(lq <= pmax) g += '<line x1="'+X(lq)+'" y1="'+Y(0)+'" x2="'+X(lq)+'" y2="'+Y(0.10)+'" style="stroke:var(--red)" stroke-dasharray="5 4" stroke-width="1.4"/><circle cx="'+X(lq)+'" cy="'+Y(0.10)+'" r="5" style="fill:var(--red)"/>';
+        for(var j = 0; j <= 4; j++){ var pj = pmax * j / 4; g += '<text x="'+X(pj)+'" y="'+(H-pB+18)+'" text-anchor="middle" font-size="'+fs+'" font-family="monospace" style="fill:var(--ink-faint)">'+(pj*100).toFixed(pmax < 0.05 ? 2 : 1)+'%</text>'; }
+        g += '<text x="'+(pL+iw/2)+'" y="'+(H-6)+'" text-anchor="middle" font-size="'+fs+'" style="fill:var(--ink-dim)">Lot % defective</text>';
+        var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Operating characteristic curve for n '+n+', Ac '+ac+'">'+g+'</svg>';
+        var fp = function(x){ return (x*100).toFixed(x < 0.01 ? 2 : 1) + "%"; };
+        return '<div class="viz"><h4>OC curve — what this plan protects against</h4>' + svg +
+          '<p class="vcap"><span style="color:var(--green)">●</span> A lot at the AQL (<strong>' + fp(aq) + '</strong> defective) is accepted <strong>' + Math.round(paA*100) + '%</strong> of the time. ' +
+          '<span style="color:var(--red)">●</span> A lot <strong>' + fp(lq) + '</strong> defective is still accepted <strong>10%</strong> of the time (LQ10). ' +
+          'Binomial model (n = ' + n + ', Ac = ' + ac + '), lot large relative to the sample; normal inspection only.</p></div>';
+      }
+      function tpPlotHTML(dx, dy, tol, total, dev, pass, outOfSize, hasBonus){
+        var N = chN(), S = N ? 320 : 340, c = S / 2, rTol = tol / 2, rTot = total / 2, rDev = dev / 2;
+        var R = Math.max(rTot, rDev, rTol, 1e-9) * 1.25, k = (c - 18) / R, fs = chFS();
+        var ok = pass && !outOfSize, pc = ok ? "var(--green)" : "var(--red)";
+        var g = '<line x1="'+c+'" y1="10" x2="'+c+'" y2="'+(S-10)+'" style="stroke:var(--grid)"/><line x1="10" y1="'+c+'" x2="'+(S-10)+'" y2="'+c+'" style="stroke:var(--grid)"/>';
+        if(hasBonus) g += '<circle cx="'+c+'" cy="'+c+'" r="'+(rTot*k)+'" style="fill:rgba(61,214,140,.08);stroke:var(--green)" stroke-width="1.6"/>';
+        g += '<circle cx="'+c+'" cy="'+c+'" r="'+(rTol*k)+'" style="fill:'+(hasBonus?'none':'rgba(77,163,255,.08)')+';stroke:var(--cyan)" stroke-width="1.6" stroke-dasharray="'+(hasBonus?'6 4':'0')+'"/>';
+        var px = c + dx * k, py = c - dy * k;
+        g += '<line x1="'+c+'" y1="'+c+'" x2="'+px+'" y2="'+py+'" style="stroke:'+pc+'" stroke-width="1.6"/><circle cx="'+px+'" cy="'+py+'" r="6" style="fill:'+pc+';stroke:var(--bg)" stroke-width="2"/>';
+        g += '<circle cx="'+c+'" cy="'+c+'" r="3" style="fill:var(--ink-dim)"/>';
+        g += '<text x="'+(S-12)+'" y="'+(c-6)+'" text-anchor="end" font-size="'+fs+'" style="fill:var(--ink-faint)">+X</text><text x="'+(c+6)+'" y="'+(fs+12)+'" font-size="'+fs+'" style="fill:var(--ink-faint)">+Y</text>';
+        var svg = '<svg viewBox="0 0 '+S+' '+S+'" style="max-width:'+S+'px;margin:0 auto" role="img" aria-label="True position zone plot">'+g+'</svg>';
+        return '<div class="viz"><h4>Position zone</h4>' + svg + '<p class="vcap"><span style="color:var(--cyan)">' + (hasBonus ? '- -' : '○') + '</span> stated zone ⌀ <strong>' + fmt(tol, 4) + '</strong>' +
+          (hasBonus ? ' · <span style="color:var(--green)">○</span> with bonus ⌀ <strong>' + fmt(total, 4) + '</strong>' : '') +
+          ' · <span style="color:' + pc + '">●</span> measured centre, ⌀ <strong>' + fmt(dev, 4) + '</strong> (Δx ' + fmt(dx, 4) + ', Δy ' + fmt(dy, 4) + '). Drawn to scale.</p></div>';
+      }
+      function grrBarsHTML(EV, AV, GRR, PV, TV){
+        if(!(TV > 0)) return "";
+        var N = chN(), W = N ? 340 : 720, rowH = N ? 44 : 40, pL = N ? 50 : 150, pR = N ? 62 : 70, pT = 8, fs = chFS();
+        var rows = [["Repeatability (EV)", EV], ["Reproducibility (AV)", AV], ["Gage R&R", GRR], ["Part variation", PV]];
+        var H = pT + rows.length * rowH + 30, iw = W - pL - pR;
+        function X(pct){ return pL + iw * Math.min(pct, 100) / 100; }
+        var g = "";
+        [10, 30].forEach(function(t){ g += '<line x1="'+X(t)+'" y1="'+pT+'" x2="'+X(t)+'" y2="'+(pT+rows.length*rowH)+'" style="stroke:var(--line)" stroke-dasharray="4 4"/><text x="'+X(t)+'" y="'+(pT+rows.length*rowH+18)+'" text-anchor="middle" font-size="'+fs+'" font-family="monospace" style="fill:var(--ink-faint)">'+t+'%</text>'; });
+        rows.forEach(function(r, i){
+          var pct = 100 * r[1] / TV, y = pT + i * rowH, col = i === 2 ? (pct < 10 ? "var(--green)" : pct <= 30 ? "var(--amber)" : "var(--red)") : (i === 3 ? "var(--cyan)" : "var(--ink-faint)");
+          var lab = N ? ["EV", "AV", "GRR", "PV"][i] : r[0];
+          g += '<text x="'+(pL-8)+'" y="'+(y+rowH/2+4)+'" text-anchor="end" font-size="'+fs+'" style="fill:var(--ink-dim)">'+esc(lab)+'</text>';
+          g += '<rect x="'+pL+'" y="'+(y+8)+'" width="'+Math.max(1, X(pct)-pL)+'" height="'+(rowH-16)+'" rx="3" style="fill:'+col+'"/>';
+          g += '<text x="'+(X(pct)+6)+'" y="'+(y+rowH/2+4)+'" font-size="'+fs+'" font-family="monospace" style="fill:var(--ink)">'+pct.toFixed(1)+'%</text>';
+        });
+        var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Components of variation as percent of study variation">'+g+'</svg>';
+        return '<div class="viz"><h4>Components of variation — % of study variation</h4>' + svg + '<p class="vcap">Each bar is that component\'s standard deviation as a % of total variation (TV). They don\'t add to 100% — variances add, standard deviations don\'t. Dashed lines mark the AIAG 10% / 30% guidelines for Gage R&amp;R.</p></div>';
       }
       $("grrCalc").addEventListener("click", calcGRR);
       $("grrSample").addEventListener("click", function(){
@@ -2983,6 +3101,7 @@
         else if(steps > 0) note = '<div class="flag green">Arrow rule applied: code letter '+letter+' has no plan at AQL '+aql+', so the standard\'s arrow '+(firstArrow === "U" ? "(↑ up)" : "(↓ down)")+' leads to code <strong>'+planLetter+'</strong> (n = '+n+', Ac '+ac+', Re '+re+'). Inspect '+n+' pieces: accept the lot on '+ac+' or fewer defectives, reject on '+re+' or more.</div>';
         else note = '<div class="flag green">Inspect <strong>'+n+'</strong> pieces from the lot of '+lot+': accept on <strong>'+ac+'</strong> or fewer defectives, reject on <strong>'+re+'</strong> or more.</div>';
         $("aqlNote").innerHTML = note;
+        $("aqlOC").innerHTML = n < lot ? aqlOCHTML(n, ac, Number(aql)) : "";
         $("aqlResults").classList.remove("hidden");
       });
 
@@ -3035,25 +3154,25 @@
         var total = data.reduce(function(s,d){ return s+d.count; }, 0);
         var cum = 0; data.forEach(function(d){ cum += d.count; d.cumPct = cum/total*100; });
         paretoData = data;
-        var W=720, H=300, padL=44, padR=44, padT=16, padB=56, iw=W-padL-padR, ih=H-padT-padB;
+        var W=chN()?460:720, H=chN()?340:300, padL=44, padR=chN()?48:44, padT=chN()?24:16, padB=chN()?70:56, iw=W-padL-padR, ih=H-padT-padB;
         var maxC = data[0].count;
         var bw = iw/data.length;
         var g = "";
         data.forEach(function(d, i){
           var x = padL + i*bw, h = ih*d.count/maxC;
           g += '<rect x="'+(x+3)+'" y="'+(padT+ih-h)+'" width="'+Math.max(bw-6,2)+'" height="'+h+'" fill="#0b7f95" opacity="0.90"/>';
-          g += '<text x="'+(x+bw/2)+'" y="'+(padT+ih-h-5)+'" fill="#132635" font-size="11.5" font-family="monospace" text-anchor="middle">'+d.count+'</text>';
+          g += '<text x="'+(x+bw/2)+'" y="'+(padT+ih-h-5)+'" fill="#132635" font-size="'+chFS(1)+'" font-family="monospace" text-anchor="middle">'+d.count+'</text>';
           var label = d.cat.length > 12 ? d.cat.slice(0,11)+"…" : d.cat;
-          g += '<text x="'+(x+bw/2)+'" y="'+(padT+ih+16)+'" fill="#3f5d73" font-size="10.5" text-anchor="middle" transform="rotate(-18 '+(x+bw/2)+' '+(padT+ih+16)+')">'+esc(label)+'</text>';
+          g += '<text x="'+(x+bw/2)+'" y="'+(padT+ih+16)+'" fill="#3f5d73" font-size="'+chFS()+'" text-anchor="middle" transform="rotate(-18 '+(x+bw/2)+' '+(padT+ih+16)+')">'+esc(label)+'</text>';
         });
         var y80 = padT + ih*(1-0.8);
         g += '<line x1="'+padL+'" y1="'+y80+'" x2="'+(W-padR)+'" y2="'+y80+'" stroke="#5f7f99" stroke-width="1.2" stroke-dasharray="6 4"/>';
-        g += '<text x="'+(W-padR+5)+'" y="'+(y80+3.5)+'" fill="#6b8699" font-size="10.5" font-family="monospace">80%</text>';
+        g += '<text x="'+(W-padR+5)+'" y="'+(y80+3.5)+'" fill="#6b8699" font-size="'+chFS()+'" font-family="monospace">80%</text>';
         var pts = data.map(function(d, i){ return (padL + i*bw + bw/2)+","+(padT + ih*(1-d.cumPct/100)); }).join(" ");
         g += '<polyline points="'+pts+'" fill="none" stroke="#b97d0f" stroke-width="2"/>';
         data.forEach(function(d, i){
           g += '<circle cx="'+(padL + i*bw + bw/2)+'" cy="'+(padT + ih*(1-d.cumPct/100))+'" r="3.6" fill="#b97d0f"/>';
-          g += '<text x="'+(padL + i*bw + bw/2)+'" y="'+(padT + ih*(1-d.cumPct/100) - 9)+'" fill="#b97d0f" font-size="10.5" font-family="monospace" text-anchor="middle">'+fmt(d.cumPct,0)+'%</text>';
+          g += '<text x="'+(padL + i*bw + bw/2)+'" y="'+(padT + ih*(1-d.cumPct/100) - 9)+'" fill="#b97d0f" font-size="'+chFS()+'" font-family="monospace" text-anchor="middle">'+fmt(d.cumPct,0)+'%</text>';
         });
         $("paretoChart").innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Pareto chart">'+g+'</svg>';
         var vital = [], c2 = 0;
@@ -5980,6 +6099,7 @@
           if(mod !== "rfs" && !hasOther) verdictHtml += '<p class="small" style="margin:8px 0 0">Size checked against the ' + (mod === "mmc" ? "MMC" : "LMC") + ' limit only — enter the other size limit to confirm the feature is fully within size.</p>';
         }
         $("tpVerdict").innerHTML = verdictHtml;
+        $("tpPlot").innerHTML = tpPlotHTML(dx, dy, tol, total, dev, pass, outOfSize, mod !== "rfs" && !outOfSize && bonus > 0);
         $("tpResults").classList.remove("hidden");
         flash($("tpTiles"));
       }
@@ -6453,7 +6573,7 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjIwLjEtY2hhcmNvYWwzIjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjIwLjEtcG9saXNoIjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
