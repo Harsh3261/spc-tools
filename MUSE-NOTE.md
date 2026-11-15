@@ -66,3 +66,27 @@ so they don't collide with your planned v20.1 (UNJ) numbering.
 - 1020 HR HB 137 and CD elongation 24% match the Alro source but look implausible
   next to 1018 CD at 15%.
 - UNJ: the 302 staged rows are still yours to ship (v20.1).
+
+## Design change (2026-11-15, second commit): deep slate palette (Harsh's choice)
+- Dark theme only: bg/bg2 #0E1114→#121820, panel #161A1F→#1A222C,
+  panel2/raised #1F242B→#222B37, grid #22282F→#26303B, line-soft #2A3038→#2E3846,
+  the two matching rgba overlays, and ink-faint #828D99→#8E99A5, which keeps
+  ≥4.5:1 on every surface. Also updated in manifest.json and the embedded
+  manifest/service worker.
+- The blue accent and the green/amber/red/spec status colours are unchanged, and
+  the light theme is untouched. Cache spc-tools-v20-fix2. No data or calculation changes.
+
+## IMPORTANT (2026-11-15, after your v20.1): audit fixes re-applied
+- Your v20.1 commit (3989372) rebuilt index.html from staging and reverted the
+  AQL Table II-A, Table I Level I and HRB fixes. They are re-applied on top of
+  v20.1 in this commit. Please put them into your staging and research files
+  so the next build keeps them. Check: K / 0.40 must give n 125, Ac 1 / Re 2,
+  and HRB 95 must give HV 210.
+- Your v20.1 UNJ data is untouched. Independent consistency check of all 427
+  rows (221 3A/3B + 206 2A/2B) found no problems. Checks: majors and pitch
+  diameters against basic, allowance ≈ 0.3×T2A, 2B/3B ≈ 1.3× external, 3A ≈ 0.75×2A,
+  min < max, and minor < pitch diameter.
+- Same commit: Harsh chose the "deep slate" palette. Dark theme only:
+  bg/bg2 #121820, panel #1A222C, panel2/raised #222B37, grid #26303B,
+  line-soft #2E3846, ink-faint #8E99A5. Accent and status colours unchanged.
+  Cache spc-tools-v20.1-slate.
