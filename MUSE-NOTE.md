@@ -90,3 +90,23 @@ so they don't collide with your planned v20.1 (UNJ) numbering.
   bg/bg2 #121820, panel #1A222C, panel2/raised #222B37, grid #26303B,
   line-soft #2E3846, ink-faint #8E99A5. Accent and status colours unchanged.
   Cache spc-tools-v20.1-slate.
+
+## Round 3 (2026-11-15, ~13:00): remaining audit items + soft charcoal palette
+- Palette (Harsh's choice, replaces deep slate). Dark theme only:
+  - Backgrounds: bg/bg2 #141516, panel #1C1E20, panel2/raised #25282B, grid #2A2D30, line-soft #323538, line #63666B.
+  - Text, warm and neutral: ink #E8E6E1, ink-dim #A9A7A2, ink-faint #97958F, centre #96989B.
+  - Overlays: rgba(20,21,22,.94) and rgba(28,30,32,.98); zebra rows rgba(42,44,47,.45); sheet overlay rgba(6,6,7,.74).
+  - Accent and status colours unchanged. All text is ≥4.5:1 on every surface.
+  - Cache spc-tools-v20.1-charcoal.
+- Hardness:
+  - Added an HV 240 row [240, 228, 20.4, 100, 787] so HRB 100 converts. HRB 100 = HV 240 per E140 Table 2; the other cells are interpolated in Table 1.
+  - UI text and the data comment no longer imply that E140 provides tensile. The UTS column is an approximate correlation; please name its real source if you have it.
+  - HB in the HRB range was left as is. E140 Table 2 prints HB = HV there, but switching would make HB non-monotonic against Table 1 at HRC 20 (HV 238 → HB 226). Your call.
+- DIN 513: when d3 isn't tabulated, the basic-size view now shows
+  d3 = d − 1.735534 P, labelled "calculated". The formula reproduces all 20 of
+  your tabulated d3 values exactly. TH_S513 data is unchanged; this is render-time only.
+- Not changed, on purpose:
+  - The 4 UNSETTLED B1.9 Table 2 cells (TPI 6 H and F, TPI 4 r, TPI 3 F). The formula
+    result depends on whether p is rounded first (e.g. TPI 6 H = 0.1484 or 0.1485), and
+    the printed table itself departs from the formula at TPI 1.25 r (0.0572 vs 0.0571).
+  - The 3/8-24 NOGO plug PD. It's already handled by your D16 basis note.
