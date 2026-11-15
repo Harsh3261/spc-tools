@@ -124,3 +124,14 @@ so they don't collide with your planned v20.1 (UNJ) numbering.
     - NPT 24 and NPTF 12 (E0, L2 and E1 formulas), BSPT 15 (= ISO 228 basics) and PG 10.
   - BA differs from 0.6P/1.2P by ≤0.004 mm, which is BS 93's own rounding.
 - Cache spc-tools-v20.1-charcoal2.
+
+## Round 6 (2026-11-15, ~13:30): hardness tensile column sourced
+- The UTS column in E140[] is now ISO 18265:2013 Table A.1 (unalloyed / low-alloy
+  steels), interpolated on HV. Corroborated by three published reproductions
+  (Alfa Chemistry, Optimas, WS-Stahl). Set to null above 650 HV, where Table A.1
+  has no tensile value. The old values were 5–25 MPa high and unsourced.
+- Brinell basis settled. The HB column already equals ISO 18265 / E140 Table 1
+  HBW (HB ≈ 0.95 HV), so it's kept. The UI cite line now explains that E140
+  Table 2 prints steel-ball HBS (higher in the HRB range).
+- Cache spc-tools-v20.1-charcoal3. The four B1.9 Table 2 cells stay blank: no
+  public reproduction exists, and the formula result depends on rounding.

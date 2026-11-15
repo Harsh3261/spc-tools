@@ -1099,7 +1099,7 @@
 
         <div class="card">
           <h2>Hardness conversion — steel</h2>
-          <p class="small">Enter a hardness value and choose the scale it's in under <strong>Convert from</strong> — you can start from any scale — and get the approximate equivalents in every other scale, plus a rough tensile-strength estimate for carbon and low-alloy steels (an approximate correlation — ASTM E140 itself does not convert hardness to tensile).</p>
+          <p class="small">Enter a hardness value and choose the scale it's in under <strong>Convert from</strong> — you can start from any scale — and get the approximate equivalents in every other scale, plus an approximate tensile strength for unalloyed and low-alloy steels from ISO 18265 Table A.1 (ASTM E140 itself does not convert hardness to tensile).</p>
 
           <label class="flabel" for="hardGroup">Material group</label>
           <select id="hardGroup" class="biginput">
@@ -1132,7 +1132,7 @@
             <div class="stats" id="hardTiles"></div>
             <div class="flags" id="hardNote"></div>
           </div>
-          <p class="cite">Approximate conversions for steel per ASTM E140 (Table 1 for the HRC range, Table 2 for HRB) — for reference only, not for acceptance decisions. The tensile figure is a rough correlation, not part of E140.</p>
+          <p class="cite">Approximate conversions for steel per ASTM E140 (Table 1 for the HRC range, Table 2 for HRB) — for reference only, not for acceptance decisions. Tensile per ISO 18265 Table A.1 (unalloyed / low-alloy steels, up to 650 HV); Brinell values follow the HBW basis of E140 Table 1 / ISO 18265 (HB ≈ 0.95 HV) — E140 Table 2 prints steel-ball HBS, which is higher in the HRB range.</p>
         </div>
 
       </section>
@@ -3222,25 +3222,25 @@
       });
 
       /* BEGIN DATA E140: hardness rows [HV, HB, HRC, HRB, approx UTS MPa], null = not covered.
-         Provenance: ASTM E140 Table 1 (non-austenitic steels) for HV/HB/HRC; HRB column re-derived from E140 Table 2 (2026-11-15 audit). The UTS column is an approximate correlation, NOT an E140 value; verified 2026-11.
+         Provenance: ASTM E140 Table 1 (non-austenitic steels) for HV/HB/HRC; HRB column re-derived from E140 Table 2 (2026-11-15 audit). The UTS column is ISO 18265:2013 Table A.1 (unalloyed and low-alloy steels), interpolated on HV; null above 650 HV where Table A.1 gives no tensile value; verified 2026-11-15.
          Edit data only via a verified data change, never by hand-tuning numbers. */
       /* --- hardness conversion, ASTM E140 Table 1 (steel), interpolated ---
          Rows: [HV, HB, HRC, HRB, approx UTS in MPa]; null = scale not covered
          at that hardness in the standard table (never extrapolated). */
       var E140 = [
-        [90,86,null,null,295],[100,95,null,null,325],[110,105,null,62,355],
-        [120,114,null,67.5,390],[130,124,null,72,420],[140,133,null,76.5,455],
-        [150,143,null,80,485],[160,152,null,83.3,520],[170,162,null,86.3,550],
-        [180,171,null,89,580],[190,181,null,91,615],[200,190,null,93,650],
-        [210,200,null,95,685],[220,209,null,96.7,715],[230,219,null,98.3,750],
-        [238,226,20,99.7,780],[240,228,20.4,100,787],[248,237,22,null,815],[260,247,24,null,850],
-        [272,258,26,null,885],[286,271,28,null,930],[302,286,30,null,990],
-        [318,301,32,null,1035],[336,318,34,null,1095],[354,335,36,null,1155],
-        [372,352,38,null,1210],[392,371,40,null,1275],[412,390,42,null,1345],
-        [434,409,44,null,1415],[458,432,46,null,1500],[484,455,48,null,1595],
-        [513,481,50,null,1700],[544,512,52,null,1810],[577,543,54,null,1920],
-        [613,577,56,null,2035],[653,615,58,null,2165],[697,654,60,null,2300],
-        [746,688,62,null,2420],[800,739,64,null,null],[865,null,66,null,null],
+        [90,86,null,null,285],[100,95,null,null,320],[110,105,null,62,350],
+        [120,114,null,67.5,385],[130,124,null,72,415],[140,133,null,76.5,450],
+        [150,143,null,80,480],[160,152,null,83.3,510],[170,162,null,86.3,545],
+        [180,171,null,89,575],[190,181,null,91,610],[200,190,null,93,640],
+        [210,200,null,95,675],[220,209,null,96.7,705],[230,219,null,98.3,740],
+        [238,226,20,99.7,764],[240,228,20.4,100,770],[248,237,22,null,794],[260,247,24,null,835],
+        [272,258,26,null,871],[286,271,28,null,918],[302,286,30,null,971],
+        [318,301,32,null,1023],[336,318,34,null,1081],[354,335,36,null,1137],
+        [372,352,38,null,1196],[392,371,40,null,1262],[412,390,42,null,1326],
+        [434,409,44,null,1399],[458,432,46,null,1479],[484,455,48,null,1571],
+        [513,481,50,null,1676],[544,512,52,null,1789],[577,543,54,null,1908],
+        [613,577,56,null,2042],[653,615,58,null,null],[697,654,60,null,null],
+        [746,688,62,null,null],[800,739,64,null,null],[865,null,66,null,null],
         [940,null,68,null,null],[1005,null,69,null,null],[1076,null,70,null,null]
       ];
       /* END DATA E140 */
@@ -6453,7 +6453,7 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjIwLjEtY2hhcmNvYWwyIjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjIwLjEtY2hhcmNvYWwzIjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
