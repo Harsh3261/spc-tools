@@ -197,3 +197,18 @@ answers in the column you guarded did not:
 | P | 800 | 800/1/2 | 800/2/3 | 800/3/4 | 800/5/6 | 800/7/8 | 800/10/11 | 800/14/15 | 800/21/22 | 500/21/22 | 315/21/22 | 200/21/22 |
 | Q | 1250 | 1250/2/3 | 1250/3/4 | 1250/5/6 | 1250/7/8 | 1250/10/11 | 1250/14/15 | 1250/21/22 | 800/21/22 | 500/21/22 | 315/21/22 | 200/21/22 |
 | R | 2000 | 2000/3/4 | 2000/5/6 | 2000/7/8 | 2000/10/11 | 2000/14/15 | 2000/21/22 | 1250/21/22 | 800/21/22 | 500/21/22 | 315/21/22 | 200/21/22 |
+
+## Round 9 (2026-11-15, ~15:20): PC / desktop layout
+Presentation only. No calculation changed; the AQL comparison (176/176) and all regression tests still pass.
+- New `@media screen and (min-width:1024px)` block at the end of the main style:
+  - The cluster bar is pinned at the top (sticky) instead of the bottom.
+  - The current cluster's tools show as a visible row of buttons; the tool-picker sheet is hidden.
+  - Action rows are static.
+  - .wrap is 1120 px.
+  - The sticky headline sits at top 78 px, under the cluster bar.
+  - Thread table values don't wrap.
+  - Phones are unchanged.
+- Keyboard: Ctrl/⌘ + Enter clicks the first visible button.act (Analyse, Look up plan, …).
+  The listener sits just before clusterOfTool().
+- No horizontal overflow at 1024–1920 px in any of the 10 tools.
+- Cache spc-tools-v20.2-desktop, in both sw.js and the inlined base64 service worker.
