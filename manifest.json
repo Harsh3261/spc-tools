@@ -1,5 +1,5 @@
 {
-  "background_color": "#0a1118",
+  "background_color": "#0E1114",
   "description": "Personal statistical tools: SPC and capability, Gage R&R, data checks, AQL sampling and Pareto charts. All calculations run on-device.",
   "display": "standalone",
   "icons": [
@@ -23,5 +23,5 @@
   "scope": ".",
   "short_name": "SPC Tools",
   "start_url": ".",
-  "theme_color": "#0a1118"
+  "theme_color": "#0E1114"
 }

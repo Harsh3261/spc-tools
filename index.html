@@ -12,6 +12,7 @@
     theme, fonts, motion, chart layers, SPC headline, status ring and
     Sightline Mode (see SECTION · v19 PRESENTATION). Data, maths, status
     rules and the open-empty / EXAMPLE behaviour are unchanged.
+    v19.2 (2026-11-14): design revamp hotfix — instrument-blue accent #4DA3FF, graphite ramp, spec-limit violet, neutral-to-pitch zone tints, fixed bottom cluster bar, tool picker sheet, sticky action bars, Clear in card header, smoother motion, new 'Out of Control' icon. Presentation only — data, maths and behaviour untouched.
     ======================================================================
     One self-contained file. The <style> block holds the theme and layout,
     the <body> holds the markup for every tool, and one classic <script>
@@ -85,12 +86,12 @@
     <meta name="author" content="Harsh Patel" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#0a1118" />
+    <meta name="theme-color" content="#0E1114" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="SPC Tools" />
-    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBhMTExOCIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8sIGluY2gtZnJhY3Rpb24gYW5kIGhhcmRuZXNzIGNvbnZlcnRlcnMsIHNpZ21hLVBQTSBjb252ZXJzaW9uLCB0aHJlYWQgYmFzaWMgZGlhbWV0ZXJzLCB0b2xlcmFuY2Ugc3RhY2stdXAgYW5kIHRydWUgcG9zaXRpb24uIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImljb25zIjpbeyJwdXJwb3NlIjoiYW55Iiwic2l6ZXMiOiIxOTJ4MTkyIiwic3JjIjoiaWNvbi0xOTIucG5nIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsicHVycG9zZSI6ImFueSIsInNpemVzIjoiNTEyeDUxMiIsInNyYyI6Imljb24tNTEyLnBuZyIsInR5cGUiOiJpbWFnZS9wbmcifV0sIm5hbWUiOiJTUEMgVG9vbHMiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0Iiwic2NvcGUiOiIuLi8iLCJzaG9ydF9uYW1lIjoiU1BDIFRvb2xzIiwic3RhcnRfdXJsIjoiLi4vaW5kZXguaHRtbCIsInRoZW1lX2NvbG9yIjoiIzBhMTExOCJ9" />
+    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBFMTExNCIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8sIGluY2gtZnJhY3Rpb24gYW5kIGhhcmRuZXNzIGNvbnZlcnRlcnMsIHNpZ21hLVBQTSBjb252ZXJzaW9uLCB0aHJlYWQgYmFzaWMgZGlhbWV0ZXJzLCB0b2xlcmFuY2Ugc3RhY2stdXAgYW5kIHRydWUgcG9zaXRpb24uIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImljb25zIjpbeyJwdXJwb3NlIjoiYW55Iiwic2l6ZXMiOiIxOTJ4MTkyIiwic3JjIjoiaWNvbi0xOTIucG5nIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsicHVycG9zZSI6ImFueSIsInNpemVzIjoiNTEyeDUxMiIsInNyYyI6Imljb24tNTEyLnBuZyIsInR5cGUiOiJpbWFnZS9wbmcifV0sIm5hbWUiOiJTUEMgVG9vbHMiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0Iiwic2NvcGUiOiIuLi8iLCJzaG9ydF9uYW1lIjoiU1BDIFRvb2xzIiwic3RhcnRfdXJsIjoiLi4vaW5kZXguaHRtbCIsInRoZW1lX2NvbG9yIjoiIzBFMTExNCJ9" />
     <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
     <link rel="icon" href="data:," />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -98,30 +99,34 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <title>SPC Tools</title>
     <style>
-      /* ===== v19 · dark "instrument" theme =====
-         Palette (SPEC §1): bg #0a1118 · panel #101b25 · raised #172634 ·
-         grid #1f3242 · text #e2ecf2 · muted #8aa3b5 · accent #2ec4d6 ·
-         centre #8aa3b5 · pass #3ddc97 · warn #ffb020 · fail #ff4d5e.
+      /* ===== v19 · dark "instrument" theme (v19.2 palette) =====
+         Palette (v19.2): graphite ramp bg #0E1114 · panel #161A1F ·
+         raised #1F242B · grid #22282F · hairline #2A3038 · line #5A6572 ·
+         text #E6EDF3 · muted #9AA5B1 · faint #828D99 · instrument-blue
+         accent #4DA3FF · centre #8B95A1 · spec-limit violet #B48EFF ·
+         pass #3DD68C · warn #F2A93B · fail #FF5A5F.
          The old variable NAMES are kept (markup uses var(--cyan) etc. inline),
-         only their values change. Layout rules are unchanged from v18. */
+         only their values change. */
       :root{
         color-scheme:dark;
-        --bg:#0a1118; --bg2:#0a1118; --panel:#101b25; --panel2:#172634;
-        --line:#4a6a82; --line-soft:#1f3242;
-        --ink:#e2ecf2; --ink-dim:#8aa3b5; --ink-faint:#7590a3;
-        --cyan:#2ec4d6; --cyan-dim:#2ec4d6; --on-accent:#06222a;
-        --amber:#ffb020; --red:#ff4d5e; --green:#3ddc97;
-        --centre:#8aa3b5; --grid:#1f3242; --raised:#172634;
-        --amber-ink:#ffd27a; --red-ink:#ffb3bb; --green-ink:#9cf0c9;
+        --bg:#0E1114; --bg2:#0E1114; --panel:#161A1F; --panel2:#1F242B;
+        --line:#5A6572; --line-soft:#2A3038;
+        --ink:#E6EDF3; --ink-dim:#9AA5B1; --ink-faint:#828D99;
+        --cyan:#4DA3FF; --cyan-dim:#4DA3FF; --on-accent:#081527;
+        --amber:#F2A93B; --red:#FF5A5F; --green:#3DD68C;
+        --centre:#8B95A1; --grid:#22282F; --raised:#1F242B;
+        --amber-ink:#FFC978; --red-ink:#FFB3B8; --green-ink:#93EBC0;
+        --spec:#B48EFF;
         --mono:"IBM Plex Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
         --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-        --ease:cubic-bezier(.2,.7,.2,1);
+        --ease:cubic-bezier(.25,.8,.25,1);
+        --ease-out:cubic-bezier(.16,1,.3,1);
       }
       *{box-sizing:border-box}
       html{-webkit-text-size-adjust:100%; scroll-padding-top:14px; scroll-padding-bottom:18px; background:var(--bg)}
       body{
         margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
-        background-image:radial-gradient(rgba(138,163,181,.07) 1px, transparent 1.15px);
+        background-image:radial-gradient(rgba(139,149,161,.07) 1px, transparent 1.15px);
         background-size:22px 22px;
       }
       .wrap{max-width:920px; margin:0 auto; padding:18px 14px 36px}
@@ -143,7 +148,7 @@
         background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
         border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:600; letter-spacing:.02em;
       }
-      nav.tabs button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(46,196,214,.28)}
+      nav.tabs button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(77,163,255,.30)}
       nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       section.tool{display:none}
       section.tool.active{display:block; min-height:calc(100dvh - 230px)}
@@ -158,7 +163,7 @@
         border-radius:7px; padding:11px 12px; font-size:16px; font-family:var(--sans);
       }
       input[type="number"]{font-family:var(--mono); font-variant-numeric:tabular-nums}
-      input::placeholder, textarea::placeholder{color:#5d7688; opacity:1}
+      input::placeholder, textarea::placeholder{color:#75808C; opacity:1}
       select option{background:var(--panel); color:var(--ink)}
       input[type="checkbox"], input[type="radio"]{accent-color:var(--cyan)}
       textarea{font-family:var(--mono); font-size:14.5px; line-height:1.5; min-height:110px; resize:vertical; font-variant-numeric:tabular-nums}
@@ -212,7 +217,7 @@
       }
       a.ghostlink:active{transform:translateY(1px)}
       a{color:var(--cyan)}
-      .snapshot{background:var(--bg2); border:1px dashed rgba(46,196,214,.55); border-radius:8px; padding:14px; margin-top:12px}
+      .snapshot{background:var(--bg2); border:1px dashed rgba(77,163,255,.55); border-radius:8px; padding:14px; margin-top:12px}
       .snapshot h4{margin:0 0 8px; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan)}
       .snapshot table{width:100%; border-collapse:collapse; font-size:14px; font-family:var(--mono); font-variant-numeric:tabular-nums}
       .snapshot td{padding:3px 0; vertical-align:top}
@@ -247,7 +252,7 @@
         background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
         border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:600; letter-spacing:.02em;
       }
-      .seg button[aria-pressed="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(46,196,214,.28)}
+      .seg button[aria-pressed="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(77,163,255,.28)}
       .seg button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       .hidden{display:none !important}
       /* Sheet input (Map & Preview) overlay */
@@ -294,8 +299,8 @@
       }
       nav.clusters .cl-name{font-size:14px; font-weight:600; letter-spacing:.02em; line-height:1.2}
       nav.clusters .cl-sub{font-size:11px; font-weight:400; color:var(--ink-faint); line-height:1.25}
-      nav.clusters button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(46,196,214,.28)}
-      nav.clusters button[aria-selected="true"] .cl-sub{color:rgba(6,34,42,.82)}
+      nav.clusters button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(77,163,255,.30)}
+      nav.clusters button[aria-selected="true"] .cl-sub{color:rgba(8,21,39,.85)}
       nav.clusters button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       @media (hover:hover){ nav.clusters button[aria-selected="false"]:hover{background:var(--panel2); color:var(--ink)} }
       @media (max-width:560px){
@@ -311,7 +316,7 @@
         flex:1 1 0; min-width:max-content; min-height:44px; padding:8px 14px; border-radius:999px;
         background:var(--panel); color:var(--ink-dim); border:1px solid var(--line); font-size:13.5px;
       }
-      nav.tabs button[aria-selected="true"]{background:rgba(46,196,214,.12); color:var(--cyan); border-color:var(--cyan); box-shadow:inset 0 0 0 1px var(--cyan)}
+      nav.tabs button[aria-selected="true"]{background:rgba(77,163,255,.12); color:var(--cyan); border-color:var(--cyan); box-shadow:inset 0 0 0 1px var(--cyan)}
       section.tool{padding-top:14px}
       /* cards: calmer rhythm, clearer hierarchy */
       .card{border-radius:12px; padding:18px 16px 16px; margin-bottom:16px}
@@ -324,7 +329,7 @@
       /* buttons: primary = filled accent, secondary = raised with a clear border */
       button.ghost, a.ghostlink{background:var(--panel2); border-color:var(--line); box-shadow:0 1px 2px rgba(0,0,0,.3)}
       @media (hover:hover){ button.ghost:hover, a.ghostlink:hover{border-color:var(--cyan); color:var(--cyan)} button.act:hover:not(:disabled){filter:brightness(1.08)} }
-      button.act{box-shadow:0 2px 10px rgba(46,196,214,.22)}
+      button.act{box-shadow:0 2px 10px rgba(77,163,255,.22)}
       .btnrow{gap:10px}
       /* form controls: >= 44 px everywhere */
       input[type="text"], input[type="number"], select{min-height:46px}
@@ -348,9 +353,9 @@
       .headline .hl-v{font-weight:500; font-size:30px; letter-spacing:-.01em}
       .headline .hl-sep{color:var(--ink-faint); padding:0 .25em}
       .headline .hl-t{font-family:var(--mono); font-weight:500; font-size:15px; display:inline}
-      .headline.good{border-color:rgba(61,220,151,.45)} .headline.good .hl-v, .headline.good .hl-t{color:var(--green)}
-      .headline.warn{border-color:rgba(255,176,32,.45)} .headline.warn .hl-v, .headline.warn .hl-t{color:var(--amber)}
-      .headline.bad{border-color:rgba(255,77,94,.5)} .headline.bad .hl-v, .headline.bad .hl-t{color:var(--red)}
+      .headline.good{border-color:rgba(61,214,140,.45)} .headline.good .hl-v, .headline.good .hl-t{color:var(--green)}
+      .headline.warn{border-color:rgba(242,169,59,.45)} .headline.warn .hl-v, .headline.warn .hl-t{color:var(--amber)}
+      .headline.bad{border-color:rgba(255,90,95,.5)} .headline.bad .hl-v, .headline.bad .hl-t{color:var(--red)}
 
       /* ===== v19 · individuals chart: frame, zone bands, rings, status ring (SPEC §3, §8b) =====
          #spcChart keeps exactly the SVG v18 drew. Zone bands sit in an
@@ -361,13 +366,13 @@
       .spcchart .zlayer{position:absolute; top:8px; left:4px; right:4px; pointer-events:none}
       .spcchart .zlayer svg{width:100%; height:auto; display:block}
       .spcchart .zlayer.under{z-index:0} .spcchart .zlayer.over{z-index:2}
-      .zone-c{fill:#2ec4d6; fill-opacity:.075} .zone-b{fill:#2ec4d6; fill-opacity:.04} .zone-a{fill:#172634; fill-opacity:.85}
-      .ooc-ring{fill:none; stroke:#ff4d5e; stroke-width:1.8}
+      .zone-c{fill:#4DA3FF; fill-opacity:.08} .zone-b{fill:#F2A93B; fill-opacity:.05} .zone-a{fill:#F2A93B; fill-opacity:.10}
+      .ooc-ring{fill:none; stroke:#FF5A5F; stroke-width:1.8}
       .spcchart::after{content:""; position:absolute; inset:-1px; border-radius:9px; pointer-events:none; box-shadow:0 0 0 2px var(--ring, transparent); z-index:3}
-      .spcchart.ring-pass{--ring:#3ddc97}
-      .spcchart.ring-warn{--ring:#ffb020}
-      .spcchart.ring-fail{--ring:#ff4d5e}
-      .spcchart.ring-warn::after, .spcchart.ring-fail::after{animation:ringPulse 1.8s ease-in-out infinite}
+      .spcchart.ring-pass{--ring:#3DD68C}
+      .spcchart.ring-warn{--ring:#F2A93B}
+      .spcchart.ring-fail{--ring:#FF5A5F}
+      .spcchart.ring-warn::after, .spcchart.ring-fail::after{animation:ringPulse 2.2s ease-in-out infinite}
       @keyframes ringPulse{0%,100%{box-shadow:0 0 0 2px var(--ring)} 50%{box-shadow:0 0 0 2px var(--ring), 0 0 14px 2px var(--ring)}}
 
       /* ===== v19 · chart colours (screen only; print keeps the original light chart colours) =====
@@ -375,76 +380,132 @@
          attributes are re-mapped here by role (CSS beats SVG attributes). */
       @media screen{
         /* SPC individuals chart */
-        #spcChart line[stroke="#b97d0f"]{stroke:#ffb020; stroke-opacity:.85}
-        #spcChart text[fill="#b97d0f"]{fill:#ffb020}
-        #spcChart line[stroke="#0b7f95"]{stroke:#8aa3b5}
-        #spcChart text[fill="#0b7f95"]{fill:#8aa3b5}
-        #spcChart line[stroke="#c93a3a"]{stroke:#ff4d5e}
-        #spcChart text[fill="#c93a3a"]{fill:#ff4d5e}
-        #spcChart line[stroke="#7aa3bd"]{stroke:#2ec4d6; stroke-opacity:.75; stroke-width:1.6}
-        #spcChart circle[fill="#0b7f95"]{fill:#2ec4d6}
-        #spcChart circle[fill="#b97d0f"]{fill:#ffb020}
-        #spcChart circle[fill="#c93a3a"]{fill:#ff4d5e}
-        #spcChart circle[stroke="#ffffff"]{stroke:#101b25; stroke-width:1.4}
-        #spcChart text[fill="#6b8699"]{fill:#8aa3b5}
+        #spcChart line[stroke="#b97d0f"]{stroke:#C9D1D9; stroke-opacity:.9}      /* control limits: light grey */
+        #spcChart text[fill="#b97d0f"]{fill:#C9D1D9}
+        #spcChart line[stroke="#0b7f95"]{stroke:#8B95A1}                        /* centre line: grey */
+        #spcChart text[fill="#0b7f95"]{fill:#8B95A1}
+        #spcChart line[stroke="#c93a3a"]{stroke:#B48EFF}                         /* SPEC limits: violet */
+        #spcChart text[fill="#c93a3a"]{fill:#B48EFF}
+        #spcChart line[stroke="#7aa3bd"]{stroke:#4DA3FF; stroke-opacity:.8; stroke-width:1.6}  /* trace: accent */
+        #spcChart circle[fill="#0b7f95"]{fill:#4DA3FF}                          /* in-control points: accent */
+        #spcChart circle[fill="#b97d0f"]{fill:#F2A93B}                          /* out-of-control points: warning */
+        #spcChart circle[fill="#c93a3a"]{fill:#FF5A5F}                          /* out-of-spec points: breach red */
+        #spcChart circle[stroke="#ffffff"]{stroke:#161A1F; stroke-width:1.4}
+        #spcChart text[fill="#6b8699"]{fill:#8B95A1}
         /* Data Check histogram */
-        #checkChart rect[fill="#0b7f95"]{fill:#2ec4d6; opacity:.82}
-        #checkChart text[fill="#3f5d73"]{fill:#e2ecf2}
-        #checkChart text[fill="#6b8699"]{fill:#8aa3b5}
-        #checkChart line[stroke="#b9c9d6"]{stroke:#2a4255}
-        #checkChart line[stroke="#c93a3a"]{stroke:#ff4d5e}
-        #checkChart text[fill="#c93a3a"]{fill:#ff4d5e}
+        #checkChart rect[fill="#0b7f95"]{fill:#4DA3FF; opacity:.85}
+        #checkChart text[fill="#3f5d73"]{fill:#E6EDF3}
+        #checkChart text[fill="#6b8699"]{fill:#8B95A1}
+        #checkChart line[stroke="#b9c9d6"]{stroke:#3A434D}
+        #checkChart line[stroke="#c93a3a"]{stroke:#B48EFF}                      /* histogram spec lines: violet */
+        #checkChart text[fill="#c93a3a"]{fill:#B48EFF}
         /* Pareto */
-        #paretoChart rect[fill="#0b7f95"]{fill:#2ec4d6; opacity:.82}
-        #paretoChart text[fill="#132635"]{fill:#e2ecf2}
-        #paretoChart text[fill="#3f5d73"]{fill:#8aa3b5}
-        #paretoChart line[stroke="#5f7f99"]{stroke:#8aa3b5}
-        #paretoChart text[fill="#6b8699"]{fill:#8aa3b5}
-        #paretoChart polyline[stroke="#b97d0f"]{stroke:#ffb020}
-        #paretoChart circle[fill="#b97d0f"]{fill:#ffb020}
-        #paretoChart text[fill="#b97d0f"]{fill:#ffb020}
-        /* EXAMPLE DATA watermark (drawn into the SVG): fail colour, a touch stronger on dark */
-        .chartbox text[fill="#c93a3a"][fill-opacity]{fill:#ff4d5e; fill-opacity:.2}
+        #paretoChart rect[fill="#0b7f95"]{fill:#4DA3FF; opacity:.85}
+        #paretoChart text[fill="#132635"]{fill:#E6EDF3}
+        #paretoChart text[fill="#3f5d73"]{fill:#8B95A1}
+        #paretoChart line[stroke="#5f7f99"]{stroke:#8B95A1}
+        #paretoChart text[fill="#6b8699"]{fill:#8B95A1}
+        #paretoChart polyline[stroke="#b97d0f"]{stroke:#F2A93B}
+        #paretoChart circle[fill="#b97d0f"]{fill:#F2A93B}
+        #paretoChart text[fill="#b97d0f"]{fill:#F2A93B}
+        /* EXAMPLE DATA watermark (drawn into the SVG): stays alarm red */
+        .chartbox text[fill="#c93a3a"][fill-opacity]{fill:#FF5A5F; fill-opacity:.2}   /* EXAMPLE watermark stays alarm red */
       }
 
       /* ===== v19 · Sightline Mode (SPEC §8a) ===== */
-      .sightline{position:fixed; inset:0; z-index:80; background:#0a1118; color:#e2ecf2; overflow:auto;
+      .sightline{position:fixed; inset:0; z-index:80; background:#0E1114; color:#E6EDF3; overflow:auto;
         display:flex; flex-direction:column; justify-content:center; padding:max(18px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
         font-family:var(--mono); font-variant-numeric:tabular-nums; cursor:pointer; -webkit-tap-highlight-color:transparent}
       .sightline:focus{outline:none}
-      .sightline .sl-tag{font-family:var(--sans); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#2ec4d6; margin:0 0 6px}
-      .sightline .sl-title{font-size:clamp(26px, 6.2vw, 64px); font-weight:500; line-height:1.1; margin:0 0 14px; color:#e2ecf2}
+      .sightline .sl-tag{font-family:var(--sans); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#4DA3FF; margin:0 0 6px}
+      .sightline .sl-title{font-size:clamp(26px, 6.2vw, 64px); font-weight:500; line-height:1.1; margin:0 0 14px; color:#E6EDF3}
       .sightline table{border-collapse:collapse; width:100%}
-      .sightline th{font-family:var(--sans); font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#8aa3b5; text-align:right; padding:0 0 6px 18px}
+      .sightline th{font-family:var(--sans); font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#8B95A1; text-align:right; padding:0 0 6px 18px}
       .sightline th:first-child{text-align:left; padding-left:0}
-      .sightline td{border-top:1px solid #1f3242; padding:10px 0 10px 18px; text-align:right; font-size:clamp(22px, 5vw, 54px); font-weight:500; line-height:1.15; color:#e2ecf2; white-space:nowrap}
-      .sightline td:first-child{text-align:left; padding-left:0; font-weight:400; font-size:clamp(13px, 2.2vw, 20px); color:#8aa3b5; white-space:normal}
-      .sightline tr.sl-pd td:not(:first-child){color:#2ec4d6}
-      .sightline .sl-hint{font-family:var(--sans); font-size:12px; color:#7590a3; margin:14px 0 0}
+      .sightline td{border-top:1px solid #2A3038; padding:10px 0 10px 18px; text-align:right; font-size:clamp(22px, 5vw, 54px); font-weight:500; line-height:1.15; color:#E6EDF3; white-space:nowrap}
+      .sightline td:first-child{text-align:left; padding-left:0; font-weight:400; font-size:clamp(13px, 2.2vw, 20px); color:#8B95A1; white-space:normal}
+      .sightline tr.sl-pd td:not(:first-child){color:#4DA3FF}
+      .sightline .sl-hint{font-family:var(--sans); font-size:12px; color:#828D99; margin:14px 0 0}
 
       /* ===== v19 · motion (SPEC §4): 160–220 ms, transform/opacity only ===== */
-      section.tool.active{animation:panelIn .18s var(--ease)}
-      section.tool.active > .card{animation:cardIn .2s var(--ease) both}
-      section.tool.active > .card + .card{animation-delay:.02s}
-      .chartbox{animation:fadeIn .2s var(--ease)}
-      #spcChart svg{animation:drawIn .22s var(--ease)}
-      .spcchart .zlayer svg{animation:fadeIn .22s var(--ease)}
+      section.tool.active{animation:panelIn .26s var(--ease-out)}
+      section.tool.active > .card{animation:cardIn .3s var(--ease-out) both}
+      section.tool.active > .card + .card{animation-delay:.04s}
+      .chartbox{animation:fadeIn .24s var(--ease-out)}
+      #spcChart svg{animation:drawIn .34s var(--ease-out)}
+      .spcchart .zlayer svg{animation:fadeIn .24s var(--ease-out)}
       #spcResults:not(.hidden), #checkResults:not(.hidden), #grrResults:not(.hidden), #aqlResults:not(.hidden),
-      #paretoResults:not(.hidden), #tpResults:not(.hidden), #sigResults:not(.hidden){animation:reveal .2s var(--ease)}
-      .headline{animation:reveal .22s var(--ease)}
-      .sightline{animation:fadeIn .18s var(--ease)}
-      .flash{animation:resFlash .2s ease-out}
-      button.act, button.ghost, nav.tabs button, nav.clusters button, .seg button, a.ghostlink{transition:transform .16s var(--ease), background-color .16s var(--ease), color .16s var(--ease), border-color .16s var(--ease), box-shadow .16s var(--ease), filter .16s var(--ease)}
+      #paretoResults:not(.hidden), #tpResults:not(.hidden), #sigResults:not(.hidden){animation:reveal .28s var(--ease-out)}
+      .headline{animation:reveal .28s var(--ease-out)}
+      .sightline{animation:fadeIn .24s var(--ease-out)}
+      .flash{animation:resFlash .26s ease-out}
+      button.act, button.ghost, nav.tabs button, nav.clusters button, .seg button, a.ghostlink{transition:transform .22s var(--ease), background-color .22s var(--ease), color .22s var(--ease), border-color .22s var(--ease), box-shadow .22s var(--ease), filter .22s var(--ease)}
       button.act:active, button.ghost:active, a.ghostlink:active, .seg button:active, nav.clusters button:active, nav.tabs button:active{transform:scale(.98)}
       @keyframes panelIn{from{opacity:0}to{opacity:1}}
       @keyframes cardIn{from{opacity:0; transform:translateY(6px)}to{opacity:1; transform:none}}
       @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-      @keyframes drawIn{from{opacity:.2; clip-path:inset(0 100% 0 0)}to{opacity:1; clip-path:inset(0 0 0 0)}}
+      @keyframes drawIn{from{opacity:.15; transform:translateX(6px)}to{opacity:1; transform:none}}
       @keyframes reveal{from{opacity:0; transform:translateY(4px)}to{opacity:1; transform:none}}
       @keyframes resFlash{from{opacity:.35}to{opacity:1}}
       @media (prefers-reduced-motion: reduce){
         *, *::before, *::after{animation:none !important; transition:none !important; scroll-behavior:auto !important}
         .spcchart.ring-warn::after, .spcchart.ring-fail::after{animation:none !important; box-shadow:0 0 0 2px var(--ring) !important}
+      }
+
+      /* ===== v19.2 · layout revamp =====
+         Screen only. Sits after every earlier layout rule (incl. the
+         560 px cluster query and the 46 px input rule) so it wins by order. */
+      @media screen{
+        /* 1 · fixed bottom cluster bar */
+        nav.clusters{position:fixed; left:50%; transform:translateX(-50%); width:min(100%,920px); bottom:0; z-index:70;
+          display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:0;
+          padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+          background:rgba(14,17,20,.94); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+          border-top:1px solid var(--line-soft)}
+        nav.clusters button{min-height:56px}
+        nav.clusters .cl-name{font-size:15px}
+        @media (max-width:560px){
+          nav.clusters{grid-template-columns:repeat(5,1fr)}
+          nav.clusters button, nav.clusters button:nth-child(4), nav.clusters button:nth-child(5){grid-column:auto; min-height:56px}
+          nav.clusters .cl-sub{display:none}
+          nav.clusters .cl-name{font-size:13.5px}
+        }
+        .wrap{padding-bottom:calc(124px + env(safe-area-inset-bottom))}
+        html{scroll-padding-bottom:150px}
+        /* 2 · targets */
+        nav.tabs button{min-height:56px}
+        button.act, button.ghost{min-height:56px}
+        input[type="text"], input[type="number"], select{min-height:60px}
+        textarea{min-height:110px}
+        .btnrow{gap:12px}
+        nav.tabs{gap:8px}
+        /* 3 · single-column inputs (USL/LSL stay paired) */
+        @media (max-width:720px){
+          .row2, .row3{grid-template-columns:1fr}
+          .row2.pair{grid-template-columns:1fr 1fr; gap:12px}
+        }
+        /* 4 · sticky action bar */
+        .btnrow{position:sticky; bottom:calc(84px + env(safe-area-inset-bottom)); z-index:40; background:var(--panel); border-top:1px solid var(--line-soft); padding:10px 2px}
+        .btnrow .act{order:99; margin-left:auto; min-width:160px}
+        /* 5 · tool picker + sheet */
+        .toolpicker-btn{display:flex; align-items:center; justify-content:space-between; width:100%; min-height:56px; padding:10px 14px; margin:10px 0 0; cursor:pointer;
+          background:var(--panel2); color:var(--ink); border:1px solid var(--line); border-radius:8px; font-family:var(--sans); font-size:15px; font-weight:600}
+        nav.tabs{position:fixed; left:50%; transform:translate(-50%,12px); width:min(100%,920px); bottom:calc(84px + env(safe-area-inset-bottom)); z-index:65;
+          display:flex; flex-direction:column; flex-wrap:nowrap; gap:8px; margin:0; padding:12px;
+          background:rgba(22,26,31,.98); border:1px solid var(--line-soft); border-radius:12px 12px 0 0; max-height:62vh; overflow:auto;
+          opacity:0; pointer-events:none; transition:opacity .24s var(--ease), transform .24s var(--ease)}
+        nav.tabs.open{transform:translate(-50%,0); opacity:1; pointer-events:auto}
+        nav.tabs button{min-height:64px; width:100%; text-align:left; font-size:15px; flex:0 0 auto}
+        /* one-tool clusters (Process, Sampling) hide the tool sheet: hide its picker too */
+        .toolpicker-btn:has(+ nav.tabs.hidden){display:none}
+        /* 6 · keyboard clearance for typed fields (selects keep their 18 px margin) */
+        input, textarea{scroll-margin-bottom:46vh}
+        /* 7 · Clear in the card header */
+        .cardhead{display:flex; align-items:flex-start; justify-content:space-between; gap:12px}
+        .cardhead h2{margin:0}
+        .cardhead .ghost{min-height:48px; flex:0 0 auto}
+        /* 9 · pinned result */
+        .headline{position:sticky; top:8px; z-index:35; box-shadow:0 8px 24px rgba(0,0,0,.35)}
       }
 
       /* ===== v19 · print: light theme on white paper ===== */
@@ -454,7 +515,7 @@
           --bg:#ffffff; --bg2:#ffffff; --panel:#ffffff; --panel2:#f3f5f7;
           --line:#9aa9b5; --line-soft:#c9d3db;
           --ink:#111a22; --ink-dim:#36495a; --ink-faint:#55687a;
-          --cyan:#0b6f82; --cyan-dim:#0b6f82; --on-accent:#ffffff;
+          --cyan:#1F5FA8; --cyan-dim:#1F5FA8; --on-accent:#ffffff;
           --amber:#8a6200; --red:#b3302f; --green:#136b45;
           --amber-ink:#6d4d05; --red-ink:#7a1f1f; --green-ink:#145c3d;
         }
@@ -463,11 +524,17 @@
         .card, .sheetcard{box-shadow:none !important; break-inside:avoid}
         *, *::before, *::after{animation:none !important; transition:none !important}
         .spcchart::after{display:none}
-        .zone-c{fill:#0b6f82; fill-opacity:.06} .zone-b{fill:#0b6f82; fill-opacity:.03} .zone-a{fill:#e9eef2; fill-opacity:.7}
+        .zone-c{fill:#1F5FA8; fill-opacity:.06} .zone-b{fill:#8A6200; fill-opacity:.04} .zone-a{fill:#e9eef2; fill-opacity:.7}
         .ooc-ring{stroke:#b3302f}
         .sightline{display:none !important}
         .headline .hl-v, .headline .hl-t{color:#111a22 !important}
         .dtable tr:nth-child(even) td, table.grid tr:nth-child(even) td{background:#f3f5f7}
+        /* v19.2: undo the screen-only bars and sheet on paper */
+        nav.clusters{position:static; background:none; border:0; padding:0}
+        .btnrow{position:static}
+        .toolpicker-btn{display:none}
+        nav.tabs{position:static; opacity:1; transform:none; pointer-events:auto}
+        .headline{position:static}
       }
     </style>
   </head>
@@ -488,6 +555,7 @@
         <button type="button" role="tab" id="clbtn-sampling" aria-selected="false" data-cluster="sampling"><span class="cl-name">Sampling</span><span class="cl-sub">AQL lookup</span></button>
         <button type="button" role="tab" id="clbtn-reference" aria-selected="false" data-cluster="reference"><span class="cl-name">Reference</span><span class="cl-sub">Threads · Convert · more</span></button>
       </nav>
+      <button type="button" id="toolPicker" class="toolpicker-btn" aria-expanded="false"><span>Calculator: <span class="tp-cur"></span></span><span aria-hidden="true">▾</span></button>
       <nav class="tabs" role="tablist" aria-label="Tools in this group">
         <button type="button" role="tab" id="tabbtn-spc" aria-selected="true" data-tab="spc" data-cluster="process">SPC &amp; Capability</button>
         <button type="button" role="tab" id="tabbtn-check" aria-selected="false" data-tab="check" data-cluster="analyse">Data Check</button>
@@ -504,7 +572,10 @@
       <!-- ============ TOOL 1 : SPC & CAPABILITY ============ -->
       <section class="tool active" id="tool-spc" role="tabpanel" aria-labelledby="tabbtn-spc">
         <div class="card">
+          <div class="cardhead">
           <h2>SPC &amp; Capability</h2>
+          <button class="ghost" id="spcClear">Clear</button>
+          </div>
           <p class="guru">Shewhart: the chart separates common causes from special causes — react to signals, not to noise. Deming: adjusting a stable process only adds variation.</p>
 
           <label class="flabel" for="spcName">Characteristic</label>
@@ -519,7 +590,7 @@
           </div>
           <div class="msg hidden" id="spcImportInfo" role="status"></div>
 
-          <div class="row2">
+          <div class="row2 pair">
             <div>
               <label class="flabel" for="spcLSL">LSL (optional)</label>
               <input type="number" id="spcLSL" step="any" inputmode="decimal" placeholder="Lower spec" />
@@ -533,7 +604,6 @@
           <div class="btnrow">
             <button class="act" id="spcAnalyse">Analyse</button>
             <button class="ghost" id="spcSample">Load example (demo)</button>
-            <button class="ghost" id="spcClear">Clear</button>
           </div>
           <div class="msg hidden" id="spcMsg" role="status"></div>
           <div class="demobanner hidden" id="spcDemoBanner" role="status"><strong>EXAMPLE DATA</strong> — demonstration only, not real measurements.</div>
@@ -4619,9 +4689,21 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjE1IjsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIiwgZnVuY3Rpb24gKGUpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgewogICAgICByZXR1cm4gYy5hZGRBbGwoWyIuLi9pbmRleC5odG1sIiwgIi4vbWFuaWZlc3QuanNvbiJdKS5jYXRjaChmdW5jdGlvbiAoKSB7fSk7CiAgICB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImFjdGl2YXRlIiwgZnVuY3Rpb24gKGUpIHsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5rZXlzKCkudGhlbihmdW5jdGlvbiAoa2V5cykgewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoa2V5cy5tYXAoZnVuY3Rpb24gKGspIHsgcmV0dXJuIGsgPT09IENBQ0hFID8gbnVsbCA6IGNhY2hlcy5kZWxldGUoayk7IH0pKTsKICAgIH0pLnRoZW4oZnVuY3Rpb24gKCkgeyByZXR1cm4gc2VsZi5jbGllbnRzLmNsYWltKCk7IH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLCBmdW5jdGlvbiAoZSkgewogIGlmIChlLnJlcXVlc3QubWV0aG9kICE9PSAiR0VUIikgcmV0dXJuOwogIGUucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChoaXQpIHsKICAgICAgdmFyIG5ldCA9IGZldGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAocmVzcCkgewogICAgICAgIGlmIChyZXNwICYmIHJlc3Aub2sgJiYgbmV3IFVSTChlLnJlcXVlc3QudXJsKS5vcmlnaW4gPT09IHNlbGYubG9jYXRpb24ub3JpZ2luKSB7CiAgICAgICAgICB2YXIgY29weSA9IHJlc3AuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7IGMucHV0KGUucmVxdWVzdCwgY29weSk7IH0pOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcDsKICAgICAgfSkuY2F0Y2goZnVuY3Rpb24gKCkgeyByZXR1cm4gaGl0OyB9KTsKICAgICAgcmV0dXJuIGhpdCB8fCBuZXQ7CiAgICB9KQogICk7Cn0pOwo=").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjE5LjIiOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
+    </script>
+    <script>
+      /* v19.2 · tool picker sheet wiring (presentation only) */
+      (function(){
+        var btn = document.getElementById("toolPicker"), nav = document.querySelector("nav.tabs"), cl = document.querySelector("nav.clusters");
+        if(!btn || !nav) return;
+        function sync(){ var sel = nav.querySelector("button[aria-selected=\"true\"]"); var cur = btn.querySelector(".tp-cur"); if(cur) cur.textContent = sel ? sel.textContent.trim() : ""; }
+        btn.addEventListener("click", function(){ var open = nav.classList.toggle("open"); btn.setAttribute("aria-expanded", open ? "true" : "false"); if(open) sync(); });
+        nav.addEventListener("click", function(e){ if(e.target && e.target.closest && e.target.closest("button")){ nav.classList.remove("open"); btn.setAttribute("aria-expanded","false"); setTimeout(sync, 0); } });
+        if(cl) cl.addEventListener("click", function(){ setTimeout(sync, 0); });
+        sync();
+      })();
     </script>
   </body>
 </html>
