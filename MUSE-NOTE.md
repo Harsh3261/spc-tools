@@ -212,3 +212,11 @@ Presentation only. No calculation changed; the AQL comparison (176/176) and all 
   The listener sits just before clusterOfTool().
 - No horizontal overflow at 1024–1920 px in any of the 10 tools.
 - Cache spc-tools-v20.2-desktop, in both sw.js and the inlined base64 service worker.
+
+## Round 10 (2026-11-15, ~15:35): thread search
+- Threads tool: new "Search all threads" box (#thSearch, #thSearchRes), just after the guru line. The JS sits after the thFam change listener.
+- It indexes thSizesFor() across every Family option, so there is no new data. Every typed word must appear in "family + size". Spaces, ×/x and quotes are ignored.
+- UNJ decimal labels also index their fraction (0.2500-28 → 1/4-28).
+- Picking a result sets thFam, calls thFillSizes(), sets thSize, then thFillSideClass().
+- Tested queries: M10, 1/2-13, 3/4 NPT (E1 0.98887), G 1/4, Tr20, 1/4-28 UNJ, MJ10, Pg 9.
+- Cache spc-tools-v20.3-thsearch, in sw.js and the inlined SW.

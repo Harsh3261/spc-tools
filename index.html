@@ -579,6 +579,16 @@
         .headline{top:78px}
         .dtable td:not(:first-child){white-space:nowrap}
       }
+      /* 2026-11-15 thread search */
+      .thsearch{margin:4px 0 12px}
+      .thsres{display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:340px; overflow:auto}
+      .thsres:empty{display:none}
+      .thsres button{display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:46px; padding:8px 12px; text-align:left; cursor:pointer;
+        background:var(--panel2); color:var(--ink); border:1px solid var(--line-soft); border-radius:8px; font-family:var(--sans); font-size:14px}
+      .thsres button:hover, .thsres button:focus-visible{border-color:var(--cyan)}
+      .ts-size{font-family:var(--mono); font-weight:600}
+      .ts-fam{color:var(--ink-dim); font-size:12.5px; text-align:right}
+      .thsmore{margin:2px 0 0; color:var(--ink-dim); font-size:12.5px}
     </style>
   </head>
   <body>
@@ -1188,6 +1198,11 @@
         <div class="card">
           <h2>Threads — manufacturing limits &amp; gauge verification</h2>
           <p class="guru">Two different sets of numbers for two different jobs: manufacturing limits judge the part you make; gauge limits judge the gauge itself. Pick the thread, then choose the view.</p>
+          <div class="thsearch">
+            <label class="flabel" for="thSearch">Search all threads</label>
+            <input id="thSearch" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="e.g. M10, 1/2-13, 3/4 NPT, G 1/4, Tr20, 1-1/4-12 UNJ" />
+            <div id="thSearchRes" class="thsres" role="listbox" aria-label="Matching threads"></div>
+          </div>
           <div class="row2">
             <div>
               <label class="flabel" for="thFam">Family</label>
@@ -5964,6 +5979,59 @@
         $("thSegGauge").setAttribute("aria-pressed", isMfg ? "false" : "true");
       }
       $("thFam").addEventListener("change", function(){ holdScroll(function(){ thFillSizes(); }); });
+      /* 2026-11-15 · thread search: one box across every family. It indexes
+         the same option lists the Family/Size selects use (thSizesFor), so it
+         adds no data. Every typed word must appear in "family + size" (spaces,
+         ×/x and quotes ignored). Picking a result sets Family, Size, then
+         re-renders through the normal path. */
+      (function(){
+        var box = $("thSearch"), out = $("thSearchRes");
+        if(!box || !out) return;
+        var idx = null;
+        function norm(t){ return String(t).toLowerCase().replace(/[×]/g, "x").replace(/[″"”']/g, "").replace(/\s+/g, ""); }
+        /* UNJ sizes are listed as decimals (0.2500-28 UNJF): also index the
+           fraction (1/4-28) so "1/4 unj" finds them. */
+        function fracAlias(label){
+          var m = /^(\d+)\.(\d{3,4})-(\d+)/.exec(String(label)); if(!m) return "";
+          var whole = +m[1], f = parseFloat("0." + m[2]), n = Math.round(f * 64);
+          if(Math.abs(n / 64 - f) > 1e-4) return "";
+          var d = 64; while(n && n % 2 === 0 && d > 1){ n /= 2; d /= 2; }
+          var frac = n ? n + "/" + d : "";
+          return "|" + norm((whole ? whole + (frac ? "-" : "") : "") + frac + "-" + m[3]);
+        }
+        function build(){
+          idx = [];
+          Array.prototype.forEach.call($("thFam").options, function(o){
+            thSizesFor(o.value).forEach(function(sz){
+              if(sz[0] === "custom") return;
+              idx.push({ fam:o.value, famLabel:o.textContent, size:sz[0], label:sz[1], key:norm(o.textContent + " " + o.value) + "|" + norm(sz[1]) + fracAlias(sz[1]) });
+            });
+          });
+        }
+        function show(){
+          var q = box.value.trim();
+          if(!q){ out.innerHTML = ""; return; }
+          if(!idx) build();
+          var words = q.toLowerCase().split(/\s+/).map(norm).filter(Boolean);
+          var hits = idx.filter(function(e){ return words.every(function(w){ return e.key.indexOf(w) >= 0; }); });
+          hits.sort(function(a, b){ var qa = norm(a.label).indexOf(words[0]) === 0 ? 0 : 1, qb = norm(b.label).indexOf(words[0]) === 0 ? 0 : 1; return qa - qb; });
+          var more = hits.length > 30 ? '<p class="thsmore">' + (hits.length - 30) + " more — keep typing to narrow it down.</p>" : "";
+          out.innerHTML = hits.length ? hits.slice(0, 30).map(function(e, i){
+            return '<button type="button" role="option" data-i="' + idx.indexOf(e) + '"><span class="ts-size">' + esc(e.label) + '</span><span class="ts-fam">' + esc(e.famLabel) + "</span></button>";
+          }).join("") + more : '<p class="thsmore">No thread matches \u201c' + esc(q) + '\u201d. Try the size only, e.g. \u201c1/2\u201d or \u201cM12\u201d.</p>';
+        }
+        box.addEventListener("input", show);
+        box.addEventListener("keydown", function(e){ if(e.key === "Enter"){ var b = out.querySelector("button"); if(b){ e.preventDefault(); b.click(); } } });
+        out.addEventListener("click", function(e){
+          var b = e.target.closest("button[data-i]"); if(!b) return;
+          var it = idx[+b.getAttribute("data-i")];
+          $("thFam").value = it.fam; thFillSizes();
+          $("thSize").value = it.size; thFillSideClass();
+          out.innerHTML = ""; box.value = it.label + " · " + it.famLabel;
+          var r = $("thOut") || $("thSize"); if(r && r.scrollIntoView) r.scrollIntoView({ block:"nearest" });
+        });
+      })();
+
       $("thSize").addEventListener("change", function(){ holdScroll(function(){ thFillSideClass(); }); });
       $("thSide").addEventListener("change", function(){ holdScroll(function(){ thFillSideClass(); }); });
       $("thClass").addEventListener("change", function(){ holdScroll(function(){ thRender(); }); });
@@ -6598,7 +6666,7 @@
       /* ---------- PWA: offline service worker (same-origin; silently skip on failure) ---------- */
       try {
         if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjIwLjItZGVza3RvcCI7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsIGZ1bmN0aW9uIChlKSB7CiAgc2VsZi5za2lwV2FpdGluZygpOwogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsKICAgICAgcmV0dXJuIGMuYWRkQWxsKFsiLi4vaW5kZXguaHRtbCIsICIuL21hbmlmZXN0Lmpzb24iXSkuY2F0Y2goZnVuY3Rpb24gKCkge30pOwogICAgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsIGZ1bmN0aW9uIChlKSB7CiAgZS53YWl0VW50aWwoCiAgICBjYWNoZXMua2V5cygpLnRoZW4oZnVuY3Rpb24gKGtleXMpIHsKICAgICAgcmV0dXJuIFByb21pc2UuYWxsKGtleXMubWFwKGZ1bmN0aW9uIChrKSB7IHJldHVybiBrID09PSBDQUNIRSA/IG51bGwgOiBjYWNoZXMuZGVsZXRlKGspOyB9KSk7CiAgICB9KS50aGVuKGZ1bmN0aW9uICgpIHsgcmV0dXJuIHNlbGYuY2xpZW50cy5jbGFpbSgpOyB9KQogICk7Cn0pOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImZldGNoIiwgZnVuY3Rpb24gKGUpIHsKICBpZiAoZS5yZXF1ZXN0Lm1ldGhvZCAhPT0gIkdFVCIpIHJldHVybjsKICBlLnJlc3BvbmRXaXRoKAogICAgY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihmdW5jdGlvbiAoaGl0KSB7CiAgICAgIHZhciBuZXQgPSBmZXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKHJlc3ApIHsKICAgICAgICBpZiAocmVzcCAmJiByZXNwLm9rICYmIG5ldyBVUkwoZS5yZXF1ZXN0LnVybCkub3JpZ2luID09PSBzZWxmLmxvY2F0aW9uLm9yaWdpbikgewogICAgICAgICAgdmFyIGNvcHkgPSByZXNwLmNsb25lKCk7CiAgICAgICAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbihmdW5jdGlvbiAoYykgeyBjLnB1dChlLnJlcXVlc3QsIGNvcHkpOyB9KTsKICAgICAgICB9CiAgICAgICAgcmV0dXJuIHJlc3A7CiAgICAgIH0pLmNhdGNoKGZ1bmN0aW9uICgpIHsgcmV0dXJuIGhpdDsgfSk7CiAgICAgIHJldHVybiBoaXQgfHwgbmV0OwogICAgfSkKICApOwp9KTsK").catch(function(){});
+          navigator.serviceWorker.register("data:application/javascript;base64,LyogU1BDIFRvb2xzIHNlcnZpY2Ugd29ya2VyIOKAlCBvZmZsaW5lIGNhY2hlIGZvciB0aGUgYXBwIHNoZWxsLgogICBSZWdpc3RlcmVkIGJ5IGluZGV4Lmh0bWwgaW5zaWRlIGEgdHJ5L2NhdGNoOyBpZiByZWdpc3RyYXRpb24gb3IKICAgc2NvcGUgZmFpbHMgb24gYW55IGhvc3QsIHRoZSBhcHAgc2ltcGx5IHJ1bnMgb25saW5lLW9ubHkuICovCnZhciBDQUNIRSA9ICJzcGMtdG9vbHMtdjIwLjMtdGhzZWFyY2giOwpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoImluc3RhbGwiLCBmdW5jdGlvbiAoZSkgewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKICBlLndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGZ1bmN0aW9uIChjKSB7CiAgICAgIHJldHVybiBjLmFkZEFsbChbIi4uL2luZGV4Lmh0bWwiLCAiLi9tYW5pZmVzdC5qc29uIl0pLmNhdGNoKGZ1bmN0aW9uICgpIHt9KTsKICAgIH0pCiAgKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLCBmdW5jdGlvbiAoZSkgewogIGUud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGZ1bmN0aW9uIChrZXlzKSB7CiAgICAgIHJldHVybiBQcm9taXNlLmFsbChrZXlzLm1hcChmdW5jdGlvbiAoaykgeyByZXR1cm4gayA9PT0gQ0FDSEUgPyBudWxsIDogY2FjaGVzLmRlbGV0ZShrKTsgfSkpOwogICAgfSkudGhlbihmdW5jdGlvbiAoKSB7IHJldHVybiBzZWxmLmNsaWVudHMuY2xhaW0oKTsgfSkKICApOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsIGZ1bmN0aW9uIChlKSB7CiAgaWYgKGUucmVxdWVzdC5tZXRob2QgIT09ICJHRVQiKSByZXR1cm47CiAgZS5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4oZnVuY3Rpb24gKGhpdCkgewogICAgICB2YXIgbmV0ID0gZmV0Y2goZS5yZXF1ZXN0KS50aGVuKGZ1bmN0aW9uIChyZXNwKSB7CiAgICAgICAgaWYgKHJlc3AgJiYgcmVzcC5vayAmJiBuZXcgVVJMKGUucmVxdWVzdC51cmwpLm9yaWdpbiA9PT0gc2VsZi5sb2NhdGlvbi5vcmlnaW4pIHsKICAgICAgICAgIHZhciBjb3B5ID0gcmVzcC5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oZnVuY3Rpb24gKGMpIHsgYy5wdXQoZS5yZXF1ZXN0LCBjb3B5KTsgfSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiByZXNwOwogICAgICB9KS5jYXRjaChmdW5jdGlvbiAoKSB7IHJldHVybiBoaXQ7IH0pOwogICAgICByZXR1cm4gaGl0IHx8IG5ldDsKICAgIH0pCiAgKTsKfSk7Cg==").catch(function(){});
         }
       } catch(e) { /* offline install is a bonus, never a blocker */ }
     </script>
