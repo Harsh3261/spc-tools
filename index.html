@@ -1076,6 +1076,31 @@
         </div>
 
         <div class="card">
+          <h2>Mass</h2>
+          <div class="row2">
+            <div>
+              <label class="flabel" for="cvKg">kg</label>
+              <input type="number" id="cvKg" class="biginput" step="any" inputmode="decimal" placeholder="kg" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="cvLb">lb</label>
+              <input type="number" id="cvLb" class="biginput" step="any" inputmode="decimal" placeholder="lb" autocomplete="off" />
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label class="flabel" for="cvG">g</label>
+              <input type="number" id="cvG" class="biginput" step="any" inputmode="decimal" placeholder="g" autocomplete="off" />
+            </div>
+            <div>
+              <label class="flabel" for="cvOz">oz</label>
+              <input type="number" id="cvOz" class="biginput" step="any" inputmode="decimal" placeholder="oz (avoirdupois)" autocomplete="off" />
+            </div>
+          </div>
+          <p class="small">1 lb = 0.45359237 kg exactly · 1 lb = 16 oz (avoirdupois) · 1 kg = 1000 g. This is mass — for force (lbf ⇄ N) use the Force card. Type in any field.</p>
+        </div>
+
+        <div class="card">
           <h2>Temperature</h2>
           <div class="row2">
             <div>
@@ -3607,7 +3632,7 @@
 
       /* ======================================================================
          SECTION · CONVERT MODULES (v20, SPEC §4)
-         Pressure/stress, torque, thread pitch, flow, force, temperature
+         Pressure/stress, torque, thread pitch, flow, force, mass, temperature
          (+ ISO 1 thermal correction), angle/taper, Ra unit change.
          Factors are SPEC §4 only (exact or NIST SP 811). Every field is
          bidirectional on "input"; other fields are written programmatically
@@ -3647,6 +3672,8 @@
       cvLinear([["cvLpm", 1], ["cvGpm", 3.785411784]]);
       /* Force, base N */
       cvLinear([["cvN", 1], ["cvLbf", 4.4482216152605], ["cvKn", 1000]]);
+      /* Mass, base kg (1 lb = 0.45359237 kg exactly, international yard and pound 1959) */
+      cvLinear([["cvKg", 1], ["cvLb", 0.45359237], ["cvG", 0.001], ["cvOz", 0.45359237 / 16]]);
       /* Ra unit change only, base µm */
       cvLinear([["cvRaUm", 1], ["cvRaUin", 0.0254]]);
 

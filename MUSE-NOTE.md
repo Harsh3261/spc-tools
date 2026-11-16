@@ -262,3 +262,11 @@ Cache spc-tools-v20.4-offline.
 - sw.js: the page (navigation, index.html, manifest) is now NETWORK-FIRST with cache:'no-store'. Online, an update shows on the first reload. The cached copy is used only offline. Other assets stay cache-first.
 - Tested: after one reload a changed index.html shows; offline reload still works (offline.js passes).
 - Cache spc-tools-v20.7-netfirst.
+
+# Note for Muse — Mass converter added (2026-11-16)
+
+Harsh asked Claude to add kg ⇄ lb to the Convert tab. A **Mass** card (kg, lb,
+g, oz) now sits after Force, wired through the existing `cvLinear` helper with
+base kg: lb = 0.45359237 (exact, 1959 international pound), g = 0.001,
+oz = 0.45359237/16. Cache bumped to `spc-tools-v20.8-mass`. Please carry this
+into your source/SPEC §4 before your next build so it isn't overwritten.
