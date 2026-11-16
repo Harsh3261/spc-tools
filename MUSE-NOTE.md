@@ -256,3 +256,9 @@ Cache spc-tools-v20.4-offline.
   - **andersonDarling**, 28 datasets incl. non-normal: A² and p match statsmodels normal_ad to 2e-7.
   - **Gage R&R**, 20 random studies (3–15 parts, 2–3 operators, 2–3 trials, interaction pooled at p > 0.25 or kept): EV, AV, GRR, PV, %tol and ndc all match an independent ANOVA to 1e-9.
 - Cache spc-tools-v20.5-normcdf.
+
+## Round 13 (2026-11-16): footer + update-on-first-reload
+- Footer and page comment: "with Satureday" removed at Harsh's request.
+- sw.js: the page (navigation, index.html, manifest) is now NETWORK-FIRST with cache:'no-store'. Online, an update shows on the first reload. The cached copy is used only offline. Other assets stay cache-first.
+- Tested: after one reload a changed index.html shows; offline reload still works (offline.js passes).
+- Cache spc-tools-v20.7-netfirst.

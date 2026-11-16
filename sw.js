@@ -1,4 +1,4 @@
-const CACHE = "spc-tools-v20.6-credit";
+const CACHE = "spc-tools-v20.7-netfirst";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -8,5 +8,18 @@ self.addEventListener("activate", (e) => {
 });
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+  const url = new URL(e.request.url);
+  const sameOrigin = url.origin === location.origin;
+  // The page is NETWORK-FIRST so an update shows on the first reload; the cached copy is used only offline.
+  const isPage = e.request.mode === "navigate" || (sameOrigin && /\/(index\.html)?$|manifest\.json$/.test(url.pathname));
+  if (isPage) {
+    e.respondWith(
+      fetch(e.request, { cache: "no-store" }).then((res) => {
+        if (res.ok && sameOrigin) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
+        return res;
+      }).catch(() => caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || caches.match("./index.html")))
+    );
+    return;
+  }
   e.respondWith(caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || fetch(e.request)));
 });
