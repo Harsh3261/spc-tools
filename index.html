@@ -631,11 +631,11 @@
            switch inside clusters that hold more than one tool. Every tool keeps
            its original tabbtn-* / tool-* IDs. Not sticky, no bottom bar. -->
       <nav class="clusters" role="tablist" aria-label="Tool groups">
-        <button type="button" role="tab" id="clbtn-process" aria-selected="true" data-cluster="process"><span class="cl-name">Process</span><span class="cl-sub">SPC &amp; capability</span></button>
+        <button type="button" role="tab" id="clbtn-process" aria-selected="true" data-cluster="process"><span class="cl-name">Process</span><span class="cl-sub">SPC · Sigma ⇄ PPM</span></button>
         <button type="button" role="tab" id="clbtn-analyse" aria-selected="false" data-cluster="analyse"><span class="cl-name">Analyse</span><span class="cl-sub">Data Check · Pareto</span></button>
-        <button type="button" role="tab" id="clbtn-measure" aria-selected="false" data-cluster="measure"><span class="cl-name">Measure</span><span class="cl-sub">Gage R&amp;R · Position</span></button>
+        <button type="button" role="tab" id="clbtn-measure" aria-selected="false" data-cluster="measure"><span class="cl-name">Measure</span><span class="cl-sub">Gage R&amp;R · Position · Stack-Up</span></button>
         <button type="button" role="tab" id="clbtn-sampling" aria-selected="false" data-cluster="sampling"><span class="cl-name">Sampling</span><span class="cl-sub">AQL lookup</span></button>
-        <button type="button" role="tab" id="clbtn-reference" aria-selected="false" data-cluster="reference"><span class="cl-name">Reference</span><span class="cl-sub">Threads · Convert · more</span></button>
+        <button type="button" role="tab" id="clbtn-reference" aria-selected="false" data-cluster="reference"><span class="cl-name">Reference</span><span class="cl-sub">Threads · Unit converters</span></button>
       </nav>
       <button type="button" id="toolPicker" class="toolpicker-btn" aria-expanded="false"><span>Calculator: <span class="tp-cur"></span></span><span aria-hidden="true">▾</span></button>
       <nav class="tabs" role="tablist" aria-label="Tools in this group">
@@ -646,9 +646,9 @@
         <button type="button" role="tab" id="tabbtn-tp" aria-selected="false" data-tab="tp" data-cluster="measure">True Position</button>
         <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
         <button type="button" role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads" data-cluster="reference">Threads</button>
-        <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Convert</button>
-        <button type="button" role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack" data-cluster="reference">Stack-Up</button>
-        <button type="button" role="tab" id="tabbtn-sigma" aria-selected="false" data-tab="sigma" data-cluster="reference">Sigma ⇄ PPM</button>
+        <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Unit converters</button>
+        <button type="button" role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack" data-cluster="measure">Stack-Up</button>
+        <button type="button" role="tab" id="tabbtn-sigma" aria-selected="false" data-tab="sigma" data-cluster="process">Sigma ⇄ PPM</button>
       </nav>
 
       <!-- ============ TOOL 1 : SPC & CAPABILITY ============ -->
@@ -1486,6 +1486,7 @@
       <footer>
         Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate; tensile per ISO 18265) · Thread limits per ISO 965-2 / ASME B1.1, gauge values per ASME B1.2 / ISO 1502 · True position per ASME Y14.5. Estimates from your data — verify critical results before acting on them.
       </footer>
+      <p class="makers-mark" style="font-size:14px">Need a material's chemistry or strength, or a mill cert checked? <a href="https://harsh3261.github.io/materials-atlas/" style="color:var(--cyan)">Open Materials Atlas →</a></p>
       <p class="makers-mark">Built by Harsh Patel</p>
       <p class="makers-mark rights">© 2026 Harsh Patel · All rights reserved</p>
     </div>
