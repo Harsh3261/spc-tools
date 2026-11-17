@@ -1,0 +1,16 @@
+{
+  "name": "SPC Tools",
+  "short_name": "SPC Tools",
+  "description": "Personal statistical tools for quality work: SPC & capability, data checks, Gage R&R, AQL sampling lookup, Pareto, thread limits, converters, stack-up and true position. All calculations run on-device.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070A14",
+  "theme_color": "#070A14",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

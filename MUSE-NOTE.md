@@ -270,3 +270,17 @@ g, oz) now sits after Force, wired through the existing `cvLinear` helper with
 base kg: lb = 0.45359237 (exact, 1959 international pound), g = 0.001,
 oz = 0.45359237/16. Cache bumped to `spc-tools-v20.8-mass`. Please carry this
 into your source/SPEC §4 before your next build so it isn't overwritten.
+
+# Note for Muse — sister theme + fixes (2026-11-16)
+- **Design (screen only; print theme untouched):** one `@media screen` block at the end of the
+  style element. Navy base shared with Materials Atlas (#070A14 / #0F1424 / #161C30), the
+  instrument-blue accent #4DA3FF kept (all chart colours unchanged), plus a blue→cyan gradient
+  on the header bar, "Tools" wordmark, selected cluster and primary (.act) buttons.
+- **Bug: σ showed as Σ.** Uppercase stat labels turned "σ within" into "Σ WITHIN" (Σ means sum).
+  statTile() now wraps σ, x̄ and (s) in `<span class="lc">` (text-transform:none); same for the
+  "Include 1.5σ shift" label.
+- **Manifest:** the page used an inline data: manifest whose start_url/scope were "../" and
+  whose icon paths couldn't resolve from a data: URL; manifest.json in the repo was 0 bytes.
+  manifest.json now holds a proper manifest (start_url/scope "./", icons 192/512/svg) and the
+  page links to it.
+- Cache spc-tools-v20.9-anodized.

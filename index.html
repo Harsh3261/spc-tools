@@ -86,12 +86,12 @@
     <meta name="author" content="Harsh Patel" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#141516" />
+    <meta name="theme-color" content="#070A14" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="SPC Tools" />
-    <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjoiIzE0MTUxNiIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgc3RhdGlzdGljYWwgdG9vbHMgZm9yIHF1YWxpdHkgd29yazogU1BDICYgY2FwYWJpbGl0eSwgZGF0YSBjaGVja3MsIEdhZ2UgUiZSLCBBUUwgc2FtcGxpbmcgbG9va3VwLCBQYXJldG8sIGluY2gtZnJhY3Rpb24gYW5kIGhhcmRuZXNzIGNvbnZlcnRlcnMsIHNpZ21hLVBQTSBjb252ZXJzaW9uLCB0aHJlYWQgYmFzaWMgZGlhbWV0ZXJzLCB0b2xlcmFuY2Ugc3RhY2stdXAgYW5kIHRydWUgcG9zaXRpb24uIEFsbCBjYWxjdWxhdGlvbnMgcnVuIG9uLWRldmljZS4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImljb25zIjpbeyJwdXJwb3NlIjoiYW55Iiwic2l6ZXMiOiIxOTJ4MTkyIiwic3JjIjoiaWNvbi0xOTIucG5nIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsicHVycG9zZSI6ImFueSIsInNpemVzIjoiNTEyeDUxMiIsInNyYyI6Imljb24tNTEyLnBuZyIsInR5cGUiOiJpbWFnZS9wbmcifV0sIm5hbWUiOiJTUEMgVG9vbHMiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0Iiwic2NvcGUiOiIuLi8iLCJzaG9ydF9uYW1lIjoiU1BDIFRvb2xzIiwic3RhcnRfdXJsIjoiLi4vaW5kZXguaHRtbCIsInRoZW1lX2NvbG9yIjoiIzE0MTUxNiJ9" />
+    <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
     <link rel="icon" href="data:," />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -589,6 +589,35 @@
       .ts-size{font-family:var(--mono); font-weight:600}
       .ts-fam{color:var(--ink-dim); font-size:12.5px; text-align:right}
       .thsmore{margin:2px 0 0; color:var(--ink-dim); font-size:12.5px}
+
+      /* ===== 2026-11-16 "Anodized" sister theme — presentation only, screen only (print keeps
+         its light theme). Navy base shared with Materials Atlas; instrument-blue accent kept
+         (charts unchanged) and lifted with a blue→cyan gradient on headline, selected tabs and
+         primary buttons. No maths, data or behaviour change. ===== */
+      @media screen{
+        :root{
+          --bg:#070A14; --bg2:#0B1020; --panel:#0F1424; --panel2:#161C30; --raised:#161C30;
+          --line:#5C6888; --line-soft:#232B47; --grid:#1C2440;
+          --ink:#E9EDF7; --ink-dim:#AEB8CE; --ink-faint:#97A2BA;
+          --grad:linear-gradient(100deg,#4DA3FF 0%,#2EE6D6 100%);
+        }
+        html{background:
+          radial-gradient(ellipse 70% 45% at 100% 0%, rgba(77,163,255,.12) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 0% 0%, rgba(46,230,214,.08) 0%, transparent 60%), #070A14}
+        body{background-color:transparent; background-image:radial-gradient(rgba(150,170,210,.06) 1px, transparent 1.15px)}
+        ::selection{background:rgba(77,163,255,.35); color:#fff}
+        header.top{position:relative; padding-top:14px}
+        header.top::before{content:""; position:absolute; left:0; right:0; top:0; height:4px; border-radius:4px; background:var(--grad); box-shadow:0 0 18px rgba(77,163,255,.35)}
+        header.top h1{font-size:30px; font-weight:700}
+        header.top h1 .accent{background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent}
+        .card{border-radius:12px; border-color:var(--line-soft)}
+        button.act{background:var(--grad); border-color:transparent; box-shadow:0 4px 18px rgba(77,163,255,.22)}
+        nav.clusters button[aria-selected="true"]{background:var(--grad); border-color:transparent; box-shadow:0 4px 18px rgba(77,163,255,.25)}
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus{outline:2px solid var(--cyan); outline-offset:1px; border-color:var(--cyan); box-shadow:0 0 0 4px rgba(77,163,255,.14)}
+        .guru{color:var(--ink-dim)}
+      }
+      /* statistical symbols stay lowercase inside uppercase labels (σ is not Σ, x̄ is not X̄) */
+      .lc{text-transform:none}
     </style>
   </head>
   <body>
@@ -1345,7 +1374,7 @@
               <input type="number" id="sigVal" class="biginput" step="any" inputmode="decimal" placeholder="e.g. 1.33" autocomplete="off" />
             </div>
             <div>
-              <label class="flabel" for="sigShift">Include 1.5σ shift</label>
+              <label class="flabel" for="sigShift">Include 1.5<span class="lc">σ</span> shift</label>
               <select id="sigShift" class="biginput">
                 <option value="off" selected>Off — centred process</option>
                 <option value="on">On — Motorola convention</option>
@@ -1553,7 +1582,7 @@
         document.body.appendChild(a); a.click();
         setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 300);
       }
-      function statTile(k, v, cls){ return '<div class="stat"><span class="k">'+esc(k)+'</span><span class="v'+(cls?' '+cls:'')+'">'+esc(v)+'</span></div>'; }
+      function statTile(k, v, cls){ return '<div class="stat"><span class="k">'+esc(k).replace(/(σ|x̄|\(s\))/g,'<span class="lc">$1</span>')+'</span><span class="v'+(cls?' '+cls:'')+'">'+esc(v)+'</span></div>'; }
       /* Scroll hold: run fn(), then restore the exact scroll position so a
          control that re-renders content can never move the page (user rule:
          operating any control leaves window.scrollY unchanged). */
