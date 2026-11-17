@@ -288,3 +288,6 @@ into your source/SPEC §4 before your next build so it isn't overwritten.
 # Note for Muse — tool grouping (2026-11-16)
 - Sigma ⇄ PPM moved to the **Process** cluster (it is a capability tool); Stack-Up moved to **Measure** beside True Position. **Reference** is now look-ups only: Threads + "Unit converters" (tab renamed from "Convert"). Only data-cluster attributes, cluster subtitles and one tab label changed; IDs unchanged.
 - Footer link to Materials Atlas. Cache spc-tools-v20.10-groups.
+
+# Note for Muse — Graphite theme (2026-11-16)
+Harsh asked for dark grey. Same `@media screen` layer, colours only: base #17181A, panels #232528 / #2D3033, blue accent and blue→cyan gradient kept, charts and print unchanged. theme-color/manifest #17181A. Cache spc-tools-v20.11-graphite.
