@@ -616,6 +616,38 @@
         input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus{outline:2px solid var(--cyan); outline-offset:1px; border-color:var(--cyan); box-shadow:0 0 0 4px rgba(77,163,255,.14)}
         .guru{color:var(--ink-dim)}
       }
+
+      /* ===== 2026-11-16 · search, saved studies, reports, Learn ===== */
+      .toolsearch{position:relative; margin:14px 0 4px}
+      .toolsearch input{width:100%}
+      .toolhits{position:absolute; left:0; right:0; top:100%; z-index:80; margin-top:4px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:6px; box-shadow:0 12px 30px rgba(0,0,0,.45)}
+      .toolhits button{display:block; width:100%; text-align:left; min-height:44px; padding:8px 12px; border:0; border-radius:8px; background:transparent; color:var(--ink); font:inherit; font-size:15px; cursor:pointer}
+      .toolhits button:hover,.toolhits button:focus{background:var(--panel2); color:var(--cyan)}
+      .svrow{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line-soft)}
+      .svb{display:flex; gap:6px; flex-shrink:0} .svb button{min-height:40px; padding:6px 12px}
+      .rptbar{margin-top:16px; padding-top:12px; border-top:1px solid var(--line-soft)}
+      .rptrow{display:flex; gap:8px} .rptrow input{flex:1} .rptrow button{flex-shrink:0}
+      .rpthead{display:none}
+      .learn details.lesson{border:1px solid var(--line-soft); border-radius:10px; padding:0 14px; margin:10px 0; background:var(--bg2)}
+      .learn details.lesson summary{cursor:pointer; padding:14px 0; font-weight:600; font-size:16px; color:var(--ink)}
+      .learn details.lesson[open] summary{color:var(--cyan)}
+      .learn p,.learn li{font-size:14.5px; line-height:1.6; color:var(--ink-dim)} .learn b{color:var(--ink)}
+      .learn .todo{border-left:3px solid var(--cyan); padding:6px 10px; background:rgba(77,163,255,.07); border-radius:4px}
+      .learn table.lt{width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:14px}
+      .learn table.lt th,.learn table.lt td{border:1px solid var(--line-soft); padding:7px 9px; text-align:left; vertical-align:top}
+      .learn td.g{color:var(--green); font-weight:600} .learn td.a{color:var(--amber); font-weight:600} .learn td.r{color:var(--red); font-weight:600}
+      @media print{
+        body.print-tool header.top, body.print-tool .toolsearch, body.print-tool nav.clusters, body.print-tool nav.tabs,
+        body.print-tool .toolpicker-btn, body.print-tool footer, body.print-tool .makers-mark, body.print-tool .rptbar,
+        body.print-tool .savedstudies, body.print-tool button, body.print-tool #importNote{display:none !important}
+        body.print-tool .rpthead{display:block; font-family:Arial,Helvetica,sans-serif; color:#000; margin:0 0 10px}
+        body.print-tool .rpthead h1{font-size:17pt; margin:0 0 6px; color:#000; -webkit-text-fill-color:#000; background:none}
+        body.print-tool .rpthead table{border-collapse:collapse; width:100%; font-size:10pt}
+        body.print-tool .rpthead th,body.print-tool .rpthead td{border:1px solid #888; padding:4px 6px; text-align:left}
+        body.print-tool .rpthead th{background:#eee}
+        body.print-tool .rpt-note{font-size:8.5pt; color:#333}
+        body.print-tool .card{break-inside:auto !important}
+      }
       /* statistical symbols stay lowercase inside uppercase labels (σ is not Σ, x̄ is not X̄) */
       .lc{text-transform:none}
     </style>
@@ -624,18 +656,23 @@
     <div class="wrap">
       <header class="top">
         <h1>SPC <span class="accent">Tools</span></h1>
-        <p><strong>Your data never leaves this device.</strong> All calculations run in your browser — paste your values, get your answers. Nothing is uploaded, stored on a server, or kept after you close the tab.</p>
+        <p><strong>Your data never leaves this device.</strong> All calculations run in your browser — paste your values, get your answers. Nothing is uploaded or stored on a server. Studies are kept only if you press <em>Save</em>, and then only in this browser on this device.</p>
       </header>
 
       <!-- Stage 2: five task clusters (top segmented control) + a secondary
            switch inside clusters that hold more than one tool. Every tool keeps
            its original tabbtn-* / tool-* IDs. Not sticky, no bottom bar. -->
+      <div class="toolsearch">
+        <label class="flabel" for="toolQ">Find a tool</label>
+        <input type="search" id="toolQ" placeholder="e.g. Cpk, gauge study, M10, torque, hardness, AQL" autocomplete="off" aria-controls="toolHits" />
+        <div id="toolHits" class="toolhits" role="listbox" hidden></div>
+      </div>
       <nav class="clusters" role="tablist" aria-label="Tool groups">
         <button type="button" role="tab" id="clbtn-process" aria-selected="true" data-cluster="process"><span class="cl-name">Process</span><span class="cl-sub">SPC · Sigma ⇄ PPM</span></button>
         <button type="button" role="tab" id="clbtn-analyse" aria-selected="false" data-cluster="analyse"><span class="cl-name">Analyse</span><span class="cl-sub">Data Check · Pareto</span></button>
         <button type="button" role="tab" id="clbtn-measure" aria-selected="false" data-cluster="measure"><span class="cl-name">Measure</span><span class="cl-sub">Gage R&amp;R · Position · Stack-Up</span></button>
         <button type="button" role="tab" id="clbtn-sampling" aria-selected="false" data-cluster="sampling"><span class="cl-name">Sampling</span><span class="cl-sub">AQL lookup</span></button>
-        <button type="button" role="tab" id="clbtn-reference" aria-selected="false" data-cluster="reference"><span class="cl-name">Reference</span><span class="cl-sub">Threads · Unit converters</span></button>
+        <button type="button" role="tab" id="clbtn-reference" aria-selected="false" data-cluster="reference"><span class="cl-name">Reference</span><span class="cl-sub">Threads · Converters · Learn</span></button>
       </nav>
       <button type="button" id="toolPicker" class="toolpicker-btn" aria-expanded="false"><span>Calculator: <span class="tp-cur"></span></span><span aria-hidden="true">▾</span></button>
       <nav class="tabs" role="tablist" aria-label="Tools in this group">
@@ -647,6 +684,7 @@
         <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
         <button type="button" role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads" data-cluster="reference">Threads</button>
         <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Unit converters</button>
+        <button type="button" role="tab" id="tabbtn-learn" aria-selected="false" data-tab="learn" data-cluster="reference">Learn</button>
         <button type="button" role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack" data-cluster="measure">Stack-Up</button>
         <button type="button" role="tab" id="tabbtn-sigma" aria-selected="false" data-tab="sigma" data-cluster="process">Sigma ⇄ PPM</button>
       </nav>
@@ -686,6 +724,11 @@
           <div class="btnrow">
             <button class="act" id="spcAnalyse">Analyse</button>
             <button class="ghost" id="spcSample">Load example (demo)</button>
+          </div>
+          <div class="savedstudies" id="spcSavedBox">
+            <div class="btnrow" style="margin-top:10px"><button class="ghost" id="spcSave" type="button">Save study on this device</button></div>
+            <div class="msg hidden" id="spcSaveMsg" role="status"></div>
+            <div id="spcSavedList"></div>
           </div>
           <div class="msg hidden" id="spcMsg" role="status"></div>
           <div class="demobanner hidden" id="spcDemoBanner" role="status"><strong>EXAMPLE DATA</strong> — demonstration only, not real measurements.</div>
@@ -1483,6 +1526,72 @@
           </div>
         </div>
       </div>
+      <!-- ============ LEARN (2026-11-16) ============ -->
+      <section class="tool" id="tool-learn" role="tabpanel" aria-labelledby="tabbtn-learn">
+        <div class="card learn">
+          <h2>Learn — what the numbers mean and what to do next</h2>
+          <p class="small">Short, practical notes behind each tool. Thresholds are the ones this app uses, from the AIAG SPC and MSA reference manuals and ANSI/ASQ Z1.4.</p>
+
+          <details class="lesson" open><summary>Control limits are not spec limits</summary>
+            <p><b>Control limits</b> (UCL/LCL) come from your own data: the process average ± 3σ within. They tell you whether the process is <em>stable</em>. <b>Spec limits</b> (LSL/USL) come from the drawing. They tell you whether parts are <em>acceptable</em>.</p>
+            <p>A point can be in control and out of spec (a stable process that is not capable), or out of control and still in spec (something changed; find it before it makes scrap).</p>
+            <p class="todo"><b>Do next:</b> never move control limits to match the spec, and never adjust the machine for a point that is inside the control limits. That is tampering, and it adds variation.</p>
+          </details>
+
+          <details class="lesson"><summary>The signals the SPC tool flags</summary>
+            <ul>
+              <li><b>Beyond a control limit:</b> one point outside UCL/LCL.</li>
+              <li><b>Run of 8:</b> eight points in a row on one side of the centre line (the average has shifted).</li>
+              <li><b>Trend of 6:</b> six points in a row steadily rising or falling (tool wear, temperature, drift).</li>
+            </ul>
+            <p class="todo"><b>Do next:</b> find and remove the special cause (tool change, new lot, new operator, setup) before you quote a Cpk. Capability from an unstable process does not predict tomorrow's parts.</p>
+          </details>
+
+          <details class="lesson"><summary>Reading Cp, Cpk, Pp and Ppk</summary>
+            <ul>
+              <li><b>Cp</b>: could the spread fit inside the tolerance if it were centred? Uses σ within.</li>
+              <li><b>Cpk</b>: does it fit, given where the process actually sits? Uses σ within and the nearer spec limit.</li>
+              <li><b>Pp / Ppk</b>: the same two ideas using σ overall (sample standard deviation), so they include drift between parts.</li>
+            </ul>
+            <table class="lt"><tr><th>Cpk</th><th>This app says</th><th>Typical action</th></tr>
+              <tr><td>≥ 1.33</td><td class="g">Capable</td><td>Maintain control; reduce inspection only if the customer agrees.</td></tr>
+              <tr><td>1.00 – 1.33</td><td class="a">Marginal</td><td>Capable today, little margin for drift. Watch closely; plan an improvement.</td></tr>
+              <tr><td>&lt; 1.00</td><td class="r">Not capable</td><td>Expect defects. Contain (100 % inspection or sort), then fix the process.</td></tr></table>
+            <p><b>Cp much higher than Cpk</b> (gap of 0.3 or more): the spread is fine but the process is off-centre. Recentring is usually the cheapest fix.<br><b>Cp low too:</b> the spread itself is too wide. Reduce variation, or review the tolerance with design.</p>
+            <p><b>Sample size matters.</b> With 30 values, a calculated Cpk of 1.33 could plausibly be anywhere from about 1.0 to 1.7 (95 % confidence). Quote capability from more data when the decision matters; many customers ask for at least 100 values or 25 subgroups.</p>
+            <p>Cpk and PPM assume roughly normal data. Check the shape in <b>Data Check</b> first.</p>
+          </details>
+
+          <details class="lesson"><summary>Normality (Data Check)</summary>
+            <p>The Anderson–Darling test asks whether the data could reasonably come from a normal distribution. A <b>p-value below 0.05</b> means probably not normal.</p>
+            <p class="todo"><b>Do next:</b> look at the histogram. Two humps usually means two streams mixed (two machines, two cavities, two operators): split them. A long tail on one side is common for flatness, runout, position and roughness, which cannot go below zero. Then normal-based PPM is unreliable; report the observed out-of-spec count instead.</p>
+          </details>
+
+          <details class="lesson"><summary>Gage R&amp;R: can you trust the measurement?</summary>
+            <table class="lt"><tr><th>%GRR</th><th>AIAG verdict</th></tr>
+              <tr><td>&lt; 10 %</td><td class="g">Acceptable</td></tr>
+              <tr><td>10 – 30 %</td><td class="a">May be acceptable, depending on how important the feature is and the cost of a better gauge</td></tr>
+              <tr><td>&gt; 30 %</td><td class="r">Not acceptable: improve the measurement system</td></tr></table>
+            <p><b>% of tolerance</b> judges the gauge for accepting parts. <b>% of study variation</b> judges it for process control. <b>ndc</b> (number of distinct categories) should be <b>5 or more</b>.</p>
+            <p class="todo"><b>Do next:</b> high <b>EV</b> (repeatability) points at the gauge or fixture: clamping, wear, resolution. High <b>AV</b> (reproducibility) points at people or method: write a clearer procedure and train. Use parts that cover the real process range; ten near-identical parts make any gauge look bad on % study variation.</p>
+          </details>
+
+          <details class="lesson"><summary>AQL sampling: what acceptance does and doesn't mean</summary>
+            <p>AQL is the worst process average that is still acceptable <em>over many lots</em>. It is not a promise about any one lot: a lot that passes can still contain defectives.</p>
+            <p>Look up the code letter from lot size and inspection level (General II is the normal default), then the sample size n and the accept (Ac) and reject (Re) numbers. Accept the lot if defectives found ≤ Ac; reject if ≥ Re.</p>
+            <p>This app shows <b>normal</b> inspection. Z1.4 also has tightened and reduced inspection with switching rules; apply them if your contract uses them.</p>
+          </details>
+
+          <details class="lesson"><summary>Pareto, True Position and Stack-Up in one line each</summary>
+            <ul>
+              <li><b>Pareto:</b> fix the few biggest bars first. "80/20" is a rule of thumb, not a law; rank by cost or severity too, not only count.</li>
+              <li><b>True Position:</b> position = 2 × √(Δx² + Δy²), compared with the diameter tolerance zone. At MMC the zone grows by how far the feature has departed from MMC (the bonus).</li>
+              <li><b>Stack-Up:</b> worst case adds every tolerance and always holds. RSS assumes centred, normal, independent processes and gives a tighter but statistical prediction.</li>
+            </ul>
+          </details>
+        </div>
+      </section>
+
       <footer>
         Methods: AIAG SPC &amp; MSA reference manuals · ANSI/ASQ Z1.4 · Anderson–Darling normality · ASTM E140 hardness conversions (steel, approximate; tensile per ISO 18265) · Thread limits per ISO 965-2 / ASME B1.1, gauge values per ASME B1.2 / ISO 1502 · True position per ASME Y14.5. Estimates from your data — verify critical results before acting on them.
       </footer>
@@ -6871,6 +6980,147 @@
         nav.addEventListener("click", function(e){ if(e.target && e.target.closest && e.target.closest("button")){ nav.classList.remove("open"); btn.setAttribute("aria-expanded","false"); setTimeout(sync, 0); } });
         if(cl) cl.addEventListener("click", function(){ setTimeout(sync, 0); });
         sync();
+      })();
+    </script>
+
+    <div id="rptHead" class="rpthead" aria-hidden="true"></div>
+    <script>
+      /* ===== 2026-11-16 · tool search, saved studies (this device only),
+         printable reports, and import from Materials Atlas. ===== */
+      (function(){
+        var LS = {
+          get:function(k,d){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+          set:function(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+        };
+        function H(x){ return String(x==null?"":x).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+        function when(iso){ var d = new Date(iso); return d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}) + " " + d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}); }
+
+        (function(){ var w = document.querySelector(".wrap"), h = $("rptHead"); if(w && h) w.insertBefore(h, w.firstChild); })();
+        /* ---- tool search ---- */
+        var TOOLS = [
+          ["spc","SPC & Capability","control chart I-MR individuals Cpk Cp Ppk Pp capability process stable signals UCL LCL run trend"],
+          ["sigma","Sigma ⇄ PPM","sigma level PPM DPMO defects per million yield six sigma Cpk to PPM 1.5 shift"],
+          ["check","Data Check","histogram normality normal Anderson Darling distribution descriptive statistics mean standard deviation"],
+          ["pareto","Pareto","pareto defects categories vital few 80/20 scrap reasons"],
+          ["grr","Gage R&R","gauge gage R&R repeatability reproducibility MSA measurement system ANOVA ndc EV AV gauge study"],
+          ["tp","True Position","true position GD&T MMC LMC bonus tolerance hole location"],
+          ["stack","Stack-Up","tolerance stack stack-up worst case RSS assembly gap"],
+          ["aql","AQL Lookup","AQL sampling plan Z1.4 lot size sample size accept reject inspection level code letter"],
+          ["threads","Threads","thread M10 UNC UNF NPT BSP pitch diameter gauge plug ring go no-go Acme metric class 6g 2A 3B tap"],
+          ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],
+          ["learn","Learn","learn explain what does it mean help Cpk meaning control limits vs spec limits normality gauge AQL what to do next"]
+        ];
+        var q = $("toolQ"), hits = $("toolHits");
+        function score(t, words){
+          var hay = (t[1] + " " + t[2]).toLowerCase(), n = 0;
+          for(var i=0;i<words.length;i++){ if(hay.indexOf(words[i]) < 0) return 0; n += t[1].toLowerCase().indexOf(words[i]) >= 0 ? 3 : 1; }
+          return n;
+        }
+        function drawHits(){
+          var words = q.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+          if(!words.length){ hits.hidden = true; hits.innerHTML = ""; return; }
+          var list = TOOLS.map(function(t){ return [score(t, words), t]; }).filter(function(x){ return x[0] > 0; })
+                          .sort(function(a,b){ return b[0]-a[0]; }).slice(0,5);
+          hits.innerHTML = list.length ? list.map(function(x){ return '<button type="button" role="option" data-tab="'+x[1][0]+'">'+H(x[1][1])+'</button>'; }).join("")
+                                       : '<p class="small" style="margin:6px 4px">No tool matches. Try a shorter word.</p>';
+          hits.hidden = false;
+        }
+        function go(tab){
+          hits.hidden = true; q.value = "";
+          showTool(tab);
+          var cur = document.querySelector("#toolPicker .tp-cur"), sel = $("tabbtn-"+tab); if(cur && sel) cur.textContent = sel.textContent.trim();
+          var el = $("tool-"+tab); if(el) setTimeout(function(){ el.scrollIntoView({block:"start", behavior:"smooth"}); }, 30);
+        }
+        q.addEventListener("input", drawHits);
+        q.addEventListener("keydown", function(e){
+          if(e.key === "Enter"){ var b = hits.querySelector("button"); if(b){ e.preventDefault(); go(b.getAttribute("data-tab")); } }
+          if(e.key === "Escape"){ hits.hidden = true; }
+        });
+        hits.addEventListener("click", function(e){ var b = e.target.closest("button[data-tab]"); if(b) go(b.getAttribute("data-tab")); });
+
+        /* ---- saved SPC studies ---- */
+        function readForm(){ return { name:$("spcName").value.trim(), data:$("spcData").value, lsl:$("spcLSL").value, usl:$("spcUSL").value }; }
+        function count(txt){ return (String(txt).match(/-?\d*\.?\d+(?:[eE][-+]?\d+)?/g) || []).length; }
+        function drawSaved(){
+          var all = LS.get("spc.studies", []), out = $("spcSavedList");
+          if(!all.length){ out.innerHTML = ""; return; }
+          out.innerHTML = '<p class="flabel" style="margin-top:14px">Saved studies on this device</p>' + all.map(function(r){
+            return '<div class="svrow"><span><b>'+H(r.name || "Untitled")+'</b><br><span class="small">'+H(when(r.when))+' · '+count(r.data)+' values'+(r.lsl!==""||r.usl!==""?' · spec '+H(r.lsl||"—")+' to '+H(r.usl||"—"):'')+'</span></span>'+
+                   '<span class="svb"><button type="button" class="ghost" data-act="load" data-id="'+r.id+'">Load</button><button type="button" class="ghost" data-act="del" data-id="'+r.id+'">Delete</button></span></div>';
+          }).join("");
+        }
+        $("spcSave").addEventListener("click", function(){
+          var f = readForm(), m = $("spcSaveMsg");
+          if(count(f.data) < 2){ showMsg(m, "Enter at least 2 measurements before saving."); return; }
+          var all = LS.get("spc.studies", []);
+          all.unshift({ id:Date.now().toString(36), when:new Date().toISOString(), name:f.name, data:f.data, lsl:f.lsl, usl:f.usl });
+          if(LS.set("spc.studies", all.slice(0,100))){ showMsg(m, "Saved on this device. It stays in this browser until you delete it or clear the site's data.", true); drawSaved(); }
+          else { showMsg(m, "Could not save: this browser is blocking storage (private mode or storage full)."); }
+        });
+        $("spcSavedList").addEventListener("click", function(e){
+          var b = e.target.closest("button[data-act]"); if(!b) return;
+          var all = LS.get("spc.studies", []), id = b.getAttribute("data-id");
+          if(b.getAttribute("data-act") === "del"){
+            var ok = true; try{ ok = window.confirm("Delete this saved study from this device?"); }catch(err){}
+            if(ok){ LS.set("spc.studies", all.filter(function(r){ return r.id !== id; })); drawSaved(); }
+            return;
+          }
+          var r = all.filter(function(x){ return x.id === id; })[0]; if(!r) return;
+          $("spcName").value = r.name; $("spcData").value = r.data; $("spcLSL").value = r.lsl; $("spcUSL").value = r.usl;
+          $("spcAnalyse").click();
+        });
+        drawSaved();
+
+        /* ---- printable report (any tool) ---- */
+        var TITLES = {}; TOOLS.forEach(function(t){ TITLES[t[0]] = t[1]; });
+        var PRINTABLE = ["spc","check","pareto","grr","tp","stack","aql","sigma"];
+        PRINTABLE.forEach(function(tab){
+          var sec = $("tool-"+tab); if(!sec) return;
+          var cards = sec.querySelectorAll(".card"), last = cards[cards.length-1] || sec;
+          last.insertAdjacentHTML("beforeend",
+            '<div class="rptbar"><label class="flabel" for="rptBy-'+tab+'">Prepared by (printed on the report)</label>'+
+            '<div class="rptrow"><input type="text" id="rptBy-'+tab+'" class="rptby" autocomplete="name" placeholder="Your name" />'+
+            '<button type="button" class="ghost" data-print="'+tab+'">Report / PDF</button></div>'+
+            '<p class="small" style="margin:6px 0 0">Prints this tool with your inputs and results, the date and your name. Choose "Save as PDF" in the print dialog to keep a file.</p></div>');
+        });
+        var by = LS.get("spc.preparedBy", "");
+        document.querySelectorAll(".rptby").forEach(function(i){ i.value = by; i.addEventListener("change", function(){ LS.set("spc.preparedBy", i.value.trim()); document.querySelectorAll(".rptby").forEach(function(o){ if(o!==i) o.value = i.value; }); }); });
+        document.addEventListener("click", function(e){
+          var b = e.target.closest("button[data-print]"); if(!b) return;
+          var tab = b.getAttribute("data-print"), name = $("rptBy-"+tab).value.trim();
+          LS.set("spc.preparedBy", name);
+          var subj = (tab === "spc" || tab === "check") ? $("spcName").value.trim() : "";
+          $("rptHead").innerHTML = '<h1>SPC Tools — '+H(TITLES[tab])+' report</h1>'+
+            '<table><tr><th>Date</th><td>'+H(when(new Date().toISOString()))+'</td><th>Prepared by</th><td>'+(name ? H(name) : "____________________")+'</td></tr>'+
+            (subj ? '<tr><th>Characteristic</th><td colspan="3">'+H(subj)+'</td></tr>' : '')+'</table>'+
+            '<p class="rpt-note">Calculated on-device from the values shown below. Estimates from your data: verify critical results before acting on them.</p>';
+          document.body.classList.add("print-tool");
+          var done = function(){ document.body.classList.remove("print-tool"); window.removeEventListener("afterprint", done); };
+          window.addEventListener("afterprint", done);
+          window.print();
+          setTimeout(done, 1500);
+        });
+
+        /* ---- import from Materials Atlas (#import=<base64 JSON>) ---- */
+        var m = /#import=([A-Za-z0-9+/=]+)/.exec(location.hash);
+        if(m){
+          try{
+            var pay = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+            if(Array.isArray(pay.data) && pay.data.length){
+              $("spcName").value = String(pay.name || "").slice(0,200);
+              $("spcData").value = pay.data.filter(function(v){ return typeof v === "number" && isFinite(v); }).join("\n");
+              $("spcLSL").value = (typeof pay.lsl === "number") ? pay.lsl : "";
+              $("spcUSL").value = (typeof pay.usl === "number") ? pay.usl : "";
+              showTool("spc", true);
+              $("spcAnalyse").click();
+              var note = '<div class="flag amber"><strong>Imported from Materials Atlas:</strong> '+pay.data.length+' values from saved cert checks'+
+                (Array.isArray(pay.labels) ? ' (in order: '+H(pay.labels.join(", "))+')' : '')+'. Spec limits are the grade\'s chemistry range. '+
+                'Each point is a different heat, so the chart shows heat-to-heat variation. '+(pay.data.length < 25 ? 'With fewer than 25 values, treat the limits and Cpk as rough estimates.' : '')+'</div>';
+              $("spcMsg").insertAdjacentHTML("beforebegin", '<div id="importNote">'+note+'</div>');
+            }
+          }catch(err){ /* bad link: ignore */ }
+          try{ history.replaceState(null, "", location.pathname + location.search); }catch(err){}
+        }
       })();
     </script>
   </body>

@@ -291,3 +291,12 @@ into your source/SPEC §4 before your next build so it isn't overwritten.
 
 # Note for Muse — Graphite theme (2026-11-16)
 Harsh asked for dark grey. Same `@media screen` layer, colours only: base #17181A, panels #232528 / #2D3033, blue accent and blue→cyan gradient kept, charts and print unchanged. theme-color/manifest #17181A. Cache spc-tools-v20.11-graphite.
+
+# Note for Muse — search, Learn, saved studies, reports, Atlas import (2026-11-16)
+All in a new script block before </body> plus CSS before the `.lc` rule. No maths or data changed.
+- **Find a tool** search box under the header (keyword map TOOLS in the new script); Enter opens the top hit; keeps the tool-picker label in sync.
+- **Learn** tool (data-tab="learn", Reference cluster): control vs spec limits, the three flagged signals, Cp/Cpk/Pp/Ppk with the app's own thresholds (≥1.33 / 1.00–1.33 / <1.00) and actions, Cpk sample-size note (n=30, Cpk 1.33 → ~0.97–1.69 at 95 %, Bissell approximation), Anderson–Darling p<0.05, AIAG %GRR 10/30 and ndc ≥5, AQL meaning incl. normal-inspection-only note, Pareto/True Position/Stack-Up one-liners.
+- **Saved studies** (SPC & Capability): Save / Load / Delete in localStorage `spc.studies` (≤100). Header privacy line updated to say studies are kept only when saved, on this device.
+- **Report / PDF** bar at the end of SPC, Data Check, Pareto, Gage R&R, True Position, Stack-Up, AQL and Sigma: "Prepared by" (remembered as `spc.preparedBy`) + print with `body.print-tool` (report header with date, name and characteristic; nav, search, buttons hidden; cards may break across pages).
+- **Import from Materials Atlas:** `#import=<base64 JSON>` fills the SPC form, runs Analyse, shows an amber note (heat-to-heat variation, <25 values = rough estimate) and clears the hash.
+- Tested: search hits, Learn, save→clear→load, report PDF, import; every tool's demo/run with 0 JS errors. Cache spc-tools-v20.12-learn.
