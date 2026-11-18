@@ -654,6 +654,22 @@
         body.print-tool .rpt-note{font-size:8.5pt; color:#333}
         body.print-tool .card{break-inside:auto !important}
       }
+      /* ===== 2026-11-17 · Attribute charts + Short-run (colours via theme variables, so print stays light) ===== */
+      .qcchart .qc-trace{stroke:var(--cyan); stroke-opacity:.75; stroke-width:1.5}
+      .qcchart .qc-pt{fill:var(--cyan); stroke:var(--panel); stroke-width:1.2}
+      .qcchart .qc-sig{fill:var(--amber); stroke:var(--panel); stroke-width:1.2}
+      .qcchart .qc-red{fill:var(--red); stroke:var(--panel); stroke-width:1.2}
+      .qcchart .qc-lim{stroke:var(--ink-dim); stroke-width:1.4; stroke-dasharray:6 4; fill:none}
+      .qcchart .qc-lim-t{fill:var(--ink-dim)}
+      .qcchart .qc-ctr{stroke:var(--centre); stroke-width:1.3}
+      .qcchart .qc-ctr-t{fill:var(--centre)}
+      .qcchart .qc-spec{stroke:var(--spec); stroke-width:1.4; stroke-dasharray:3 3}
+      .qcchart .qc-spec-t{fill:var(--spec)}
+      .qcchart .qc-ax{fill:var(--ink-faint)}
+      .qcchart .qc-band-g{fill:var(--green); fill-opacity:.10}
+      .qcchart .qc-band-y{fill:var(--amber); fill-opacity:.10}
+      .qctable td.good{color:var(--green-ink)} .qctable td.warn{color:var(--amber-ink)} .qctable td.bad{color:var(--red-ink)}
+      .qctable td,.qctable th{font-size:13.5px}
       /* statistical symbols stay lowercase inside uppercase labels (σ is not Σ, x̄ is not X̄) */
       .lc{text-transform:none}
     </style>
@@ -674,7 +690,7 @@
         <div id="toolHits" class="toolhits" role="listbox" hidden></div>
       </div>
       <nav class="clusters" role="tablist" aria-label="Tool groups">
-        <button type="button" role="tab" id="clbtn-process" aria-selected="true" data-cluster="process"><span class="cl-name">Process</span><span class="cl-sub">SPC · Sigma ⇄ PPM</span></button>
+        <button type="button" role="tab" id="clbtn-process" aria-selected="true" data-cluster="process"><span class="cl-name">Process</span><span class="cl-sub">SPC · Short-run · Attribute</span></button>
         <button type="button" role="tab" id="clbtn-analyse" aria-selected="false" data-cluster="analyse"><span class="cl-name">Analyse</span><span class="cl-sub">Data Check · Pareto</span></button>
         <button type="button" role="tab" id="clbtn-measure" aria-selected="false" data-cluster="measure"><span class="cl-name">Measure</span><span class="cl-sub">Gage R&amp;R · Position · Stack-Up</span></button>
         <button type="button" role="tab" id="clbtn-sampling" aria-selected="false" data-cluster="sampling"><span class="cl-name">Sampling</span><span class="cl-sub">AQL lookup</span></button>
@@ -693,6 +709,8 @@
         <button type="button" role="tab" id="tabbtn-learn" aria-selected="false" data-tab="learn" data-cluster="reference">Learn</button>
         <button type="button" role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack" data-cluster="measure">Stack-Up</button>
         <button type="button" role="tab" id="tabbtn-sigma" aria-selected="false" data-tab="sigma" data-cluster="process">Sigma ⇄ PPM</button>
+        <button type="button" role="tab" id="tabbtn-attr" aria-selected="false" data-tab="attr" data-cluster="process">Attribute charts</button>
+        <button type="button" role="tab" id="tabbtn-short" aria-selected="false" data-tab="short" data-cluster="process">Short-run</button>
       </nav>
 
       <!-- ============ TOOL 1 : SPC & CAPABILITY ============ -->
@@ -1533,6 +1551,137 @@
         </div>
       </div>
       <!-- ============ LEARN (2026-11-16) ============ -->
+      <!-- ============ TOOL : ATTRIBUTE CHARTS (2026-11-17) ============ -->
+      <section class="tool" id="tool-attr" role="tabpanel" aria-labelledby="tabbtn-attr">
+        <div class="card">
+          <div class="cardhead">
+          <h2>Attribute charts — scrap, defects, NCPs</h2>
+          <button class="ghost" id="attrClear">Clear</button>
+          </div>
+          <p class="guru">For counts, not measurements: scrap per week, NCPs per week, defects per part. Tells you whether a bad week is a real change or normal week-to-week noise.</p>
+          <label class="flabel" for="attrType">What are you counting?</label>
+          <select id="attrType" class="biginput">
+            <option value="c" selected>c — events or defects per period (same amount of work each period)</option>
+            <option value="u">u — defects per unit (amount of work changes)</option>
+            <option value="p">p — fraction of parts defective (sample size changes)</option>
+            <option value="np">np — number of parts defective (same sample size)</option>
+          </select>
+          <label class="flabel" for="attrData" id="attrDataLabel">One period per line: label, count</label>
+          <textarea id="attrData" class="mono" style="min-height:150px" spellcheck="false" placeholder="Week 1, 6&#10;Week 2, 13&#10;Week 3, 7&#10;…"></textarea>
+          <p class="small" id="attrHint">Paste two columns straight from Excel (label, count). A third column is the sample size or units for p, np and u charts.</p>
+          <label class="flabel" for="attrLimits">Control limits</label>
+          <select id="attrLimits" class="biginput">
+            <option value="auto" selected>Auto — standard, or Laney if the data is over-dispersed</option>
+            <option value="standard">Standard (Poisson / binomial)</option>
+            <option value="laney">Laney-adjusted (c′ / u′ / p′)</option>
+          </select>
+          <div class="btnrow">
+            <button class="ghost" id="attrDemo">Load example (demo)</button>
+            <button class="act" id="attrGo">Analyse</button>
+          </div>
+          <div class="msg hidden" id="attrMsg" role="status"></div>
+          <div id="attrResults" class="hidden">
+            <div class="stats" id="attrTiles"></div>
+            <h3 id="attrChartTitle">Chart</h3>
+            <div class="chartbox qcchart" id="attrChart"></div>
+            <div class="legend">
+              <span><i class="swatch" style="background:var(--cyan)"></i> Period</span>
+              <span><i class="swatch" style="background:var(--amber)"></i> Signal</span>
+              <span>– – control limits</span>
+            </div>
+            <div class="flags" id="attrFlags"></div>
+            <p class="explain" id="attrExplain"></p>
+            <div class="btnrow"><button class="ghost" id="attrCsv">Download CSV</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TOOL : SHORT-RUN (2026-11-17) ============ -->
+      <section class="tool" id="tool-short" role="tabpanel" aria-labelledby="tabbtn-short">
+        <div class="card">
+          <h2>Short-run &amp; batch production</h2>
+          <p class="guru">When part numbers change every few hours, study the machine and the feature, not the part number.</p>
+          <div class="seg" role="group" aria-label="Short-run view">
+            <button type="button" id="srModeSetup" aria-pressed="true">Setup approval</button>
+            <button type="button" id="srModeChart" aria-pressed="false">Mixed-part chart</button>
+            <button type="button" id="srModePredict" aria-pressed="false">Can this machine hold it?</button>
+          </div>
+
+          <!-- PRE-Control -->
+          <div id="srSetup">
+            <p class="small">PRE-Control: approve a setup on the first few parts, with no history needed. Green is the middle half of the tolerance, yellow the outer quarters, red outside the spec.</p>
+            <div class="row2">
+              <div><label class="flabel" for="pcLSL">LSL</label><input type="number" id="pcLSL" step="any" inputmode="decimal" placeholder="e.g. 2.4990" autocomplete="off"></div>
+              <div><label class="flabel" for="pcUSL">USL</label><input type="number" id="pcUSL" step="any" inputmode="decimal" placeholder="e.g. 2.5010" autocomplete="off"></div>
+            </div>
+            <label class="flabel" for="pcStage">Stage</label>
+            <select id="pcStage" class="biginput">
+              <option value="setup" selected>Setup — first parts off, one reading per part</option>
+              <option value="run">Running — pairs of consecutive parts (A, B per line)</option>
+            </select>
+            <label class="flabel" for="pcData" id="pcDataLabel">Readings in the order the parts came off</label>
+            <textarea id="pcData" class="mono" style="min-height:96px" spellcheck="false" placeholder="2.5003, 2.4998, 2.5001 …"></textarea>
+            <div class="btnrow">
+              <button class="ghost" id="pcDemo">Load example (demo)</button>
+              <button class="act" id="pcGo">Check</button>
+            </div>
+            <div class="msg hidden" id="pcMsg" role="status"></div>
+            <div id="pcResults" class="hidden">
+              <div class="flags" id="pcVerdict"></div>
+              <div class="chartbox qcchart" id="pcChart"></div>
+              <div class="gridscroll"><table class="dtable qctable" id="pcTable"></table></div>
+              <p class="explain" id="pcExplain"></p>
+            </div>
+          </div>
+
+          <!-- DNOM / % tolerance -->
+          <div id="srChart" class="hidden">
+            <p class="small">Put different part numbers on one chart by plotting how far each reading is from the middle of its own tolerance. Use it per machine and feature type, e.g. "bores on Mill 3".</p>
+            <label class="flabel" for="srScale">Plot</label>
+            <select id="srScale" class="biginput">
+              <option value="pct" selected>% of tolerance (different tolerances can share a chart)</option>
+              <option value="dnom">Deviation from target, in units (similar tolerances only)</option>
+            </select>
+            <label class="flabel" for="srData">One reading per line, in time order: part, LSL, USL, measured</label>
+            <textarea id="srData" class="mono" style="min-height:150px" spellcheck="false" placeholder="Part A, 1.2490, 1.2510, 1.2503&#10;Part B, 0.7480, 0.7500, 0.7494&#10;…"></textarea>
+            <div class="btnrow">
+              <button class="ghost" id="srDemo">Load example (demo)</button>
+              <button class="act" id="srGo">Analyse</button>
+            </div>
+            <div class="msg hidden" id="srMsg" role="status"></div>
+            <div id="srResults" class="hidden">
+              <div class="stats" id="srTiles"></div>
+              <div class="chartbox qcchart" id="srPlot"></div>
+              <div class="flags" id="srFlags"></div>
+              <div class="gridscroll"><table class="dtable qctable" id="srParts"></table></div>
+              <p class="explain" id="srExplain"></p>
+            </div>
+          </div>
+
+          <!-- Predictor -->
+          <div id="srPredict" class="hidden">
+            <p class="small">Check a new job before the first cut. Enter the tolerance and each machine's usual variation (σ) for this kind of feature. Get σ from the mixed-part chart ("σ within", in units) or from past CMM data.</p>
+            <div class="row3">
+              <div><label class="flabel" for="mpLSL">LSL</label><input type="number" id="mpLSL" step="any" inputmode="decimal" autocomplete="off"></div>
+              <div><label class="flabel" for="mpUSL">USL</label><input type="number" id="mpUSL" step="any" inputmode="decimal" autocomplete="off"></div>
+              <div><label class="flabel" for="mpOff">Setup off-centre by</label><input type="number" id="mpOff" step="any" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+            </div>
+            <label class="flabel" for="mpData">Machines: name, σ (one per line)</label>
+            <textarea id="mpData" class="mono" style="min-height:110px" spellcheck="false" placeholder="Mill 1, 0.0004&#10;Mill 2, 0.0007"></textarea>
+            <div class="btnrow">
+              <button class="ghost" id="mpSave">Save machine list on this device</button>
+              <button class="ghost" id="mpDemo">Load example (demo)</button>
+              <button class="act" id="mpGo">Predict</button>
+            </div>
+            <div class="msg hidden" id="mpMsg" role="status"></div>
+            <div id="mpResults" class="hidden">
+              <div class="gridscroll"><table class="dtable qctable" id="mpTable"></table></div>
+              <p class="explain" id="mpExplain"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="tool" id="tool-learn" role="tabpanel" aria-labelledby="tabbtn-learn">
         <div class="card learn">
           <h2>Learn — what the numbers mean and what to do next</h2>
@@ -2036,6 +2185,7 @@
           $("spcCap").innerHTML =
             statTile("Cp (within)", st.cap.cp===null?"—":fmt2(st.cap.cp), capClass(st.cap.cp)) +
             statTile("Cpk (within)", st.cap.cpk===null?"—":fmt2(st.cap.cpk), capClass(st.cap.cpk)) +
+            (st.cap.cpk===null ? "" : statTile("Cpk at least (95%)", fmt2(QC.cpkBound(st.cap.cpk, st.n, 0.95, "lower")), capClass(QC.cpkBound(st.cap.cpk, st.n, 0.95, "lower")))) +
             statTile("Pp (overall)", st.cap.pp===null?"—":fmt2(st.cap.pp), capClass(st.cap.pp)) +
             statTile("Ppk (overall)", st.cap.ppk===null?"—":fmt2(st.cap.ppk), capClass(st.cap.ppk)) +
             statTile("Out of spec", String(st.cap.oosCount), st.cap.oosCount? "bad":"good") +
@@ -2058,6 +2208,15 @@
           else meaning = "Highly capable — normal variation would have to change a lot before defects appear.";
         } else if(st.outCtrl.length) meaning = "Something changed in the process — a special cause is likely, so investigate before trusting parts made after that point.";
         else meaning = "No special-cause signals on this data — keep sampling; stability is something you keep proving.";
+        if(st.cap && st.cap.cpk!==null){
+          /* 2026-11-17: sample-size honesty (Bissell lower bound, tested in tests/qc.test.js) */
+          var cpkLo = QC.cpkBound(st.cap.cpk, st.n, 0.95, "lower");
+          meaning += " With " + st.n + " readings, the true Cpk could be as low as " + fmt2(cpkLo) + " (95% confidence).";
+          if(st.cap.cpk >= 1.33 && cpkLo < 1.33){
+            var nNeed = QC.nForCpk(st.cap.cpk, 1.33, 0.95);
+            meaning += nNeed ? " To prove Cpk ≥ 1.33 at that confidence you would need about " + nNeed + " readings, if Cpk stays at " + fmt2(st.cap.cpk) + "." : "";
+          }
+        }
         var smEl = $("spcMeaning");
         smEl.innerHTML = "<strong>What this means:</strong> " + esc(meaning);
         smEl.classList.remove("hidden");
@@ -3530,6 +3689,528 @@
         paretoData.forEach(function(d){ lines.push(csvq(d.cat)+","+d.count+","+fmt(d.count/total*100,1)+","+fmt(d.cumPct,1)); });
         lines.push("Total,"+total+",100.0,");
         downloadCSV("pareto.csv", lines.join("\n"));
+      });
+
+      /* @@QC-CALC BEGIN — pure maths for Attribute charts, Short-run tools and the
+         Cpk lower bound. No DOM access. tests/qc.test.js extracts this block
+         verbatim and checks it against textbook examples and an independent
+         Python implementation. Keep it self-contained. */
+      var QC = (function(){
+        /* ---- normal distribution (own copies so this block stands alone) ---- */
+        function erfc(x){ /* Numerical Recipes erfcc, |rel err| < 1.2e-7 */
+          var z = Math.abs(x), t = 1/(1+0.5*z);
+          var r = t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277)))))))));
+          return x >= 0 ? r : 2-r;
+        }
+        function phi(z){ return 0.5*erfc(-z/Math.SQRT2); }          /* P(Z <= z) */
+        function phiUpper(z){ return 0.5*erfc(z/Math.SQRT2); }      /* P(Z > z)  */
+        function invPhi(p){ /* Acklam, rel err < 1.2e-9 */
+          if(p <= 0 || p >= 1) return NaN;
+          var a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239],
+              b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+              c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+              d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416], pl=0.02425, q, r;
+          if(p < pl){ q=Math.sqrt(-2*Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+          if(p > 1-pl){ q=Math.sqrt(-2*Math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+          q=p-0.5; r=q*q;
+          return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+        }
+        /* ---- chi-square upper tail via the regularized incomplete gamma ---- */
+        function lnGamma(x){
+          var g=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+          var y=x, t=x+5.5; t -= (x+0.5)*Math.log(t); var s=1.000000000190015;
+          for(var j=0;j<6;j++){ y++; s += g[j]/y; }
+          return -t+Math.log(2.5066282746310005*s/x);
+        }
+        function gammaQ(a, x){ /* Q(a,x) = 1 - P(a,x) */
+          if(x <= 0) return 1;
+          var gln = lnGamma(a), i, del, sum, ap;
+          if(x < a+1){
+            ap=a; sum=del=1/a;
+            for(i=0;i<1000;i++){ ap++; del*=x/ap; sum+=del; if(Math.abs(del) < Math.abs(sum)*1e-14) break; }
+            return 1 - sum*Math.exp(-x+a*Math.log(x)-gln);
+          }
+          var b=x+1-a, c=1/1e-300, d=1/b, h=d, an;
+          for(i=1;i<1000;i++){
+            an=-i*(i-a); b+=2; d=an*d+b; if(Math.abs(d)<1e-300) d=1e-300;
+            c=b+an/c; if(Math.abs(c)<1e-300) c=1e-300; d=1/d; del=d*c; h*=del; if(Math.abs(del-1)<1e-14) break;
+          }
+          return Math.exp(-x+a*Math.log(x)-gln)*h;
+        }
+        function chi2Upper(x, df){ return gammaQ(df/2, x/2); }
+
+        function meanOf(a){ var s=0; for(var i=0;i<a.length;i++) s+=a[i]; return s/a.length; }
+        function sdOf(a){ if(a.length<2) return 0; var m=meanOf(a), s=0; for(var i=0;i<a.length;i++){ var d=a[i]-m; s+=d*d; } return Math.sqrt(s/(a.length-1)); }
+        function mrBarOf(a){ if(a.length<2) return 0; var s=0; for(var i=1;i<a.length;i++) s+=Math.abs(a[i]-a[i-1]); return s/(a.length-1); }
+        /* runs of 8+ consecutive points strictly on one side of the centre line */
+        function runsOf(stats, centre){
+          var runs=[], side=0, len=0, start=0;
+          for(var i=0;i<stats.length;i++){
+            var s = stats[i] > centre ? 1 : (stats[i] < centre ? -1 : 0);
+            if(s!==0 && s===side) len++;
+            else if(s!==0){ side=s; len=1; start=i; }
+            else { side=0; len=0; }
+            if(len===8) runs.push({from:start+1, to:i+1, side: side>0?"above":"below"});
+            else if(len>8 && runs.length && runs[runs.length-1].to===i) runs[runs.length-1].to = i+1;
+          }
+          return runs;
+        }
+
+        /* ======== Attribute charts (Montgomery, Introduction to SQC, ch. 7;
+           Laney 2002, "Improved control charts for attributes") ========
+           type: "p" | "np" | "c" | "u". xs = counts. ns = sample sizes / units
+           (ignored for c). limits: "standard" | "laney". */
+        function attr(type, xs, ns, limits){
+          var k = xs.length, i;
+          if(k < 2) return { error:"Enter at least 2 periods." };
+          for(i=0;i<k;i++){
+            if(!isFinite(xs[i]) || xs[i] < 0) return { error:"Row "+(i+1)+": the count must be zero or more." };
+            if(type!=="c"){
+              if(!isFinite(ns[i]) || ns[i] <= 0) return { error:"Row "+(i+1)+": the sample size must be more than zero." };
+              if((type==="p"||type==="np") && xs[i] > ns[i]) return { error:"Row "+(i+1)+": defectives ("+xs[i]+") cannot exceed the sample size ("+ns[i]+")." };
+            }
+          }
+          if(type==="np"){ for(i=1;i<k;i++) if(ns[i]!==ns[0]) return { error:"An np chart needs the same sample size every period. Use a p chart when the size changes." }; }
+          var sumX=0, sumN=0; for(i=0;i<k;i++){ sumX+=xs[i]; sumN+= type==="c" ? 1 : ns[i]; }
+          var centre, stat=[], sig=[], cap=[];
+          if(type==="p"){ var pb=sumX/sumN; centre=pb; for(i=0;i<k;i++){ stat.push(xs[i]/ns[i]); sig.push(Math.sqrt(pb*(1-pb)/ns[i])); cap.push(1); } }
+          else if(type==="np"){ var pb2=sumX/sumN, n0=ns[0]; centre=n0*pb2; for(i=0;i<k;i++){ stat.push(xs[i]); sig.push(Math.sqrt(n0*pb2*(1-pb2))); cap.push(n0); } }
+          else if(type==="c"){ centre=sumX/k; for(i=0;i<k;i++){ stat.push(xs[i]); sig.push(Math.sqrt(centre)); cap.push(Infinity); } }
+          else if(type==="u"){ centre=sumX/sumN; for(i=0;i<k;i++){ stat.push(xs[i]/ns[i]); sig.push(Math.sqrt(centre/ns[i])); cap.push(Infinity); } }
+          else return { error:"Unknown chart type." };
+          if(!(sig[0] > 0)) return { error: centre===0 ? "Every count is zero — there is nothing to chart yet." : "Every item is defective — limits are not defined." };
+          /* over-dispersion diagnostics */
+          var z=[], D=0; for(i=0;i<k;i++){ z.push((stat[i]-centre)/sig[i]); D += z[i]*z[i]; }
+          var sigmaZ = mrBarOf(z)/1.128;
+          var df = k-1, pOver = chi2Upper(D, df);
+          var mult = limits==="laney" ? sigmaZ : 1;
+          var pts=[], signals=[];
+          for(i=0;i<k;i++){
+            var u = Math.min(centre + 3*sig[i]*mult, cap[i]), l = centre - 3*sig[i]*mult, hasL = l > 0;
+            if(!hasL) l = 0;
+            var o = stat[i] > u ? "above" : (hasL && stat[i] < l ? "below" : null);
+            if(o) signals.push(i+1);
+            pts.push({ stat:stat[i], ucl:u, lcl:l, hasLcl:hasL, out:o, z:z[i] });
+          }
+          return { type:type, k:k, centre:centre, sumX:sumX, sumN:sumN, points:pts, signals:signals,
+                   runs:runsOf(stat, centre), sigmaZ:sigmaZ, pearson:D, df:df, pOver:pOver, pUnder:1-pOver, limits:limits };
+        }
+
+        /* Over-dispersion check for "Auto" limits. Points already outside the
+           standard limits are left out first, so one or two special causes do
+           not by themselves make the data look over-dispersed. Flag when the
+           rest still spreads more than the model allows (Pearson χ² p < 0.01
+           and σz > 1). */
+        function overdispersion(type, xs, ns){
+          var s = attr(type, xs, ns, "standard");
+          if(s.error) return { flag:false, error:s.error };
+          var kx=[], kn=[];
+          for(var i=0;i<xs.length;i++) if(s.signals.indexOf(i+1) < 0){ kx.push(xs[i]); kn.push(ns ? ns[i] : 1); }
+          if(kx.length < 3) return { flag:false, excluded:s.signals, sigmaZ:s.sigmaZ, pOver:s.pOver };
+          var s2 = attr(type, kx, type==="c" ? null : kn, "standard");
+          if(s2.error) return { flag:false, excluded:s.signals, sigmaZ:s.sigmaZ, pOver:s.pOver };
+          return { flag: s2.pOver < 0.01 && s2.sigmaZ > 1, excluded:s.signals, sigmaZ:s2.sigmaZ, pOver:s2.pOver };
+        }
+
+        /* ======== Individuals (I-MR) on any series ======== */
+        function imr(y){
+          var n=y.length, m=meanOf(y), mr=mrBarOf(y), sw=mr/1.128;
+          var out=[]; for(var i=0;i<n;i++) if(y[i] > m+3*sw || y[i] < m-3*sw) out.push(i+1);
+          return { n:n, mean:m, mrBar:mr, sdW:sw, sdO:sdOf(y), ucl:m+3*sw, lcl:m-3*sw, out:out, runs:runsOf(y, m), mrUcl:3.267*mr };
+        }
+
+        /* ======== Short-run chart: deviation from target (DNOM) or
+           percent of half-tolerance. rows: {part, lsl, usl, x}. Target = the
+           middle of the tolerance, so unequal tolerances (+0.05/-0) still
+           centre correctly. ======== */
+        function shortRun(rows, mode){
+          if(rows.length < 2) return { error:"Enter at least 2 readings." };
+          var y=[], halfs=[], i;
+          for(i=0;i<rows.length;i++){
+            var r=rows[i];
+            if(!(r.usl > r.lsl)) return { error:"Row "+(i+1)+" ("+r.part+"): USL must be greater than LSL." };
+            var t=(r.lsl+r.usl)/2, h=(r.usl-r.lsl)/2;
+            halfs.push(h);
+            y.push(mode==="pct" ? (r.x-t)/h*100 : r.x-t);
+          }
+          var st = imr(y);
+          var sameTol = true; for(i=1;i<halfs.length;i++) if(Math.abs(halfs[i]-halfs[0]) > 1e-12*Math.max(1,halfs[0])) sameTol=false;
+          var specHalf = mode==="pct" ? 100 : (sameTol ? halfs[0] : null);
+          var cap = null;
+          if(specHalf!==null && st.sdW > 0){
+            cap = { cp: (2*specHalf)/(6*st.sdW), cpk: Math.min(specHalf-st.mean, st.mean+specHalf)/(3*st.sdW) };
+          }
+          var outSpec=[]; if(specHalf!==null) for(i=0;i<y.length;i++) if(Math.abs(y[i]) > specHalf) outSpec.push(i+1);
+          /* spread per part (needs 3+ readings) — DNOM assumes they are similar */
+          var groups={}, order=[];
+          for(i=0;i<rows.length;i++){ var p=rows[i].part; if(!groups[p]){ groups[p]=[]; order.push(p); } groups[p].push(y[i]); }
+          var parts = order.map(function(p){ return { part:p, n:groups[p].length, mean:meanOf(groups[p]), sd: groups[p].length>=3 ? sdOf(groups[p]) : null }; });
+          var sds = parts.filter(function(p){ return p.sd!==null && p.sd>0; }).map(function(p){ return p.sd; });
+          var spreadRatio = sds.length>=2 ? Math.max.apply(null,sds)/Math.min.apply(null,sds) : null;
+          return { y:y, mode:mode, st:st, specHalf:specHalf, sameTol:sameTol, cap:cap, outSpec:outSpec, parts:parts, spreadRatio:spreadRatio };
+        }
+
+        /* ======== PRE-Control (Shainin; Bhote 1991). Green = middle half of
+           the tolerance, yellow = outer quarters, red = outside the spec. ======== */
+        function pcZone(v, lsl, usl){
+          var q=(usl-lsl)/4;
+          if(v < lsl) return "red-lo"; if(v > usl) return "red-hi";
+          if(v < lsl+q) return "yellow-lo"; if(v > usl-q) return "yellow-hi";
+          return "green";
+        }
+        function preControlSetup(lsl, usl, vals){
+          if(!(usl > lsl)) return { error:"USL must be greater than LSL." };
+          var steps=[], greens=0, prevY=null, approvedAt=null, i;
+          for(i=0;i<vals.length;i++){
+            var zn=pcZone(vals[i], lsl, usl), act, cls;
+            if(zn.indexOf("red")===0){ act="Red — stop. Find the cause, correct the setup, restart the count."; cls="bad"; greens=0; prevY=null; }
+            else if(zn.indexOf("yellow")===0){
+              if(prevY){
+                if(prevY===zn){ act="Second yellow in a row, same side — adjust toward the centre, restart the count."; cls="warn"; }
+                else { act="Yellows on opposite sides — the spread is too wide. Reduce variation before running."; cls="bad"; }
+                greens=0; prevY=null;
+              } else { act="Yellow — restart the green count."; cls="warn"; greens=0; prevY=zn; }
+            } else {
+              greens++; prevY=null;
+              if(greens===5){ act="5 greens in a row — setup approved."; cls="good"; }
+              else { act="Green "+greens+" of 5."; cls="good"; }
+            }
+            steps.push({ v:vals[i], zone:zn, action:act, cls:cls, greens:greens });
+            if(greens===5){ approvedAt=i+1; break; }
+          }
+          return { q:(usl-lsl)/4, greenLo:lsl+(usl-lsl)/4, greenHi:usl-(usl-lsl)/4, steps:steps, approvedAt:approvedAt, ignored: approvedAt ? vals.length-approvedAt : 0 };
+        }
+        function preControlRun(lsl, usl, pairs){
+          if(!(usl > lsl)) return { error:"USL must be greater than LSL." };
+          return pairs.map(function(pr){
+            var a=pcZone(pr[0], lsl, usl), b=pcZone(pr[1], lsl, usl), act, cls;
+            if(a.indexOf("red")===0 || b.indexOf("red")===0){ act="Red — stop. Correct the cause and requalify the setup (5 greens)."; cls="bad"; }
+            else if(a.indexOf("yellow")===0 && b.indexOf("yellow")===0){
+              if(a===b){ act="Both yellow, same side — adjust toward the centre."; cls="warn"; }
+              else { act="Yellows on opposite sides — stop. Variation has grown; find and reduce it."; cls="bad"; }
+            } else { act="Continue running."; cls="good"; }
+            return { a:pr[0], b:pr[1], za:a, zb:b, action:act, cls:cls };
+          });
+        }
+
+        /* ======== Will this machine hold the tolerance? ======== */
+        function predict(sigma, lsl, usl, offset){
+          if(!(sigma > 0)) return { error:"Machine σ must be more than zero." };
+          if(!(usl > lsl)) return { error:"USL must be greater than LSL." };
+          var tol=usl-lsl, mid=(lsl+usl)/2, mu=mid+(offset||0);
+          var cp=tol/(6*sigma), cpk=Math.min(usl-mu, mu-lsl)/(3*sigma);
+          var ppm=(phi((lsl-mu)/sigma)+phiUpper((usl-mu)/sigma))*1e6;
+          return { cp:cp, cpk:cpk, ppm:ppm, maxSigma133: tol/8, maxOffset133: Math.max(0, tol/2 - 4*sigma) };
+        }
+        function sigmaFromSeries(y){ return y.length>=2 ? mrBarOf(y)/1.128 : null; }
+
+        /* ======== Cpk confidence bound (Bissell 1990; Montgomery eq. 8.22) ========
+           side "lower": one-sided lower bound. side "two": [lo, hi]. */
+        function cpkBound(cpk, n, conf, side){
+          if(!(n > 1) || !isFinite(cpk)) return null;
+          var z = side==="two" ? invPhi(1-(1-conf)/2) : invPhi(conf);
+          var se = Math.sqrt(1/(9*n) + cpk*cpk/(2*(n-1)));
+          return side==="two" ? [cpk - z*se, cpk + z*se] : cpk - z*se;
+        }
+        /* smallest n whose lower bound reaches target, if Cpk stays at cpk */
+        function nForCpk(cpk, target, conf){
+          if(!(cpk > target)) return null;
+          for(var n=2;n<=100000;n++) if(cpkBound(cpk, n, conf, "lower") >= target) return n;
+          return null;
+        }
+
+        return { attr:attr, overdispersion:overdispersion, imr:imr, shortRun:shortRun, pcZone:pcZone, preControlSetup:preControlSetup, preControlRun:preControlRun,
+                 predict:predict, sigmaFromSeries:sigmaFromSeries, cpkBound:cpkBound, nForCpk:nForCpk,
+                 _phi:phi, _invPhi:invPhi, _chi2Upper:chi2Upper };
+      })();
+      /* @@QC-CALC END */
+      /* ======================================================================
+         SECTION · ATTRIBUTE CHARTS (tool attr) and SHORT-RUN (tool short)
+         2026-11-17. All maths lives in the QC block above (tested by
+         tests/qc.test.js); this section only reads inputs and draws.
+         ====================================================================== */
+      function qcLines(text){
+        /* rows of cells from a paste: tab, comma or semicolon separated */
+        return String(text).split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean).map(function(l){
+          return l.split(/\t|;|,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(function(c){ return c.trim().replace(/^"|"$/g, ""); });
+        });
+      }
+      function qcNum(s){ if(s===undefined || s===null) return NaN; var t = String(s).replace(/[$\s]/g, ""); return t === "" ? NaN : Number(t); }
+      function qcG(x){ /* compact number for charts and tables */
+        if(x===null || x===undefined || !isFinite(x)) return "—";
+        var a = Math.abs(x);
+        return a >= 1000 ? x.toFixed(0) : a >= 100 ? x.toFixed(1) : a >= 1 ? x.toFixed(2) : a >= 0.01 ? x.toFixed(4) : x.toPrecision(3);
+      }
+      /* one chart for every QC view: points, per-point limits (steps when the
+         sample size changes), centre line and optional spec lines. */
+      function qcChartSVG(o){
+        var n = o.y.length, W = chN()?460:720, H = chN()?300:290, padL = chN()?70:58, padR = 14, padT = 16, padB = chN()?34:30;
+        var iw = W-padL-padR, ih = H-padT-padB;
+        var all = o.y.slice();
+        if(o.ucl) all = all.concat(o.ucl.filter(isFinite)); if(o.lcl) all = all.concat(o.lcl);
+        if(o.centre!==undefined) all.push(o.centre);
+        (o.spec||[]).forEach(function(s){ all.push(s); });
+        (o.bands||[]).forEach(function(b){ all.push(b[0], b[1]); });
+        var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+        if(o.floor0) lo = Math.min(0, lo);
+        var span = hi-lo || Math.abs(hi) || 1; lo -= span*0.08; hi += span*0.08; span = hi-lo;
+        if(o.floor0 && lo < 0 && Math.min.apply(null, o.y) >= 0) lo = Math.max(lo, -span*0.04);
+        span = hi-lo;
+        function X(i){ return padL + (n===1 ? iw/2 : iw*i/(n-1)); }
+        function Y(v){ return padT + ih*(1-(v-lo)/span); }
+        var half = n > 1 ? iw/(n-1)/2 : iw/2, g = "";
+        (o.bands||[]).forEach(function(b){
+          var y1 = Y(b[1]), y0 = Y(b[0]);
+          g += '<rect class="qc-band-'+b[2]+'" x="'+padL+'" y="'+Math.min(y0,y1)+'" width="'+iw+'" height="'+Math.abs(y0-y1)+'"/>';
+        });
+        function hline(v, cls, label){
+          var y = Y(v);
+          g += '<line class="'+cls+'" x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'"/>';
+          g += '<text class="'+cls+'-t" x="'+(padL-5)+'" y="'+(y+3.5)+'" font-size="'+chFS()+'" text-anchor="end">'+esc(label)+'</text>';
+        }
+        (o.spec||[]).forEach(function(s){ hline(s, "qc-spec", qcG(s)); });
+        if(o.centre!==undefined) hline(o.centre, "qc-ctr", qcG(o.centre));
+        function limitPath(arr, show){
+          var steady = arr.every(function(v){ return Math.abs(v-arr[0]) < 1e-12; });
+          if(steady){ if(show===undefined || show[0]) hline(arr[0], "qc-lim", qcG(arr[0])); return; }
+          var d = "";
+          for(var i=0;i<n;i++){ if(show && !show[i]) continue; var x0 = Math.max(padL, X(i)-half), x1 = Math.min(W-padR, X(i)+half); d += "M"+x0+" "+Y(arr[i])+"H"+x1; }
+          if(d) g += '<path class="qc-lim" d="'+d+'"/>';
+        }
+        if(o.ucl) limitPath(o.ucl.map(function(v){ return isFinite(v) ? v : hi; }));
+        if(o.lcl) limitPath(o.lcl, o.hasLcl);
+        for(var i=1;i<n;i++) g += '<line class="qc-trace" x1="'+X(i-1)+'" y1="'+Y(o.y[i-1])+'" x2="'+X(i)+'" y2="'+Y(o.y[i])+'"/>';
+        for(var j=0;j<n;j++){
+          var cls = o.ptClass ? o.ptClass(j) : (o.sig && o.sig[j] ? "qc-sig" : "qc-pt");
+          var lab = o.labels ? o.labels[j] : String(j+1);
+          g += '<circle class="'+cls+'" cx="'+X(j)+'" cy="'+Y(o.y[j])+'" r="'+(cls==="qc-pt"?3.6:5)+'"><title>'+esc(lab)+': '+esc(qcG(o.y[j]))+'</title></circle>';
+        }
+        var l0 = o.labels ? o.labels[0] : "1", l1 = o.labels ? o.labels[n-1] : String(n);
+        g += '<text class="qc-ax" x="'+padL+'" y="'+(H-8)+'" font-size="'+chFS()+'">'+esc(String(l0).slice(0,18))+'</text>';
+        if(n > 1) g += '<text class="qc-ax" x="'+(W-padR)+'" y="'+(H-8)+'" font-size="'+chFS()+'" text-anchor="end">'+esc(String(l1).slice(0,18))+'</text>';
+        return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.aria||"Control chart")+'">'+g+'</svg>';
+      }
+
+      /* ---------------- Attribute charts ---------------- */
+      var attrLast = null;
+      var ATTR_LABEL = { c:"One period per line: label, count", u:"One period per line: label, defects, units inspected",
+                         p:"One period per line: label, defective parts, parts inspected", np:"One period per line: label, defective parts, parts inspected" };
+      function attrSync(){ $("attrDataLabel").textContent = ATTR_LABEL[$("attrType").value]; }
+      $("attrType").addEventListener("change", attrSync);
+      function attrRead(type){
+        var rows = qcLines($("attrData").value), out = { labels:[], x:[], n:[], skipped:[] };
+        rows.forEach(function(r, i){
+          var cells = r.slice(), label = null;
+          if(cells.length && !isFinite(qcNum(cells[0]))) label = cells.shift();
+          var x = qcNum(cells[0]), n = qcNum(cells[1]);
+          if(!isFinite(x) || (type!=="c" && !isFinite(n))){ out.skipped.push(i+1); return; }
+          out.labels.push(label || String(out.x.length+1)); out.x.push(x); out.n.push(type==="c" ? 1 : n);
+        });
+        return out;
+      }
+      function attrAnalyse(){
+        var type = $("attrType").value, mode = $("attrLimits").value, msg = $("attrMsg");
+        var d = attrRead(type);
+        if(d.x.length < 2){ $("attrResults").classList.add("hidden"); showMsg(msg, type==="c" ? "Enter at least 2 lines of: label, count." : "Enter at least 2 lines of: label, count, sample size."); return; }
+        var std = QC.attr(type, d.x, d.n, "standard");
+        if(std.error){ $("attrResults").classList.add("hidden"); showMsg(msg, std.error); return; }
+        var od = QC.overdispersion(type, d.x, d.n), over = od.flag;
+        var lim = mode==="auto" ? (over ? "laney" : "standard") : mode;
+        var r = lim==="laney" ? QC.attr(type, d.x, d.n, "laney") : std;
+        if(d.skipped.length) showMsg(msg, "Skipped line"+(d.skipped.length>1?"s ":" ")+d.skipped.slice(0,8).join(", ")+(d.skipped.length>8?"…":"")+" (no number found — headers and totals are skipped).", true);
+        else hideMsg(msg);
+        var name = { c:"c chart", u:"u chart", p:"p chart", np:"np chart" }[type] + (lim==="laney" ? " (Laney-adjusted)" : "");
+        $("attrChartTitle").textContent = name;
+        var pct = type==="p";
+        var fmtS = function(v){ return pct ? fmt(v*100, 2)+"%" : qcG(v); };
+        var steady = r.points.every(function(p){ return Math.abs(p.ucl - r.points[0].ucl) < 1e-12; });
+        $("attrTiles").innerHTML =
+          statTile("Periods", String(r.k)) +
+          statTile("Average", fmtS(r.centre)) +
+          statTile(steady ? "UCL" : "UCL (varies)", steady ? fmtS(r.points[0].ucl) : "per period") +
+          statTile("LCL", steady ? (r.points[0].hasLcl ? fmtS(r.points[0].lcl) : "none") : "per period") +
+          statTile("Signals", String(r.signals.length + r.runs.length), (r.signals.length + r.runs.length) ? "warn" : "good") +
+          statTile("Spread vs model", fmt(r.sigmaZ, 2) + "×", over ? "warn" : "");
+        var sigSet = {}; r.signals.forEach(function(i){ sigSet[i-1] = true; });
+        $("attrChart").innerHTML = qcChartSVG({ y: r.points.map(function(p){ return pct ? p.stat*100 : p.stat; }),
+          ucl: r.points.map(function(p){ return pct ? p.ucl*100 : p.ucl; }), lcl: r.points.map(function(p){ return pct ? p.lcl*100 : p.lcl; }),
+          hasLcl: r.points.map(function(p){ return p.hasLcl; }), centre: pct ? r.centre*100 : r.centre, sig: r.points.map(function(p, i){ return !!sigSet[i]; }),
+          labels: d.labels, floor0: true, aria: name });
+        var f = "";
+        if(r.signals.length) f += '<div class="flag amber"><strong>Outside the limits:</strong> '+esc(r.signals.map(function(i){ return d.labels[i-1]+" ("+fmtS(r.points[i-1].stat)+")"; }).join(", "))+'. Something different happened here — find out what before it is averaged away.</div>';
+        r.runs.forEach(function(run){ f += '<div class="flag amber"><strong>Shift:</strong> '+esc(d.labels[run.from-1])+' to '+esc(d.labels[run.to-1])+' — '+(run.to-run.from+1)+' periods in a row '+run.side+' the average.'+(run.side==="below" && r.signals.some(function(i){ return r.points[i-1].out==="above"; }) ? ' Check this after removing the high period(s): one big outlier lifts the average, which can make ordinary periods look low.' : '')+'</div>'; });
+        if(!r.signals.length && !r.runs.length) f += '<div class="flag green"><strong>No signals.</strong> The ups and downs are normal variation for this process. A "bad week" here is not a reason to react — reducing this level needs a change to the system (Pareto the causes).</div>';
+        if(over && lim==="standard") f += '<div class="flag amber"><strong>Over-dispersed:</strong> the data varies '+fmt(r.sigmaZ,1)+'× more than the '+(type==="p"||type==="np"?"binomial":"Poisson")+' model expects, so these standard limits are too narrow and will raise false alarms. Switch limits to Auto or Laney.</div>';
+        if(over && lim==="laney") f += '<div class="flag green"><strong>Limits widened '+fmt(r.sigmaZ,2)+'× (Laney).</strong> Counts here vary more than independent events would — typical when one incident scraps a whole batch. Standard limits would flag '+std.signals.length+' period'+(std.signals.length===1?"":"s")+'; these flag '+r.signals.length+'.</div>';
+        if(type==="c" && d.x.some(function(v){ return v > 0 && v !== Math.round(v); })) f += '<div class="flag amber">Some counts are not whole numbers. A c chart is for counts — for costs or hours use the SPC &amp; Capability (individuals) chart.</div>';
+        $("attrFlags").innerHTML = f;
+        var ex = "<strong>How this was worked out:</strong> ";
+        if(type==="c") ex += "average count c̄ = "+qcG(r.centre)+"; limits c̄ ± 3√c̄"+(lim==="laney"?" × "+fmt(r.sigmaZ,3):"")+". A c chart assumes each period has about the same amount of work. If production volume changes a lot, enter parts made as a third column and use a u or p chart.";
+        else if(type==="u") ex += "ū = total defects ÷ total units = "+qcG(r.centre)+"; limits ū ± 3√(ū/nᵢ)"+(lim==="laney"?" × "+fmt(r.sigmaZ,3):"")+", so they step in and out with each period's units.";
+        else if(type==="p") ex += "p̄ = total defective ÷ total inspected = "+fmt(r.centre*100,3)+"%; limits p̄ ± 3√(p̄(1−p̄)/nᵢ)"+(lim==="laney"?" × "+fmt(r.sigmaZ,3):"")+".";
+        else ex += "n p̄ = "+qcG(r.centre)+"; limits n p̄ ± 3√(n p̄ (1−p̄))"+(lim==="laney"?" × "+fmt(r.sigmaZ,3):"")+".";
+        ex += " Spread vs model (σz) = "+fmt(r.sigmaZ,2)+": 1.0 means the counts vary exactly as independent random events would. Over-dispersion test"+(od.excluded && od.excluded.length ? " (leaving out the "+od.excluded.length+" period"+(od.excluded.length>1?"s":"")+" already outside the standard limits)" : "")+": σz "+fmt(od.sigmaZ,2)+", p "+(od.pOver < 0.0001 ? "< 0.0001" : "= "+fmt(od.pOver,4))+" — "+(over ? "over-dispersed (p < 0.01), so Auto uses Laney limits." : "no strong evidence of over-dispersion, so Auto keeps the standard limits.");
+        $("attrExplain").innerHTML = ex;
+        attrLast = { d:d, r:r, type:type, name:name };
+        $("attrResults").classList.remove("hidden");
+      }
+      $("attrGo").addEventListener("click", attrAnalyse);
+      $("attrClear").addEventListener("click", function(){ $("attrData").value = ""; $("attrResults").classList.add("hidden"); hideMsg($("attrMsg")); });
+      $("attrDemo").addEventListener("click", function(){
+        /* Montgomery, Introduction to SQC, Example 7.3: nonconformities on 26 samples of 100 circuit boards */
+        var x = [21,24,16,12,15,5,28,20,31,25,20,24,16,19,10,17,13,22,18,39,30,24,16,19,17,15];
+        $("attrType").value = "c"; attrSync(); $("attrLimits").value = "auto";
+        $("attrData").value = x.map(function(v, i){ return "Sample " + (i+1) + ", " + v; }).join("\n");
+        attrAnalyse();
+        showMsg($("attrMsg"), "Example: textbook circuit-board data (Montgomery, Example 7.3). The book gives average 19.85, UCL 33.22 (it rounds the average first; unrounded 33.21), LCL 6.48, and samples 6 and 20 outside.", true);
+      });
+      $("attrCsv").addEventListener("click", function(){
+        if(!attrLast) return;
+        var a = attrLast, lines = ["Period,Count,"+(a.type==="c"?"":"Size,")+"Statistic,LCL,Centre,UCL,Signal"];
+        a.r.points.forEach(function(p, i){
+          lines.push(csvq(a.d.labels[i])+","+a.d.x[i]+","+(a.type==="c"?"":a.d.n[i]+",")+p.stat+","+(p.hasLcl?p.lcl:"")+","+a.r.centre+","+p.ucl+","+(p.out||""));
+        });
+        downloadCSV("attribute-chart.csv", lines.join("\n"));
+      });
+
+      /* ---------------- Short-run: view switch ---------------- */
+      var SR_VIEWS = [["srModeSetup","srSetup"],["srModeChart","srChart"],["srModePredict","srPredict"]];
+      SR_VIEWS.forEach(function(v){
+        $(v[0]).addEventListener("click", function(){
+          SR_VIEWS.forEach(function(w){ $(w[0]).setAttribute("aria-pressed", w[0]===v[0] ? "true" : "false"); $(w[1]).classList.toggle("hidden", w[0]!==v[0]); });
+        });
+      });
+
+      /* ---------------- PRE-Control ---------------- */
+      var PC_ZONE = { "green":"Green", "yellow-lo":"Yellow (low)", "yellow-hi":"Yellow (high)", "red-lo":"Red (below LSL)", "red-hi":"Red (above USL)" };
+      function pcSync(){ $("pcDataLabel").textContent = $("pcStage").value==="run" ? "Pairs of consecutive parts, one pair per line: A, B" : "Readings in the order the parts came off"; }
+      $("pcStage").addEventListener("change", pcSync);
+      function pcAnalyse(){
+        var lsl = qcNum($("pcLSL").value), usl = qcNum($("pcUSL").value), msg = $("pcMsg"), stage = $("pcStage").value;
+        if(!isFinite(lsl) || !isFinite(usl) || !(usl > lsl)){ $("pcResults").classList.add("hidden"); showMsg(msg, "Enter LSL and USL (USL greater than LSL). PRE-Control needs a two-sided tolerance."); return; }
+        hideMsg(msg);
+        var q = (usl-lsl)/4, bands = [[lsl, lsl+q, "y"], [lsl+q, usl-q, "g"], [usl-q, usl, "y"]], zcls = function(z){ return z==="green" ? "good" : (z.indexOf("red")===0 ? "bad" : "warn"); };
+        var h = "", v, vals, ex;
+        if(stage==="setup"){
+          vals = parseNumbers($("pcData").value).vals;
+          if(!vals.length){ $("pcResults").classList.add("hidden"); showMsg(msg, "Enter the readings, one per part, in order."); return; }
+          var r = QC.preControlSetup(lsl, usl, vals);
+          var last = r.steps[r.steps.length-1];
+          if(r.approvedAt) v = '<div class="flag green"><strong>Setup approved</strong> at part '+r.approvedAt+'. Start production and switch to Running checks.'+(r.ignored ? ' ('+r.ignored+' later reading'+(r.ignored>1?"s":"")+' not part of the setup check.)' : '')+'</div>';
+          else if(last.cls==="bad") v = '<div class="flag red"><strong>Do not run.</strong> '+esc(last.action)+'</div>';
+          else v = '<div class="flag amber"><strong>Not approved yet.</strong> '+esc(last.action)+' Keep measuring until 5 greens in a row.</div>';
+          h = "<tr><th>Part</th><th>Reading</th><th>Zone</th><th style='text-align:left'>Action</th></tr>" + r.steps.map(function(s, i){
+            return "<tr><td>"+(i+1)+"</td><td>"+esc(String(s.v))+"</td><td class='"+zcls(s.zone)+"'>"+PC_ZONE[s.zone]+"</td><td style='text-align:left'>"+esc(s.action)+"</td></tr>"; }).join("");
+          $("pcChart").innerHTML = qcChartSVG({ y: r.steps.map(function(s){ return s.v; }), bands: bands, spec: [lsl, usl],
+            ptClass: function(i){ var z = r.steps[i].zone; return z==="green" ? "qc-pt" : (z.indexOf("red")===0 ? "qc-red" : "qc-sig"); }, aria: "PRE-Control setup chart" });
+          ex = "Zones: green "+qcG(lsl+q)+" to "+qcG(usl-q)+", yellow "+qcG(lsl)+"–"+qcG(lsl+q)+" and "+qcG(usl-q)+"–"+qcG(usl)+". Rules (Shainin / Bhote): 5 greens in a row approves the setup; a yellow restarts the count; two yellows in a row on the same side means adjust; on opposite sides means the spread is too wide; any red means stop. "+
+               "Then check 2 consecutive parts about 6 times between adjustments. PRE-Control works from the tolerance, not from process data, so it guards a setup well but is not a capability study.";
+        } else {
+          var pairs = qcLines($("pcData").value).map(function(r){ return [qcNum(r[0]), qcNum(r[1])]; }).filter(function(p){ return isFinite(p[0]) && isFinite(p[1]); });
+          if(!pairs.length){ $("pcResults").classList.add("hidden"); showMsg(msg, "Enter pairs, one per line: A, B."); return; }
+          var rr = QC.preControlRun(lsl, usl, pairs), worst = rr.some(function(s){ return s.cls==="bad"; }) ? "bad" : (rr.some(function(s){ return s.cls==="warn"; }) ? "warn" : "good");
+          var lastR = rr[rr.length-1];
+          v = '<div class="flag '+(lastR.cls==="good"?"green":(lastR.cls==="warn"?"amber":"red"))+'"><strong>Latest pair:</strong> '+esc(lastR.action)+(worst!=="good" && lastR.cls==="good" ? " Earlier pairs needed action — check it was taken." : "")+'</div>';
+          h = "<tr><th>Pair</th><th>A</th><th>B</th><th style='text-align:left'>Action</th></tr>" + rr.map(function(s, i){
+            return "<tr><td>"+(i+1)+"</td><td class='"+zcls(s.za)+"'>"+esc(String(s.a))+"</td><td class='"+zcls(s.zb)+"'>"+esc(String(s.b))+"</td><td style='text-align:left'>"+esc(s.action)+"</td></tr>"; }).join("");
+          var flat = []; pairs.forEach(function(p){ flat.push(p[0], p[1]); });
+          $("pcChart").innerHTML = qcChartSVG({ y: flat, bands: bands, spec: [lsl, usl],
+            ptClass: function(i){ var z = QC.pcZone(flat[i], lsl, usl); return z==="green" ? "qc-pt" : (z.indexOf("red")===0 ? "qc-red" : "qc-sig"); }, aria: "PRE-Control running chart" });
+          ex = "Running rules: both green, or one green and one yellow → continue. Both yellow on the same side → adjust. Yellows on opposite sides → stop and reduce variation. Any red → stop, fix the cause and requalify the setup with 5 greens.";
+        }
+        $("pcVerdict").innerHTML = v; $("pcTable").innerHTML = h; $("pcExplain").innerHTML = ex;
+        $("pcResults").classList.remove("hidden");
+      }
+      $("pcGo").addEventListener("click", pcAnalyse);
+      $("pcDemo").addEventListener("click", function(){
+        $("pcStage").value = "setup"; pcSync();
+        $("pcLSL").value = "2.4990"; $("pcUSL").value = "2.5010";
+        $("pcData").value = "2.5007, 2.5006, 2.5001, 2.4999, 2.5003, 2.5000, 2.5002, 2.5004";
+        pcAnalyse();
+        showMsg($("pcMsg"), "Example (made-up readings): the first two parts sit high in yellow, so the operator adjusts; the next five are green and the setup is approved at part 7.", true);
+      });
+
+      /* ---------------- Mixed-part (DNOM / % tolerance) chart ---------------- */
+      function srAnalyse(){
+        var mode = $("srScale").value, msg = $("srMsg"), rows = [], bad = [];
+        qcLines($("srData").value).forEach(function(c, i){
+          var part = c[0], lsl = qcNum(c[1]), usl = qcNum(c[2]), x = qcNum(c[3]);
+          if(c.length < 4 || !isFinite(lsl) || !isFinite(usl) || !isFinite(x)){ bad.push(i+1); return; }
+          rows.push({ part:part, lsl:lsl, usl:usl, x:x });
+        });
+        var r = QC.shortRun(rows, mode);
+        if(r.error){ $("srResults").classList.add("hidden"); showMsg(msg, rows.length < 2 ? "Enter at least 2 lines of: part, LSL, USL, measured." : r.error); return; }
+        if(bad.length) showMsg(msg, "Skipped line"+(bad.length>1?"s ":" ")+bad.slice(0,8).join(", ")+(bad.length>8?"…":"")+" (need part, LSL, USL, measured).", true); else hideMsg(msg);
+        var st = r.st, u = mode==="pct" ? "%" : "";
+        var f = function(v){ return qcG(v) + u; };
+        $("srTiles").innerHTML =
+          statTile("Readings", String(st.n)) + statTile("Parts", String(r.parts.length)) +
+          statTile("Average off target", f(st.mean)) + statTile("σ within", f(st.sdW)) +
+          statTile("UCL", f(st.ucl)) + statTile("LCL", f(st.lcl)) +
+          (r.cap ? statTile("Cp", fmt2(r.cap.cp), capClass(r.cap.cp)) + statTile("Cpk", fmt2(r.cap.cpk), capClass(r.cap.cpk)) : "");
+        var sig = r.y.map(function(v, i){ return st.out.indexOf(i+1) >= 0; });
+        $("srPlot").innerHTML = qcChartSVG({ y: r.y, ucl: r.y.map(function(){ return st.ucl; }), lcl: r.y.map(function(){ return st.lcl; }), centre: st.mean,
+          spec: r.specHalf!==null ? [-r.specHalf, r.specHalf] : [], sig: sig, labels: rows.map(function(x){ return x.part; }),
+          ptClass: function(i){ return r.outSpec.indexOf(i+1) >= 0 ? "qc-red" : (sig[i] ? "qc-sig" : "qc-pt"); }, aria: "Short-run chart" });
+        var fl = "";
+        if(r.outSpec.length) fl += '<div class="flag red"><strong>Out of tolerance:</strong> reading'+(r.outSpec.length>1?"s ":" ")+r.outSpec.join(", ")+'.</div>';
+        if(st.out.length) fl += '<div class="flag amber"><strong>Outside control limits:</strong> '+esc(st.out.map(function(i){ return i+" ("+rows[i-1].part+")"; }).join(", "))+' — a setup, tool or material change worth investigating.</div>';
+        st.runs.forEach(function(run){ fl += '<div class="flag amber"><strong>Shift:</strong> readings '+run.from+'–'+run.to+' all '+run.side+' the average — the machine is biased '+(run.side==="above"?"high":"low")+' across jobs (offset, tool wear compensation or fixture).</div>'; });
+        if(Math.abs(st.mean) > 0 && st.sdW > 0 && Math.abs(st.mean) > st.sdW) fl += '<div class="flag amber"><strong>Off-centre across jobs:</strong> on average parts land '+f(st.mean)+' from the middle of the tolerance — more than the machine\'s own σ. When every job leans the same way, the cause is shared — offsets, setup habit or gauging — not the part.</div>';
+        if(r.spreadRatio!==null && r.spreadRatio > 2) fl += '<div class="flag amber"><strong>Parts vary differently:</strong> the most variable part number spreads '+fmt(r.spreadRatio,1)+'× more than the least.'+(mode==="dnom" ? ' A deviation chart assumes similar spread; try "% of tolerance", or chart those parts separately.' : ' Read the limits with care — they average across parts that behave differently.')+'</div>';
+        if(!fl) fl = '<div class="flag green"><strong>No signals</strong> across '+r.parts.length+' part number'+(r.parts.length>1?"s":"")+'. This machine and feature look stable from job to job.</div>';
+        $("srFlags").innerHTML = fl;
+        $("srParts").innerHTML = "<tr><th style='text-align:left'>Part</th><th>Readings</th><th>Avg off target</th><th>Spread (s)</th></tr>" + r.parts.map(function(p){
+          return "<tr><td style='text-align:left'>"+esc(p.part)+"</td><td>"+p.n+"</td><td>"+f(p.mean)+"</td><td>"+(p.sd===null?"needs 3+":f(p.sd))+"</td></tr>"; }).join("");
+        $("srExplain").innerHTML = "<strong>How this was worked out:</strong> target = middle of each part's tolerance ((LSL+USL)/2), so one-sided tolerances like +0.05/−0 still centre correctly. " +
+          (mode==="pct" ? "Each reading is shown as % of its half-tolerance: 0% is on target and ±100% are the tolerance limits for every part, so Cp/Cpk compare against ±100%. This assumes spread grows with tolerance width." :
+                          "Each reading minus its target, in units. Parts must have similar spread"+(r.sameTol ? "; all tolerances are equal, so the spec lines and Cp/Cpk apply." : "; tolerances differ, so no spec lines or Cp/Cpk are shown — use % of tolerance for those.")) +
+          " Limits are individuals-chart limits from the moving range (σ = MR̄/1.128). Enter readings in production order. Use the σ within (in units, on the deviation view) as this machine's σ in \"Can this machine hold it?\".";
+        $("srResults").classList.remove("hidden");
+      }
+      $("srGo").addEventListener("click", srAnalyse);
+      $("srDemo").addEventListener("click", function(){
+        $("srScale").value = "pct";
+        $("srData").value = [
+          "Part A, 1.2490, 1.2510, 1.2502","Part A, 1.2490, 1.2510, 1.2504","Part A, 1.2490, 1.2510, 1.2499","Part A, 1.2490, 1.2510, 1.2503",
+          "Part B, 0.7480, 0.7500, 0.7492","Part B, 0.7480, 0.7500, 0.7494","Part B, 0.7480, 0.7500, 0.7491",
+          "Part C, 2.0000, 2.0050, 2.0028","Part C, 2.0000, 2.0050, 2.0031","Part C, 2.0000, 2.0050, 2.0024","Part C, 2.0000, 2.0050, 2.0030",
+          "Part A, 1.2490, 1.2510, 1.2505","Part A, 1.2490, 1.2510, 1.2503","Part B, 0.7480, 0.7500, 0.7493","Part B, 0.7480, 0.7500, 0.7495",
+          "Part C, 2.0000, 2.0050, 2.0033","Part C, 2.0000, 2.0050, 2.0029"].join("\n");
+        srAnalyse();
+        showMsg($("srMsg"), "Example (made-up readings): three part numbers on one machine, and all three sit high in their tolerance (+17% to +30%) — a shared bias you would never see charting each part separately.", true);
+      });
+
+      /* ---------------- Machine predictor ---------------- */
+      (function(){ try{ var s = localStorage.getItem("short.machines"); if(s) $("mpData").value = JSON.parse(s); }catch(e){} })();
+      $("mpSave").addEventListener("click", function(){
+        try{ localStorage.setItem("short.machines", JSON.stringify($("mpData").value)); showMsg($("mpMsg"), "Machine list saved in this browser on this device.", true); }
+        catch(e){ showMsg($("mpMsg"), "Could not save — this browser is blocking storage."); }
+      });
+      function mpAnalyse(){
+        var lsl = qcNum($("mpLSL").value), usl = qcNum($("mpUSL").value), off = qcNum($("mpOff").value), msg = $("mpMsg");
+        if(!isFinite(off)) off = 0;
+        if(!isFinite(lsl) || !isFinite(usl) || !(usl > lsl)){ $("mpResults").classList.add("hidden"); showMsg(msg, "Enter the new job's LSL and USL (USL greater than LSL)."); return; }
+        var ms = [], bad = [];
+        qcLines($("mpData").value).forEach(function(c, i){ var s = qcNum(c[c.length-1]); if(c.length < 2 || !(s > 0)) bad.push(i+1); else ms.push({ name:c.slice(0,-1).join(", "), sigma:s }); });
+        if(!ms.length){ $("mpResults").classList.add("hidden"); showMsg(msg, "Enter at least one machine: name, σ."); return; }
+        if(bad.length) showMsg(msg, "Skipped line"+(bad.length>1?"s ":" ")+bad.join(", ")+" (need name, σ above zero).", true); else hideMsg(msg);
+        var res = ms.map(function(m){ var p = QC.predict(m.sigma, lsl, usl, off); p.name = m.name; p.sigma = m.sigma; return p; })
+                    .sort(function(a, b){ return b.cpk - a.cpk; });
+        $("mpTable").innerHTML = "<tr><th style='text-align:left'>Machine</th><th>σ</th><th>Cp</th><th>Cpk</th><th>Expected PPM</th><th style='text-align:left'>Verdict</th></tr>" + res.map(function(p){
+          var vcls = p.cpk >= 1.33 ? "good" : (p.cpk >= 1.0 ? "warn" : "bad"), vt = p.cpk >= 1.33 ? "Good fit" : (p.cpk >= 1.0 ? "Marginal — extra first-piece checks" : "Poor fit — expect scrap");
+          return "<tr><td style='text-align:left'>"+esc(p.name)+"</td><td>"+qcG(p.sigma)+"</td><td>"+fmt2(p.cp)+"</td><td class='"+vcls+"'>"+fmt2(p.cpk)+"</td><td>"+(p.ppm < 1 ? "< 1" : fmt(p.ppm,0))+"</td><td style='text-align:left' class='"+vcls+"'>"+vt+"</td></tr>"; }).join("");
+        var tol = usl-lsl;
+        $("mpExplain").innerHTML = "<strong>How this was worked out:</strong> tolerance "+qcG(tol)+"; Cp = tolerance ÷ 6σ; Cpk uses the distance from "+(off ? "the expected setup position (centre "+(off>0?"+":"")+qcG(off)+")" : "the centre")+" to the nearest limit ÷ 3σ; PPM from the normal curve. "+
+          "To reach Cpk 1.33 when centred, a machine needs σ ≤ "+qcG(tol/8)+". This is a prediction: it assumes the machine behaves on this job as it did on past jobs of the same feature type, and that the data was stable. Confirm on the first parts with Setup approval.";
+        $("mpResults").classList.remove("hidden");
+      }
+      $("mpGo").addEventListener("click", mpAnalyse);
+      $("mpDemo").addEventListener("click", function(){
+        $("mpLSL").value = "1.2490"; $("mpUSL").value = "1.2510"; $("mpOff").value = "";
+        $("mpData").value = "Machine 1, 0.00018\nMachine 2, 0.00030\nMachine 3, 0.00045";
+        mpAnalyse();
+        showMsg($("mpMsg"), "Example (made-up σ values) for a ±0.0010 bore: only Machine 1 is a safe choice.", true);
       });
 
       /* ======================================================================
@@ -7005,6 +7686,8 @@
         /* ---- tool search ---- */
         var TOOLS = [
           ["spc","SPC & Capability","control chart I-MR individuals Cpk Cp Ppk Pp capability process stable signals UCL LCL run trend"],
+          ["attr","Attribute charts","attribute p chart np chart c chart u chart scrap per week NCP defects count defectives fraction defective Laney over-dispersion"],
+          ["short","Short-run","short run batch production high mix setup approval first piece first part off PRE-Control DNOM deviation from nominal percent of tolerance machine capability predict new job which machine"],
           ["sigma","Sigma ⇄ PPM","sigma level PPM DPMO defects per million yield six sigma Cpk to PPM 1.5 shift"],
           ["check","Data Check","histogram normality normal Anderson Darling distribution descriptive statistics mean standard deviation"],
           ["pareto","Pareto","pareto defects categories vital few 80/20 scrap reasons"],

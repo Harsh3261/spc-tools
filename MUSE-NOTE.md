@@ -303,3 +303,11 @@ All in a new script block before </body> plus CSS before the `.lc` rule. No math
 
 # Note for Muse — solid blue accent (2026-11-17)
 Harsh asked Claude to drop the blue→cyan gradient. Screen `@media` theme block only: `--grad` removed; primary buttons and selected group tab are solid #2563EB (hover #1D4ED8) with white text (5.2:1); "Tools" heading is solid #60A5FA; top bar is a 2px solid #3B82F6 line with no glow. Red/amber/green stay reserved for chart and status signals; `--cyan` and all chart colours are unchanged, and print is untouched. Cache spc-tools-v20.13-solidblue.
+
+# Note for Muse — Attribute charts, Short-run, Cpk lower bound (2026-11-17)
+Built by Claude at Harsh's request. Two new Process tools and one SPC addition:
+- **Attribute charts** (`tool-attr`): p, np, c, u charts; Laney p′/u′/c′ limits; "Auto" uses Laney only when the data stays over-dispersed after leaving out periods already outside the standard limits (Pearson χ² p < 0.01 and σz > 1).
+- **Short-run** (`tool-short`): PRE-Control setup approval and running pairs; mixed-part chart (deviation from mid-tolerance, or % of half-tolerance) with I-MR limits; machine predictor (Cp/Cpk/PPM from machine σ and the job tolerance), machine list saved in localStorage key `short.machines`.
+- **SPC**: "Cpk at least (95%)" tile and sample-size sentence (Bissell lower bound).
+- All maths is in the `@@QC-CALC` block. `node tests/qc.test.js` checks it against Montgomery Examples 7.1, 7.3, 7.4 and 8.5 plus 45 numpy/scipy reference cases (tests/qc-reference.json). Keep the block self-contained so the test can extract it.
+- Also checked locally on Harsh's own data. Never add his company data (part numbers, machines, costs, files) to this repo. Cache spc-tools-v21-shortrun.
