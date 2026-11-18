@@ -300,3 +300,6 @@ All in a new script block before </body> plus CSS before the `.lc` rule. No math
 - **Report / PDF** bar at the end of SPC, Data Check, Pareto, Gage R&R, True Position, Stack-Up, AQL and Sigma: "Prepared by" (remembered as `spc.preparedBy`) + print with `body.print-tool` (report header with date, name and characteristic; nav, search, buttons hidden; cards may break across pages).
 - **Import from Materials Atlas:** `#import=<base64 JSON>` fills the SPC form, runs Analyse, shows an amber note (heat-to-heat variation, <25 values = rough estimate) and clears the hash.
 - Tested: search hits, Learn, save→clear→load, report PDF, import; every tool's demo/run with 0 JS errors. Cache spc-tools-v20.12-learn.
+
+# Note for Muse — solid blue accent (2026-11-17)
+Harsh asked Claude to drop the blue→cyan gradient. Screen `@media` theme block only: `--grad` removed; primary buttons and selected group tab are solid #2563EB (hover #1D4ED8) with white text (5.2:1); "Tools" heading is solid #60A5FA; top bar is a 2px solid #3B82F6 line with no glow. Red/amber/green stay reserved for chart and status signals; `--cyan` and all chart colours are unchanged, and print is untouched. Cache spc-tools-v20.13-solidblue.

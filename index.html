@@ -590,6 +590,9 @@
       .ts-fam{color:var(--ink-dim); font-size:12.5px; text-align:right}
       .thsmore{margin:2px 0 0; color:var(--ink-dim); font-size:12.5px}
 
+      /* 2026-11-17: gradients replaced with solid engineering blue (#2563EB, white text) on primary
+         buttons and selected group tab; "Tools" in solid #60A5FA; top bar 2px solid. Red/amber/green
+         stay reserved for chart and status signals. Chart colours unchanged. */
       /* ===== 2026-11-16 "Graphite" theme (dark grey; replaced the navy look the same day) — presentation only, screen only (print keeps
          its light theme). Neutral dark-grey base; instrument-blue accent kept
          (charts unchanged) and lifted with a blue→cyan gradient on headline, selected tabs and
@@ -599,7 +602,7 @@
           --bg:#17181A; --bg2:#1C1E20; --panel:#232528; --panel2:#2D3033; --raised:#2D3033;
           --line:#70747A; --line-soft:#3A3D41; --grid:#303336;
           --ink:#EEEFF0; --ink-dim:#B9BCC0; --ink-faint:#A0A3A8;
-          --grad:linear-gradient(100deg,#4DA3FF 0%,#2EE6D6 100%);
+          --btn:#2563EB; --btn-hover:#1D4ED8; --btn-ink:#FFFFFF; --accent-text:#60A5FA;
         }
         html{background:
           radial-gradient(ellipse 70% 45% at 100% 0%, rgba(255,255,255,.05) 0%, transparent 60%),
@@ -607,12 +610,15 @@
         body{background-color:transparent; background-image:radial-gradient(rgba(200,205,210,.05) 1px, transparent 1.15px)}
         ::selection{background:rgba(77,163,255,.35); color:#fff}
         header.top{position:relative; padding-top:14px}
-        header.top::before{content:""; position:absolute; left:0; right:0; top:0; height:4px; border-radius:4px; background:var(--grad); box-shadow:0 0 18px rgba(77,163,255,.35)}
+        header.top::before{content:""; position:absolute; left:0; right:0; top:0; height:2px; border-radius:2px; background:#3B82F6}
         header.top h1{font-size:30px; font-weight:700}
-        header.top h1 .accent{background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent}
+        header.top h1 .accent{color:var(--accent-text)}
         .card{border-radius:12px; border-color:var(--line-soft)}
-        button.act{background:var(--grad); border-color:transparent; box-shadow:0 4px 18px rgba(77,163,255,.22)}
-        nav.clusters button[aria-selected="true"]{background:var(--grad); border-color:transparent; box-shadow:0 4px 18px rgba(77,163,255,.25)}
+        button.act{background:var(--btn); color:var(--btn-ink); border-color:var(--btn); box-shadow:0 1px 2px rgba(0,0,0,.35)}
+        @media (hover:hover){ button.act:hover:not(:disabled){background:var(--btn-hover); border-color:var(--btn-hover); filter:none} }
+        button.act:disabled{background:var(--panel2); color:var(--ink-faint); border-color:var(--line)}
+        nav.clusters button[aria-selected="true"]{background:var(--btn); color:var(--btn-ink); border-color:var(--btn); box-shadow:0 1px 2px rgba(0,0,0,.35)}
+        nav.clusters button[aria-selected="true"] .cl-sub{color:rgba(255,255,255,.85)}
         input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus{outline:2px solid var(--cyan); outline-offset:1px; border-color:var(--cyan); box-shadow:0 0 0 4px rgba(77,163,255,.14)}
         .guru{color:var(--ink-dim)}
       }
