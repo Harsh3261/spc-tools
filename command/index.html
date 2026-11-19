@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121417">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Q Command">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Quality Command</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<!--
+  Quality Command — a management representative's desk for an ISO 9001 QMS:
+  corrective actions (CAPA), internal audit programme, due dates, management
+  review pack, quality objectives, ISO 9001:2026 transition and an audit
+  readiness check. Everything is stored in this browser on this device only
+  (localStorage "qc.data"); there is no server and no network request.
+  Logic that decides dates and the readiness score lives in the QCMD block
+  and is tested by ../tests/command.e2e.js.
+-->
+<style>
+  :root{
+    --bg:#121417; --bg2:#181B20; --panel:#1E2229; --panel2:#262B33; --line:#323944; --line-soft:#2A3038;
+    --ink:#E9EDF2; --ink-dim:#AEB6C2; --ink-faint:#7D8794;
+    --blue:#2563EB; --blue-h:#1D4ED8; --blue-t:#60A5FA;
+    --green:#22C55E; --green-ink:#86EFAC; --amber:#F59E0B; --amber-ink:#FCD34D; --red:#EF4444; --red-ink:#FCA5A5;
+    --r:12px; --pad:16px;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); font-size:16px; -webkit-text-size-adjust:100%}
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  button,input,select,textarea{font:inherit; color:inherit}
+  header{padding:calc(14px + env(safe-area-inset-top)) var(--pad) 8px; position:relative}
+  header::before{content:""; position:absolute; left:var(--pad); right:var(--pad); top:calc(6px + env(safe-area-inset-top)); height:2px; background:var(--blue); border-radius:2px}
+  .brand{display:flex; align-items:center; gap:10px; margin-top:6px}
+  .brand svg{width:30px; height:30px; flex-shrink:0}
+  .brand h1{font-size:21px; margin:0; letter-spacing:.2px}
+  .brand h1 span{color:var(--blue-t)}
+  .tag{font-size:12.5px; color:var(--ink-faint); margin:4px 0 0}
+  main{padding:0 var(--pad); max-width:900px; margin:0 auto}
+  .view{display:none} .view.on{display:block}
+  h2{font-size:19px; margin:18px 0 10px}
+  h3{font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); margin:20px 0 8px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:14px; margin:10px 0}
+  .muted{color:var(--ink-faint)} .small{font-size:13.5px; color:var(--ink-dim); line-height:1.45}
+  .row{display:flex; gap:10px; align-items:center} .row > *{flex:1} .wrap{flex-wrap:wrap}
+  .btn{appearance:none; border:1px solid var(--line); background:var(--panel2); border-radius:10px; padding:11px 14px; min-height:44px; cursor:pointer; font-weight:600; font-size:15px}
+  .btn.pri{background:var(--blue); border-color:var(--blue); color:#fff} .btn.pri:active{background:var(--blue-h)}
+  .btn.danger{color:var(--red-ink); border-color:#5a2a2a}
+  .btn.sm{min-height:36px; padding:7px 11px; font-size:14px}
+  .btns{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+  label.f{display:block; font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim); margin:12px 0 5px}
+  input[type=text],input[type=date],input[type=number],select,textarea{width:100%; background:var(--bg2); border:1px solid var(--line); border-radius:10px; padding:11px 12px; min-height:44px; font-size:16px}
+  textarea{min-height:84px; resize:vertical; line-height:1.4}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--blue-t); outline-offset:1px}
+  nav.bottom{position:fixed; left:0; right:0; bottom:0; background:rgba(18,20,23,.96); border-top:1px solid var(--line); display:flex; padding:6px 6px calc(6px + env(safe-area-inset-bottom)); z-index:20; backdrop-filter:blur(8px)}
+  nav.bottom button{flex:1; background:none; border:0; color:var(--ink-faint); padding:6px 2px; border-radius:10px; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; min-height:52px; position:relative}
+  nav.bottom button svg{width:22px; height:22px}
+  nav.bottom button[aria-current="page"]{color:#fff; background:var(--blue)}
+  nav.bottom .badge{position:absolute; top:3px; right:calc(50% - 22px); background:var(--red); color:#fff; font-size:10.5px; min-width:17px; height:17px; border-radius:9px; display:flex; align-items:center; justify-content:center; padding:0 4px}
+  /* readiness gauge */
+  .gauge{display:flex; gap:16px; align-items:center}
+  .gauge svg{width:118px; height:118px; flex-shrink:0}
+  .gauge .num{font-size:34px; font-weight:800; font-family:var(--mono)}
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:3px 8px; border-radius:999px; background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line)}
+  .pill.red{color:var(--red-ink); border-color:#6b2b2b; background:#2a1717} .pill.amber{color:var(--amber-ink); border-color:#6b5320; background:#2a2312} .pill.green{color:var(--green-ink); border-color:#1f5a35; background:#11251a} .pill.blue{color:#cfe0ff; border-color:#2b4a8a; background:#16233d}
+  .item{display:flex; gap:12px; align-items:flex-start; padding:12px 2px; border-bottom:1px dashed var(--line-soft); cursor:pointer}
+  .item:last-child{border-bottom:0}
+  .item .t{font-weight:600; line-height:1.3} .item .s{font-size:13px; color:var(--ink-dim); margin-top:3px; line-height:1.35}
+  .item .r{margin-left:auto; text-align:right; flex-shrink:0}
+  .dot{width:10px; height:10px; border-radius:50%; margin-top:6px; flex-shrink:0; background:var(--ink-faint)}
+  .dot.red{background:var(--red)} .dot.amber{background:var(--amber)} .dot.green{background:var(--green)} .dot.blue{background:var(--blue-t)}
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .stat{background:var(--bg2); border:1px solid var(--line); border-radius:10px; padding:10px}
+  .stat .k{font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint)} .stat .v{font-size:22px; font-weight:800; font-family:var(--mono); margin-top:2px}
+  .stage{display:flex; gap:3px; margin-top:8px} .stage i{flex:1; height:5px; border-radius:3px; background:var(--line)} .stage i.on{background:var(--blue-t)}
+  .seg{display:flex; gap:6px; flex-wrap:wrap; margin:6px 0 4px} .seg button{min-height:38px; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--panel2); font-size:14px; font-weight:600; color:var(--ink-dim)} .seg button[aria-pressed="true"]{background:var(--blue); border-color:var(--blue); color:#fff}
+  .empty{padding:18px 4px; color:var(--ink-faint); font-size:14.5px}
+  /* bottom sheet */
+  .sheet-bg{position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:40; display:none}
+  .sheet{position:fixed; left:0; right:0; bottom:0; max-height:92vh; overflow:auto; background:var(--panel); border-top-left-radius:18px; border-top-right-radius:18px; border:1px solid var(--line); z-index:41; padding:8px var(--pad) calc(18px + env(safe-area-inset-bottom)); display:none; max-width:900px; margin:0 auto}
+  .sheet.on,.sheet-bg.on{display:block}
+  .sheet .grab{width:44px; height:5px; border-radius:3px; background:var(--line); margin:4px auto 6px}
+  .sheet h2{margin-top:6px}
+  .sub{border:1px solid var(--line-soft); border-radius:10px; padding:10px; margin-top:8px; background:var(--bg2)}
+  .why{display:flex; gap:8px; align-items:center; margin-top:6px} .why b{font-family:var(--mono); color:var(--blue-t); width:34px; flex-shrink:0; font-size:13px}
+  .q{padding:10px 0; border-bottom:1px dashed var(--line-soft)} .q:last-child{border-bottom:0}
+  .q .qt{font-size:14.5px; line-height:1.35} .q .seg{margin-top:6px}
+  .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(96px + env(safe-area-inset-bottom)); background:#0b0d10; border:1px solid var(--line); color:var(--ink); padding:10px 16px; border-radius:10px; z-index:60; font-size:14.5px; display:none; max-width:90vw}
+  .toast.on{display:block}
+  .banner{border:1px solid #6b5320; background:#2a2312; color:var(--amber-ink); border-radius:10px; padding:10px 12px; font-size:14px; margin:10px 0}
+  .banner.blue{border-color:#2b4a8a; background:#16233d; color:#cfe0ff}
+  table.t{width:100%; border-collapse:collapse; font-size:14px} table.t th,table.t td{padding:8px 6px; border-bottom:1px solid var(--line-soft); text-align:left; vertical-align:top} table.t th{color:var(--ink-dim); font-size:12px; text-transform:uppercase; letter-spacing:.05em}
+  .bar{height:8px; background:var(--line); border-radius:4px; overflow:hidden} .bar i{display:block; height:100%; background:var(--blue-t)}
+  .print-only{display:none}
+  @media (min-width:700px){ .stats{grid-template-columns:repeat(6,1fr)} }
+  /* management review report on paper */
+  @media print{
+    :root{--bg:#fff; --bg2:#fff; --panel:#fff; --panel2:#fff; --line:#999; --line-soft:#ccc; --ink:#000; --ink-dim:#222; --ink-faint:#444; --blue-t:#1d4ed8}
+    body{padding:0; background:#fff}
+    header, nav.bottom, .view, .sheet, .sheet-bg, .toast, .noprint{display:none !important}
+    #printArea{display:block !important}
+    #printArea h1{font-size:18pt; margin:0 0 4pt} #printArea h2{font-size:13pt; margin:14pt 0 4pt; border-bottom:1px solid #999} #printArea p,#printArea li,#printArea td,#printArea th{font-size:10.5pt}
+    #printArea table{width:100%; border-collapse:collapse} #printArea td,#printArea th{border:1px solid #999; padding:3pt 5pt; text-align:left}
+  }
+  #printArea{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#323944" stroke-width="4"/><path d="M16 3 A13 13 0 1 1 4.6 22.2" fill="none" stroke="#2563EB" stroke-width="4" stroke-linecap="round"/><path d="M11 16.5l3.4 3.4L21.5 12" fill="none" stroke="#60A5FA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><h1>Quality <span>Command</span></h1><p class="tag">Your QMS desk · stored on this device only</p></div>
+  </div>
+</header>
+<main>
+  <section class="view on" id="v-today" aria-label="Today"></section>
+  <section class="view" id="v-capa" aria-label="Corrective actions"></section>
+  <section class="view" id="v-audit" aria-label="Audits"></section>
+  <section class="view" id="v-due" aria-label="Due dates"></section>
+  <section class="view" id="v-review" aria-label="Review"></section>
+</main>
+<div id="printArea"></div>
+<nav class="bottom" aria-label="Sections">
+  <button data-view="today" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today<span class="badge" id="bToday" hidden></span></button>
+  <button data-view="capa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg>CAPA<span class="badge" id="bCapa" hidden></span></button>
+  <button data-view="audit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Audits<span class="badge" id="bAudit" hidden></span></button>
+  <button data-view="due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Due<span class="badge" id="bDue" hidden></span></button>
+  <button data-view="review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/></svg>Review</button>
+</nav>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div id="sheetBody"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+/* @@QCMD BEGIN — dates, statuses and the readiness score (pure, tested) */
+var QCMD = (function(){
+  function pad(n){ return (n < 10 ? "0" : "") + n; }
+  /* local calendar date, never UTC — "today" must match the wall clock */
+  function today(d){ d = d || new Date(); return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()); }
+  function parse(iso){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ""); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; }
+  function addDays(iso, n){ var d = parse(iso); if(!d) return ""; d.setDate(d.getDate() + n); return today(d); }
+  /* add months, clamping to the month's last day (Jan 31 + 1 month = Feb 28/29) */
+  function addMonths(iso, n){
+    var d = parse(iso); if(!d) return "";
+    var y = d.getFullYear(), m = d.getMonth() + n, day = d.getDate();
+    var last = new Date(y, m + 1, 0).getDate();
+    return today(new Date(y, m, Math.min(day, last)));
+  }
+  function days(a, b){ var A = parse(a), B = parse(b); if(!A || !B) return null; return Math.round((B - A) / 86400000); }
+  function nextDue(last, months){ return last ? addMonths(last, months) : null; }
+  /* CAPA stage: 0 contain · 1 root cause · 2 action · 3 verify · 4 effectiveness · 5 done */
+  function capaStage(c){
+    if(c.closed){ return c.effResult === "effective" ? 5 : 4; }
+    var acts = c.actions || [];
+    if(acts.length && acts.every(function(a){ return a.done; })) return 3;
+    if((c.rootCause || "").trim()) return 2;
+    if((c.containment || "").trim()) return 1;
+    return 0;
+  }
+  var STAGES = ["Contain","Root cause","Action","Verify","Effectiveness check","Closed — effective"];
+  /* Readiness: what an auditor would pick on. Points are a rule of thumb for
+     priority, not a grade from any standard. Returns {score, items}. */
+  function readiness(D, now){
+    now = now || today();
+    var items = [], add = function(pts, sev, title, sub, go){ items.push({ pts:pts, sev:sev, title:title, sub:sub, go:go }); };
+    (D.capas || []).forEach(function(c){
+      var st = capaStage(c), lab = (c.no || "CAPA") + " · " + (c.title || "untitled");
+      if(!c.closed){
+        if(c.due && days(c.due, now) > 0) add(8, "red", "Overdue corrective action", lab + " — due " + c.due + " (" + days(c.due, now) + " days late)", "capa:" + c.id);
+        else if(st < 2 && c.opened && days(c.opened, now) > 30) add(4, "amber", "No root cause after 30 days", lab, "capa:" + c.id);
+        (c.actions || []).forEach(function(a){ if(!a.done && a.due && days(a.due, now) > 0) add(3, "amber", "Action step overdue", lab + " — " + (a.text || "step") + (a.owner ? " (" + a.owner + ")" : ""), "capa:" + c.id); });
+      } else if(c.effResult === "not effective"){
+        add(8, "red", "Action was not effective — reopen it", lab, "capa:" + c.id);
+      } else if(c.effResult !== "effective"){
+        if(c.effDue && days(c.effDue, now) > 0) add(5, "red", "Effectiveness check overdue", lab + " — due " + c.effDue, "capa:" + c.id);
+      }
+    });
+    (D.program || []).forEach(function(p){
+      var nd = p.last ? nextDue(p.last, p.freq) : null;
+      if(!p.last) add(6, "red", "Never audited", p.area + (p.clauses ? " · " + p.clauses : ""), "audit:" + p.id);
+      else if(days(nd, now) > 0) add(6, "red", "Internal audit overdue", p.area + " — due " + nd, "audit:" + p.id);
+    });
+    (D.audits || []).forEach(function(a){
+      (a.findings || []).forEach(function(f){
+        if((f.type === "Major NC" || f.type === "Minor NC") && !f.capaId) add(5, "red", "Audit finding with no corrective action", a.area + " " + a.date + " — " + f.type + ": " + (f.text || ""), "finding:" + a.id + ":" + f.id);
+      });
+    });
+    (D.dues || []).forEach(function(d){
+      var nd = nextDue(d.last, d.freq);
+      if(!nd) add(3, "amber", (d.kind || "Item") + " has no last date", d.name, "due:" + d.id);
+      else if(days(nd, now) > 0) add(d.kind === "Calibration" ? 6 : 4, "red", (d.kind || "Item") + " overdue", d.name + " — due " + nd, "due:" + d.id);
+    });
+    var lastMr = D.mrLast;
+    if(!lastMr) add(15, "red", "No management review on record", "ISO 9001 expects planned reviews — record your last one or hold one", "review");
+    else if(days(addMonths(lastMr, 12), now) > 0) add(15, "red", "Management review older than 12 months", "Last held " + lastMr, "review");
+    (D.objectives || []).forEach(function(o){
+      if(o.actual === "" || o.actual === null || o.actual === undefined) add(2, "amber", "Quality objective has no current result", o.name, "review");
+    });
+    items.sort(function(a, b){ return b.pts - a.pts; });
+    var total = items.reduce(function(s, i){ return s + i.pts; }, 0);
+    return { score: Math.max(0, 100 - total), items: items };
+  }
+  function objectiveMet(o){
+    var a = Number(o.actual), t = Number(o.target);
+    if(o.actual === "" || o.actual === null || !isFinite(a) || !isFinite(t)) return null;
+    return o.dir === "max" ? a <= t : a >= t;
+  }
+  return { today:today, addDays:addDays, addMonths:addMonths, days:days, nextDue:nextDue, capaStage:capaStage, STAGES:STAGES, readiness:readiness, objectiveMet:objectiveMet };
+})();
+/* @@QCMD END */
+
+(function(){
+  var KEY = "qc.data";
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s === undefined || s === null ? "" : s).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  var T = QCMD.today;
+  /* ------------ data ------------ */
+  function blank(){
+    return { v:1, capas:[], program:[], audits:[], dues:[], objectives:[], mrLast:"", mrHistory:[], mrDraft:{}, transition:{}, backupAt:"", seq:{} };
+  }
+  var D;
+  function load(){
+    try{ D = JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){ D = null; }
+    if(!D || typeof D !== "object") D = blank();
+    var b = blank(); Object.keys(b).forEach(function(k){ if(D[k] === undefined) D[k] = b[k]; });
+  }
+  var storageOk = true;
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(D)); storageOk = true; }catch(e){ storageOk = false; toast("Could not save — this browser is blocking storage."); } render(); }
+  function nextNo(prefix){ var y = T().slice(0,4), k = prefix + y; D.seq[k] = (D.seq[k] || 0) + 1; return prefix + "-" + y + "-" + String(D.seq[k]).padStart(3, "0"); }
+  function toast(m){ var t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(function(){ t.classList.remove("on"); }, 2600); }
+  function pill(sev, txt){ return '<span class="pill ' + sev + '">' + esc(txt) + '</span>'; }
+  function rel(iso){ if(!iso) return ""; var d = QCMD.days(T(), iso); return d === 0 ? "today" : d > 0 ? "in " + d + " day" + (d===1?"":"s") : Math.abs(d) + " day" + (d===-1?"":"s") + " late"; }
+  function dueSev(iso, soon){ if(!iso) return "amber"; var d = QCMD.days(T(), iso); return d < 0 ? "red" : d <= (soon || 14) ? "amber" : "green"; }
+
+  /* ------------ navigation ------------ */
+  var view = "today";
+  function go(v){
+    view = v;
+    document.querySelectorAll(".view").forEach(function(s){ s.classList.toggle("on", s.id === "v-" + v); });
+    document.querySelectorAll("nav.bottom button").forEach(function(b){ if(b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+    render(); window.scrollTo(0, 0);
+  }
+  document.querySelector("nav.bottom").addEventListener("click", function(e){ var b = e.target.closest("button[data-view]"); if(b) go(b.dataset.view); });
+
+  /* ------------ sheet (forms) ------------ */
+  function openSheet(html){ $("sheetBody").innerHTML = html; $("sheet").classList.add("on"); $("sheetBg").classList.add("on"); $("sheet").scrollTop = 0; document.body.style.overflow = "hidden"; }
+  function closeSheet(){ $("sheet").classList.remove("on"); $("sheetBg").classList.remove("on"); document.body.style.overflow = ""; }
+  $("sheetBg").addEventListener("click", closeSheet);
+  function val(id){ var e = $(id); return e ? e.value.trim() : ""; }
+
+  /* ------------ TODAY ------------ */
+  function gaugeSVG(score){
+    var r = 50, c = 2 * Math.PI * r, col = score >= 85 ? "#22C55E" : score >= 65 ? "#F59E0B" : "#EF4444";
+    return '<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="' + r + '" fill="none" stroke="#2A3038" stroke-width="12"/>' +
+      '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + (c * score / 100) + ' ' + c + '" transform="rotate(-90 60 60)"/>' +
+      '<text x="60" y="68" text-anchor="middle" fill="#E9EDF2" font-size="30" font-weight="800" font-family="ui-monospace,Menlo,monospace">' + score + '</text></svg>';
+  }
+  function upcoming(){
+    var now = T(), list = [];
+    D.capas.forEach(function(c){
+      if(!c.closed && c.due) list.push({ date:c.due, t:(c.no || "CAPA") + " due", s:c.title, go:"capa:" + c.id });
+      if(c.closed && c.effResult !== "effective" && c.effResult !== "not effective" && c.effDue) list.push({ date:c.effDue, t:"Effectiveness check", s:(c.no || "") + " · " + c.title, go:"capa:" + c.id });
+    });
+    D.program.forEach(function(p){ var nd = QCMD.nextDue(p.last, p.freq); if(nd) list.push({ date:nd, t:"Internal audit", s:p.area, go:"audit:" + p.id }); });
+    D.dues.forEach(function(d){ var nd = QCMD.nextDue(d.last, d.freq); if(nd) list.push({ date:nd, t:d.kind, s:d.name, go:"due:" + d.id }); });
+    if(D.mrLast) list.push({ date:QCMD.addMonths(D.mrLast, 12), t:"Management review (12 months)", s:"Last held " + D.mrLast, go:"review" });
+    return list.filter(function(x){ var d = QCMD.days(now, x.date); return d >= 0 && d <= 30; }).sort(function(a, b){ return a.date < b.date ? -1 : 1; });
+  }
+  function renderToday(){
+    var R = QCMD.readiness(D), now = T();
+    var open = D.capas.filter(function(c){ return !c.closed; }).length;
+    var h = "";
+    var bd = D.backupAt ? QCMD.days(D.backupAt.slice(0,10), now) : null;
+    var hasData = D.capas.length + D.program.length + D.dues.length + D.audits.length > 0;
+    if(hasData && (bd === null || bd > 14)) h += '<div class="banner">' + (bd === null ? "No backup yet." : "Last backup " + bd + " days ago.") + ' Your records live only in this browser. <b data-go="backup" style="text-decoration:underline;cursor:pointer">Back up now</b></div>';
+    if(!storageOk) h += '<div class="banner">This browser is not saving data. Turn off private browsing.</div>';
+    h += '<div class="card"><div class="gauge">' + gaugeSVG(R.score) + '<div><div style="font-weight:700;font-size:17px">Audit readiness</div><div class="small">' +
+      (R.items.length ? R.items.length + " thing" + (R.items.length===1?"":"s") + " an auditor would pick on. Fix the top ones first." : "Nothing an auditor would flag from what is recorded here.") +
+      '</div><div class="small muted" style="margin-top:6px">A rule-of-thumb check of your records, not an audit result.</div></div></div></div>';
+    h += '<div class="stats">' +
+      '<div class="stat"><div class="k">Open CAPA</div><div class="v">' + open + '</div></div>' +
+      '<div class="stat"><div class="k">Overdue</div><div class="v" style="color:' + (R.items.some(function(i){ return i.sev==="red"; }) ? "var(--red-ink)" : "var(--green-ink)") + '">' + R.items.filter(function(i){ return i.sev === "red"; }).length + '</div></div>' +
+      '<div class="stat"><div class="k">Next 30 days</div><div class="v">' + upcoming().length + '</div></div></div>';
+    h += '<h3>Fix first</h3><div class="card">';
+    if(!R.items.length) h += '<div class="empty">' + (hasData ? "All clear." : "Start by adding your audit programme, your calibration and document due dates, and any open corrective actions. The score updates as you go.") + '</div>';
+    R.items.slice(0, 12).forEach(function(i){ h += '<div class="item" data-go="' + esc(i.go) + '"><span class="dot ' + i.sev + '"></span><div><div class="t">' + esc(i.title) + '</div><div class="s">' + esc(i.sub) + '</div></div><div class="r"><span class="pill ' + i.sev + '">−' + i.pts + '</span></div></div>'; });
+    if(R.items.length > 12) h += '<div class="small muted" style="padding-top:8px">+ ' + (R.items.length - 12) + ' more</div>';
+    h += '</div>';
+    var up = upcoming();
+    h += '<h3>Coming up (30 days)</h3><div class="card">' + (up.length ? up.map(function(x){ return '<div class="item" data-go="' + esc(x.go) + '"><span class="dot ' + dueSev(x.date, 7) + '"></span><div><div class="t">' + esc(x.t) + '</div><div class="s">' + esc(x.s) + '</div></div><div class="r small">' + esc(rel(x.date)) + '</div></div>'; }).join("") : '<div class="empty">Nothing due in the next 30 days.</div>') + '</div>';
+    if(!hasData) h += '<div class="btns"><button class="btn" data-act="sample">Load example data to try it</button></div>';
+    $("v-today").innerHTML = h;
+    var red = R.items.filter(function(i){ return i.sev === "red"; }).length;
+    badge("bToday", red);
+  }
+  function badge(id, n){ var b = $(id); if(n > 0){ b.textContent = n > 99 ? "99+" : n; b.hidden = false; } else b.hidden = true; }
+
+  /* ------------ CAPA ------------ */
+  var capaFilter = "open";
+  var SOURCES = ["Internal audit","External audit","Customer complaint","NCR / scrap trend","Supplier","Management review","Process monitoring","Other"];
+  function renderCapa(){
+    var now = T();
+    var list = D.capas.filter(function(c){ return capaFilter === "all" ? true : capaFilter === "open" ? !c.closed : capaFilter === "verify" ? (c.closed && c.effResult !== "effective") : (c.closed && c.effResult === "effective"); });
+    list.sort(function(a, b){ return (a.due || "9") < (b.due || "9") ? -1 : 1; });
+    var h = '<h2>Corrective actions</h2><div class="seg" id="capaSeg">' +
+      [["open","Open"],["verify","Effectiveness"],["done","Closed"],["all","All"]].map(function(f){ return '<button data-f="' + f[0] + '" aria-pressed="' + (capaFilter===f[0]) + '">' + f[1] + '</button>'; }).join("") + '</div>';
+    h += '<div class="btns"><button class="btn pri" data-act="capaNew">+ New corrective action</button></div><div class="card">';
+    if(!list.length) h += '<div class="empty">None here.</div>';
+    list.forEach(function(c){
+      var st = QCMD.capaStage(c), late = !c.closed && c.due && QCMD.days(c.due, now) > 0;
+      var sev = st === 5 ? "green" : late ? "red" : st === 4 ? "blue" : "amber";
+      h += '<div class="item" data-go="capa:' + c.id + '"><span class="dot ' + sev + '"></span><div style="flex:1;min-width:0"><div class="t">' + esc(c.no) + ' · ' + esc(c.title || "untitled") + '</div>' +
+        '<div class="s">' + esc(c.source || "") + (c.owner ? " · " + esc(c.owner) : "") + (c.closed ? " · closed " + esc(c.closed) : c.due ? " · due " + esc(c.due) + " (" + rel(c.due) + ")" : "") + '</div>' +
+        '<div class="stage">' + [0,1,2,3,4].map(function(i){ return '<i class="' + (i < st || st === 5 ? "on" : "") + '"></i>'; }).join("") + '</div></div>' +
+        '<div class="r">' + pill(sev, QCMD.STAGES[st]) + '</div></div>';
+    });
+    h += '</div>';
+    $("v-capa").innerHTML = h;
+    badge("bCapa", D.capas.filter(function(c){ return !c.closed && c.due && QCMD.days(c.due, now) > 0; }).length);
+  }
+  function capaForm(c){
+    var isNew = !c;
+    c = c || { id:uid(), no:"", title:"", source:"Internal audit", opened:T(), owner:"", due:QCMD.addDays(T(), 30), problem:"", containment:"", why:["","","","",""], rootCause:"", actions:[], closed:"", effDue:"", effMethod:"", effResult:"", effNote:"" };
+    var st = QCMD.capaStage(c);
+    var h = '<h2>' + (isNew ? "New corrective action" : esc(c.no)) + '</h2>' +
+      '<div class="stage">' + [0,1,2,3,4].map(function(i){ return '<i class="' + (i < st || st === 5 ? "on" : "") + '"></i>'; }).join("") + '</div><div class="small" style="margin-top:4px">Stage: <b>' + QCMD.STAGES[st] + '</b></div>' +
+      '<label class="f" for="cTitle">Title</label><input type="text" id="cTitle" value="' + esc(c.title) + '" placeholder="e.g. Bore oversize on lathe 7 after tool change">' +
+      '<div class="row"><div><label class="f" for="cSource">Source</label><select id="cSource">' + SOURCES.map(function(s){ return '<option' + (s===c.source?" selected":"") + '>' + s + '</option>'; }).join("") + '</select></div>' +
+      '<div><label class="f" for="cOwner">Owner</label><input type="text" id="cOwner" value="' + esc(c.owner) + '"></div></div>' +
+      '<div class="row"><div><label class="f" for="cOpened">Opened</label><input type="date" id="cOpened" value="' + esc(c.opened) + '"></div><div><label class="f" for="cDue">Due</label><input type="date" id="cDue" value="' + esc(c.due) + '"></div></div>' +
+      '<label class="f" for="cProblem">Problem — what, where, when, how many, how found</label><textarea id="cProblem" placeholder="State the facts. Avoid the cause here.">' + esc(c.problem) + '</textarea>' +
+      '<label class="f" for="cCont">1 · Containment — what was done now to protect the customer</label><textarea id="cCont" placeholder="Parts quarantined, sorted, 100% check…">' + esc(c.containment) + '</textarea>' +
+      '<label class="f">2 · Why did it happen? (5 Whys — stop when you reach a cause you can fix)</label>' +
+      (c.why || ["","","","",""]).map(function(w, i){ return '<div class="why"><b>Why ' + (i+1) + '</b><input type="text" id="cWhy' + i + '" value="' + esc(w) + '"></div>'; }).join("") +
+      '<label class="f" for="cRoot">Root cause</label><textarea id="cRoot" placeholder="The cause that, if removed, stops it coming back">' + esc(c.rootCause) + '</textarea>' +
+      '<label class="f">3 · Corrective actions</label><div id="cActs">' + (c.actions || []).map(actRow).join("") + '</div>' +
+      '<div class="btns"><button class="btn sm" data-act="addAct">+ Add action</button></div>';
+    if(c.closed){
+      h += '<label class="f">4 · Effectiveness — did it stop the problem coming back?</label>' +
+        '<div class="row"><div><label class="f" for="cEffDue">Check on</label><input type="date" id="cEffDue" value="' + esc(c.effDue) + '"></div><div><label class="f" for="cEffRes">Result</label><select id="cEffRes"><option value="">Not checked yet</option><option value="effective"' + (c.effResult==="effective"?" selected":"") + '>Effective</option><option value="not effective"' + (c.effResult==="not effective"?" selected":"") + '>Not effective</option></select></div></div>' +
+        '<label class="f" for="cEffMethod">How it was checked (evidence)</label><textarea id="cEffMethod" placeholder="e.g. 0 repeats in 60 days of NCR data; Cpk 1.6 on 30 parts">' + esc(c.effMethod) + '</textarea>';
+    }
+    h += '<div class="btns"><button class="btn pri" data-act="capaSave" data-id="' + c.id + '">Save</button>' +
+      (!isNew && !c.closed ? '<button class="btn" data-act="capaClose" data-id="' + c.id + '">Close &amp; schedule effectiveness check</button>' : '') +
+      (!isNew && c.closed ? '<button class="btn" data-act="capaReopen" data-id="' + c.id + '">Reopen</button>' : '') +
+      (!isNew ? '<button class="btn danger" data-act="capaDel" data-id="' + c.id + '">Delete</button>' : '') +
+      '<button class="btn" data-act="close">Cancel</button></div>';
+    if(!isNew && c.closed) h += '<p class="small">Closed ' + esc(c.closed) + '. ISO 9001 asks you to review whether the action worked — record the evidence above when you check.</p>';
+    openSheet(h);
+    capaForm.cur = JSON.parse(JSON.stringify(c)); capaForm.isNew = isNew;
+  }
+  function actRow(a, i){
+    a = a || { text:"", owner:"", due:"", done:false };
+    return '<div class="sub act"><input type="text" class="aText" value="' + esc(a.text) + '" placeholder="Action">' +
+      '<div class="row" style="margin-top:6px"><input type="text" class="aOwner" value="' + esc(a.owner) + '" placeholder="Owner"><input type="date" class="aDue" value="' + esc(a.due) + '"></div>' +
+      '<label class="small" style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" class="aDone"' + (a.done ? " checked" : "") + ' style="width:20px;height:20px"> Done</label></div>';
+  }
+  function capaCollect(){
+    var c = capaForm.cur;
+    c.title = val("cTitle"); c.source = val("cSource"); c.owner = val("cOwner"); c.opened = val("cOpened"); c.due = val("cDue");
+    c.problem = val("cProblem"); c.containment = val("cCont"); c.rootCause = val("cRoot");
+    c.why = [0,1,2,3,4].map(function(i){ return val("cWhy" + i); });
+    c.actions = Array.prototype.map.call(document.querySelectorAll("#cActs .act"), function(r){
+      return { text:r.querySelector(".aText").value.trim(), owner:r.querySelector(".aOwner").value.trim(), due:r.querySelector(".aDue").value, done:r.querySelector(".aDone").checked };
+    }).filter(function(a){ return a.text; });
+    if($("cEffDue")){ c.effDue = val("cEffDue"); c.effResult = val("cEffRes"); c.effMethod = val("cEffMethod"); }
+    return c;
+  }
+  function capaStore(c){
+    if(!c.title){ toast("Give it a title."); return false; }
+    if(!c.no) c.no = nextNo("CA");
+    var i = D.capas.findIndex(function(x){ return x.id === c.id; });
+    if(i >= 0) D.capas[i] = c; else D.capas.push(c);
+    return true;
+  }
+
+  /* ------------ AUDITS ------------ */
+  /* Questions are this app's own wording, grouped by ISO 9001 clause number. */
+  var QB = {
+    "4 Context": ["Can the team say which internal and external issues affect quality here, and when they were last reviewed?","Are the needs of interested parties (customers, regulators, owners) written down and current?","Is the QMS scope documented, including any requirements that do not apply and why?"],
+    "5 Leadership": ["Do people know the quality policy and what it means for their job?","Are roles, responsibilities and authorities clear (who can stop the line, approve deviations, release product)?","Is there evidence top management reviews quality results and acts on them?"],
+    "6 Planning": ["Are risks and opportunities for this process identified, with actions and owners?","Are quality objectives measurable, with a plan, an owner and a due date?","Were recent changes (new machine, new customer, layout) planned and controlled?"],
+    "7 Support": ["Are gauges in use calibrated and identified, with status traceable to a record?","Can operators show they are trained for the jobs they are doing today?","Is the document at the workstation the current revision?","Is knowledge from problems (lessons learned) kept and used?"],
+    "8 Operation": ["Is the drawing, revision and control plan / routing at the machine the one on the order?","Is first-piece / setup approval recorded before the run?","Is nonconforming product identified and segregated, with a disposition and an authorised approver?","Are supplier and outsourced process controls defined and checked on receipt?","Is product traceable to its job, material and inspection record?"],
+    "9 Performance evaluation": ["Is process and product data (scrap, NCRs, Cpk, delivery) analysed and acted on, not just collected?","Is customer feedback / satisfaction monitored?","Is the internal audit programme on schedule, and were past findings closed?"],
+    "10 Improvement": ["For recent nonconformities: was there containment, a root cause and an action that stopped it recurring?","Is effectiveness of corrective actions checked with evidence?","Are improvements being made, not just fixes?"]
+  };
+  function renderAudit(){
+    var now = T();
+    var prog = D.program.slice().sort(function(a, b){ var x = QCMD.nextDue(a.last, a.freq) || "0", y = QCMD.nextDue(b.last, b.freq) || "0"; return x < y ? -1 : 1; });
+    var h = '<h2>Internal audits</h2><p class="small">Your audit programme: each process or clause with how often it is audited. Record an audit and the next date moves on by itself.</p>' +
+      '<div class="btns"><button class="btn pri" data-act="progNew">+ Add to programme</button></div><h3>Programme</h3><div class="card">';
+    if(!prog.length) h += '<div class="empty">Add the processes you audit — e.g. "Machining – Dept 11 · clauses 7.1.5, 8.5, 8.7 · every 12 months".</div>';
+    prog.forEach(function(p){
+      var nd = QCMD.nextDue(p.last, p.freq), sev = p.last ? dueSev(nd, 30) : "red";
+      h += '<div class="item" data-go="audit:' + p.id + '"><span class="dot ' + sev + '"></span><div><div class="t">' + esc(p.area) + '</div><div class="s">' + esc(p.clauses || "") + ' · every ' + p.freq + ' months · ' + (p.last ? "last " + esc(p.last) : "never audited") + '</div></div>' +
+        '<div class="r small">' + (nd ? esc(rel(nd)) : '<span class="pill red">due</span>') + '</div></div>';
+    });
+    h += '</div><h3>Audit records</h3><div class="card">';
+    var recs = D.audits.slice().sort(function(a, b){ return a.date < b.date ? 1 : -1; });
+    if(!recs.length) h += '<div class="empty">No audits recorded yet.</div>';
+    recs.forEach(function(a){
+      var nc = (a.findings || []).filter(function(f){ return f.type === "Major NC" || f.type === "Minor NC"; }), open = nc.filter(function(f){ return !f.capaId; }).length;
+      h += '<div class="item" data-go="rec:' + a.id + '"><span class="dot ' + (open ? "red" : "green") + '"></span><div><div class="t">' + esc(a.area) + ' · ' + esc(a.date) + '</div><div class="s">' + (a.auditor ? esc(a.auditor) + " · " : "") + (a.findings || []).length + ' finding' + ((a.findings||[]).length===1?"":"s") + (nc.length ? " · " + nc.length + " NC" : "") + (open ? " · " + open + " without CAPA" : "") + '</div></div></div>';
+    });
+    h += '</div>';
+    $("v-audit").innerHTML = h;
+    badge("bAudit", D.program.filter(function(p){ return !p.last || QCMD.days(QCMD.nextDue(p.last, p.freq), now) > 0; }).length);
+  }
+  function progForm(p){
+    var isNew = !p; p = p || { id:uid(), area:"", clauses:"", freq:12, last:"", owner:"" };
+    openSheet('<h2>' + (isNew ? "Add to audit programme" : esc(p.area)) + '</h2>' +
+      '<label class="f" for="pArea">Process or area</label><input type="text" id="pArea" value="' + esc(p.area) + '" placeholder="e.g. Machining – Dept 11">' +
+      '<label class="f" for="pClauses">Clauses covered</label><input type="text" id="pClauses" value="' + esc(p.clauses) + '" placeholder="e.g. 7.1.5, 8.5, 8.7">' +
+      '<div class="row"><div><label class="f" for="pFreq">Every (months)</label><input type="number" id="pFreq" min="1" max="36" value="' + esc(p.freq) + '"></div><div><label class="f" for="pLast">Last audited</label><input type="date" id="pLast" value="' + esc(p.last) + '"></div></div>' +
+      '<div class="btns"><button class="btn pri" data-act="progSave" data-id="' + p.id + '">Save</button>' + (!isNew ? '<button class="btn" data-act="recNew" data-id="' + p.id + '">Record an audit</button><button class="btn danger" data-act="progDel" data-id="' + p.id + '">Remove</button>' : '') + '<button class="btn" data-act="close">Cancel</button></div>');
+    progForm.cur = p; progForm.isNew = isNew;
+  }
+  var FT = ["Major NC","Minor NC","OFI","Positive"];
+  function recForm(a, prog){
+    var isNew = !a;
+    a = a || { id:uid(), progId: prog ? prog.id : "", area: prog ? prog.area : "", date:T(), auditor:"", checks:{}, findings:[], notes:"" };
+    var h = '<h2>' + (isNew ? "Record audit" : "Audit · " + esc(a.area)) + '</h2>' +
+      '<div class="row"><div><label class="f" for="rDate">Date</label><input type="date" id="rDate" value="' + esc(a.date) + '"></div><div><label class="f" for="rAud">Auditor</label><input type="text" id="rAud" value="' + esc(a.auditor) + '"></div></div>' +
+      '<label class="f" for="rArea">Area</label><input type="text" id="rArea" value="' + esc(a.area) + '">' +
+      '<h3>Checklist</h3><p class="small">Tap OK, NC or N/A. An NC adds a finding below for you to describe.</p><div class="seg" id="qbSeg">' + Object.keys(QB).map(function(k, i){ return '<button data-qb="' + esc(k) + '" aria-pressed="' + (i===0) + '">' + esc(k.split(" ")[0]) + '</button>'; }).join("") + '</div><div class="card" id="qbList"></div>' +
+      '<h3>Findings</h3><div id="rFind">' + (a.findings || []).map(findRow).join("") + '</div>' +
+      '<div class="btns"><button class="btn sm" data-act="addFind">+ Add finding</button></div>' +
+      '<label class="f" for="rNotes">Notes / summary</label><textarea id="rNotes">' + esc(a.notes) + '</textarea>' +
+      '<div class="btns"><button class="btn pri" data-act="recSave" data-id="' + a.id + '">Save audit</button>' + (!isNew ? '<button class="btn danger" data-act="recDel" data-id="' + a.id + '">Delete</button>' : '') + '<button class="btn" data-act="close">Cancel</button></div>';
+    openSheet(h);
+    recForm.cur = JSON.parse(JSON.stringify(a)); recForm.isNew = isNew; recForm.qb = Object.keys(QB)[0];
+    drawQB();
+  }
+  function drawQB(){
+    var k = recForm.qb, a = recForm.cur;
+    $("qbList").innerHTML = QB[k].map(function(q, i){
+      var key = k + "|" + i, v = a.checks[key] || "";
+      return '<div class="q"><div class="qt">' + esc(q) + '</div><div class="seg">' + ["OK","NC","N/A"].map(function(o){ return '<button data-chk="' + esc(key) + '" data-v="' + o + '" aria-pressed="' + (v===o) + '">' + o + '</button>'; }).join("") + '</div></div>';
+    }).join("");
+    document.querySelectorAll("#qbSeg button").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.qb === k); });
+  }
+  function findRow(f){
+    f = f || { id:uid(), type:"Minor NC", clause:"", text:"", capaId:"" };
+    var cap = f.capaId ? D.capas.filter(function(c){ return c.id === f.capaId; })[0] : null;
+    return '<div class="sub find" data-fid="' + f.id + '" data-capa="' + esc(f.capaId || "") + '"><div class="row"><select class="fType">' + FT.map(function(t){ return '<option' + (t===f.type?" selected":"") + '>' + t + '</option>'; }).join("") + '</select><input type="text" class="fClause" value="' + esc(f.clause) + '" placeholder="Clause"></div>' +
+      '<textarea class="fText" style="margin-top:6px;min-height:64px" placeholder="What was seen — the evidence">' + esc(f.text) + '</textarea>' +
+      (cap ? '<div class="small" style="margin-top:6px">→ ' + esc(cap.no) + ' · ' + esc(QCMD.STAGES[QCMD.capaStage(cap)]) + '</div>' : '<div class="small muted" style="margin-top:6px">NC findings get a corrective action when you save.</div>') + '</div>';
+  }
+  function recCollect(){
+    var a = recForm.cur;
+    a.date = val("rDate"); a.auditor = val("rAud"); a.area = val("rArea"); a.notes = val("rNotes");
+    a.findings = Array.prototype.map.call(document.querySelectorAll("#rFind .find"), function(r){
+      return { id:r.dataset.fid, type:r.querySelector(".fType").value, clause:r.querySelector(".fClause").value.trim(), text:r.querySelector(".fText").value.trim(), capaId:r.dataset.capa || "" };
+    }).filter(function(f){ return f.text || f.clause; });
+    return a;
+  }
+
+  /* ------------ DUE ------------ */
+  var KINDS = ["Calibration","Document review","Training","Supplier evaluation","Maintenance","Other"];
+  var dueFilter = "All";
+  function renderDue(){
+    var now = T();
+    var list = D.dues.filter(function(d){ return dueFilter === "All" || d.kind === dueFilter; }).slice().sort(function(a, b){ return (QCMD.nextDue(a.last, a.freq) || "0") < (QCMD.nextDue(b.last, b.freq) || "0") ? -1 : 1; });
+    var h = '<h2>Due dates</h2><p class="small">Calibration, document reviews, training renewals, supplier evaluations — anything that repeats. Tap "Done" and the next date is set.</p>' +
+      '<div class="seg">' + ["All"].concat(KINDS).map(function(k){ return '<button data-kf="' + k + '" aria-pressed="' + (dueFilter===k) + '">' + k + '</button>'; }).join("") + '</div>' +
+      '<div class="btns"><button class="btn pri" data-act="dueNew">+ Add item</button><button class="btn" data-act="dueBulk">Paste a list</button></div><div class="card">';
+    if(!list.length) h += '<div class="empty">Nothing here yet.</div>';
+    list.forEach(function(d){
+      var nd = QCMD.nextDue(d.last, d.freq), sev = dueSev(nd, 14);
+      h += '<div class="item"><span class="dot ' + sev + '"></span><div data-go="due:' + d.id + '" style="flex:1;min-width:0"><div class="t">' + esc(d.name) + '</div><div class="s">' + esc(d.kind) + (d.owner ? " · " + esc(d.owner) : "") + ' · every ' + d.freq + ' mo · ' + (nd ? "due " + esc(nd) + " (" + rel(nd) + ")" : "no last date") + '</div></div>' +
+        '<div class="r"><button class="btn sm" data-act="dueDone" data-id="' + d.id + '">Done</button></div></div>';
+    });
+    h += '</div>';
+    $("v-due").innerHTML = h;
+    badge("bDue", D.dues.filter(function(d){ var nd = QCMD.nextDue(d.last, d.freq); return !nd || QCMD.days(nd, now) > 0; }).length);
+  }
+  function dueForm(d){
+    var isNew = !d; d = d || { id:uid(), kind:dueFilter !== "All" ? dueFilter : "Calibration", name:"", owner:"", freq:12, last:"", notes:"" };
+    openSheet('<h2>' + (isNew ? "Add due item" : esc(d.name)) + '</h2>' +
+      '<label class="f" for="dKind">Type</label><select id="dKind">' + KINDS.map(function(k){ return '<option' + (k===d.kind?" selected":"") + '>' + k + '</option>'; }).join("") + '</select>' +
+      '<label class="f" for="dName">Name</label><input type="text" id="dName" value="' + esc(d.name) + '" placeholder="e.g. Bore gauge BG-12, QP-08 Control of NC product">' +
+      '<div class="row"><div><label class="f" for="dFreq">Every (months)</label><input type="number" id="dFreq" min="1" max="120" value="' + esc(d.freq) + '"></div><div><label class="f" for="dLast">Last done</label><input type="date" id="dLast" value="' + esc(d.last) + '"></div></div>' +
+      '<label class="f" for="dOwner">Owner</label><input type="text" id="dOwner" value="' + esc(d.owner) + '">' +
+      '<label class="f" for="dNotes">Notes</label><textarea id="dNotes">' + esc(d.notes) + '</textarea>' +
+      '<div class="btns"><button class="btn pri" data-act="dueSave" data-id="' + d.id + '">Save</button>' + (!isNew ? '<button class="btn danger" data-act="dueDel" data-id="' + d.id + '">Delete</button>' : '') + '<button class="btn" data-act="close">Cancel</button></div>');
+    dueForm.cur = d;
+  }
+
+  /* ------------ REVIEW ------------ */
+  var TRANS = ["4 Context of the organization","5 Leadership","6 Planning","7 Support","8 Operation","9 Performance evaluation","10 Improvement"];
+  var MR_INPUTS = [
+    ["prev","Status of actions from previous reviews"],
+    ["issues","Changes in external and internal issues"],
+    ["customer","Customer satisfaction and feedback"],
+    ["process","Process performance and product conformity"],
+    ["ncca","Nonconformities and corrective actions"],
+    ["monitor","Monitoring and measurement results"],
+    ["audit","Audit results"],
+    ["supplier","Performance of external providers (suppliers)"],
+    ["resources","Adequacy of resources"],
+    ["risks","Effectiveness of actions on risks and opportunities"],
+    ["improve","Opportunities for improvement"]
+  ];
+  function scrapSummary(){
+    /* SPC Tools (same site) keeps Scrap / NCR report history here, if the user saved it */
+    var h = null; try{ h = JSON.parse(localStorage.getItem("ncp.history") || "null"); }catch(e){}
+    if(!h || !h.rows || !h.rows.length) return null;
+    var cut = QCMD.addMonths(T(), -12), rows = h.rows.filter(function(r){ return r.date && r.date >= cut; });
+    if(!rows.length) return null;
+    var byM = {}, byC = {}, cost = 0;
+    rows.forEach(function(r){ var m = r.date.slice(0,7); byM[m] = (byM[m] || 0) + 1; var k = r.cause || "(no cause)"; byC[k] = (byC[k] || 0) + (r.cost || 0); cost += r.cost || 0; });
+    var top = Object.keys(byC).sort(function(a, b){ return byC[b] - byC[a]; }).slice(0, 3);
+    return { n:rows.length, cost:cost, months:Object.keys(byM).sort().map(function(m){ return [m, byM[m]]; }), top:top.map(function(k){ return [k, byC[k]]; }) };
+  }
+  function autoInputs(){
+    var now = T(), since = D.mrLast || QCMD.addMonths(now, -12), A = {};
+    var opened = D.capas.filter(function(c){ return c.opened >= since; }), open = D.capas.filter(function(c){ return !c.closed; });
+    var late = open.filter(function(c){ return c.due && QCMD.days(c.due, now) > 0; });
+    var eff = D.capas.filter(function(c){ return c.closed && c.closed >= since; }), effOk = eff.filter(function(c){ return c.effResult === "effective"; }), effNo = eff.filter(function(c){ return c.effResult === "not effective"; });
+    A.ncca = opened.length + " corrective actions opened since " + since + "; " + open.length + " open now (" + late.length + " overdue). " + eff.length + " closed: " + effOk.length + " verified effective, " + effNo.length + " not effective, " + (eff.length - effOk.length - effNo.length) + " awaiting the effectiveness check.";
+    var bySrc = {}; opened.forEach(function(c){ bySrc[c.source] = (bySrc[c.source] || 0) + 1; });
+    if(opened.length) A.ncca += " By source: " + Object.keys(bySrc).map(function(k){ return k + " " + bySrc[k]; }).join(", ") + ".";
+    var recs = D.audits.filter(function(a){ return a.date >= since; }), f = { "Major NC":0, "Minor NC":0, "OFI":0, "Positive":0 };
+    recs.forEach(function(a){ (a.findings || []).forEach(function(x){ f[x.type] = (f[x.type] || 0) + 1; }); });
+    var overdueProg = D.program.filter(function(p){ return !p.last || QCMD.days(QCMD.nextDue(p.last, p.freq), now) > 0; });
+    A.audit = recs.length + " internal audits since " + since + ": " + f["Major NC"] + " major NC, " + f["Minor NC"] + " minor NC, " + f.OFI + " OFIs, " + f.Positive + " positives. Programme: " + D.program.length + " areas, " + overdueProg.length + " overdue" + (overdueProg.length ? " (" + overdueProg.map(function(p){ return p.area; }).join(", ") + ")" : "") + ".";
+    var cal = D.dues.filter(function(d){ return d.kind === "Calibration"; }), calLate = cal.filter(function(d){ var nd = QCMD.nextDue(d.last, d.freq); return !nd || QCMD.days(nd, now) > 0; });
+    A.monitor = cal.length ? cal.length + " calibrated items tracked, " + calLate.length + " overdue" + (calLate.length ? " (" + calLate.map(function(d){ return d.name; }).join(", ") + ")" : "") + "." : "";
+    var obj = D.objectives.map(function(o){ var m = QCMD.objectiveMet(o); return o.name + ": " + (o.actual === "" ? "no result" : o.actual + (o.unit || "")) + " vs target " + (o.dir === "max" ? "≤ " : "≥ ") + o.target + (o.unit || "") + (m === null ? "" : m ? " — met" : " — NOT met"); });
+    var s = scrapSummary();
+    A.process = (obj.length ? "Quality objectives — " + obj.join("; ") + ". " : "") + (s ? "Scrap/NCR records (last 12 months, from SPC Tools on this device): " + s.n + " records, cost $" + s.cost.toFixed(2) + "; top causes by cost: " + s.top.map(function(t){ return t[0] + " ($" + t[1].toFixed(0) + ")"; }).join(", ") + "." : "");
+    var sup = D.dues.filter(function(d){ return d.kind === "Supplier evaluation"; });
+    A.supplier = sup.length ? sup.length + " supplier evaluations tracked." : "";
+    var prev = D.mrHistory.length ? D.mrHistory[D.mrHistory.length - 1] : null;
+    if(prev && prev.actionIds && prev.actionIds.length){
+      var pa = prev.actionIds.map(function(id){ return D.capas.filter(function(c){ return c.id === id; })[0]; }).filter(Boolean);
+      A.prev = pa.length + " actions from the " + prev.date + " review: " + pa.filter(function(c){ return c.closed; }).length + " closed, " + pa.filter(function(c){ return !c.closed; }).length + " open" + (pa.filter(function(c){ return !c.closed; }).length ? " (" + pa.filter(function(c){ return !c.closed; }).map(function(c){ return c.no; }).join(", ") + ")" : "") + ".";
+    }
+    return A;
+  }
+  function renderReview(){
+    var now = T(), h = '<h2>Management review</h2>';
+    h += '<div class="card"><div class="row"><div><div class="t" style="font-weight:700">' + (D.mrLast ? "Last held " + esc(D.mrLast) : "No review recorded") + '</div><div class="small">' + (D.mrLast ? "Next by " + esc(QCMD.addMonths(D.mrLast, 12)) + " (" + rel(QCMD.addMonths(D.mrLast, 12)) + ") if yearly" : "Record your last review date, or prepare one now.") + '</div></div></div>' +
+      '<div class="btns"><button class="btn pri" data-act="mrPrep">Prepare review pack</button><button class="btn" data-act="mrLastSet">Set last review date</button></div></div>';
+    h += '<h3>Quality objectives</h3><div class="card">';
+    if(!D.objectives.length) h += '<div class="empty">Add your measurable objectives — e.g. "Scrap cost ≤ $2,000 / week" or "On-time delivery ≥ 95%".</div>';
+    D.objectives.forEach(function(o){ var m = QCMD.objectiveMet(o); h += '<div class="item" data-go="obj:' + o.id + '"><span class="dot ' + (m === null ? "amber" : m ? "green" : "red") + '"></span><div><div class="t">' + esc(o.name) + '</div><div class="s">Target ' + (o.dir === "max" ? "≤ " : "≥ ") + esc(o.target) + esc(o.unit || "") + ' · now ' + (o.actual === "" ? "—" : esc(o.actual) + esc(o.unit || "")) + '</div></div><div class="r">' + (m === null ? pill("amber","no result") : m ? pill("green","met") : pill("red","not met")) + '</div></div>'; });
+    h += '<div class="btns"><button class="btn sm" data-act="objNew">+ Objective</button></div></div>';
+    var done = TRANS.filter(function(k){ return (D.transition[k] || {}).s === "done"; }).length, prog = TRANS.filter(function(k){ return (D.transition[k] || {}).s === "wip"; }).length;
+    var pct = Math.round((done + prog * 0.5) / TRANS.length * 100);
+    h += '<h3>ISO 9001:2026 transition</h3><div class="card"><div class="small">Published 16 Sept 2026; certified sites have a transition period of about three years. Mark each clause as you check your system against the new text.</div>' +
+      '<div class="bar" style="margin:10px 0 4px"><i style="width:' + pct + '%"></i></div><div class="small">' + pct + '% · ' + done + ' of ' + TRANS.length + ' clauses done</div>';
+    TRANS.forEach(function(k){ var t = D.transition[k] || {}; h += '<div class="item" data-go="tr:' + esc(k) + '"><span class="dot ' + (t.s === "done" ? "green" : t.s === "wip" ? "amber" : "") + '"></span><div><div class="t">' + esc(k) + '</div>' + (t.n ? '<div class="s">' + esc(t.n) + '</div>' : '') + '</div><div class="r">' + pill(t.s === "done" ? "green" : t.s === "wip" ? "amber" : "", t.s === "done" ? "done" : t.s === "wip" ? "in progress" : "not started") + '</div></div>'; });
+    h += '</div>';
+    var bd = D.backupAt ? D.backupAt.slice(0,10) : "";
+    h += '<h3>Your data</h3><div class="card" id="backupCard"><div class="small">Stored only in this browser on this device — nothing is sent anywhere. Safari can clear website data for sites you have not opened in a while, so add this app to your Home Screen and keep a backup file.' + (bd ? " Last backup: " + esc(bd) + "." : " No backup yet.") + '</div>' +
+      '<div class="btns"><button class="btn pri" data-act="backup">Back up (download file)</button><button class="btn" data-act="restore">Restore from file</button><button class="btn" data-act="capaCsv">Corrective actions as CSV</button><button class="btn danger" data-act="wipe">Delete everything</button></div>' +
+      '<input type="file" id="restoreFile" accept=".json,application/json" hidden></div>';
+    h += '<p class="small" style="text-align:center;margin:22px 0 6px"><a href="../" style="color:var(--blue-t)">Open SPC Tools →</a> · Built by Harsh Patel</p>';
+    $("v-review").innerHTML = h;
+  }
+  function mrPrep(){
+    var A = autoInputs(), dr = D.mrDraft || {};
+    var h = '<h2>Management review pack</h2><p class="small">Grey text was filled in from your records — edit freely. Add decisions and actions at the end; each action becomes a tracked corrective action.</p>' +
+      '<div class="row"><div><label class="f" for="mDate">Review date</label><input type="date" id="mDate" value="' + esc(dr.date || T()) + '"></div></div>' +
+      '<label class="f" for="mWho">Attendees</label><input type="text" id="mWho" value="' + esc(dr.who || "") + '">' +
+      '<h3>Inputs (ISO 9001 · 9.3.2)</h3>';
+    MR_INPUTS.forEach(function(x){
+      var v = dr[x[0]] !== undefined ? dr[x[0]] : (A[x[0]] || "");
+      h += '<label class="f" for="mi_' + x[0] + '">' + esc(x[1]) + '</label><textarea id="mi_' + x[0] + '" placeholder="Notes, evidence, data">' + esc(v) + '</textarea>';
+    });
+    h += '<h3>Outputs — decisions and actions</h3><div id="mActs">' + (dr.acts || []).map(actRow).join("") + '</div><div class="btns"><button class="btn sm" data-act="mAddAct">+ Action</button></div>' +
+      '<label class="f" for="mDec">Decisions (improvement, changes to the QMS, resources)</label><textarea id="mDec">' + esc(dr.dec || "") + '</textarea>' +
+      '<div class="btns"><button class="btn" data-act="mrDraftSave">Save draft</button><button class="btn" data-act="mrPrint">Print / PDF</button><button class="btn pri" data-act="mrFinish">Finish review</button><button class="btn" data-act="mrRefresh">Refill from records</button><button class="btn" data-act="close">Close</button></div>';
+    openSheet(h);
+  }
+  function mrCollect(){
+    var dr = { date:val("mDate"), who:val("mWho"), dec:val("mDec") };
+    MR_INPUTS.forEach(function(x){ dr[x[0]] = val("mi_" + x[0]); });
+    dr.acts = Array.prototype.map.call(document.querySelectorAll("#mActs .act"), function(r){ return { text:r.querySelector(".aText").value.trim(), owner:r.querySelector(".aOwner").value.trim(), due:r.querySelector(".aDue").value, done:r.querySelector(".aDone").checked }; }).filter(function(a){ return a.text; });
+    return dr;
+  }
+  function mrPrint(dr){
+    var p = '<h1>Management Review</h1><p>Date: ' + esc(dr.date) + ' &nbsp; · &nbsp; Attendees: ' + esc(dr.who || "—") + '</p>';
+    MR_INPUTS.forEach(function(x){ p += '<h2>' + esc(x[1]) + '</h2><p>' + (esc(dr[x[0]]) || "—").replace(/\n/g, "<br>") + '</p>'; });
+    p += '<h2>Decisions</h2><p>' + (esc(dr.dec) || "—").replace(/\n/g, "<br>") + '</p><h2>Actions</h2>';
+    p += dr.acts.length ? '<table><tr><th>Action</th><th>Owner</th><th>Due</th></tr>' + dr.acts.map(function(a){ return '<tr><td>' + esc(a.text) + '</td><td>' + esc(a.owner) + '</td><td>' + esc(a.due) + '</td></tr>'; }).join("") + '</table>' : '<p>—</p>';
+    p += '<p style="margin-top:18pt">Approved by: ______________________ &nbsp;&nbsp; Date: __________</p>';
+    $("printArea").innerHTML = p; window.print();
+  }
+
+  /* ------------ actions (one delegated handler) ------------ */
+  function findBy(list, id){ return list.filter(function(x){ return x.id === id; })[0]; }
+  document.addEventListener("click", function(e){
+    var g = e.target.closest("[data-go]");
+    if(g && !e.target.closest("button")){
+      var k = g.dataset.go.split(":");
+      if(k[0] === "capa"){ var c = findBy(D.capas, k[1]); if(c) capaForm(c); }
+      else if(k[0] === "audit"){ var p = findBy(D.program, k[1]); if(p) progForm(p); }
+      else if(k[0] === "rec"){ var a = findBy(D.audits, k[1]); if(a) recForm(a); }
+      else if(k[0] === "finding"){ var a2 = findBy(D.audits, k[1]); if(a2) recForm(a2); }
+      else if(k[0] === "due"){ var d = findBy(D.dues, k[1]); if(d) dueForm(d); }
+      else if(k[0] === "obj"){ objForm(findBy(D.objectives, k[1])); }
+      else if(k[0] === "tr"){ trForm(g.dataset.go.slice(3)); }
+      else if(k[0] === "review"){ go("review"); }
+      else if(k[0] === "backup"){ go("review"); setTimeout(function(){ var b = $("backupCard"); if(b) b.scrollIntoView(); }, 50); }
+      return;
+    }
+    var b = e.target.closest("button"); if(!b) return;
+    if(b.dataset.f){ capaFilter = b.dataset.f; renderCapa(); return; }
+    if(b.dataset.kf){ dueFilter = b.dataset.kf; renderDue(); return; }
+    if(b.dataset.qb){ recCollectChecks(); recForm.qb = b.dataset.qb; drawQB(); return; }
+    if(b.dataset.chk){
+      recForm.cur.checks[b.dataset.chk] = b.dataset.v; drawQB();
+      if(b.dataset.v === "NC"){
+        var parts = b.dataset.chk.split("|"), q = QB[parts[0]][+parts[1]];
+        var f = { id:uid(), type:"Minor NC", clause:parts[0].split(" ")[0], text:"Checklist: " + q + " — ", capaId:"" };
+        $("rFind").insertAdjacentHTML("beforeend", findRow(f)); toast("Finding added — describe what you saw.");
+      }
+      return;
+    }
+    var act = b.dataset.act, id = b.dataset.id; if(!act) return;
+    switch(act){
+      case "close": closeSheet(); break;
+      case "sample": sample(); break;
+      case "capaNew": capaForm(); break;
+      case "addAct": $("cActs").insertAdjacentHTML("beforeend", actRow()); break;
+      case "mAddAct": $("mActs").insertAdjacentHTML("beforeend", actRow()); break;
+      case "capaSave": { var c1 = capaCollect(); if(capaStore(c1)){ closeSheet(); save(); toast("Saved " + c1.no); } break; }
+      case "capaClose": {
+        var c2 = capaCollect();
+        if(!c2.rootCause){ toast("Record the root cause before closing."); break; }
+        if(!c2.actions.length || !c2.actions.every(function(a){ return a.done; })){ toast("Finish (tick) every action before closing."); break; }
+        c2.closed = T(); if(!c2.effDue) c2.effDue = QCMD.addDays(c2.closed, 60);
+        if(capaStore(c2)){ closeSheet(); save(); toast("Closed. Effectiveness check set for " + c2.effDue + "."); }
+        break;
+      }
+      case "capaReopen": { var c3 = capaCollect(); c3.closed = ""; c3.effResult = ""; capaStore(c3); closeSheet(); save(); toast("Reopened."); break; }
+      case "capaDel": if(confirm("Delete this corrective action?")){ D.capas = D.capas.filter(function(x){ return x.id !== id; }); D.audits.forEach(function(a){ (a.findings||[]).forEach(function(f){ if(f.capaId === id) f.capaId = ""; }); }); closeSheet(); save(); } break;
+      case "progNew": progForm(); break;
+      case "progSave": {
+        var p1 = progForm.cur; p1.area = val("pArea"); p1.clauses = val("pClauses"); p1.freq = Math.max(1, parseInt(val("pFreq"), 10) || 12); p1.last = val("pLast");
+        if(!p1.area){ toast("Name the process or area."); break; }
+        if(progForm.isNew) D.program.push(p1); closeSheet(); save(); break;
+      }
+      case "progDel": if(confirm("Remove from the programme? Past audit records are kept.")){ D.program = D.program.filter(function(x){ return x.id !== id; }); closeSheet(); save(); } break;
+      case "recNew": { var pp = findBy(D.program, id); closeSheet(); recForm(null, pp); break; }
+      case "addFind": $("rFind").insertAdjacentHTML("beforeend", findRow()); break;
+      case "recSave": {
+        recCollectChecks(); var a = recCollect();
+        if(!a.date || !a.area){ toast("Date and area are needed."); break; }
+        a.findings.forEach(function(f){
+          if((f.type === "Major NC" || f.type === "Minor NC") && !f.capaId){
+            var nc = { id:uid(), no:"", title:(f.type + " " + (f.clause ? "(" + f.clause + ") " : "") + "— " + a.area).slice(0, 120), source:"Internal audit", opened:a.date, owner:"", due:QCMD.addDays(a.date, f.type === "Major NC" ? 30 : 60),
+                       problem:f.text, containment:"", why:["","","","",""], rootCause:"", actions:[], closed:"", effDue:"", effMethod:"", effResult:"", effNote:"" };
+            capaStore(nc); f.capaId = nc.id;
+          }
+        });
+        var i = D.audits.findIndex(function(x){ return x.id === a.id; }); if(i >= 0) D.audits[i] = a; else D.audits.push(a);
+        var pr = findBy(D.program, a.progId) || D.program.filter(function(p){ return p.area === a.area; })[0];
+        if(pr && (!pr.last || a.date > pr.last)) pr.last = a.date;
+        closeSheet(); save();
+        var made = a.findings.filter(function(f){ return f.type === "Major NC" || f.type === "Minor NC"; }).length;
+        toast("Audit saved" + (made ? " · " + made + " corrective action" + (made===1?"":"s") + " opened" : "") + ".");
+        break;
+      }
+      case "recDel": if(confirm("Delete this audit record?")){ D.audits = D.audits.filter(function(x){ return x.id !== id; }); closeSheet(); save(); } break;
+      case "dueNew": dueForm(); break;
+      case "dueSave": {
+        var d1 = dueForm.cur; d1.kind = val("dKind"); d1.name = val("dName"); d1.freq = Math.max(1, parseInt(val("dFreq"), 10) || 12); d1.last = val("dLast"); d1.owner = val("dOwner"); d1.notes = val("dNotes");
+        if(!d1.name){ toast("Give it a name."); break; }
+        if(!findBy(D.dues, d1.id)) D.dues.push(d1); closeSheet(); save(); break;
+      }
+      case "dueDel": if(confirm("Delete this item?")){ D.dues = D.dues.filter(function(x){ return x.id !== id; }); closeSheet(); save(); } break;
+      case "dueDone": { var d2 = findBy(D.dues, id); d2.last = T(); save(); toast(d2.name + " — next due " + QCMD.nextDue(d2.last, d2.freq)); break; }
+      case "dueBulk": bulkForm(); break;
+      case "bulkSave": bulkSave(); break;
+      case "objNew": objForm(); break;
+      case "objSave": {
+        var o = objForm.cur; o.name = val("oName"); o.target = val("oTarget"); o.actual = val("oActual"); o.unit = val("oUnit"); o.dir = val("oDir");
+        if(!o.name){ toast("Name the objective."); break; }
+        if(!findBy(D.objectives, o.id)) D.objectives.push(o); closeSheet(); save(); break;
+      }
+      case "objDel": D.objectives = D.objectives.filter(function(x){ return x.id !== id; }); closeSheet(); save(); break;
+      case "trSave": { D.transition[trForm.k] = { s:val("tS"), n:val("tN") }; closeSheet(); save(); break; }
+      case "mrPrep": mrPrep(); break;
+      case "mrRefresh": { var keep = mrCollect(), A = autoInputs(); MR_INPUTS.forEach(function(x){ if(A[x[0]] !== undefined) keep[x[0]] = A[x[0]]; }); D.mrDraft = keep; save(); mrPrep(); toast("Refilled from current records."); break; }
+      case "mrDraftSave": D.mrDraft = mrCollect(); save(); toast("Draft saved."); break;
+      case "mrPrint": { var dr = mrCollect(); D.mrDraft = dr; save(); mrPrint(dr); break; }
+      case "mrFinish": {
+        var dr2 = mrCollect(); if(!dr2.date){ toast("Set the review date."); break; }
+        var ids = dr2.acts.map(function(a){
+          var c = { id:uid(), no:"", title:a.text.slice(0, 120), source:"Management review", opened:dr2.date, owner:a.owner, due:a.due || QCMD.addDays(dr2.date, 90), problem:"Action from management review " + dr2.date, containment:"n/a — improvement action", why:["","","","",""], rootCause:"", actions:[{ text:a.text, owner:a.owner, due:a.due, done:false }], closed:"", effDue:"", effMethod:"", effResult:"", effNote:"" };
+          capaStore(c); return c.id;
+        });
+        D.mrHistory.push({ date:dr2.date, who:dr2.who, record:dr2, actionIds:ids }); D.mrLast = dr2.date > (D.mrLast || "") ? dr2.date : D.mrLast; D.mrDraft = {};
+        closeSheet(); save(); toast("Review recorded · " + ids.length + " action" + (ids.length===1?"":"s") + " tracked.");
+        break;
+      }
+      case "mrLastSet": openSheet('<h2>Last management review</h2><label class="f" for="mLast">Date</label><input type="date" id="mLast" value="' + esc(D.mrLast) + '"><div class="btns"><button class="btn pri" data-act="mrLastSave">Save</button><button class="btn" data-act="close">Cancel</button></div>'); break;
+      case "mrLastSave": D.mrLast = val("mLast"); closeSheet(); save(); break;
+      case "backup": backup(); break;
+      case "restore": $("restoreFile").click(); break;
+      case "capaCsv": capaCsv(); break;
+      case "wipe": if(confirm("Delete ALL Quality Command data from this device? Make a backup first if you may need it.") && confirm("Really delete everything?")){ D = blank(); save(); toast("Everything deleted from this device."); } break;
+    }
+  });
+  function recCollectChecks(){ /* checks are kept live in recForm.cur.checks */ }
+  function objForm(o){
+    var isNew = !o; o = o || { id:uid(), name:"", target:"", actual:"", unit:"", dir:"min" };
+    openSheet('<h2>' + (isNew ? "Quality objective" : esc(o.name)) + '</h2><label class="f" for="oName">Objective</label><input type="text" id="oName" value="' + esc(o.name) + '" placeholder="e.g. Scrap cost per week">' +
+      '<div class="row"><div><label class="f" for="oDir">Good is</label><select id="oDir"><option value="min"' + (o.dir==="min"?" selected":"") + '>at least (≥)</option><option value="max"' + (o.dir==="max"?" selected":"") + '>at most (≤)</option></select></div><div><label class="f" for="oTarget">Target</label><input type="number" step="any" id="oTarget" value="' + esc(o.target) + '"></div></div>' +
+      '<div class="row"><div><label class="f" for="oActual">Current result</label><input type="number" step="any" id="oActual" value="' + esc(o.actual) + '"></div><div><label class="f" for="oUnit">Unit</label><input type="text" id="oUnit" value="' + esc(o.unit) + '" placeholder="%, $, ppm"></div></div>' +
+      '<div class="btns"><button class="btn pri" data-act="objSave">Save</button>' + (!isNew ? '<button class="btn danger" data-act="objDel" data-id="' + o.id + '">Delete</button>' : '') + '<button class="btn" data-act="close">Cancel</button></div>');
+    objForm.cur = o;
+  }
+  function trForm(k){
+    var t = D.transition[k] || {}; trForm.k = k;
+    openSheet('<h2>' + esc(k) + '</h2><label class="f" for="tS">Status</label><select id="tS"><option value="">Not started</option><option value="wip"' + (t.s==="wip"?" selected":"") + '>In progress</option><option value="done"' + (t.s==="done"?" selected":"") + '>Done</option></select>' +
+      '<label class="f" for="tN">Gaps found / actions</label><textarea id="tN" placeholder="What changed for this clause, and what you need to update">' + esc(t.n || "") + '</textarea>' +
+      '<div class="btns"><button class="btn pri" data-act="trSave">Save</button><button class="btn" data-act="close">Cancel</button></div>');
+  }
+  function bulkForm(){
+    openSheet('<h2>Paste a list</h2><p class="small">One item per line: <b>type, name, every-months, last-done date (yyyy-mm-dd), owner</b>. Paste straight from Excel (tab-separated works too). Types: ' + KINDS.join(", ") + '.</p>' +
+      '<textarea id="bulkTxt" style="min-height:160px" placeholder="Calibration, Bore gauge BG-12, 6, 2026-07-14, Harsh&#10;Document review, QP-08 Control of NC product, 24, 2025-03-01"></textarea>' +
+      '<div class="btns"><button class="btn pri" data-act="bulkSave">Add</button><button class="btn" data-act="close">Cancel</button></div><div id="bulkMsg" class="small"></div>');
+  }
+  function bulkSave(){
+    var lines = val("bulkTxt").split(/\r?\n/).filter(Boolean), add = [], bad = [];
+    lines.forEach(function(l, i){
+      var c = l.split(/\t|,/).map(function(x){ return x.trim(); });
+      var kind = KINDS.filter(function(k){ return k.toLowerCase() === (c[0] || "").toLowerCase(); })[0], freq = parseInt(c[2], 10), last = c[3] || "";
+      if(!kind || !c[1] || !(freq > 0) || (last && !/^\d{4}-\d{2}-\d{2}$/.test(last))){ bad.push(i + 1); return; }
+      add.push({ id:uid(), kind:kind, name:c[1], freq:freq, last:last, owner:c[4] || "", notes:"" });
+    });
+    if(bad.length){ $("bulkMsg").textContent = "Line" + (bad.length>1?"s ":" ") + bad.join(", ") + " could not be read — check type, months and date (yyyy-mm-dd). Nothing was added."; return; }
+    D.dues = D.dues.concat(add); closeSheet(); save(); toast(add.length + " item" + (add.length===1?"":"s") + " added.");
+  }
+  function download(name, text, type){
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type:type })); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  function backup(){
+    D.backupAt = new Date().toISOString();
+    download("quality-command-backup-" + T() + ".json", JSON.stringify(D, null, 1), "application/json");
+    save(); toast("Backup downloaded. Keep it somewhere safe (it holds your records).");
+  }
+  document.addEventListener("change", function(e){
+    if(e.target.id !== "restoreFile" || !e.target.files.length) return;
+    var r = new FileReader();
+    r.onload = function(){
+      var x = null; try{ x = JSON.parse(r.result); }catch(err){}
+      if(!x || !Array.isArray(x.capas) || !Array.isArray(x.dues)){ toast("That is not a Quality Command backup file."); return; }
+      if(!confirm("Replace the data on this device with this backup (" + x.capas.length + " corrective actions, " + x.dues.length + " due items)?")) return;
+      D = x; var b = blank(); Object.keys(b).forEach(function(k){ if(D[k] === undefined) D[k] = b[k]; }); save(); toast("Restored.");
+    };
+    r.readAsText(e.target.files[0]); e.target.value = "";
+  });
+  function capaCsv(){
+    var q = function(s){ s = String(s === undefined || s === null ? "" : s); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    var L = ["No,Title,Source,Owner,Opened,Due,Stage,Closed,Effectiveness due,Effectiveness result,Root cause,Actions"];
+    D.capas.forEach(function(c){ L.push([c.no, c.title, c.source, c.owner, c.opened, c.due, QCMD.STAGES[QCMD.capaStage(c)], c.closed, c.effDue, c.effResult, c.rootCause, (c.actions||[]).map(function(a){ return a.text + (a.done ? " [done]" : ""); }).join(" | ")].map(q).join(",")); });
+    download("corrective-actions-" + T() + ".csv", L.join("\n"), "text/csv");
+  }
+  /* example data — clearly made up — so the app can be tried before real use */
+  function sample(){
+    var t = T(), A = QCMD.addDays, M = QCMD.addMonths;
+    D.program = [
+      { id:uid(), area:"Machining – CNC cells", clauses:"7.1.5, 8.5.1, 8.7", freq:12, last:M(t, -13) },
+      { id:uid(), area:"Receiving inspection", clauses:"8.4, 8.6", freq:12, last:M(t, -5) },
+      { id:uid(), area:"Calibration control", clauses:"7.1.5", freq:12, last:"" }
+    ];
+    D.dues = [
+      { id:uid(), kind:"Calibration", name:"Example bore gauge BG-1", owner:"", freq:6, last:M(t, -7), notes:"" },
+      { id:uid(), kind:"Calibration", name:"Example CMM", owner:"", freq:12, last:M(t, -2), notes:"" },
+      { id:uid(), kind:"Document review", name:"Example procedure QP-01", owner:"", freq:24, last:M(t, -23), notes:"" },
+      { id:uid(), kind:"Training", name:"Example: operator first-piece approval", owner:"", freq:12, last:M(t, -3), notes:"" }
+    ];
+    var c1 = { id:uid(), no:"", title:"Example: bore oversize after tool change", source:"NCR / scrap trend", opened:A(t, -45), owner:"", due:A(t, -5), problem:"Example data", containment:"Parts sorted", why:["Tool offset not updated","","","",""], rootCause:"", actions:[], closed:"", effDue:"", effMethod:"", effResult:"", effNote:"" };
+    var c2 = { id:uid(), no:"", title:"Example: wrong revision at machine", source:"Internal audit", opened:A(t, -120), owner:"", due:A(t, -80), problem:"Example data", containment:"Replaced drawing", why:["","","","",""], rootCause:"No check of revision at job release", actions:[{ text:"Add revision check to job release", owner:"", due:A(t, -90), done:true }], closed:A(t, -75), effDue:A(t, -15), effMethod:"", effResult:"", effNote:"" };
+    capaStore(c1); capaStore(c2);
+    D.objectives = [{ id:uid(), name:"Example: on-time delivery", target:"95", actual:"92", unit:"%", dir:"min" }];
+    save(); toast("Example data loaded — delete it from Review › Your data when you start for real.");
+  }
+
+  function render(){
+    renderToday();
+    if(view === "capa") renderCapa(); else badge("bCapa", D.capas.filter(function(c){ return !c.closed && c.due && QCMD.days(c.due, T()) > 0; }).length);
+    if(view === "audit") renderAudit(); else badge("bAudit", D.program.filter(function(p){ return !p.last || QCMD.days(QCMD.nextDue(p.last, p.freq), T()) > 0; }).length);
+    if(view === "due") renderDue(); else badge("bDue", D.dues.filter(function(d){ var nd = QCMD.nextDue(d.last, d.freq); return !nd || QCMD.days(nd, T()) > 0; }).length);
+    if(view === "review") renderReview();
+  }
+  load(); render();
+  if("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function(){});
+})();
+</script>
+</body>
+</html>
