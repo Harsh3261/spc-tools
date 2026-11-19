@@ -670,6 +670,17 @@
       .qcchart .qc-band-y{fill:var(--amber); fill-opacity:.10}
       .qctable td.good{color:var(--green-ink)} .qctable td.warn{color:var(--amber-ink)} .qctable td.bad{color:var(--red-ink)}
       .qctable td,.qctable th{font-size:13.5px}
+      .ncpchecks{display:flex; flex-direction:column; gap:2px; margin-top:6px}
+      .ncpcheck{display:flex; align-items:center; gap:10px; min-height:44px; padding:6px 4px; border-bottom:1px dashed var(--line-soft); font-size:14.5px; color:var(--ink); cursor:pointer}
+      .ncpcheck input{width:20px; height:20px; flex-shrink:0; accent-color:var(--cyan)}
+      .ncpcheck.off{color:var(--ink-faint); cursor:default}
+      .ncpmerge{padding:8px 0; border-bottom:1px dashed var(--line-soft); font-size:14.5px; color:var(--ink)} .ncpmerge select{margin-top:6px}
+      .ncpcheck .small{margin-left:auto; text-align:right}
+      .qcchart .qc-bar{fill:var(--cyan); fill-opacity:.85} .qcchart .qc-bar-o{fill:var(--ink-faint); fill-opacity:.6}
+      .qcchart .qc-val{fill:var(--ink)} .qcchart .qc-cum{fill:var(--amber)} .qcchart .qc-plab{fill:var(--ink-dim)}
+      .ncptable tr.ncpp td{font-weight:700; color:var(--ink); background:var(--bg2)}
+      #ncpFile{display:block; width:100%; margin-top:6px; padding:12px; border:1px dashed var(--line); border-radius:8px; background:var(--bg2); color:var(--ink); font:inherit}
+      @media print{ body.print-tool #ncpFile, body.print-tool #ncpHistRow, body.print-tool #ncpSetup, body.print-tool label[for="ncpFile"], body.print-tool #tool-ncp .guru + label + input + div + p{display:none !important} }
       /* statistical symbols stay lowercase inside uppercase labels (σ is not Σ, x̄ is not X̄) */
       .lc{text-transform:none}
     </style>
@@ -691,7 +702,7 @@
       </div>
       <nav class="clusters" role="tablist" aria-label="Tool groups">
         <button type="button" role="tab" id="clbtn-process" aria-selected="true" data-cluster="process"><span class="cl-name">Process</span><span class="cl-sub">SPC · Short-run · Attribute</span></button>
-        <button type="button" role="tab" id="clbtn-analyse" aria-selected="false" data-cluster="analyse"><span class="cl-name">Analyse</span><span class="cl-sub">Data Check · Pareto</span></button>
+        <button type="button" role="tab" id="clbtn-analyse" aria-selected="false" data-cluster="analyse"><span class="cl-name">Analyse</span><span class="cl-sub">Data Check · Pareto · Scrap report</span></button>
         <button type="button" role="tab" id="clbtn-measure" aria-selected="false" data-cluster="measure"><span class="cl-name">Measure</span><span class="cl-sub">Gage R&amp;R · Position · Stack-Up</span></button>
         <button type="button" role="tab" id="clbtn-sampling" aria-selected="false" data-cluster="sampling"><span class="cl-name">Sampling</span><span class="cl-sub">AQL lookup</span></button>
         <button type="button" role="tab" id="clbtn-reference" aria-selected="false" data-cluster="reference"><span class="cl-name">Reference</span><span class="cl-sub">Threads · Converters · Learn</span></button>
@@ -701,6 +712,7 @@
         <button type="button" role="tab" id="tabbtn-spc" aria-selected="true" data-tab="spc" data-cluster="process">SPC &amp; Capability</button>
         <button type="button" role="tab" id="tabbtn-check" aria-selected="false" data-tab="check" data-cluster="analyse">Data Check</button>
         <button type="button" role="tab" id="tabbtn-pareto" aria-selected="false" data-tab="pareto" data-cluster="analyse">Pareto</button>
+        <button type="button" role="tab" id="tabbtn-ncp" aria-selected="false" data-tab="ncp" data-cluster="analyse">Scrap / NCP report</button>
         <button type="button" role="tab" id="tabbtn-grr" aria-selected="false" data-tab="grr" data-cluster="measure">Gage R&amp;R</button>
         <button type="button" role="tab" id="tabbtn-tp" aria-selected="false" data-tab="tp" data-cluster="measure">True Position</button>
         <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
@@ -1551,6 +1563,64 @@
         </div>
       </div>
       <!-- ============ LEARN (2026-11-16) ============ -->
+      <!-- ============ TOOL : SCRAP / NCP REPORT (2026-11-17) ============ -->
+      <section class="tool" id="tool-ncp" role="tabpanel" aria-labelledby="tabbtn-ncp">
+        <div class="card">
+          <h2>Scrap / NCP report</h2>
+          <p class="guru">Import the raw NCP sheets as they come out of the system. Totals by week and cause, the charts and a PDF are built for you — no summary columns to fill in by hand.</p>
+          <label class="flabel" for="ncpFile">Import Excel (.xlsx) or CSV — one or more files</label>
+          <input type="file" id="ncpFile" accept=".xlsx,.csv,.txt,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" multiple>
+          <div class="svrow" id="ncpHistRow">
+            <span><b>History on this device</b><br><span class="small" id="ncpHistInfo">Nothing saved yet.</span></span>
+            <span class="svb"><button type="button" class="ghost" id="ncpHistUse">Use history</button><button type="button" class="ghost" id="ncpHistClear">Clear</button></span>
+          </div>
+          <p class="small">Saved history stays in this browser on this device only. Nothing is uploaded.</p>
+          <div class="msg hidden" id="ncpMsg" role="status"></div>
+
+          <div id="ncpSetup" class="hidden">
+            <h3>Sheets</h3>
+            <p class="small" id="ncpSheetNote"></p>
+            <div class="btnrow" style="margin-top:6px"><button type="button" class="ghost" id="ncpAll">Select all</button><button type="button" class="ghost" id="ncpNone">Select none</button></div>
+            <div id="ncpSheets" class="ncpchecks"></div>
+            <h3>Options</h3>
+            <div class="row2">
+              <div><label class="flabel" for="ncpPeriod">One period on the charts is</label>
+                <select id="ncpPeriod" class="biginput">
+                  <option value="sheet">One sheet (tab)</option>
+                  <option value="week">One week (Sun–Sat, from the date)</option>
+                  <option value="month">One month (from the date)</option>
+                </select></div>
+              <div><label class="flabel" for="ncpPieces">Pieces count</label>
+                <select id="ncpPieces" class="biginput">
+                  <option value="both">Scrapped + saved</option>
+                  <option value="scrap">Scrapped only</option>
+                </select></div>
+            </div>
+            <div id="ncpMergeWrap" class="hidden">
+              <h3>Causes that look like the same thing</h3>
+              <p class="small">Pick the correct spelling for each pair, or keep them separate. Case, spaces and dashes are already ignored.</p>
+              <div id="ncpMerge" class="ncpchecks"></div>
+            </div>
+            <h3>Charts and tables to include</h3>
+            <div id="ncpCharts" class="ncpchecks"></div>
+            <div class="btnrow">
+              <button type="button" class="ghost" id="ncpSave">Save these NCPs to history</button>
+              <button type="button" class="act" id="ncpGo">Build report</button>
+            </div>
+          </div>
+
+          <div id="ncpResults" class="hidden">
+            <div class="stats" id="ncpTiles"></div>
+            <div class="flags" id="ncpChecks"></div>
+            <div id="ncpOut"></div>
+            <div class="btnrow">
+              <button type="button" class="ghost" id="ncpCsvP">Download totals by period &amp; cause (CSV)</button>
+              <button type="button" class="ghost" id="ncpCsvR">Download cleaned NCP list (CSV)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ TOOL : ATTRIBUTE CHARTS (2026-11-17) ============ -->
       <section class="tool" id="tool-attr" role="tabpanel" aria-labelledby="tabbtn-attr">
         <div class="card">
@@ -4212,6 +4282,417 @@
         mpAnalyse();
         showMsg($("mpMsg"), "Example (made-up σ values) for a ±0.0010 bore: only Machine 1 is a safe choice.", true);
       });
+
+      /* @@NCP-CALC BEGIN — pure logic for the Scrap / NCP report: reading raw
+         NCP export sheets, cleaning, and totals. No DOM access.
+         tests/ncp.test.js extracts this block verbatim. */
+      var NCP = (function(){
+        function nh(h){ return String(h === undefined || h === null ? "" : h).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+        /* header aliases, compared after nh() */
+        var ALIAS = {
+          ncp:     ["ncp","ncp number","ncp no","ncr","ncr number","nc number","nonconformance","nonconformance number"],
+          part:    ["part number","part","part no","pn","item","item number"],
+          date:    ["submitted","date","date submitted","created","ncp date","submitted date"],
+          job:     ["job","job number","work order","wo"],
+          found:   ["dept found","department found"],
+          orig:    ["dept originated","department originated","originating dept"],
+          machine: ["work center","workcenter","work centre","machine","machine work center","resource"],
+          cost:    ["cost","total cost","scrap cost","cost usd","cost cad"],
+          cause:   ["root cause","cause"],
+          reason:  ["reason","nc reason","defect"],
+          saved:   ["saved","saved pcs","qty saved"],
+          scrap:   ["scrap","scrapped","scrap qty","scrapped pcs","qty scrapped","scrap pcs"]
+        };
+        var FIELD = {}; Object.keys(ALIAS).forEach(function(f){ ALIAS[f].forEach(function(a){ FIELD[a] = f; }); });
+        /* header row = first of the top 10 rows naming 3+ known fields; the
+           first column with a given field wins (a right-hand summary "COST"
+           is ignored). */
+        function detect(grid){
+          for(var i = 0; i < Math.min(grid.length, 10); i++){
+            var row = grid[i] || [], map = {}, n = 0;
+            for(var c = 0; c < row.length; c++){ var f = FIELD[nh(row[c])]; if(f && map[f] === undefined){ map[f] = c; n++; } }
+            if(n >= 3) return { hi:i, map:map, n:n };
+          }
+          return null;
+        }
+        function isNcpSheet(d){ return !!d && (d.map.cost !== undefined || d.map.scrap !== undefined) && (d.map.cause !== undefined || d.map.reason !== undefined) && (d.map.ncp !== undefined || d.map.part !== undefined); }
+        var DAY = 86400000, EPOCH = Date.UTC(1899, 11, 30);
+        function serialOk(v){ return v > 36526 && v < 73051; } /* 2000-01-01 .. 2099-12-31 */
+        /* -> UTC-midnight Date, or null */
+        function toDate(v){
+          var s = String(v === undefined || v === null ? "" : v).trim(); if(!s) return null;
+          if(/^\d+(\.\d+)?$/.test(s)){ var x = Number(s); if(!serialOk(x)) return null; var d = new Date(EPOCH + Math.floor(x) * DAY); return d; }
+          var m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s); if(m) return new Date(Date.UTC(+m[1], +m[2]-1, +m[3]));
+          m = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/.exec(s); if(m){ var y = +m[3]; if(y < 100) y += 2000; return new Date(Date.UTC(y, +m[1]-1, +m[2])); }
+          return null;
+        }
+        function iso(d){ return d ? d.toISOString().slice(0,10) : ""; }
+        function num(v){ var s = String(v === undefined || v === null ? "" : v).replace(/[$,\s]/g, ""); if(s === "") return 0; var x = Number(s); return isFinite(x) ? x : NaN; }
+        function txt(v){ return String(v === undefined || v === null ? "" : v).trim(); }
+        var JOBRE = /^\d{4,}-\d{1,3}$/;
+        /* sheets: [{name, grid}] -> cleaned rows + what was found */
+        function parse(sheets){
+          var rows = [], info = [], seen = {}, issues = { dupes:[], shifted:[], noCause:[], badNum:[], noDate:[] };
+          sheets.forEach(function(sh){
+            var d = detect(sh.grid || []);
+            if(!isNcpSheet(d)){ info.push({ name:sh.name, used:false, n:0, why: d ? "no cost/scrap and cause columns" : "no NCP header row" }); return; }
+            var M = d.map, n = 0, g = sh.grid;
+            var cell = function(r, f){ return M[f] === undefined ? "" : r[M[f]]; };
+            for(var i = d.hi + 1; i < g.length; i++){
+              var r = g[i] || [];
+              var id = txt(cell(r, "ncp")), part = txt(cell(r, "part"));
+              var cause = txt(cell(r, "cause")) || txt(cell(r, "reason"));
+              var costRaw = cell(r, "cost"), scrapRaw = cell(r, "scrap"), savedRaw = cell(r, "saved");
+              /* an NCP row has an NCP number; files without that column need a part number plus a cause or a cost */
+              if(M.ncp !== undefined ? !id : !(part && (cause || txt(costRaw)))) continue;
+              var dateRaw = cell(r, "date"), job = txt(cell(r, "job")), dt = toDate(dateRaw), fixed = false;
+              /* hand-typed rows sometimes slide one column: date in Part Number, part in Job */
+              if(!dt && serialOk(Number(part)) && /^\d+(\.\d+)?$/.test(part) || !dt && /^\d{4}-\d{2}-\d{2}/.test(part)){
+                var cands = [part, txt(dateRaw), job], p2 = "", j2 = "", d2 = null;
+                cands.forEach(function(c){ if(!c) return; var cd = toDate(c); if(cd && !d2) d2 = cd; else if(JOBRE.test(c) && !j2) j2 = c; else if(!p2 && !cd) p2 = c; });
+                if(d2){ dt = d2; part = p2; job = j2; fixed = true; }
+              }
+              var cost = num(costRaw), scrap = num(scrapRaw), saved = num(savedRaw);
+              var key = id || (sh.name + "#" + (i+1));
+              if(id && seen[id]){ issues.dupes.push({ id:id, where:sh.name, first:seen[id] }); continue; }
+              if(id) seen[id] = sh.name;
+              if(!isFinite(cost) || !isFinite(scrap) || !isFinite(saved)) issues.badNum.push({ id:key, where:sh.name });
+              if(!cause) issues.noCause.push({ id:key, where:sh.name });
+              if(!dt) issues.noDate.push({ id:key, where:sh.name });
+              if(fixed) issues.shifted.push({ id:key, where:sh.name });
+              rows.push({ id:key, sheet:sh.name, date:iso(dt), part:part, job:job, machine:txt(cell(r, "machine")), found:txt(cell(r, "found")), orig:txt(cell(r, "orig")),
+                          cause:cause, cost:isFinite(cost)?cost:0, scrap:isFinite(scrap)?scrap:0, saved:isFinite(saved)?saved:0 });
+              n++;
+            }
+            info.push({ name:sh.name, used:true, n:n, fields:Object.keys(M) });
+          });
+          return { rows:rows, sheets:info, issues:issues };
+        }
+        /* names: case, spacing and punctuation ignored; for machines a quoted
+           name ("575 - Brand 'MODEL-4' Machine") is used when present */
+        function causeKey(s){ return nh(s); }
+        function machineName(s){ var m = /'([^']+)'|"([^"]+)"/.exec(s || ""); return m ? (m[1] || m[2]) : (s || ""); }
+        function machineKey(s){ return nh(machineName(s)).replace(/ /g, ""); }
+        function lev(a, b){
+          var m = a.length, n = b.length, d = [], i, j; if(Math.abs(m-n) > 2) return 3;
+          for(i = 0; i <= m; i++){ d[i] = [i]; } for(j = 1; j <= n; j++) d[0][j] = j;
+          for(i = 1; i <= m; i++) for(j = 1; j <= n; j++) d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1] + (a[i-1]===b[j-1]?0:1));
+          return d[m][n];
+        }
+        /* spelling groups: exact-after-normalising, then near-duplicates
+           (edit distance <= 2 on names of 6+ characters) offered as merges */
+        function variants(rows){
+          var byKey = {}, order = [];
+          rows.forEach(function(r){ if(!r.cause) return; var k = causeKey(r.cause); if(!byKey[k]){ byKey[k] = { key:k, n:0, spell:{} }; order.push(k); } byKey[k].n++; byKey[k].spell[r.cause] = (byKey[k].spell[r.cause]||0) + 1; });
+          var near = [];
+          for(var a = 0; a < order.length; a++) for(var b = a+1; b < order.length; b++){
+            var A = order[a], B = order[b];
+            if(A.length >= 6 && B.length >= 6 && lev(A, B) <= 2) near.push({ a:A, b:B, na:byKey[A].n, nb:byKey[B].n });
+          }
+          var spellings = order.map(function(k){ var s = byKey[k].spell; return { key:k, n:byKey[k].n, names:Object.keys(s).sort(function(x,y){ return s[y]-s[x]; }) }; });
+          return { spellings:spellings, near:near };
+        }
+        function weekStart(dateIso){ var d = new Date(dateIso + "T00:00:00Z"); return new Date(d.getTime() - d.getUTCDay()*DAY).toISOString().slice(0,10); }
+        /* opts: period "sheet"|"week"|"month"; pieces "both"|"scrap";
+           merge {causeKey: targetKey}; sheetOrder [names] */
+        function aggregate(rows, opts){
+          opts = opts || {};
+          var merge = opts.merge || {}, both = opts.pieces !== "scrap";
+          var names = {}, nameCount = {};
+          rows.forEach(function(r){ if(!r.cause) return; var k = causeKey(r.cause); k = merge[k] || k; nameCount[k] = nameCount[k] || {}; nameCount[k][r.cause] = (nameCount[k][r.cause]||0)+1; });
+          Object.keys(nameCount).forEach(function(k){ var c = nameCount[k]; names[k] = (opts.labels && opts.labels[k]) || Object.keys(c).sort(function(x,y){ return c[y]-c[x] || (x<y?-1:1); })[0]; });
+          var pKey = function(r){ return opts.period === "week" ? (r.date ? weekStart(r.date) : null) : opts.period === "month" ? (r.date ? r.date.slice(0,7) : null) : r.sheet; };
+          var P = {}, pOrder = [], undated = 0;
+          var zero = function(k){ return { key:k, ncps:0, pieces:0, cost:0, causes:{} }; };
+          /* every selected sheet is a period, even one with no NCPs (a zero week counts) */
+          if(opts.period === "sheet" && opts.sheetOrder) opts.sheetOrder.forEach(function(s){ P[s] = zero(s); });
+          /* the label shown is the most common spelling in the group */
+          function bump(map, k, label, r, pcs){ if(!map[k]) map[k] = { key:k, label:label, ncps:0, pieces:0, cost:0, _n:{} }; var o = map[k]; o.ncps++; o.pieces += pcs; o.cost += r.cost; o._n[label] = (o._n[label]||0) + 1; if(o._n[label] > o._n[o.label] || (o._n[label] === o._n[o.label] && label < o.label)) o.label = label; }
+          var C = {}, PT = {}, MC = {};
+          rows.forEach(function(r){
+            var pcs = r.scrap + (both ? r.saved : 0), pk = pKey(r);
+            if(pk === null){ undated++; }
+            else {
+              if(!P[pk]) P[pk] = zero(pk);
+              var p = P[pk]; p.ncps++; p.pieces += pcs; p.cost += r.cost;
+              var ck0 = r.cause ? (merge[causeKey(r.cause)] || causeKey(r.cause)) : "(no cause)";
+              bump(p.causes, ck0, r.cause ? names[ck0] : "(no cause)", r, pcs);
+            }
+            var ck = r.cause ? (merge[causeKey(r.cause)] || causeKey(r.cause)) : "(no cause)";
+            bump(C, ck, r.cause ? names[ck] : "(no cause)", r, pcs);
+            bump(PT, r.part ? nh(r.part).replace(/ /g,"") : "(blank)", r.part || "(blank)", r, pcs);
+            var mk = r.machine ? machineKey(r.machine) : "(not recorded)";
+            bump(MC, mk, r.machine ? machineName(r.machine) : "(not recorded)", r, pcs);
+          });
+          var keys = Object.keys(P), filled = 0;
+          if(opts.period !== "sheet" && keys.length){
+            /* weeks or months with no NCPs between the first and last are zero periods */
+            keys.sort();
+            var cur = keys[0], last = keys[keys.length-1], all = [];
+            while(cur <= last && all.length < 2000){
+              all.push(cur); if(!P[cur]){ P[cur] = zero(cur); filled++; }
+              if(opts.period === "week") cur = new Date(Date.parse(cur + "T00:00:00Z") + 7*DAY).toISOString().slice(0,10);
+              else { var y = +cur.slice(0,4), m = +cur.slice(5,7) + 1; if(m > 12){ m = 1; y++; } cur = y + "-" + (m < 10 ? "0" : "") + m; }
+            }
+            keys = all;
+          }
+          var periods = keys.map(function(k){ var p = P[k]; var cs = Object.keys(p.causes).map(function(c){ return p.causes[c]; }).sort(function(a,b){ return b.cost-a.cost; });
+            return { key:k, label:k, ncps:p.ncps, pieces:p.pieces, cost:round2(p.cost), causes:cs.map(function(c){ c.cost = round2(c.cost); delete c._n; return c; }) }; });
+          var list = function(M){ return Object.keys(M).map(function(k){ M[k].cost = round2(M[k].cost); delete M[k]._n; return M[k]; }); };
+          return { periods:periods, byCause:list(C), byPart:list(PT), byMachine:list(MC), undated:undated, zeroFilled:filled,
+                   total:{ ncps:rows.length, pieces:rows.reduce(function(s,r){ return s + r.scrap + (both ? r.saved : 0); }, 0), cost:round2(rows.reduce(function(s,r){ return s + r.cost; }, 0)) } };
+        }
+        function round2(x){ return Math.round(x * 100) / 100; }
+        /* add new rows to a stored history: same NCP number = replaced by the newer import */
+        function mergeHistory(oldRows, newRows){
+          var idx = {}, out = [];
+          oldRows.forEach(function(r){ idx[r.id] = out.length; out.push(r); });
+          var added = 0, replaced = 0;
+          newRows.forEach(function(r){ if(idx[r.id] !== undefined){ out[idx[r.id]] = r; replaced++; } else { idx[r.id] = out.length; out.push(r); added++; } });
+          return { rows:out, added:added, replaced:replaced };
+        }
+        return { detect:detect, parse:parse, variants:variants, aggregate:aggregate, mergeHistory:mergeHistory, toDate:toDate, weekStart:weekStart, machineName:machineName, causeKey:causeKey };
+      })();
+      /* @@NCP-CALC END */
+      /* ======================================================================
+         SECTION · SCRAP / NCP REPORT (tool ncp) — 2026-11-17
+         Reading and totals live in the NCP block (tests/ncp.test.js);
+         charts use the tested QC maths. This section reads files and draws.
+         ====================================================================== */
+      var NCP_CHARTS = [
+        ["ncpC",   "NCPs per period — control chart", true],
+        ["pcsC",   "Pieces per period — control chart", true],
+        ["costC",  "Cost per period — trend chart", true],
+        ["parCC",  "Pareto — causes by cost", true],
+        ["parCN",  "Pareto — causes by number of NCPs", true],
+        ["parPart","Pareto — part numbers by cost (top 15)", true],
+        ["parMach","Pareto — machines by cost", true],
+        ["table",  "Totals by period and cause (the summary you used to type)", true]
+      ];
+      var ncpState = { rows:[], sheets:[], source:"" }, ncpLast = null;
+      function ncpLS(k, d){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+      function ncpLSset(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+      function ncpMoney(x){ return "$" + Number(x).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+      function ncpHistDraw(){
+        var h = ncpLS("ncp.history", null), el = $("ncpHistInfo");
+        if(!h || !h.rows || !h.rows.length){ el.textContent = "Nothing saved yet."; $("ncpHistUse").disabled = true; $("ncpHistClear").disabled = true; return; }
+        var ds = h.rows.map(function(r){ return r.date; }).filter(Boolean).sort();
+        el.textContent = h.rows.length + " NCPs" + (ds.length ? ", " + ds[0] + " to " + ds[ds.length-1] : "") + " · last saved " + new Date(h.saved).toLocaleDateString();
+        $("ncpHistUse").disabled = false; $("ncpHistClear").disabled = false;
+      }
+      function ncpChartsDraw(){
+        var on = ncpLS("ncp.charts", null);
+        $("ncpCharts").innerHTML = NCP_CHARTS.map(function(c){
+          var chk = on ? on.indexOf(c[0]) >= 0 : c[2];
+          return '<label class="ncpcheck"><input type="checkbox" data-chart="'+c[0]+'"'+(chk?" checked":"")+'> '+esc(c[1])+'</label>'; }).join("");
+      }
+      function ncpSelectedSheets(){ return Array.prototype.map.call($("ncpSheets").querySelectorAll("input:checked"), function(i){ return i.getAttribute("data-sheet"); }); }
+      function ncpRowsInScope(){ var sel = ncpSelectedSheets(), set = {}; sel.forEach(function(s){ set[s] = 1; }); return ncpState.rows.filter(function(r){ return set[r.sheet]; }); }
+      function ncpMergeDraw(){
+        var v = NCP.variants(ncpRowsInScope());
+        var spell = {}; v.spellings.forEach(function(s){ spell[s.key] = s; });
+        $("ncpMergeWrap").classList.toggle("hidden", !v.near.length);
+        $("ncpMerge").innerHTML = v.near.map(function(p){
+          var A = spell[p.a], B = spell[p.b];
+          var first = A.n >= B.n ? A : B, second = first === A ? B : A;
+          return '<div class="ncpmerge"><span>"'+esc(A.names[0])+'" ('+A.n+') and "'+esc(B.names[0])+'" ('+B.n+')</span>'+
+            '<select class="biginput" data-a="'+esc(p.a)+'" data-b="'+esc(p.b)+'">'+
+            '<option value="'+esc(first.key)+'">Same cause — call it "'+esc(first.names[0])+'"</option>'+
+            '<option value="'+esc(second.key)+'">Same cause — call it "'+esc(second.names[0])+'"</option>'+
+            '<option value="">Different causes — keep separate</option></select></div>'; }).join("");
+      }
+      function ncpSetup(source, sheets, parsed){
+        ncpState = { rows: parsed.rows, sheets: sheets, source: source, issues: parsed.issues };
+        var used = sheets.filter(function(s){ return s.used; });
+        $("ncpSheets").innerHTML = sheets.map(function(s){
+          return '<label class="ncpcheck'+(s.used?"":" off")+'"><input type="checkbox" data-sheet="'+esc(s.name)+'"'+(s.used?" checked":" disabled")+'> '+esc(s.name)+' <span class="small">'+(s.used ? s.n+" NCP"+(s.n===1?"":"s") : "— skipped: "+esc(s.why))+'</span></label>'; }).join("");
+        $("ncpSheetNote").textContent = used.length + " of " + sheets.length + " sheet" + (sheets.length===1?"":"s") + " hold NCP rows (" + parsed.rows.length + " NCPs). Untick a sheet to leave it out — for example a week that is not finished yet.";
+        $("ncpPeriod").value = (source === "file" && used.length > 1) ? "sheet" : "week";
+        $("ncpPeriod").querySelector('option[value="sheet"]').disabled = source !== "file";
+        ncpMergeDraw();
+        $("ncpSetup").classList.remove("hidden");
+        $("ncpResults").classList.add("hidden");
+      }
+      function ncpFilesRead(files){
+        var msg = $("ncpMsg"), out = [], fail = [], chain = Promise.resolve();
+        Array.prototype.forEach.call(files, function(f){
+          chain = chain.then(function(){
+            return new Promise(function(res){
+              var nm = String(f.name || ""), lower = nm.toLowerCase(), rd = new FileReader();
+              var prefix = files.length > 1 ? nm.replace(/\.[^.]+$/, "") + " · " : "";
+              if(/\.xlsx$/.test(lower)){
+                rd.onload = function(){ readXlsxGrid(rd.result).then(function(x){
+                  if(x.error){ fail.push(nm); }
+                  else if(x.sheets && x.sheets.length) x.sheets.forEach(function(s){ out.push({ name: prefix + s.name, grid: s.grid }); });
+                  else out.push({ name: prefix + nm.replace(/\.[^.]+$/, ""), grid: x.grid });
+                  res(); }); };
+                rd.onerror = function(){ fail.push(nm); res(); };
+                rd.readAsArrayBuffer(f);
+              } else if(/\.(csv|txt|tsv)$/.test(lower)){
+                rd.onload = function(){ var t = String(rd.result || ""), d = sheetDetectDelimiter(t) || ",";
+                  out.push({ name: prefix + nm.replace(/\.[^.]+$/, ""), grid: parseDelimitedRows(t, d === " " ? "," : d) }); res(); };
+                rd.onerror = function(){ fail.push(nm); res(); };
+                rd.readAsText(f);
+              } else { fail.push(nm); res(); }
+            });
+          });
+        });
+        chain.then(function(){
+          if(!out.length){ showMsg(msg, "Could not read " + (fail.join(", ") || "that file") + ". Save it as .xlsx or .csv and try again."); return; }
+          var parsed = NCP.parse(out);
+          if(!parsed.rows.length){ $("ncpSetup").classList.add("hidden"); showMsg(msg, "No NCP rows found. The sheet needs a header row with columns like NCP, Part Number, Cost, Root Cause, Scrap."); return; }
+          if(fail.length) showMsg(msg, "Skipped: " + fail.join(", ") + " (not .xlsx or .csv).", true); else hideMsg(msg);
+          ncpSetup("file", parsed.sheets, parsed);
+        });
+      }
+      $("ncpFile").addEventListener("change", function(){ if(this.files && this.files.length) ncpFilesRead(this.files); });
+      $("ncpAll").addEventListener("click", function(){ $("ncpSheets").querySelectorAll("input:not([disabled])").forEach(function(i){ i.checked = true; }); ncpMergeDraw(); });
+      $("ncpNone").addEventListener("click", function(){ $("ncpSheets").querySelectorAll("input").forEach(function(i){ i.checked = false; }); ncpMergeDraw(); });
+      $("ncpSheets").addEventListener("change", ncpMergeDraw);
+      $("ncpCharts").addEventListener("change", function(){ ncpLSset("ncp.charts", Array.prototype.map.call($("ncpCharts").querySelectorAll("input:checked"), function(i){ return i.getAttribute("data-chart"); })); });
+      $("ncpHistUse").addEventListener("click", function(){
+        var h = ncpLS("ncp.history", null); if(!h || !h.rows || !h.rows.length) return;
+        var names = [], cnt = {}; h.rows.forEach(function(r){ if(cnt[r.sheet] === undefined){ cnt[r.sheet] = 0; names.push(r.sheet); } cnt[r.sheet]++; });
+        ncpSetup("history", names.map(function(n){ return { name:n, used:true, n:cnt[n] }; }), { rows: h.rows, issues: { dupes:[], shifted:[], noCause:h.rows.filter(function(r){ return !r.cause; }).map(function(r){ return { id:r.id }; }), badNum:[], noDate:h.rows.filter(function(r){ return !r.date; }).map(function(r){ return { id:r.id }; }) } });
+        showMsg($("ncpMsg"), "Loaded " + h.rows.length + " NCPs from this device. Periods are weeks (from each NCP's date).", true);
+      });
+      $("ncpHistClear").addEventListener("click", function(){
+        if(!window.confirm("Delete the saved NCP history from this device? This cannot be undone.")) return;
+        try{ localStorage.removeItem("ncp.history"); }catch(e){}
+        ncpHistDraw(); showMsg($("ncpMsg"), "History deleted from this device.", true);
+      });
+      $("ncpSave").addEventListener("click", function(){
+        var rows = ncpRowsInScope(), h = ncpLS("ncp.history", { rows:[] });
+        if(!rows.length){ showMsg($("ncpMsg"), "Select at least one sheet to save."); return; }
+        var m = NCP.mergeHistory(h.rows || [], rows);
+        if(!ncpLSset("ncp.history", { rows: m.rows, saved: new Date().toISOString() })) { showMsg($("ncpMsg"), "Could not save — this browser is blocking storage or it is full."); return; }
+        ncpHistDraw();
+        showMsg($("ncpMsg"), "Saved to this device: " + m.added + " new NCP" + (m.added===1?"":"s") + (m.replaced ? ", " + m.replaced + " already saved (updated)" : "") + ". History now holds " + m.rows.length + ".", true);
+      });
+
+      /* horizontal Pareto: bars sorted high to low, cumulative % on the right */
+      function ncpParetoSVG(items, valFmt, maxBars){
+        items = items.filter(function(x){ return x.v > 0; }).sort(function(a, b){ return b.v - a.v; });
+        var total = items.reduce(function(s, x){ return s + x.v; }, 0);
+        if(items.length > maxBars){ var rest = items.slice(maxBars - 1); items = items.slice(0, maxBars - 1).concat([{ label:"All others (" + rest.length + ")", v: rest.reduce(function(s, x){ return s + x.v; }, 0), other:true }]); }
+        var W = chN()?460:720, fs = chFS(), lineH = fs + 6, barH = chN()?18:16, rowH = lineH + barH + 10, padT = 4, valW = chN()?150:140, cumW = 52, barW = W - valW - cumW, H = padT*2 + rowH*items.length;
+        var max = items.length ? Math.max.apply(null, items.map(function(x){ return x.v; })) : 1, cum = 0, g = "";
+        var maxChars = Math.floor((W - cumW) / (fs * 0.62));
+        items.forEach(function(x, i){
+          cum += x.v; var y = padT + i*rowH, bw = Math.max(1, barW * x.v / max), lab = String(x.label); if(lab.length > maxChars) lab = lab.slice(0, maxChars - 1) + "…";
+          g += '<text class="qc-ax qc-plab" x="0" y="'+(y+fs)+'" font-size="'+fs+'"><title>'+esc(x.label)+'</title>'+esc(lab)+'</text>';
+          g += '<text class="qc-cum" x="'+W+'" y="'+(y+fs)+'" font-size="'+fs+'" text-anchor="end">'+(total ? Math.round(cum/total*100) : 0)+'%</text>';
+          g += '<rect class="'+(x.other?"qc-bar-o":"qc-bar")+'" x="0" y="'+(y+lineH)+'" width="'+bw+'" height="'+barH+'" rx="2"/>';
+          g += '<text class="qc-val" x="'+(bw+6)+'" y="'+(y+lineH+barH*0.78)+'" font-size="'+fs+'">'+esc(valFmt(x.v))+'</text>';
+        });
+        return { svg: '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Pareto chart">'+g+'</svg>', items: items, total: total };
+      }
+      function ncpParetoBlock(title, list, key, valFmt, maxBars, what){
+        var P = ncpParetoSVG(list.map(function(x){ return { label:x.label, v:x[key] }; }), valFmt, maxBars);
+        if(!P.items.length) return '<h3>'+esc(title)+'</h3><p class="small">Nothing to chart.</p>';
+        var cum = 0, vital = []; for(var i = 0; i < P.items.length; i++){ if(P.items[i].other) break; vital.push(P.items[i].label); cum += P.items[i].v; if(cum / P.total >= 0.8) break; }
+        var top = P.items[0];
+        return '<h3>'+esc(title)+'</h3><div class="chartbox qcchart">'+P.svg+'</div>'+
+          '<p class="small">Top: <b>'+esc(top.label)+'</b> — '+esc(valFmt(top.v))+' ('+Math.round(top.v/P.total*100)+'% of '+esc(valFmt(P.total))+'). '+
+          (vital.length < P.items.length ? 'The top '+vital.length+' '+what+' make up '+Math.round(cum/P.total*100)+'%.' : '')+' Right-hand column: cumulative %.</p>';
+      }
+      function ncpControlBlock(title, labels, counts, unit){
+        if(counts.length < 2) return '<h3>'+esc(title)+'</h3><p class="small">Needs at least 2 periods.</p>';
+        var od = QC.overdispersion("c", counts, null);
+        if(od.error) return '<h3>'+esc(title)+'</h3><p class="small">'+esc(od.error)+'</p>';
+        var lim = od.flag ? "laney" : "standard", r = QC.attr("c", counts, null, lim);
+        var sig = r.points.map(function(p){ return !!p.out; });
+        var html = '<h3>'+esc(title)+(lim==="laney" ? " (Laney-adjusted limits)" : "")+'</h3><div class="chartbox qcchart">'+qcChartSVG({ y: counts, ucl: r.points.map(function(p){ return p.ucl; }), lcl: r.points.map(function(p){ return p.lcl; }),
+          hasLcl: r.points.map(function(p){ return p.hasLcl; }), centre: r.centre, sig: sig, labels: labels, floor0: true, aria: title })+'</div>';
+        var s = "Average " + qcG(r.centre) + " " + unit + " per period; upper limit " + qcG(r.points[0].ucl) + ". ";
+        var hiS = r.signals.filter(function(i){ return r.points[i-1].out === "above"; }), loS = r.signals.filter(function(i){ return r.points[i-1].out === "below"; });
+        var lst = function(a){ return esc(a.map(function(i){ return labels[i-1] + " (" + counts[i-1] + ")"; }).join(", ")); };
+        if(hiS.length) s += "<b>Unusually high:</b> " + lst(hiS) + " — something different happened; find out what. ";
+        if(loS.length) s += "<b>Unusually low:</b> " + lst(loS) + " — worth knowing what went right (or whether NCPs were missed). ";
+        r.runs.forEach(function(run){ s += "<b>Shift:</b> " + esc(labels[run.from-1]) + " to " + esc(labels[run.to-1]) + ", " + (run.to-run.from+1) + " periods " + run.side + " average. "; });
+        if(!r.signals.length && !r.runs.length) s += "No signals — period-to-period ups and downs are normal variation. ";
+        if(lim === "laney") s += "Limits widened " + fmt(r.sigmaZ, 2) + "× because counts come in batches (one NCP can scrap many parts).";
+        return html + '<p class="small">' + s + '</p>';
+      }
+      function ncpBuild(){
+        var msg = $("ncpMsg"), rows = ncpRowsInScope();
+        if(!rows.length){ $("ncpResults").classList.add("hidden"); showMsg(msg, "Select at least one sheet with NCP rows."); return; }
+        hideMsg(msg);
+        /* merges: the less common spelling joins the more common one */
+        var v = NCP.variants(rows), cnt = {}; v.spellings.forEach(function(s){ cnt[s.key] = s.n; });
+        var merge = {}, labels = {}, spell = {}; v.spellings.forEach(function(s){ spell[s.key] = s.names[0]; });
+        $("ncpMerge").querySelectorAll("select").forEach(function(sel){
+          var a = sel.getAttribute("data-a"), b = sel.getAttribute("data-b"), keep = sel.value; if(!keep || cnt[a] === undefined || cnt[b] === undefined) return;
+          merge[keep === a ? b : a] = keep; labels[keep] = spell[keep];
+        });
+        Object.keys(merge).forEach(function(k){ var t = merge[k], guard = 0; while(merge[t] && guard++ < 20) t = merge[t]; merge[k] = t; });
+        var period = $("ncpPeriod").value, pieces = $("ncpPieces").value;
+        var sheetOrder = ncpState.sheets.filter(function(s){ return s.used; }).map(function(s){ return s.name; }).filter(function(n){ return ncpSelectedSheets().indexOf(n) >= 0; });
+        Object.keys(merge).forEach(function(k){ if(!labels[merge[k]]) labels[merge[k]] = spell[merge[k]]; });
+        var A = NCP.aggregate(rows, { period: period, pieces: pieces, merge: merge, labels: labels, sheetOrder: sheetOrder });
+        var on = {}; $("ncpCharts").querySelectorAll("input:checked").forEach(function(i){ on[i.getAttribute("data-chart")] = 1; });
+        var labels = A.periods.map(function(p){ return p.label; });
+        $("ncpTiles").innerHTML = statTile("NCPs", String(A.total.ncps)) + statTile("Pieces", String(A.total.pieces)) + statTile("Cost", A.total.cost >= 10000 ? "$" + Math.round(A.total.cost).toLocaleString() : ncpMoney(A.total.cost)) +
+          statTile("Periods", String(A.periods.length)) + statTile("Avg NCPs / period", A.periods.length ? fmt(A.total.ncps / A.periods.length, 1) : "—") + statTile("Causes", String(A.byCause.length));
+        /* data checks */
+        var I = ncpState.issues || {}, sel = {}; ncpSelectedSheets().forEach(function(s){ sel[s] = 1; });
+        var inSel = function(list){ return (list || []).filter(function(x){ return !x.where || sel[x.where]; }); };
+        var f = "", skipped = ncpState.sheets.filter(function(s){ return !s.used; });
+        if(skipped.length) f += '<div class="flag green">Skipped '+skipped.length+' sheet'+(skipped.length>1?"s that are":" that is")+' not an NCP list: '+esc(skipped.map(function(s){ return s.name; }).join(", "))+'.</div>';
+        var dup = inSel(I.dupes); if(dup.length) f += '<div class="flag amber"><strong>'+dup.length+' duplicate NCP number'+(dup.length>1?"s":"")+'</strong> counted once: '+esc(dup.slice(0,10).map(function(d){ return d.id+" ("+d.where+", first in "+d.first+")"; }).join("; "))+(dup.length>10?"…":"")+'</div>';
+        var sh = inSel(I.shifted); if(sh.length) f += '<div class="flag amber"><strong>'+sh.length+' row'+(sh.length>1?"s":"")+' had shifted columns</strong> (a date in Part Number) and were straightened: '+esc(sh.map(function(d){ return d.id; }).join(", "))+'. Check them in the source.</div>';
+        var nc = inSel(I.noCause); if(nc.length) f += '<div class="flag amber"><strong>'+nc.length+' NCP'+(nc.length>1?"s":"")+' with no cause</strong> — shown as "(no cause)": '+esc(nc.slice(0,10).map(function(d){ return d.id; }).join(", "))+'</div>';
+        var bn = inSel(I.badNum); if(bn.length) f += '<div class="flag amber"><strong>'+bn.length+' row'+(bn.length>1?"s":"")+' with text in a number column</strong> (cost, scrap or saved) — counted as 0: '+esc(bn.slice(0,10).map(function(d){ return d.id; }).join(", "))+'</div>';
+        if(period !== "sheet" && A.undated) f += '<div class="flag amber"><strong>'+A.undated+' NCP'+(A.undated>1?"s":"")+' with no readable date</strong> are left out of the period charts (still in the Paretos and totals).</div>';
+        if(A.zeroFilled) f += '<div class="flag green">'+A.zeroFilled+' '+(period==="week"?"week":"month")+(A.zeroFilled>1?"s":"")+' with no NCPs inside the date range are shown as 0.</div>';
+        var merged = Object.keys(merge).length; if(merged) f += '<div class="flag green">'+merged+' cause spelling'+(merged>1?"s":"")+' merged into the spelling you chose.</div>';
+        if(!f) f = '<div class="flag green">No data problems found.</div>';
+        $("ncpChecks").innerHTML = f;
+        var h = "";
+        if(on.ncpC) h += ncpControlBlock("NCPs per period", labels, A.periods.map(function(p){ return p.ncps; }), "NCPs");
+        if(on.pcsC) h += ncpControlBlock("Pieces per period", labels, A.periods.map(function(p){ return p.pieces; }), "pieces");
+        if(on.costC){
+          var costs = A.periods.map(function(p){ return p.cost; });
+          if(costs.length >= 2){
+            var st = QC.imr(costs), sig = costs.map(function(c){ return c > st.ucl || c < st.lcl; });
+            h += '<h3>Cost per period</h3><div class="chartbox qcchart">'+qcChartSVG({ y: costs, ucl: costs.map(function(){ return st.ucl; }), lcl: costs.map(function(){ return Math.max(0, st.lcl); }), hasLcl: costs.map(function(){ return st.lcl > 0; }),
+              centre: st.mean, sig: sig, labels: labels, floor0: true, aria: "Cost per period" })+'</div>'+
+              '<p class="small">Average '+ncpMoney(st.mean)+' per period; upper limit '+ncpMoney(st.ucl)+' (individuals chart, σ from moving ranges). '+
+              (st.out.length ? '<b>Outside the limits:</b> '+esc(st.out.map(function(i){ return labels[i-1]+" ("+ncpMoney(costs[i-1])+")"; }).join(", "))+'.' : 'No period outside the limits.')+'</p>';
+          } else h += '<h3>Cost per period</h3><p class="small">Needs at least 2 periods.</p>';
+        }
+        if(on.parCC) h += ncpParetoBlock("Pareto — causes by cost", A.byCause, "cost", ncpMoney, 12, "causes");
+        if(on.parCN) h += ncpParetoBlock("Pareto — causes by number of NCPs", A.byCause, "ncps", function(x){ return String(x); }, 12, "causes");
+        if(on.parPart) h += ncpParetoBlock("Pareto — part numbers by cost", A.byPart, "cost", ncpMoney, 15, "part numbers");
+        if(on.parMach) h += ncpParetoBlock("Pareto — machines by cost", A.byMachine, "cost", ncpMoney, 12, "machines");
+        if(on.table){
+          h += '<h3>Totals by period and cause</h3><div class="gridscroll"><table class="dtable qctable ncptable"><tr><th style="text-align:left">Period / cause</th><th>NCPs</th><th>Pieces</th><th>Cost</th></tr>';
+          A.periods.forEach(function(p){
+            h += '<tr class="ncpp"><td style="text-align:left">'+esc(p.label)+'</td><td>'+p.ncps+'</td><td>'+p.pieces+'</td><td>'+ncpMoney(p.cost)+'</td></tr>';
+            p.causes.forEach(function(c){ h += '<tr><td style="text-align:left;padding-left:18px">'+esc(c.label)+'</td><td>'+c.ncps+'</td><td>'+c.pieces+'</td><td>'+ncpMoney(c.cost)+'</td></tr>'; });
+          });
+          h += '<tr class="ncpp"><td style="text-align:left">Total</td><td>'+A.total.ncps+'</td><td>'+A.total.pieces+'</td><td>'+ncpMoney(A.total.cost)+'</td></tr></table></div>';
+        }
+        if(!h) h = '<p class="small">No charts selected — tick at least one above.</p>';
+        $("ncpOut").innerHTML = h;
+        ncpLast = { A: A, rows: rows, merge: merge };
+        $("ncpResults").classList.remove("hidden");
+      }
+      $("ncpGo").addEventListener("click", ncpBuild);
+      $("ncpCsvP").addEventListener("click", function(){
+        if(!ncpLast) return;
+        var L = ["Period,Cause,NCPs,Pieces,Cost"];
+        ncpLast.A.periods.forEach(function(p){ p.causes.forEach(function(c){ L.push(csvq(p.label)+","+csvq(c.label)+","+c.ncps+","+c.pieces+","+c.cost.toFixed(2)); }); L.push(csvq(p.label)+",(period total),"+p.ncps+","+p.pieces+","+p.cost.toFixed(2)); });
+        L.push("Total,,"+ncpLast.A.total.ncps+","+ncpLast.A.total.pieces+","+ncpLast.A.total.cost.toFixed(2));
+        downloadCSV("ncp-totals-by-period-and-cause.csv", L.join("\n"));
+      });
+      $("ncpCsvR").addEventListener("click", function(){
+        if(!ncpLast) return;
+        var L = ["NCP,Sheet,Date,Part Number,Job,Machine,Dept Found,Dept Originated,Cause,Scrapped,Saved,Cost"];
+        ncpLast.rows.forEach(function(r){ L.push([r.id, r.sheet, r.date, r.part, r.job, r.machine, r.found, r.orig, r.cause].map(function(x){ return csvq(String(x||"")); }).join(",")+","+r.scrap+","+r.saved+","+r.cost.toFixed(2)); });
+        downloadCSV("ncp-cleaned-list.csv", L.join("\n"));
+      });
+      ncpChartsDraw(); ncpHistDraw();
 
       /* ======================================================================
          SECTION · CONVERT (tool convert): fractions, in / mm, hardness
@@ -7690,6 +8171,7 @@
           ["short","Short-run","short run batch production high mix setup approval first piece first part off PRE-Control DNOM deviation from nominal percent of tolerance machine capability predict new job which machine"],
           ["sigma","Sigma ⇄ PPM","sigma level PPM DPMO defects per million yield six sigma Cpk to PPM 1.5 shift"],
           ["check","Data Check","histogram normality normal Anderson Darling distribution descriptive statistics mean standard deviation"],
+          ["ncp","Scrap / NCP report","scrap report NCP NCR weekly scrap import excel workbook sheets tabs cost pieces root cause pareto by part machine PDF history"],
           ["pareto","Pareto","pareto defects categories vital few 80/20 scrap reasons"],
           ["grr","Gage R&R","gauge gage R&R repeatability reproducibility MSA measurement system ANOVA ndc EV AV gauge study"],
           ["tp","True Position","true position GD&T MMC LMC bonus tolerance hole location"],
@@ -7762,7 +8244,7 @@
 
         /* ---- printable report (any tool) ---- */
         var TITLES = {}; TOOLS.forEach(function(t){ TITLES[t[0]] = t[1]; });
-        var PRINTABLE = ["spc","check","pareto","grr","tp","stack","aql","sigma"];
+        var PRINTABLE = ["spc","check","pareto","ncp","attr","short","grr","tp","stack","aql","sigma"];
         PRINTABLE.forEach(function(tab){
           var sec = $("tool-"+tab); if(!sec) return;
           var cards = sec.querySelectorAll(".card"), last = cards[cards.length-1] || sec;

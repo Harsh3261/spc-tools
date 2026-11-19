@@ -1,0 +1,507 @@
+{
+ "sheets": [
+  "JAN 4-10",
+  "JAN 11-17",
+  "JAN 18-24",
+  "JAN 25-31",
+  "FEB 1-7",
+  "FEB 8-14",
+  "FEB 15-21",
+  "FEB 22-28",
+  "MAR 1-7",
+  "MAR 8-14",
+  "MAR 15-21",
+  "MAR 22-28",
+  "MAR 29-4",
+  "APR 5-11"
+ ],
+ "ncps": 96,
+ "pieces": 251,
+ "cost": 25782.2,
+ "scrapOnly": 234,
+ "bySheet": {
+  "JAN 4-10": {
+   "ncps": 10,
+   "pieces": 19,
+   "cost": 1403.9
+  },
+  "JAN 11-17": {
+   "ncps": 4,
+   "pieces": 9,
+   "cost": 200.15
+  },
+  "JAN 18-24": {
+   "ncps": 6,
+   "pieces": 7,
+   "cost": 312.55
+  },
+  "JAN 25-31": {
+   "ncps": 9,
+   "pieces": 21,
+   "cost": 2104.8
+  },
+  "FEB 1-7": {
+   "ncps": 3,
+   "pieces": 4,
+   "cost": 618.1
+  },
+  "FEB 15-21": {
+   "ncps": 6,
+   "pieces": 15,
+   "cost": 1527.5
+  },
+  "FEB 22-28": {
+   "ncps": 11,
+   "pieces": 24,
+   "cost": 3886.45
+  },
+  "MAR 1-7": {
+   "ncps": 3,
+   "pieces": 7,
+   "cost": 371.55
+  },
+  "MAR 8-14": {
+   "ncps": 11,
+   "pieces": 82,
+   "cost": 7076.15
+  },
+  "MAR 15-21": {
+   "ncps": 9,
+   "pieces": 16,
+   "cost": 1074.8
+  },
+  "MAR 22-28": {
+   "ncps": 8,
+   "pieces": 21,
+   "cost": 2906.3
+  },
+  "MAR 29-4": {
+   "ncps": 7,
+   "pieces": 13,
+   "cost": 2311.0
+  },
+  "APR 5-11": {
+   "ncps": 9,
+   "pieces": 13,
+   "cost": 1988.95
+  }
+ },
+ "byCause": {
+  "Program Error": {
+   "ncps": 17,
+   "pieces": 98,
+   "cost": 9780.05
+  },
+  "Tooling - Broken": {
+   "ncps": 14,
+   "pieces": 31,
+   "cost": 3317.8
+  },
+  "Set Up - 1st Part Off": {
+   "ncps": 10,
+   "pieces": 16,
+   "cost": 1903.75
+  },
+  "Tooling - Worn": {
+   "ncps": 14,
+   "pieces": 26,
+   "cost": 4002.35
+  },
+  "Improper Loading": {
+   "ncps": 15,
+   "pieces": 26,
+   "cost": 2978.6
+  },
+  "Incorrect Offset - Tool": {
+   "ncps": 9,
+   "pieces": 26,
+   "cost": 1237.05
+  },
+  "Handling Damage": {
+   "ncps": 9,
+   "pieces": 16,
+   "cost": 2006.9
+  },
+  "Parts Not Deburred": {
+   "ncps": 8,
+   "pieces": 12,
+   "cost": 555.7
+  }
+ },
+ "byMachine": {
+  "LATHE-7": {
+   "ncps": 40,
+   "pieces": 141,
+   "cost": 12053.9
+  },
+  "MILL-1": {
+   "ncps": 41,
+   "pieces": 75,
+   "cost": 7516.9
+  },
+  "HMC-3": {
+   "ncps": 13,
+   "pieces": 29,
+   "cost": 4703.15
+  },
+  "(not recorded)": {
+   "ncps": 2,
+   "pieces": 6,
+   "cost": 1508.25
+  }
+ },
+ "byPart": {
+  "RT-9001": {
+   "ncps": 19,
+   "pieces": 98,
+   "cost": 8294.1
+  },
+  "QZ-32": {
+   "ncps": 16,
+   "pieces": 33,
+   "cost": 4414.65
+  },
+  "AB-7": {
+   "ncps": 15,
+   "pieces": 22,
+   "cost": 1600.95
+  },
+  "PX-200": {
+   "ncps": 18,
+   "pieces": 40,
+   "cost": 5150.6
+  },
+  "QZ-31": {
+   "ncps": 13,
+   "pieces": 28,
+   "cost": 3030.25
+  },
+  "PX-100": {
+   "ncps": 15,
+   "pieces": 30,
+   "cost": 3291.65
+  }
+ },
+ "bySheetCause": {
+  "JAN 4-10|Program Error": {
+   "ncps": 3,
+   "pieces": 5,
+   "cost": 520.15
+  },
+  "JAN 4-10|Tooling - Broken": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 12.5
+  },
+  "JAN 4-10|Set Up - 1st Part Off": {
+   "ncps": 2,
+   "pieces": 4,
+   "cost": 624.6
+  },
+  "JAN 4-10|Tooling - Worn": {
+   "ncps": 1,
+   "pieces": 2,
+   "cost": 25.0
+  },
+  "JAN 4-10|Improper Loading": {
+   "ncps": 2,
+   "pieces": 2,
+   "cost": 159.15
+  },
+  "JAN 4-10|Incorrect Offset - Tool": {
+   "ncps": 1,
+   "pieces": 5,
+   "cost": 62.5
+  },
+  "JAN 11-17|Tooling - Broken": {
+   "ncps": 2,
+   "pieces": 3,
+   "cost": 125.15
+  },
+  "JAN 11-17|Handling Damage": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 12.5
+  },
+  "JAN 11-17|Incorrect Offset - Tool": {
+   "ncps": 1,
+   "pieces": 5,
+   "cost": 62.5
+  },
+  "JAN 18-24|Program Error": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 149.9
+  },
+  "JAN 18-24|Tooling - Worn": {
+   "ncps": 2,
+   "pieces": 2,
+   "cost": 70.45
+  },
+  "JAN 18-24|Parts Not Deburred": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 9.25
+  },
+  "JAN 18-24|Handling Damage": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 57.95
+  },
+  "JAN 18-24|Improper Loading": {
+   "ncps": 1,
+   "pieces": 2,
+   "cost": 25.0
+  },
+  "JAN 25-31|Program Error": {
+   "ncps": 3,
+   "pieces": 8,
+   "cost": 236.35
+  },
+  "JAN 25-31|Improper Loading": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 9.25
+  },
+  "JAN 25-31|Set Up - 1st Part Off": {
+   "ncps": 2,
+   "pieces": 3,
+   "cost": 128.4
+  },
+  "JAN 25-31|Tooling - Broken": {
+   "ncps": 1,
+   "pieces": 3,
+   "cost": 173.85
+  },
+  "JAN 25-31|Tooling - Worn": {
+   "ncps": 2,
+   "pieces": 6,
+   "cost": 1556.95
+  },
+  "FEB 1-7|Handling Damage": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 9.25
+  },
+  "FEB 1-7|Tooling - Worn": {
+   "ncps": 2,
+   "pieces": 3,
+   "cost": 608.85
+  },
+  "FEB 15-21|Tooling - Worn": {
+   "ncps": 1,
+   "pieces": 2,
+   "cost": 299.8
+  },
+  "FEB 15-21|Incorrect Offset - Tool": {
+   "ncps": 1,
+   "pieces": 2,
+   "cost": 115.9
+  },
+  "FEB 15-21|Program Error": {
+   "ncps": 1,
+   "pieces": 3,
+   "cost": 449.7
+  },
+  "FEB 15-21|Handling Damage": {
+   "ncps": 1,
+   "pieces": 2,
+   "cost": 299.8
+  },
+  "FEB 15-21|Tooling - Broken": {
+   "ncps": 2,
+   "pieces": 6,
+   "cost": 362.3
+  },
+  "FEB 22-28|Program Error": {
+   "ncps": 2,
+   "pieces": 6,
+   "cost": 1798.8
+  },
+  "FEB 22-28|Set Up - 1st Part Off": {
+   "ncps": 2,
+   "pieces": 2,
+   "cost": 67.2
+  },
+  "FEB 22-28|Incorrect Offset - Tool": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 9.25
+  },
+  "FEB 22-28|Improper Loading": {
+   "ncps": 4,
+   "pieces": 9,
+   "cost": 1249.2
+  },
+  "FEB 22-28|Tooling - Worn": {
+   "ncps": 1,
+   "pieces": 5,
+   "cost": 749.5
+  },
+  "FEB 22-28|Parts Not Deburred": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 12.5
+  },
+  "MAR 1-7|Parts Not Deburred": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 9.25
+  },
+  "MAR 1-7|Incorrect Offset - Tool": {
+   "ncps": 1,
+   "pieces": 5,
+   "cost": 62.5
+  },
+  "MAR 1-7|Tooling - Broken": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 299.8
+  },
+  "MAR 8-14|Program Error": {
+   "ncps": 2,
+   "pieces": 65,
+   "cost": 4976.0
+  },
+  "MAR 8-14|Incorrect Offset - Tool": {
+   "ncps": 2,
+   "pieces": 4,
+   "cost": 324.8
+  },
+  "MAR 8-14|Handling Damage": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 149.9
+  },
+  "MAR 8-14|Improper Loading": {
+   "ncps": 2,
+   "pieces": 2,
+   "cost": 18.5
+  },
+  "MAR 8-14|Set Up - 1st Part Off": {
+   "ncps": 1,
+   "pieces": 2,
+   "cost": 25.0
+  },
+  "MAR 8-14|Tooling - Broken": {
+   "ncps": 1,
+   "pieces": 5,
+   "cost": 1499.0
+  },
+  "MAR 8-14|Tooling - Worn": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 57.95
+  },
+  "MAR 8-14|Parts Not Deburred": {
+   "ncps": 1,
+   "pieces": 2,
+   "cost": 25.0
+  },
+  "MAR 15-21|Tooling - Broken": {
+   "ncps": 4,
+   "pieces": 9,
+   "cost": 536.15
+  },
+  "MAR 15-21|Parts Not Deburred": {
+   "ncps": 2,
+   "pieces": 4,
+   "cost": 462.2
+  },
+  "MAR 15-21|Improper Loading": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 9.25
+  },
+  "MAR 15-21|Program Error": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 57.95
+  },
+  "MAR 15-21|Tooling - Worn": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 9.25
+  },
+  "MAR 22-28|Handling Damage": {
+   "ncps": 2,
+   "pieces": 7,
+   "cost": 865.4
+  },
+  "MAR 22-28|Set Up - 1st Part Off": {
+   "ncps": 2,
+   "pieces": 4,
+   "cost": 908.65
+  },
+  "MAR 22-28|Program Error": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 57.95
+  },
+  "MAR 22-28|Improper Loading": {
+   "ncps": 1,
+   "pieces": 5,
+   "cost": 749.5
+  },
+  "MAR 22-28|Tooling - Broken": {
+   "ncps": 1,
+   "pieces": 2,
+   "cost": 299.8
+  },
+  "MAR 22-28|Tooling - Worn": {
+   "ncps": 1,
+   "pieces": 2,
+   "cost": 25.0
+  },
+  "MAR 29-4|Parts Not Deburred": {
+   "ncps": 2,
+   "pieces": 3,
+   "cost": 37.5
+  },
+  "MAR 29-4|Program Error": {
+   "ncps": 2,
+   "pieces": 7,
+   "cost": 1524.0
+  },
+  "MAR 29-4|Tooling - Worn": {
+   "ncps": 2,
+   "pieces": 2,
+   "cost": 599.6
+  },
+  "MAR 29-4|Set Up - 1st Part Off": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 149.9
+  },
+  "APR 5-11|Incorrect Offset - Tool": {
+   "ncps": 2,
+   "pieces": 4,
+   "cost": 599.6
+  },
+  "APR 5-11|Improper Loading": {
+   "ncps": 3,
+   "pieces": 4,
+   "cost": 758.75
+  },
+  "APR 5-11|Handling Damage": {
+   "ncps": 2,
+   "pieces": 3,
+   "cost": 612.1
+  },
+  "APR 5-11|Program Error": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 9.25
+  },
+  "APR 5-11|Tooling - Broken": {
+   "ncps": 1,
+   "pieces": 1,
+   "cost": 9.25
+  }
+ },
+ "shifted": [
+  "I10039",
+  "I10040"
+ ],
+ "duplicates": 1
+}
