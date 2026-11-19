@@ -1,0 +1,99 @@
+{
+ "fmt-ncr-log.csv": {
+  "n": 40,
+  "pieces": 153,
+  "cost": 9602.1,
+  "byCause": {
+   "Fixture issue": [
+    7,
+    1107.3
+   ],
+   "Worn tool": [
+    13,
+    3294.2
+   ],
+   "Operator error": [
+    6,
+    1098.3
+   ],
+   "Wrong program": [
+    9,
+    2135.5
+   ],
+   "Setup error": [
+    3,
+    1640.5
+   ],
+   "Material defect": [
+    2,
+    326.3
+   ]
+  },
+  "term": "NCR"
+ },
+ "fmt-quality-notifications.xlsx": {
+  "n": 55,
+  "pieces": 112,
+  "cost": 1952.5,
+  "byCause": {
+   "Setup error": [
+    8,
+    466.5
+   ],
+   "Wrong program": [
+    6,
+    263.7
+   ],
+   "Worn tool": [
+    9,
+    251.25
+   ],
+   "Operator error": [
+    10,
+    263.95
+   ],
+   "Fixture issue": [
+    9,
+    287.2
+   ],
+   "Material defect": [
+    13,
+    419.9
+   ]
+  },
+  "term": "notification"
+ },
+ "fmt-monthly-tabs.xlsx": {
+  "n": 27,
+  "pieces": 114,
+  "cost": 2707.5,
+  "byCause": {
+   "Material defect": [
+    5,
+    546.25
+   ],
+   "Fixture issue": [
+    3,
+    332.5
+   ],
+   "Wrong program": [
+    5,
+    356.25
+   ],
+   "Worn tool": [
+    6,
+    593.75
+   ],
+   "Operator error": [
+    5,
+    546.25
+   ],
+   "Setup error": [
+    3,
+    332.5
+   ]
+  },
+  "term": "report",
+  "sheets": 3
+ }
+}

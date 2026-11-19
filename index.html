@@ -674,6 +674,7 @@
       .ncpcheck{display:flex; align-items:center; gap:10px; min-height:44px; padding:6px 4px; border-bottom:1px dashed var(--line-soft); font-size:14.5px; color:var(--ink); cursor:pointer}
       .ncpcheck input{width:20px; height:20px; flex-shrink:0; accent-color:var(--cyan)}
       .ncpcheck.off{color:var(--ink-faint); cursor:default}
+      .ncpcols{display:grid; grid-template-columns:1fr; gap:4px} .ncpcol{display:flex; flex-direction:column; gap:2px; font-size:13.5px; color:var(--ink-dim)} @media(min-width:700px){ .ncpcols{grid-template-columns:1fr 1fr; column-gap:14px} }
       .ncpmerge{padding:8px 0; border-bottom:1px dashed var(--line-soft); font-size:14.5px; color:var(--ink)} .ncpmerge select{margin-top:6px}
       .ncpcheck .small{margin-left:auto; text-align:right}
       .qcchart .qc-bar{fill:var(--cyan); fill-opacity:.85} .qcchart .qc-bar-o{fill:var(--ink-faint); fill-opacity:.6}
@@ -702,7 +703,7 @@
       </div>
       <nav class="clusters" role="tablist" aria-label="Tool groups">
         <button type="button" role="tab" id="clbtn-process" aria-selected="true" data-cluster="process"><span class="cl-name">Process</span><span class="cl-sub">SPC · Short-run · Attribute</span></button>
-        <button type="button" role="tab" id="clbtn-analyse" aria-selected="false" data-cluster="analyse"><span class="cl-name">Analyse</span><span class="cl-sub">Data Check · Pareto · Scrap report</span></button>
+        <button type="button" role="tab" id="clbtn-analyse" aria-selected="false" data-cluster="analyse"><span class="cl-name">Analyse</span><span class="cl-sub">Data Check · Pareto · Scrap / NCR</span></button>
         <button type="button" role="tab" id="clbtn-measure" aria-selected="false" data-cluster="measure"><span class="cl-name">Measure</span><span class="cl-sub">Gage R&amp;R · Position · Stack-Up</span></button>
         <button type="button" role="tab" id="clbtn-sampling" aria-selected="false" data-cluster="sampling"><span class="cl-name">Sampling</span><span class="cl-sub">AQL lookup</span></button>
         <button type="button" role="tab" id="clbtn-reference" aria-selected="false" data-cluster="reference"><span class="cl-name">Reference</span><span class="cl-sub">Threads · Converters · Learn</span></button>
@@ -712,7 +713,7 @@
         <button type="button" role="tab" id="tabbtn-spc" aria-selected="true" data-tab="spc" data-cluster="process">SPC &amp; Capability</button>
         <button type="button" role="tab" id="tabbtn-check" aria-selected="false" data-tab="check" data-cluster="analyse">Data Check</button>
         <button type="button" role="tab" id="tabbtn-pareto" aria-selected="false" data-tab="pareto" data-cluster="analyse">Pareto</button>
-        <button type="button" role="tab" id="tabbtn-ncp" aria-selected="false" data-tab="ncp" data-cluster="analyse">Scrap / NCP report</button>
+        <button type="button" role="tab" id="tabbtn-ncp" aria-selected="false" data-tab="ncp" data-cluster="analyse">Scrap / NCR report</button>
         <button type="button" role="tab" id="tabbtn-grr" aria-selected="false" data-tab="grr" data-cluster="measure">Gage R&amp;R</button>
         <button type="button" role="tab" id="tabbtn-tp" aria-selected="false" data-tab="tp" data-cluster="measure">True Position</button>
         <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
@@ -1566,8 +1567,8 @@
       <!-- ============ TOOL : SCRAP / NCP REPORT (2026-11-17) ============ -->
       <section class="tool" id="tool-ncp" role="tabpanel" aria-labelledby="tabbtn-ncp">
         <div class="card">
-          <h2>Scrap / NCP report</h2>
-          <p class="guru">Import the raw NCP sheets as they come out of the system. Totals by week and cause, the charts and a PDF are built for you — no summary columns to fill in by hand.</p>
+          <h2>Scrap / NCR report</h2>
+          <p class="guru">Import the raw NCP / NCR / nonconformance sheets as they come out of the system. Totals by week and cause, the charts and a PDF are built for you — no summary columns to fill in by hand.</p>
           <label class="flabel" for="ncpFile">Import Excel (.xlsx) or CSV — one or more files</label>
           <input type="file" id="ncpFile" accept=".xlsx,.csv,.txt,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" multiple>
           <div class="svrow" id="ncpHistRow">
@@ -1582,6 +1583,9 @@
             <p class="small" id="ncpSheetNote"></p>
             <div class="btnrow" style="margin-top:6px"><button type="button" class="ghost" id="ncpAll">Select all</button><button type="button" class="ghost" id="ncpNone">Select none</button></div>
             <div id="ncpSheets" class="ncpchecks"></div>
+            <h3>Columns</h3>
+            <p class="small" id="ncpColNote">Found automatically from the column names. Change any that are wrong.</p>
+            <div id="ncpCols" class="ncpcols"></div>
             <h3>Options</h3>
             <div class="row2">
               <div><label class="flabel" for="ncpPeriod">One period on the charts is</label>
@@ -4288,34 +4292,91 @@
          tests/ncp.test.js extracts this block verbatim. */
       var NCP = (function(){
         function nh(h){ return String(h === undefined || h === null ? "" : h).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
-        /* header aliases, compared after nh() */
-        var ALIAS = {
-          ncp:     ["ncp","ncp number","ncp no","ncr","ncr number","nc number","nonconformance","nonconformance number"],
-          part:    ["part number","part","part no","pn","item","item number"],
-          date:    ["submitted","date","date submitted","created","ncp date","submitted date"],
-          job:     ["job","job number","work order","wo"],
-          found:   ["dept found","department found"],
-          orig:    ["dept originated","department originated","originating dept"],
-          machine: ["work center","workcenter","work centre","machine","machine work center","resource"],
-          cost:    ["cost","total cost","scrap cost","cost usd","cost cad"],
-          cause:   ["root cause","cause"],
-          reason:  ["reason","nc reason","defect"],
-          saved:   ["saved","saved pcs","qty saved"],
-          scrap:   ["scrap","scrapped","scrap qty","scrapped pcs","qty scrapped","scrap pcs"]
-        };
-        var FIELD = {}; Object.keys(ALIAS).forEach(function(f){ ALIAS[f].forEach(function(a){ FIELD[a] = f; }); });
-        /* header row = first of the top 10 rows naming 3+ known fields; the
-           first column with a given field wins (a right-hand summary "COST"
-           is ignored). */
-        function detect(grid){
+        /* Column names differ between systems (NCP, NCR, nonconformance
+           report, quality notification…), so headers are classified by the
+           words they contain. Lower number = better match for that field.
+           Quantity and cost columns must hold mostly numbers to count. */
+        function has(h, re){ return re.test(h); }
+        function classify(h){
+          var out = [];
+          if(!h) return out;
+          var dateish = has(h, /\b(date|submitted|created|opened|raised|reported|logged|time)\b/);
+          var noIdWords = has(h, /\b(date|type|status|step|stage|desc|description|text|title|owner|by)\b/);
+          if(!noIdWords){
+            if(has(h, /^(ncp|ncr|nc|ncmr|qn|notification|nonconformance|nonconformity|deviation)$/)) out.push(["ncp",1]);
+            else if(has(h, /\b(ncp|ncr|ncmr|qn|notification|nonconformance|nonconformity|non conformance|non conforming|nonconforming|deviation)\b/) && has(h, /\b(no|number|num|id|ref|report)\b/)) out.push(["ncp",2]);
+            else if(has(h, /\b(report|record|ticket|case|incident)\b/) && has(h, /\b(no|number|num|id|ref)\b/)) out.push(["ncp",3]);
+            else if(has(h, /^(report|record|ticket|case|incident)$/)) out.push(["ncp",3]);
+          }
+          if(dateish && !has(h, /\b(due|close|closed|closing|target|complete|completed|resolved|week|ship|shipped|required)\b/))
+            out.push(["date", has(h, /\b(submitted|created|opened|raised|reported|logged)\b/) ? 1 : 2]);
+          if(has(h, /\b(cost|value|amount|price|loss)\b/)){
+            if(has(h, /\b(unit|each|per|ea)\b/)) out.push(["unitCost",1]);
+            else out.push(["cost", has(h, /\b(scrap|total|nc|ncr|ncp|nonconformance|rejected)\b/) ? 1 : 2]);
+            return out;
+          }
+          if(has(h, /\b(qty|quantity|pcs|pieces|count|units)\b|\bscrap\w*\b|\breject\w*\b|\bdefective\b/)){
+            if(has(h, /\b(saved|rework\w*|repaired|use as is|uai|salvaged|recovered)\b/)) out.push(["saved",1]);
+            else if(has(h, /\bscrap\w*\b/)) out.push(["scrap",1]);
+            else if(has(h, /\b(reject\w*|nonconforming|nc|defective|failed)\b/)) out.push(["scrap",2]);
+            else if(!has(h, /\b(order|lot|batch|ordered|produced|made|inspected|sample|received|good|total)\b/)) out.push(["scrap",3]);
+            else if(has(h, /\b(inspected|produced|made|sample)\b/)) out.push(["qtyMade",1]);
+          }
+          if(has(h, /^saved$/)) out.push(["saved",1]);
+          if(has(h, /\broot cause\b/)) out.push(["cause",1]);
+          else if(has(h, /\bcause\b/) && !has(h, /\b(by|owner|date)\b/)) out.push(["cause",2]);
+          else if(has(h, /\b(defect|failure|problem|nonconformance|nc|ncr|discrepancy)\b/) && has(h, /\b(code|type|mode|category|class)\b/)) out.push(["cause",3]);
+          else if(has(h, /^(category|defect category|issue category|nc category)$/)) out.push(["cause",4]);
+          if(has(h, /\b(reason|defect|problem|issue|discrepancy|description)\b/) && !has(h, /\b(part|item|material)\b/)) out.push(["reason", has(h, /\breason\b/) ? 1 : 2]);
+          if(has(h, /\b(part|item|material|sku|product|component|drawing)\b/) && !has(h, /\b(desc|description|name|rev|revision|qty|quantity|type|group|class)\b/)) out.push(["part", has(h, /\b(part|item|material)\b/) && has(h, /\b(number|no|num|id|code)\b/) ? 1 : 2]);
+          if(has(h, /\b(job|work order|wo|production order|mo|manufacturing order|lot|batch|traveler|traveller)\b/) && !has(h, /\b(purchase|po|qty|quantity)\b/)) out.push(["job", has(h, /\b(job|work order|wo)\b/) ? 1 : 2]);
+          if(has(h, /\b(work cent(er|re)|workcenter|workcentre|machine|equipment|resource|cell|line|asset|station|operation|op)\b/) && !has(h, /\b(qty|line item|no of)\b/)) out.push(["machine", has(h, /\b(work cent(er|re)|workcenter|workcentre|machine|equipment)\b/) ? 1 : has(h, /\b(resource|cell|line|asset|station)\b/) ? 2 : 3]);
+          if(has(h, /\b(found|detected|discovered)\b/)) out.push(["found",1]);
+          if(has(h, /\b(originat\w*|responsible|caused|source)\b/) && !has(h, /\bcause\b/)) out.push(["orig",1]);
+          if(has(h, /\bsupplier|vendor\b/)) out.push(["orig",2]);
+          return out;
+        }
+        var NUMERIC = { cost:1, unitCost:1, scrap:1, saved:1, qtyMade:1 };
+        function mostlyNumeric(grid, hi, c){
+          var n = 0, num = 0;
+          for(var i = hi+1; i < Math.min(grid.length, hi+200); i++){
+            var v = String(((grid[i]||[])[c]) === undefined ? "" : (grid[i]||[])[c]).trim(); if(!v) continue;
+            n++; if(isFinite(Number(v.replace(/[$,\s]/g, "")))) num++;
+          }
+          return n === 0 || num / n >= 0.6;
+        }
+        /* header row = first of the top 10 rows naming 3+ fields. For each
+           field the best-ranked column wins; on a tie, the leftmost (so a
+           hand-typed summary "COST" on the right is ignored). override:
+           { field: normalised header name or "" for none } */
+        function detect(grid, override){
           for(var i = 0; i < Math.min(grid.length, 10); i++){
-            var row = grid[i] || [], map = {}, n = 0;
-            for(var c = 0; c < row.length; c++){ var f = FIELD[nh(row[c])]; if(f && map[f] === undefined){ map[f] = c; n++; } }
-            if(n >= 3) return { hi:i, map:map, n:n };
+            var row = grid[i] || [], best = {}, n;
+            for(var c = 0; c < row.length; c++){
+              var h = nh(row[c]); if(!h) continue;
+              classify(h).forEach(function(fp){
+                var f = fp[0], pr = fp[1];
+                if(NUMERIC[f] && !mostlyNumeric(grid, i, c)) return;
+                if(!best[f] || pr < best[f].pr) best[f] = { c:c, pr:pr };
+              });
+            }
+            var map = {}; Object.keys(best).forEach(function(f){ map[f] = best[f].c; });
+            /* one column, one meaning: drop the weaker claim */
+            var byCol = {}; Object.keys(map).forEach(function(f){ var c = map[f]; if(byCol[c] === undefined || best[f].pr < best[byCol[c]].pr) byCol[c] = f; });
+            Object.keys(map).forEach(function(f){ if(byCol[map[f]] !== f) delete map[f]; });
+            if(override) Object.keys(override).forEach(function(f){
+              var want = override[f]; delete map[f]; if(!want) return;
+              for(var c = 0; c < row.length; c++) if(nh(row[c]) === want){ map[f] = c; break; }
+            });
+            n = Object.keys(map).length;
+            if(n >= 3) return { hi:i, map:map, n:n, headers: row.map(function(x){ return String(x === undefined ? "" : x).trim(); }) };
           }
           return null;
         }
-        function isNcpSheet(d){ return !!d && (d.map.cost !== undefined || d.map.scrap !== undefined) && (d.map.cause !== undefined || d.map.reason !== undefined) && (d.map.ncp !== undefined || d.map.part !== undefined); }
+        var FIELDS = [["ncp","Report number (NCP / NCR)"],["date","Date"],["part","Part number"],["job","Job / work order"],["machine","Machine / work center"],
+                      ["cause","Root cause"],["reason","Reason / defect (used when root cause is blank)"],["cost","Cost"],["unitCost","Unit cost (× scrap qty, if no cost column)"],
+                      ["scrap","Scrap qty"],["saved","Saved / reworked qty"],["found","Dept found"],["orig","Dept originated / supplier"]];
+        function isNcpSheet(d){ return !!d && (d.map.cost !== undefined || d.map.scrap !== undefined || d.map.unitCost !== undefined) && (d.map.cause !== undefined || d.map.reason !== undefined) && (d.map.ncp !== undefined || d.map.part !== undefined); }
         var DAY = 86400000, EPOCH = Date.UTC(1899, 11, 30);
         function serialOk(v){ return v > 36526 && v < 73051; } /* 2000-01-01 .. 2099-12-31 */
         /* -> UTC-midnight Date, or null */
@@ -4331,10 +4392,11 @@
         function txt(v){ return String(v === undefined || v === null ? "" : v).trim(); }
         var JOBRE = /^\d{4,}-\d{1,3}$/;
         /* sheets: [{name, grid}] -> cleaned rows + what was found */
-        function parse(sheets){
-          var rows = [], info = [], seen = {}, issues = { dupes:[], shifted:[], noCause:[], badNum:[], noDate:[] };
+        function parse(sheets, override){
+          var rows = [], info = [], seen = {}, issues = { dupes:[], shifted:[], noCause:[], badNum:[], noDate:[], unitCost:0 }, idHead = "";
           sheets.forEach(function(sh){
-            var d = detect(sh.grid || []);
+            var d = detect(sh.grid || [], override);
+            if(d && d.map.ncp !== undefined && !idHead) idHead = nh(d.headers[d.map.ncp]);
             if(!isNcpSheet(d)){ info.push({ name:sh.name, used:false, n:0, why: d ? "no cost/scrap and cause columns" : "no NCP header row" }); return; }
             var M = d.map, n = 0, g = sh.grid;
             var cell = function(r, f){ return M[f] === undefined ? "" : r[M[f]]; };
@@ -4353,6 +4415,7 @@
                 if(d2){ dt = d2; part = p2; job = j2; fixed = true; }
               }
               var cost = num(costRaw), scrap = num(scrapRaw), saved = num(savedRaw);
+              if(M.cost === undefined && M.unitCost !== undefined){ var uc = num(cell(r, "unitCost")); cost = isFinite(uc) && isFinite(scrap) ? Math.round(uc * scrap * 100) / 100 : NaN; issues.unitCost++; }
               var key = id || (sh.name + "#" + (i+1));
               if(id && seen[id]){ issues.dupes.push({ id:id, where:sh.name, first:seen[id] }); continue; }
               if(id) seen[id] = sh.name;
@@ -4364,9 +4427,11 @@
                           cause:cause, cost:isFinite(cost)?cost:0, scrap:isFinite(scrap)?scrap:0, saved:isFinite(saved)?saved:0 });
               n++;
             }
-            info.push({ name:sh.name, used:true, n:n, fields:Object.keys(M) });
+            info.push({ name:sh.name, used:true, n:n, fields:Object.keys(M), map:M, headers:d.headers });
           });
-          return { rows:rows, sheets:info, issues:issues };
+          /* what the records are called, for the wording on screen */
+          var term = /ncp/.test(idHead) ? "NCP" : /ncr|ncmr/.test(idHead) ? "NCR" : /notification|qn/.test(idHead) ? "notification" : /deviation/.test(idHead) ? "deviation" : /nonconform|non conform|\bnc\b/.test(idHead) ? "NCR" : "report";
+          return { rows:rows, sheets:info, issues:issues, term:term };
         }
         /* names: case, spacing and punctuation ignored; for machines a quoted
            name ("575 - Brand 'MODEL-4' Machine") is used when present */
@@ -4451,7 +4516,7 @@
           newRows.forEach(function(r){ if(idx[r.id] !== undefined){ out[idx[r.id]] = r; replaced++; } else { idx[r.id] = out.length; out.push(r); added++; } });
           return { rows:out, added:added, replaced:replaced };
         }
-        return { detect:detect, parse:parse, variants:variants, aggregate:aggregate, mergeHistory:mergeHistory, toDate:toDate, weekStart:weekStart, machineName:machineName, causeKey:causeKey };
+        return { detect:detect, classify:classify, FIELDS:FIELDS, nh:nh, parse:parse, variants:variants, aggregate:aggregate, mergeHistory:mergeHistory, toDate:toDate, weekStart:weekStart, machineName:machineName, causeKey:causeKey };
       })();
       /* @@NCP-CALC END */
       /* ======================================================================
@@ -4469,7 +4534,9 @@
         ["parMach","Pareto — machines by cost", true],
         ["table",  "Totals by period and cause (the summary you used to type)", true]
       ];
-      var ncpState = { rows:[], sheets:[], source:"" }, ncpLast = null;
+      var ncpState = { rows:[], sheets:[], source:"", raw:null, term:"NCP" }, ncpLast = null, ncpOverride = null;
+      function ncpT(n){ var t = ncpState.term || "NCP"; var pl = t === "NCP" || t === "NCR" ? t + "s" : t + "s"; return n === 1 ? t : pl; }
+      function ncpTcap(n){ var t = ncpT(n); return t.charAt(0).toUpperCase() + t.slice(1); }
       function ncpLS(k, d){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
       function ncpLSset(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
       function ncpMoney(x){ return "$" + Number(x).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 }); }
@@ -4501,15 +4568,38 @@
             '<option value="'+esc(second.key)+'">Same cause — call it "'+esc(second.names[0])+'"</option>'+
             '<option value="">Different causes — keep separate</option></select></div>'; }).join("");
       }
-      function ncpSetup(source, sheets, parsed){
-        ncpState = { rows: parsed.rows, sheets: sheets, source: source, issues: parsed.issues };
+      function ncpColsDraw(){
+        var wrap = $("ncpCols"), used = ncpState.sheets.filter(function(s){ return s.used && s.headers; });
+        if(!used.length){ wrap.innerHTML = ""; $("ncpColNote").textContent = ncpState.source === "history" ? "Columns were read when the history was saved." : ""; return; }
+        var heads = [], seenH = {};
+        used.forEach(function(s){ s.headers.forEach(function(h){ var k = NCP.nh(h); if(k && !seenH[k]){ seenH[k] = h; heads.push(k); } }); });
+        var first = used[0];
+        wrap.innerHTML = NCP.FIELDS.map(function(f){
+          var cur = first.map[f[0]] !== undefined ? NCP.nh(first.headers[first.map[f[0]]]) : "";
+          return '<label class="ncpcol"><span>'+esc(f[1])+'</span><select class="biginput" data-field="'+f[0]+'"><option value="">— not used —</option>'+
+            heads.map(function(k){ return '<option value="'+esc(k)+'"'+(k===cur?" selected":"")+'>'+esc(seenH[k])+'</option>'; }).join("")+'</select></label>'; }).join("");
+        $("ncpColNote").textContent = "Found automatically from the column names" + (used.length > 1 ? " (each sheet is matched by these names)" : "") + ". Change any that are wrong.";
+      }
+      function ncpReparse(){
+        if(!ncpState.raw) return;
+        var o = {}; $("ncpCols").querySelectorAll("select").forEach(function(sel){ o[sel.getAttribute("data-field")] = sel.value; });
+        ncpOverride = o;
+        var keep = {}; $("ncpSheets").querySelectorAll("input").forEach(function(i){ keep[i.getAttribute("data-sheet")] = i.checked; });
+        var parsed = NCP.parse(ncpState.raw, o);
+        ncpSetup("file", parsed.sheets, parsed, keep, true);
+      }
+      $("ncpCols").addEventListener("change", ncpReparse);
+      function ncpSetup(source, sheets, parsed, keep, keepCols){
+        ncpState = { rows: parsed.rows, sheets: sheets, source: source, issues: parsed.issues, raw: source === "file" ? ncpState.raw : null, term: parsed.term || "NCP" };
         var used = sheets.filter(function(s){ return s.used; });
         $("ncpSheets").innerHTML = sheets.map(function(s){
-          return '<label class="ncpcheck'+(s.used?"":" off")+'"><input type="checkbox" data-sheet="'+esc(s.name)+'"'+(s.used?" checked":" disabled")+'> '+esc(s.name)+' <span class="small">'+(s.used ? s.n+" NCP"+(s.n===1?"":"s") : "— skipped: "+esc(s.why))+'</span></label>'; }).join("");
-        $("ncpSheetNote").textContent = used.length + " of " + sheets.length + " sheet" + (sheets.length===1?"":"s") + " hold NCP rows (" + parsed.rows.length + " NCPs). Untick a sheet to leave it out — for example a week that is not finished yet.";
-        $("ncpPeriod").value = (source === "file" && used.length > 1) ? "sheet" : "week";
+          var on = s.used && !(keep && keep[s.name] === false);
+          return '<label class="ncpcheck'+(s.used?"":" off")+'"><input type="checkbox" data-sheet="'+esc(s.name)+'"'+(on?" checked":"")+(s.used?"":" disabled")+'> '+esc(s.name)+' <span class="small">'+(s.used ? s.n+" "+ncpT(s.n) : "— skipped: "+esc(s.why))+'</span></label>'; }).join("");
+        $("ncpSheetNote").textContent = used.length + " of " + sheets.length + " sheet" + (sheets.length===1?"":"s") + " hold " + ncpT(2) + " (" + parsed.rows.length + " " + ncpT(parsed.rows.length) + "). Untick a sheet to leave it out — for example a week that is not finished yet.";
+        if(!keepCols) $("ncpPeriod").value = (source === "file" && used.length > 1) ? "sheet" : "week";
         $("ncpPeriod").querySelector('option[value="sheet"]').disabled = source !== "file";
         ncpMergeDraw();
+        if(!keepCols) ncpColsDraw();
         $("ncpSetup").classList.remove("hidden");
         $("ncpResults").classList.add("hidden");
       }
@@ -4539,9 +4629,16 @@
         });
         chain.then(function(){
           if(!out.length){ showMsg(msg, "Could not read " + (fail.join(", ") || "that file") + ". Save it as .xlsx or .csv and try again."); return; }
+          ncpState.raw = out; ncpOverride = null;
           var parsed = NCP.parse(out);
-          if(!parsed.rows.length){ $("ncpSetup").classList.add("hidden"); showMsg(msg, "No NCP rows found. The sheet needs a header row with columns like NCP, Part Number, Cost, Root Cause, Scrap."); return; }
+          if(!parsed.rows.length){
+            var anyHead = out.map(function(sh){ return NCP.detect(sh.grid || []); }).filter(Boolean)[0];
+            $("ncpSetup").classList.add("hidden");
+            showMsg(msg, "No nonconformance rows found. The sheet needs a header row naming at least a report number or part number, a cause (or reason/defect), and a cost or scrap quantity." + (anyHead ? " Columns recognised: " + Object.keys(anyHead.map).join(", ") + "." : ""));
+            return;
+          }
           if(fail.length) showMsg(msg, "Skipped: " + fail.join(", ") + " (not .xlsx or .csv).", true); else hideMsg(msg);
+          ncpState.raw = out;
           ncpSetup("file", parsed.sheets, parsed);
         });
       }
@@ -4632,8 +4729,8 @@
         var A = NCP.aggregate(rows, { period: period, pieces: pieces, merge: merge, labels: labels, sheetOrder: sheetOrder });
         var on = {}; $("ncpCharts").querySelectorAll("input:checked").forEach(function(i){ on[i.getAttribute("data-chart")] = 1; });
         var labels = A.periods.map(function(p){ return p.label; });
-        $("ncpTiles").innerHTML = statTile("NCPs", String(A.total.ncps)) + statTile("Pieces", String(A.total.pieces)) + statTile("Cost", A.total.cost >= 10000 ? "$" + Math.round(A.total.cost).toLocaleString() : ncpMoney(A.total.cost)) +
-          statTile("Periods", String(A.periods.length)) + statTile("Avg NCPs / period", A.periods.length ? fmt(A.total.ncps / A.periods.length, 1) : "—") + statTile("Causes", String(A.byCause.length));
+        $("ncpTiles").innerHTML = statTile(ncpTcap(2), String(A.total.ncps)) + statTile("Pieces", String(A.total.pieces)) + statTile("Cost", A.total.cost >= 10000 ? "$" + Math.round(A.total.cost).toLocaleString() : ncpMoney(A.total.cost)) +
+          statTile("Periods", String(A.periods.length)) + statTile("Avg " + ncpT(2) + " / period", A.periods.length ? fmt(A.total.ncps / A.periods.length, 1) : "—") + statTile("Causes", String(A.byCause.length));
         /* data checks */
         var I = ncpState.issues || {}, sel = {}; ncpSelectedSheets().forEach(function(s){ sel[s] = 1; });
         var inSel = function(list){ return (list || []).filter(function(x){ return !x.where || sel[x.where]; }); };
@@ -4645,11 +4742,12 @@
         var bn = inSel(I.badNum); if(bn.length) f += '<div class="flag amber"><strong>'+bn.length+' row'+(bn.length>1?"s":"")+' with text in a number column</strong> (cost, scrap or saved) — counted as 0: '+esc(bn.slice(0,10).map(function(d){ return d.id; }).join(", "))+'</div>';
         if(period !== "sheet" && A.undated) f += '<div class="flag amber"><strong>'+A.undated+' NCP'+(A.undated>1?"s":"")+' with no readable date</strong> are left out of the period charts (still in the Paretos and totals).</div>';
         if(A.zeroFilled) f += '<div class="flag green">'+A.zeroFilled+' '+(period==="week"?"week":"month")+(A.zeroFilled>1?"s":"")+' with no NCPs inside the date range are shown as 0.</div>';
+        if(I.unitCost) f += '<div class="flag green">No cost column, so cost = unit cost × scrap qty for '+I.unitCost+' row'+(I.unitCost>1?"s":"")+'.</div>';
         var merged = Object.keys(merge).length; if(merged) f += '<div class="flag green">'+merged+' cause spelling'+(merged>1?"s":"")+' merged into the spelling you chose.</div>';
         if(!f) f = '<div class="flag green">No data problems found.</div>';
         $("ncpChecks").innerHTML = f;
         var h = "";
-        if(on.ncpC) h += ncpControlBlock("NCPs per period", labels, A.periods.map(function(p){ return p.ncps; }), "NCPs");
+        if(on.ncpC) h += ncpControlBlock(ncpTcap(2) + " per period", labels, A.periods.map(function(p){ return p.ncps; }), ncpT(2));
         if(on.pcsC) h += ncpControlBlock("Pieces per period", labels, A.periods.map(function(p){ return p.pieces; }), "pieces");
         if(on.costC){
           var costs = A.periods.map(function(p){ return p.cost; });
@@ -4662,11 +4760,11 @@
           } else h += '<h3>Cost per period</h3><p class="small">Needs at least 2 periods.</p>';
         }
         if(on.parCC) h += ncpParetoBlock("Pareto — causes by cost", A.byCause, "cost", ncpMoney, 12, "causes");
-        if(on.parCN) h += ncpParetoBlock("Pareto — causes by number of NCPs", A.byCause, "ncps", function(x){ return String(x); }, 12, "causes");
+        if(on.parCN) h += ncpParetoBlock("Pareto — causes by number of " + ncpT(2), A.byCause, "ncps", function(x){ return String(x); }, 12, "causes");
         if(on.parPart) h += ncpParetoBlock("Pareto — part numbers by cost", A.byPart, "cost", ncpMoney, 15, "part numbers");
         if(on.parMach) h += ncpParetoBlock("Pareto — machines by cost", A.byMachine, "cost", ncpMoney, 12, "machines");
         if(on.table){
-          h += '<h3>Totals by period and cause</h3><div class="gridscroll"><table class="dtable qctable ncptable"><tr><th style="text-align:left">Period / cause</th><th>NCPs</th><th>Pieces</th><th>Cost</th></tr>';
+          h += '<h3>Totals by period and cause</h3><div class="gridscroll"><table class="dtable qctable ncptable"><tr><th style="text-align:left">Period / cause</th><th>'+esc(ncpTcap(2))+'</th><th>Pieces</th><th>Cost</th></tr>';
           A.periods.forEach(function(p){
             h += '<tr class="ncpp"><td style="text-align:left">'+esc(p.label)+'</td><td>'+p.ncps+'</td><td>'+p.pieces+'</td><td>'+ncpMoney(p.cost)+'</td></tr>';
             p.causes.forEach(function(c){ h += '<tr><td style="text-align:left;padding-left:18px">'+esc(c.label)+'</td><td>'+c.ncps+'</td><td>'+c.pieces+'</td><td>'+ncpMoney(c.cost)+'</td></tr>'; });
@@ -8171,7 +8269,7 @@
           ["short","Short-run","short run batch production high mix setup approval first piece first part off PRE-Control DNOM deviation from nominal percent of tolerance machine capability predict new job which machine"],
           ["sigma","Sigma ⇄ PPM","sigma level PPM DPMO defects per million yield six sigma Cpk to PPM 1.5 shift"],
           ["check","Data Check","histogram normality normal Anderson Darling distribution descriptive statistics mean standard deviation"],
-          ["ncp","Scrap / NCP report","scrap report NCP NCR weekly scrap import excel workbook sheets tabs cost pieces root cause pareto by part machine PDF history"],
+          ["ncp","Scrap / NCR report","scrap report NCP NCR nonconformance nonconforming report non-conformance quality notification QN deviation reject log weekly scrap import excel workbook sheets tabs cost pieces root cause pareto by part machine PDF history"],
           ["pareto","Pareto","pareto defects categories vital few 80/20 scrap reasons"],
           ["grr","Gage R&R","gauge gage R&R repeatability reproducibility MSA measurement system ANOVA ndc EV AV gauge study"],
           ["tp","True Position","true position GD&T MMC LMC bonus tolerance hole location"],
