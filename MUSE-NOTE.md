@@ -328,3 +328,4 @@ Never add real company records to this repo.
 
 ## 2026-11-20: command/ rebuilt as the ISO 9001 Audit Guide (Harsh's request)
 The Quality Command tracker was replaced with a reference guide at the same URL. No data blocks. Old `qc.data` in localStorage is left alone and can be downloaded. Cache is `qcmd-v2-guide`. Facts checked: ISO 9001:2026 published 16 Sept 2026, transition ends 30 Sept 2029 (LRQA); surveillance content and the major/minor definitions follow ISO/IEC 17021-1:2015. NC response deadlines are described as set by the CB, not by ISO. Test: tests/command.e2e.js.
+- 2026-11-20 v3: Audit Guide restyled (graphite/teal, brass shop examples); Practice tab merges Interview and Drill; clause content now data-driven (CL array) with a cylinder-shop example per clause. Cache qcmd-v3-guide.

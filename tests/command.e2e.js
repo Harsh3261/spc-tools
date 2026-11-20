@@ -1,4 +1,4 @@
-/* ISO 9001 Audit Guide (command/index.html) in a real browser at phone size.
+/* ISO 9001 Audit Guide (command/index.html) in a real browser at phone size and desktop width.
    Checks: no script errors, every tab switches, clause search filters and
    recovers, no network requests, nothing written to storage, the old-tracker
    download notice appears only when old data exists.
@@ -17,7 +17,7 @@ let pass = 0, fail = 0; const ok = (c, l, x) => { if (c) pass++; else { fail++; 
   await pg.goto(URL);
   const visible = () => pg.$eval(".view.on", (e) => e.id);
   ok(await visible() === "v-basics", "opens on Basics");
-  for (const v of ["prepare", "clauses", "interview", "drill", "findings", "basics"]) {
+  for (const v of ["prepare", "clauses", "practice", "findings", "basics"]) {
     await pg.click('nav.bottom button[data-view="' + v + '"]');
     ok(await visible() === "v-" + v, "tab " + v);
     ok(await pg.$eval('nav.bottom button[data-view="' + v + '"]', (e) => e.getAttribute("aria-current")) === "page", "nav highlight " + v);
@@ -37,16 +37,20 @@ let pass = 0, fail = 0; const ok = (c, l, x) => { if (c) pass++; else { fail++; 
   await pg.fill("#cSearch", "");
   ok(await shown() === total && await pg.$eval("#cEmpty", (e) => getComputedStyle(e).display) === "none", "clear restores all");
   ok(await pg.$$eval("#clauseList h3", (h) => h.every((x) => x.style.display !== "none")), "headings restored");
+  /* old #drill links land on Practice */
+  await pg.goto(URL + "#drill"); await pg.reload(); ok(await visible() === "v-practice", "legacy #drill opens Practice");
+  /* every clause carries a cylinder-shop example */
+  ok(await pg.$$eval("#clauseList details", (d) => d.every((x) => x.querySelector(".shop"))), "every clause has a shop example");
   /* drill */
-  await pg.click('nav.bottom button[data-view="drill"]');
+  await pg.click('nav.bottom button[data-view="practice"]');
   const q1 = await pg.textContent("#dQ"); ok(q1.length > 10, "drill shows a question");
   ok(await pg.$eval("#dAns", (e) => e.hidden), "answer hidden first");
   await pg.click("#dReveal"); ok(!(await pg.$eval("#dAns", (e) => e.hidden)), "reveal shows answer");
   await pg.click('#dWho button[data-who="Shop floor"]');
-  ok(await pg.textContent("#dTag") === "Shop floor" && /of 7$/.test(await pg.textContent("#dCount")), "filter shop floor (7)", await pg.textContent("#dCount"));
+  ok(await pg.textContent("#dTag") === "Shop floor" && /of 6$/.test(await pg.textContent("#dCount")), "filter shop floor (6)", await pg.textContent("#dCount"));
   for (let i = 0; i < 8; i++) await pg.click("#dNext");
   ok(await pg.textContent("#dTag") === "Shop floor", "deck reshuffles and keeps filter");
-  ok(await pg.$$eval("#trail .tr", (t) => t.length) === 7, "order trail 7 steps");
+  ok(await pg.$$eval("#trail .tr", (t) => t.length) === 8, "order trail 8 steps");
   await pg.click('#tPick button[data-t="2"]'); ok(await pg.$$eval("#trail .tr", (t) => t.length) === 6, "bad-part trail");
   /* root-cause checker */
   await pg.click('nav.bottom button[data-view="findings"]');
@@ -68,6 +72,9 @@ let pass = 0, fail = 0; const ok = (c, l, x) => { if (c) pass++; else { fail++; 
   ok(await pg.evaluate(() => !!localStorage.getItem("qc.data")), "old data kept");
   /* layout: nothing wider than the phone */
   ok(await pg.evaluate(() => document.documentElement.scrollWidth <= 390), "no horizontal overflow");
+  /* desktop: nav sits at the top */
+  await pg.setViewportSize({ width: 1280, height: 900 });
+  ok(await pg.$eval("nav.bottom", (n) => n.getBoundingClientRect().top) < 200, "desktop nav at top");
   ok(errs.length === 0, "no page errors", errs);
   ok(net.length === 0, "no network requests", net);
   await b.close();

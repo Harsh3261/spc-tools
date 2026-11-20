@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#121417">
+<meta name="theme-color" content="#0E1114">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Audit Guide">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,223 +13,283 @@
 <link rel="apple-touch-icon" href="../icon-180.png">
 <!--
   ISO 9001 Audit Guide: a plain-language guide to a QMS and to the external
-  (certification body) audit, written for a management rep going into a first
-  surveillance audit after recertification. Reference only; it stores nothing
-  and makes no network request. Sources: ISO 9001:2015 clause structure,
-  ISO/IEC 17021-1:2015 (audit cycle, major/minor definitions, surveillance
-  content), ISO 9001:2026 publication notes from ISO, LRQA, DNV, Advisera.
-  Replaces the earlier "Quality Command" tracker at the same address.
+  (certification body) audit, written for a management rep in a hydraulic
+  cylinder shop going into a first surveillance audit after recertification.
+  Reference only; stores nothing and makes no network request.
+  Sources: ISO 9001:2015 clause structure; ISO/IEC 17021-1:2015 (audit cycle,
+  major/minor definitions, surveillance content); ISO 9001:2026 publication
+  notes from ISO, LRQA, DNV and Advisera. Shop examples are typical
+  situations, not requirements.
 -->
 <style>
   :root{
-    --bg:#121417; --bg2:#181B20; --panel:#1E2229; --panel2:#262B33; --line:#323944; --line-soft:#2A3038;
-    --ink:#E9EDF2; --ink-dim:#AEB6C2; --ink-faint:#7D8794;
-    --blue:#2563EB; --blue-t:#60A5FA; --green-ink:#86EFAC; --amber-ink:#FCD34D; --red-ink:#FCA5A5;
-    --r:12px; --pad:16px;
+    --bg:#0E1114; --bg2:#13171B; --panel:#181D23; --panel2:#20262E; --line:#2C343E; --line-soft:#232A33;
+    --ink:#E8ECEF; --dim:#A9B3BD; --faint:#76818C;
+    --acc:#2DD4BF; --acc-btn:#0F766E; --acc-soft:#0F2A28; --acc-line:#1E5A54;
+    --brass:#E0A84B; --brass-soft:#251D10; --brass-line:#5E4720;
+    --violet:#C4B5FD; --violet-soft:#1E1A33; --violet-line:#44397A;
+    --red:#FCA5A5; --red-soft:#2A1617; --red-line:#6B2B2B;
+    --amber:#FCD34D; --amber-soft:#29220F; --amber-line:#6B5320;
+    --green:#86EFAC; --green-soft:#0F241A; --green-line:#1F5A35;
+    --r:14px; --pad:16px;
     --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
     --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box}
-  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); font-size:16px; line-height:1.5; -webkit-text-size-adjust:100%}
-  body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
-  header{padding:calc(14px + env(safe-area-inset-top)) var(--pad) 4px; position:relative; max-width:860px; margin:0 auto}
-  header::before{content:""; position:absolute; left:var(--pad); right:var(--pad); top:calc(6px + env(safe-area-inset-top)); height:2px; background:var(--blue); border-radius:2px}
-  .brand{display:flex; align-items:center; gap:10px; margin-top:6px}
-  .brand svg{width:30px; height:30px; flex-shrink:0}
-  .brand h1{font-size:21px; margin:0; letter-spacing:.2px}
-  .brand h1 span{color:var(--blue-t)}
-  .tag{font-size:12.5px; color:var(--ink-faint); margin:2px 0 0}
-  main{padding:0 var(--pad); max-width:860px; margin:0 auto}
-  .view{display:none} .view.on{display:block}
-  h2{font-size:20px; margin:20px 0 6px}
-  h3{font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); margin:24px 0 8px}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); font-size:16px; line-height:1.55; -webkit-text-size-adjust:100%}
+  body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
+  header{position:relative; overflow:hidden; border-bottom:1px solid var(--line-soft); background:linear-gradient(160deg,#10201F 0%,#0E1114 60%)}
+  header::after{content:""; position:absolute; right:-60px; top:-60px; width:220px; height:220px; border-radius:50%; border:28px solid rgba(45,212,191,.06)}
+  .hwrap{max-width:880px; margin:0 auto; padding:calc(18px + env(safe-area-inset-top)) var(--pad) 16px; position:relative; z-index:1}
+  .brand{display:flex; align-items:center; gap:12px}
+  .brand svg{width:34px; height:34px; flex-shrink:0}
+  .brand h1{font-size:21px; margin:0; letter-spacing:.2px; line-height:1.2}
+  .brand h1 span{color:var(--acc)}
+  .tag{font-size:13px; color:var(--dim); margin:2px 0 0}
+  main{padding:0 var(--pad); max-width:880px; margin:0 auto}
+  .view{display:none; animation:fade .18s ease-out} .view.on{display:block}
+  @keyframes fade{from{opacity:0} to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){ .view{animation:none} }
+  .vhead{margin:20px 0 4px}
+  .vhead .eyebrow{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--acc); font-weight:700}
+  h2{font-size:23px; margin:2px 0 6px; line-height:1.25}
+  h3{font-size:12.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin:28px 0 10px; font-weight:700; display:flex; align-items:center; gap:10px}
+  h3::after{content:""; flex:1; height:1px; background:var(--line-soft)}
   p{margin:8px 0}
-  .lead{color:var(--ink-dim); margin:0 0 6px}
-  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; margin:10px 0}
-  .card h4{margin:0 0 6px; font-size:16.5px}
-  .card.hl{border-color:#2b4a8a; background:#172238}
-  .card.warn{border-color:#6b5320; background:#231e12}
-  ul,ol{margin:6px 0; padding-left:22px} li{margin:5px 0}
-  .small{font-size:14px; color:var(--ink-dim)}
-  .muted{color:var(--ink-faint)}
+  .lead{color:var(--dim); margin:0 0 6px; font-size:16.5px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:15px 16px; margin:10px 0}
+  .card h4{margin:0 0 6px; font-size:16.5px; line-height:1.3}
+  .card.hl{border-color:var(--acc-line); background:linear-gradient(180deg,var(--acc-soft),var(--panel) 75%)}
+  .card.warn{border-color:var(--amber-line); background:var(--amber-soft)}
+  .shop{border:1px solid var(--brass-line); background:var(--brass-soft); border-radius:10px; padding:10px 12px; margin:12px 0 4px; font-size:14.5px}
+  .shop .sh{display:flex; align-items:center; gap:7px; color:var(--brass); font-size:11.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:800; margin-bottom:3px}
+  .shop .sh svg{width:16px; height:16px}
+  ul,ol{margin:6px 0; padding-left:22px} li{margin:6px 0}
+  li::marker{color:var(--faint)}
+  .small{font-size:14px; color:var(--dim)}
+  .muted{color:var(--faint)}
   b,strong{color:#fff}
-  .pill{display:inline-block; font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:999px; border:1px solid var(--line); background:var(--panel2); color:var(--ink-dim); vertical-align:2px; white-space:nowrap}
-  .pill.new{color:#cfe0ff; border-color:#2b4a8a; background:#16233d}
-  .pill.red{color:var(--red-ink); border-color:#6b2b2b; background:#2a1717}
-  .pill.amber{color:var(--amber-ink); border-color:#6b5320; background:#2a2312}
-  .pill.green{color:var(--green-ink); border-color:#1f5a35; background:#11251a}
+  .pill{display:inline-block; font-size:11px; font-weight:800; letter-spacing:.03em; padding:2px 8px; border-radius:999px; border:1px solid var(--line); background:var(--panel2); color:var(--dim); vertical-align:2px; white-space:nowrap}
+  .pill.new{color:var(--violet); border-color:var(--violet-line); background:var(--violet-soft)}
+  .pill.red{color:var(--red); border-color:var(--red-line); background:var(--red-soft)}
+  .pill.amber{color:var(--amber); border-color:var(--amber-line); background:var(--amber-soft)}
+  .pill.green{color:var(--green); border-color:var(--green-line); background:var(--green-soft)}
+  .pill.acc{color:var(--acc); border-color:var(--acc-line); background:var(--acc-soft)}
   table{width:100%; border-collapse:collapse; font-size:14.5px}
-  th,td{text-align:left; padding:8px 6px; border-bottom:1px solid var(--line-soft); vertical-align:top}
-  th{color:var(--ink-dim); font-size:12px; letter-spacing:.06em; text-transform:uppercase}
-  tr.you td{background:#172238}
+  th,td{text-align:left; padding:9px 6px; border-bottom:1px solid var(--line-soft); vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  th{color:var(--faint); font-size:11.5px; letter-spacing:.08em; text-transform:uppercase}
+  tr.you td{background:var(--acc-soft)}
+  .num{font-family:var(--mono); color:var(--acc); font-weight:700; white-space:nowrap}
   details{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); margin:8px 0; overflow:hidden}
-  details[open]{border-color:#3b4656}
-  summary{list-style:none; cursor:pointer; padding:13px 14px; display:flex; gap:10px; align-items:baseline; min-height:48px}
+  details[open]{border-color:#3A4552; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  summary{list-style:none; cursor:pointer; padding:13px 14px; display:flex; gap:12px; align-items:center; min-height:52px}
   summary::-webkit-details-marker{display:none}
-  summary .no{font-family:var(--mono); color:var(--blue-t); font-weight:700; min-width:46px; flex-shrink:0}
-  summary .ti{font-weight:600; flex:1}
-  summary::after{content:"+"; color:var(--ink-faint); font-weight:700; margin-left:6px}
-  details[open] summary::after{content:"−"}
-  .body{padding:0 16px 14px}
-  .lab{font-size:12px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); margin:12px 0 2px; font-weight:700}
-  .q{border-left:3px solid var(--blue); padding:2px 0 2px 12px; margin:10px 0}
-  .q .a{color:var(--ink-dim); font-size:14.5px}
-  .say{display:block; background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px; padding:8px 11px; margin:6px 0; font-size:15px}
-  .grid2{display:grid; grid-template-columns:1fr; gap:10px}
-  @media (min-width:700px){ .grid2{grid-template-columns:1fr 1fr} }
-  .bad{color:var(--red-ink)} .good{color:var(--green-ink)}
-  .step{display:flex; gap:12px; margin:10px 0}
-  .step .n{width:28px; height:28px; border-radius:50%; background:var(--blue); color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; margin-top:2px}
-  .search{width:100%; background:var(--bg2); border:1px solid var(--line); border-radius:10px; padding:11px 12px; min-height:46px; font-size:16px; color:var(--ink); margin:6px 0 4px}
-  .search:focus{outline:2px solid var(--blue-t); outline-offset:1px}
-  .chips{display:flex; gap:6px; overflow-x:auto; padding:4px 0 8px; -webkit-overflow-scrolling:touch}
-  .chips a{flex-shrink:0; text-decoration:none; color:var(--ink-dim); border:1px solid var(--line); background:var(--panel2); padding:6px 11px; border-radius:999px; font-size:13.5px; font-weight:600}
-  a{color:var(--blue-t)}
-  dl{margin:0} dt{font-weight:700; margin-top:12px; color:#fff} dd{margin:2px 0 0; color:var(--ink-dim); font-size:15px}
-  nav.bottom{position:fixed; left:0; right:0; bottom:0; background:rgba(18,20,23,.96); border-top:1px solid var(--line); display:flex; padding:6px 6px calc(6px + env(safe-area-inset-bottom)); z-index:20; backdrop-filter:blur(8px)}
-  nav.bottom button{flex:1; min-width:0; background:none; border:0; color:var(--ink-faint); padding:6px 1px; border-radius:10px; font:inherit; font-size:11.5px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; min-height:52px; cursor:pointer}
-  nav.bottom button svg{width:22px; height:22px}
-  nav.bottom button[aria-current="page"]{color:#fff; background:var(--blue)}
-  @media (min-width:900px){ nav.bottom{max-width:860px; margin:0 auto; border:1px solid var(--line); border-bottom:0; border-radius:14px 14px 0 0} }
-  .seg{display:flex; gap:6px; overflow-x:auto; padding:2px 0 8px; -webkit-overflow-scrolling:touch}
-  .seg button{flex-shrink:0; appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--ink-dim); padding:8px 12px; border-radius:999px; font:inherit; font-size:14px; font-weight:600; min-height:38px; cursor:pointer}
-  .seg button.on{background:var(--blue); border-color:var(--blue); color:#fff}
-  .btn{appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--ink); border-radius:10px; padding:11px 14px; min-height:44px; cursor:pointer; font:inherit; font-weight:600; font-size:15px}
-  .btn.pri{background:var(--blue); border-color:var(--blue); color:#fff}
-  .btns{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
-  .dq{font-size:19px; font-weight:700; line-height:1.35; margin:10px 0 4px}
-  .tr{position:relative; padding:0 0 4px 30px}
-  .tr::before{content:""; position:absolute; left:11px; top:28px; bottom:-6px; width:2px; background:var(--line)}
+  summary .no{font-family:var(--mono); font-size:13px; color:var(--acc); font-weight:700; min-width:52px; flex-shrink:0; background:var(--acc-soft); border:1px solid var(--acc-line); border-radius:8px; padding:3px 6px; text-align:center}
+  summary .ti{font-weight:650; flex:1; line-height:1.3}
+  summary::after{content:""; width:9px; height:9px; border-right:2px solid var(--faint); border-bottom:2px solid var(--faint); transform:rotate(45deg); margin:-4px 4px 0 6px; transition:transform .15s}
+  details[open] summary::after{transform:rotate(-135deg); margin-top:4px}
+  .body{padding:0 16px 16px}
+  .lab{font-size:11.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--faint); margin:12px 0 2px; font-weight:800}
+  .lab.bad{color:var(--red)}
+  .q{border-left:3px solid var(--acc-line); padding:3px 0 3px 12px; margin:10px 0}
+  .say{display:block; background:var(--bg2); border:1px solid var(--line-soft); border-left:3px solid var(--acc); border-radius:8px; padding:9px 12px; margin:7px 0; font-size:15px}
+  .bad{color:var(--red)} .good{color:var(--green)}
+  .step{display:flex; gap:12px; margin:12px 0}
+  .step .n{width:28px; height:28px; border-radius:50%; background:var(--acc-soft); border:1px solid var(--acc-line); color:var(--acc); font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13.5px; margin-top:1px}
+  .search{width:100%; background:var(--bg2); border:1px solid var(--line); border-radius:12px; padding:12px 14px; min-height:48px; font-size:16px; color:var(--ink); margin:8px 0 4px; font-family:inherit}
+  .search:focus{outline:2px solid var(--acc); outline-offset:1px}
+  .chips,.seg{display:flex; gap:6px; overflow-x:auto; padding:4px 0 8px; -webkit-overflow-scrolling:touch; scrollbar-width:none}
+  .chips::-webkit-scrollbar,.seg::-webkit-scrollbar{display:none}
+  .chips a,.seg button{flex-shrink:0; text-decoration:none; color:var(--dim); border:1px solid var(--line); background:var(--panel2); padding:7px 12px; border-radius:999px; font:inherit; font-size:13.5px; font-weight:650; min-height:36px; cursor:pointer; display:inline-flex; align-items:center}
+  .seg button.on{background:var(--acc-btn); border-color:var(--acc-btn); color:#fff}
+  .btn{appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--ink); border-radius:11px; padding:11px 16px; min-height:46px; cursor:pointer; font:inherit; font-weight:700; font-size:15px}
+  .btn.pri{background:var(--acc-btn); border-color:var(--acc-btn); color:#fff}
+  .btn:active{transform:translateY(1px)}
+  .btns{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+  a{color:var(--acc)}
+  dl{margin:0} dt{font-weight:700; margin-top:12px; color:#fff} dd{margin:2px 0 0; color:var(--dim); font-size:15px}
+  .phase{display:flex; gap:12px; align-items:flex-start; margin:12px 0}
+  .phase .badge{flex-shrink:0; font-family:var(--mono); font-size:11.5px; font-weight:800; color:var(--acc); background:var(--acc-soft); border:1px solid var(--acc-line); border-radius:8px; padding:4px 6px; min-width:76px; text-align:center; margin-top:2px}
+  .three{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px}
+  .three div{background:var(--bg2); border:1px solid var(--line-soft); border-radius:10px; padding:10px; text-align:center}
+  .three div.now{border-color:var(--acc-line); background:var(--acc-soft)}
+  .three b{display:block; font-size:15px} .three span{font-size:12.5px; color:var(--dim)}
+  .dq{font-size:20px; font-weight:750; line-height:1.35; margin:12px 0 4px}
+  .drill{border-color:var(--acc-line)}
+  .tr{position:relative; padding:0 0 2px 34px}
+  .tr::before{content:""; position:absolute; left:12px; top:30px; bottom:-8px; width:2px; background:linear-gradient(var(--acc-line),var(--line))}
   .tr:last-child::before{display:none}
-  .tr .n{position:absolute; left:0; top:12px; width:24px; height:24px; border-radius:50%; background:var(--blue); color:#fff; font-size:12.5px; font-weight:800; display:flex; align-items:center; justify-content:center}
+  .tr .n{position:absolute; left:0; top:14px; width:26px; height:26px; border-radius:50%; background:var(--acc-btn); color:#fff; font-size:12.5px; font-weight:800; display:flex; align-items:center; justify-content:center}
   .tr .card{margin:6px 0}
-  .link{font-family:var(--mono); font-size:12.5px; color:var(--blue-t)}
-  .rc{border-radius:8px; padding:8px 11px; margin:8px 0; font-size:14.5px; border:1px solid var(--line)}
-  .rc.r{border-color:#6b2b2b; background:#2a1717} .rc.a{border-color:#6b5320; background:#2a2312} .rc.g{border-color:#1f5a35; background:#11251a}
+  .link{font-family:var(--mono); font-size:12.5px; color:var(--acc); background:var(--acc-soft); border-radius:6px; padding:3px 7px; display:inline-block; margin-top:4px}
+  .rc{border-radius:10px; padding:9px 12px; margin:8px 0; font-size:14.5px; border:1px solid var(--line)}
+  .rc.r{border-color:var(--red-line); background:var(--red-soft)} .rc.a{border-color:var(--amber-line); background:var(--amber-soft)} .rc.g{border-color:var(--green-line); background:var(--green-soft)}
+  textarea.search{min-height:110px; resize:vertical; line-height:1.45}
+  .grade{display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--line-soft)}
+  .grade:last-of-type{border-bottom:0}
+  .grade .pill{margin-top:3px; min-width:62px; text-align:center}
+  .resp{display:grid; grid-template-columns:1fr; gap:2px}
+  .resp .k{font-size:11.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--faint); font-weight:800; margin-top:12px}
+  .resp .k:first-child{margin-top:0}
+  @media (min-width:640px){ .resp{grid-template-columns:120px 1fr; gap:12px 14px} .resp .k{margin-top:3px} }
+  nav.bottom{position:fixed; left:0; right:0; bottom:0; background:rgba(14,17,20,.94); border-top:1px solid var(--line); display:flex; padding:6px 6px calc(6px + env(safe-area-inset-bottom)); z-index:20; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px)}
+  nav.bottom button{flex:1; min-width:0; background:none; border:0; color:var(--faint); padding:6px 1px; border-radius:12px; font:inherit; font-size:11.5px; font-weight:700; display:flex; flex-direction:column; align-items:center; gap:3px; min-height:54px; cursor:pointer}
+  nav.bottom button svg{width:22px; height:22px}
+  nav.bottom button[aria-current="page"]{color:var(--acc); background:var(--acc-soft)}
+  @media (min-width:900px){
+    body{padding-bottom:30px}
+    nav.bottom{position:sticky; top:0; bottom:auto; max-width:880px; margin:0 auto; border-top:0; border-bottom:1px solid var(--line); padding:8px var(--pad); gap:6px}
+    nav.bottom button{flex-direction:row; justify-content:center; font-size:14px; min-height:42px; gap:8px}
+    nav.bottom button svg{width:18px; height:18px}
+  }
   .oldData{display:none}
-  footer{color:var(--ink-faint); font-size:12.5px; text-align:center; margin:28px 0 10px}
-  .empty{display:none; color:var(--ink-faint); padding:10px 2px}
+  footer{color:var(--faint); font-size:12.5px; text-align:center; margin:32px 0 10px; line-height:1.6}
+  .empty{display:none; color:var(--faint); padding:10px 2px}
+  @media print{
+    nav.bottom,.search,.chips,.seg,.btns,#oldData{display:none!important}
+    body{background:#fff; color:#000; padding:0} .view{display:block!important} b,strong{color:#000}
+    .card,details{border-color:#bbb; background:#fff!important; break-inside:avoid}
+  }
 </style>
 </head>
 <body>
-<header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="cyl" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="13" height="8" rx="1.5"/><path d="M15 12h7M6 8V6M11 8V6"/></g></symbol>
+</defs></svg>
+<header><div class="hwrap">
   <div class="brand">
-    <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#323944" stroke-width="4"/><path d="M16 3 A13 13 0 1 1 4.6 22.2" fill="none" stroke="#2563EB" stroke-width="4" stroke-linecap="round"/><path d="M11 16.5l3.4 3.4L21.5 12" fill="none" stroke="#60A5FA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <div><h1>ISO 9001 <span>Audit Guide</span></h1><p class="tag">Your QMS and the external audit, explained plainly</p></div>
+    <svg viewBox="0 0 34 34" aria-hidden="true"><rect x="1" y="1" width="32" height="32" rx="9" fill="#0F2A28" stroke="#1E5A54"/><path d="M10 17.5l4.5 4.5L24 12" fill="none" stroke="#2DD4BF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><h1>ISO 9001 <span>Audit Guide</span></h1><p class="tag">Your QMS and the external audit, explained plainly, with examples from a hydraulic cylinder shop</p></div>
   </div>
-</header>
+</div></header>
+
+<nav class="bottom" aria-label="Sections">
+  <button data-view="basics" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg>Basics</button>
+  <button data-view="prepare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Prepare</button>
+  <button data-view="clauses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Clauses</button>
+  <button data-view="practice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 10h6M9 13.5h4"/></svg>Practice</button>
+  <button data-view="findings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Findings</button>
+</nav>
 
 <main>
 
 <!-- ============================ BASICS ============================ -->
 <section class="view on" id="v-basics">
-  <h2>Start here</h2>
-  <p class="lead">What an external audit is, which one comes next for you, and what your job is on the day.</p>
+  <div class="vhead"><div class="eyebrow">Start here</div><h2>Your first external audit</h2></div>
+  <p class="lead">What the audit is, which one comes next for you, and where cylinder shops usually get written up.</p>
 
   <div class="card hl">
-    <h4>Your next audit: surveillance audit 1</h4>
-    <p>You were recertified this year, so a new three-year cycle has started. Next comes a <b>surveillance audit</b>, about a year after recertification, then a second one the year after, then recertification again in year 3.</p>
-    <p class="small">A surveillance audit is shorter than a recertification audit. The auditor <b>samples</b> part of the system and doesn't go through every clause. But some areas get checked at every surveillance audit (next card).</p>
+    <h4>Next up: surveillance audit 1</h4>
+    <p>You were recertified this year, so a new three-year cycle has started. Next comes a <b>surveillance audit</b> about a year after recertification, a second one the year after, and recertification again in year 3.</p>
+    <div class="three"><div class="now"><b>Year 1 <span class="pill acc" style="vertical-align:1px">next</span></b><span>Surveillance</span></div><div><b>Year 2</b><span>Surveillance</span></div><div><b>Year 3</b><span>Recertification</span></div></div>
+    <p class="small" style="margin-top:10px">A surveillance audit is shorter than recertification. The auditor <b>samples</b> part of the system rather than every clause, but the list below is checked at every one.</p>
   </div>
 
+  <h3>Checked at every surveillance audit</h3>
   <div class="card">
-    <h4>You already do half of what the auditor checks</h4>
-    <p class="small">You haven't been through an external audit before, but the work behind most findings is work you already do every day:</p>
-    <table>
-      <tr><td><b>CMM, gauges, MSA</b></td><td>7.1.5 calibration and measurement traceability, one of the most common findings</td></tr>
-      <tr><td><b>NC investigations</b></td><td>8.7 nonconforming product and 10.2 corrective action</td></tr>
-      <tr><td><b>Deviation approvals</b></td><td>8.7 concessions and 5.3 authorities</td></tr>
-      <tr><td><b>Supplier quality</b></td><td>8.4 external providers</td></tr>
-      <tr><td><b>Training operators</b></td><td>7.2 competence and 7.3 awareness</td></tr>
-      <tr><td><b>CQE</b></td><td>The audit chapter of the CQE body of knowledge covers types, roles and root cause. This guide is the practical, on-the-day version.</td></tr>
-    </table>
-    <p class="small">What's new for you is the <b>system-level</b> part: management review, internal audit programme, objectives, risks and context. Spend most of your prep time there. Then use the <b>Drill</b> tab to practise.</p>
-  </div>
-
-  <div class="card">
-    <h4>What gets checked at every surveillance audit</h4>
-    <p class="small">These come from the rules certification bodies work to (ISO/IEC 17021-1). Have them ready no matter what else is on the plan:</p>
+    <p class="small" style="margin-top:0">From the rules certification bodies work to (ISO/IEC 17021-1). Have these ready whatever else the audit plan says:</p>
     <ol>
-      <li><b>Findings from this year's recertification</b>: were they really fixed, and did the fix work? This is usually checked first.</li>
-      <li><b>Internal audits</b>: done as planned, with findings raised and followed up.</li>
-      <li><b>Management review</b>: held, with the required inputs and decisions recorded.</li>
-      <li><b>Customer complaints</b> and how you handled them.</li>
-      <li><b>Quality objectives</b>: are you hitting them, and what are you doing where you aren't?</li>
-      <li><b>Continual improvement</b>: actual improvements, with evidence.</li>
-      <li><b>Changes</b> since the last audit: people (including your new role), processes, equipment, products, sites.</li>
+      <li><b>This year's recertification findings</b>: fixed, and the fix shown to work. Usually checked first.</li>
+      <li><b>Internal audits</b> done as planned, with findings followed up.</li>
+      <li><b>Management review</b> held, with all required inputs and recorded decisions.</li>
+      <li><b>Customer complaints</b> and how they were handled.</li>
+      <li><b>Quality objectives</b>: results, and what you're doing where they're missed.</li>
+      <li><b>Continual improvement</b>, with evidence.</li>
+      <li><b>Changes</b> since the last audit, including your appointment as manager.</li>
       <li><b>Use of the certificate and logo</b> on your website, quotes and letterhead.</li>
     </ol>
-    <p class="small">Plus whichever processes the audit plan lists for this visit, such as production, purchasing or calibration.</p>
+    <p class="small" style="margin-bottom:0">Plus whichever processes the plan lists for this visit, e.g. machining, welding, testing, purchasing.</p>
   </div>
 
+  <h3>Where cylinder shops get written up</h3>
   <div class="card">
-    <h4>What an external audit is</h4>
-    <p>A <b>certification body</b> (CB, sometimes called a registrar) sends an auditor to check two things: that your quality management system (QMS) meets ISO 9001, and that people actually follow it. In Canada, CBs are usually accredited by SCC or another accreditation body that's a member of the IAF.</p>
-    <p>The auditor <b>samples</b>: a few records, a few jobs, a few people. Then they <b>follow trails</b>, for example from a customer PO through to the drawing, the inspection record, the gauge used and that gauge's calibration certificate.</p>
-    <p class="small">The auditor isn't there to inspect parts or to fail you. Their job is to report what the evidence shows, good or bad. A calm, organised site with records that are easy to find makes for a short, easy audit.</p>
+    <p class="small" style="margin-top:0">These are the usual weak spots in a shop that machines, welds, assembles and tests cylinders. Walk each one before the audit. The Clauses tab has detail on each.</p>
+    <table>
+      <tr><td class="num">7.1.5</td><td><b>Test stand and torque tools.</b> Pressure gauges or transducers on the test bench, and torque wrenches for gland and piston nuts, out of calibration or not on the calibration list.</td></tr>
+      <tr><td class="num">7.5</td><td><b>Drawing revision at the station.</b> Old drawing or BOM at welding, honing or assembly after an ECN.</td></tr>
+      <tr><td class="num">8.5.1</td><td><b>Welding control.</b> No weld procedure at the station, or welder qualifications expired or missing.</td></tr>
+      <tr><td class="num">8.5.1</td><td><b>Outsourced special processes.</b> Chrome plating, nitriding or heat treatment with no validation evidence from the supplier.</td></tr>
+      <tr><td class="num">8.5.2</td><td><b>Traceability.</b> Serial number not linked to the test record, or tube/rod heat numbers lost at the saw.</td></tr>
+      <tr><td class="num">8.6</td><td><b>Test records.</b> Pressure, hold time or result missing; the tester didn't sign; the gauge ID isn't recorded.</td></tr>
+      <tr><td class="num">8.5.4</td><td><b>Preservation.</b> Rods without protection, ports open, rust on stored components.</td></tr>
+      <tr><td class="num">8.7</td><td><b>Rework.</b> Rod sent out for re-chrome or a tube re-honed without an NCR or disposition.</td></tr>
+      <tr><td class="num">8.4</td><td><b>Material certs.</b> Mill certs for chrome bar and tube filed but never compared to the spec.</td></tr>
+      <tr><td class="num">7.2</td><td><b>Competence.</b> Test bench operators or CMM users with no training record.</td></tr>
+    </table>
   </div>
 
+  <h3>How an auditor thinks</h3>
   <div class="card">
-    <h4>The three questions behind every audit question</h4>
-    <div class="step"><span class="n">1</span><div><b>Do you have it?</b> Is the requirement covered by a process, procedure or plan?</div></div>
-    <div class="step"><span class="n">2</span><div><b>Do you do it?</b> Do records show it happening, every time and not just sometimes?</div></div>
-    <div class="step"><span class="n">3</span><div><b>Does it work?</b> Do results show the process is effective: objectives met, problems not coming back?</div></div>
-    <p class="small">Shop-floor version: <i>say what you do, do what you say, prove it, and show it's working.</i></p>
+    <p style="margin-top:0">A <b>certification body</b> (CB, or registrar) checks two things: that your QMS meets ISO 9001, and that people actually follow it. In Canada, CBs are usually accredited by SCC or another IAF member. The auditor isn't inspecting cylinders or trying to fail you. They report what the evidence shows.</p>
+    <p>Behind every question is one of three tests:</p>
+    <div class="step"><span class="n">1</span><div><b>Do you have it?</b> A process or procedure covers the requirement.</div></div>
+    <div class="step"><span class="n">2</span><div><b>Do you do it?</b> Records show it happening every time.</div></div>
+    <div class="step"><span class="n">3</span><div><b>Does it work?</b> Results show it's effective, and problems don't come back.</div></div>
+    <p class="small" style="margin-bottom:0">They <b>sample and follow trails</b>, e.g. from a customer PO for a welded cylinder through to the test record and the calibration certificate of the test stand gauge. The Practice tab walks through four of these trails.</p>
   </div>
 
   <h3>Your role as management rep</h3>
   <div class="card">
-    <p>ISO 9001:2015 doesn't require a job titled "management representative". It requires top management to assign responsibilities (clause 5.3), including reporting on how the QMS is performing. In practice, the auditor will treat you as the main contact. <b>Top management still owns the QMS</b> (5.1.1). Expect the auditor to interview them directly, so they need to be ready too.</p>
-    <p class="lab">On audit day you:</p>
+    <p style="margin-top:0">ISO 9001 doesn't require a job titled "management representative". Top management assigns QMS responsibilities (5.3) and stays accountable (5.1.1), and the auditor will interview them directly. In practice, you're the main contact. On the day you:</p>
     <ul>
-      <li>Agree the audit plan and timings with the auditor, and make sure the right people are there.</li>
-      <li>Act as guide, or assign a guide who stays with the auditor the whole time.</li>
-      <li>Keep a <b>request log</b>: every record asked for, who got it, and what was shown.</li>
-      <li>Watch for possible findings as they come up, and bring evidence before the closing meeting.</li>
-      <li>Accept the findings professionally and own the response afterwards.</li>
+      <li>Agree the plan and timings, and make sure the right people are there.</li>
+      <li>Guide the auditor, or assign a guide who stays with them the whole time.</li>
+      <li>Keep a <b>request log</b>: what was asked for, who got it, what was shown.</li>
+      <li>Note possible findings as they come up, and bring evidence before the closing meeting.</li>
+      <li>Accept findings professionally, then own the response.</li>
     </ul>
   </div>
 
-  <h3>Audit types, for reference</h3>
-  <div class="card" style="padding:6px 10px">
+  <h3>You already do half of this</h3>
+  <div class="card">
     <table>
-      <tr><th>Audit</th><th>When</th><th>What it covers</th></tr>
-      <tr><td><b>Stage 1</b></td><td>New certification only</td><td>Readiness check: scope, documents, internal audit and management review done</td></tr>
-      <tr><td><b>Stage 2</b></td><td>New certification only</td><td>The whole system, checked on site</td></tr>
-      <tr class="you"><td><b>Surveillance</b> <span class="pill new">next</span></td><td>Years 1 and 2, at least once per calendar year</td><td>A sample of processes, plus the "every time" list above</td></tr>
-      <tr><td><b>Recertification</b> <span class="pill green">done</span></td><td>Year 3, before the certificate expires</td><td>The whole system, and how it has performed over the cycle</td></tr>
-      <tr><td><b>Transition</b></td><td>Before 30 Sept 2029</td><td>The changes in ISO 9001:2026, usually done alongside a surveillance or recertification audit</td></tr>
+      <tr><td><b>CMM, gauges, MSA</b></td><td>7.1.5: calibration and traceability, one of the most common findings</td></tr>
+      <tr><td><b>NC investigations</b></td><td>8.7 nonconforming product and 10.2 corrective action</td></tr>
+      <tr><td><b>Deviation approvals</b></td><td>8.7 concessions and 5.3 authorities</td></tr>
+      <tr><td><b>Supplier quality</b></td><td>8.4 external providers, including plating and heat-treat houses</td></tr>
+      <tr><td><b>Training operators</b></td><td>7.2 competence and 7.3 awareness</td></tr>
+      <tr><td><b>CQE</b></td><td>The audit chapter of the CQE body of knowledge is the theory behind this guide</td></tr>
+    </table>
+    <p class="small" style="margin-bottom:0">What's new for you is the system level: management review, the internal audit programme, objectives, risks and context. Spend most of your prep time there.</p>
+  </div>
+
+  <h3>Audit types</h3>
+  <div class="card" style="padding:6px 12px">
+    <table>
+      <tr><th>Audit</th><th>When</th><th>Covers</th></tr>
+      <tr><td><b>Stage 1 / 2</b></td><td>New certification only</td><td>Readiness check, then the full system</td></tr>
+      <tr class="you"><td><b>Surveillance</b> <span class="pill acc">next</span></td><td>Years 1 and 2, at least once per calendar year</td><td>A sample, plus the list above</td></tr>
+      <tr><td><b>Recertification</b> <span class="pill green">done</span></td><td>Year 3</td><td>The full system, and how it performed over the cycle</td></tr>
+      <tr><td><b>Transition</b></td><td>By 30 Sept 2029</td><td>The ISO 9001:2026 changes, usually alongside a surveillance or recertification audit</td></tr>
     </table>
   </div>
 
-  <h3>ISO 9001:2026: what's coming</h3>
+  <h3>ISO 9001:2026</h3>
   <div class="card">
-    <p>ISO 9001:2026 was published on <b>16 September 2026</b>. Certificates to the 2015 edition stay valid during the three-year transition, which ends on <b>30 September 2029</b>. After that date, 2015 certificates expire.</p>
-    <p class="small">It updates the 2015 edition rather than replacing it, and the changes are moderate. The main ones:</p>
+    <p style="margin-top:0">Published <b>16 September 2026</b>. 2015 certificates stay valid until the transition ends on <b>30 September 2029</b>. It updates the 2015 edition rather than replacing it, and the changes are moderate:</p>
     <ul class="small">
-      <li><b>Quality culture and ethical behaviour</b> are now stated in leadership (5.1.1) and awareness (7.3).</li>
-      <li><b>Risks and opportunities</b> are split into separate requirements for identifying and addressing each (6.1).</li>
-      <li><b>Planning of changes</b> is expanded (6.3).</li>
-      <li><b>Climate change</b> must be considered in context and interested parties (4.1/4.2). This came from the 2024 amendment, so you may already have it covered.</li>
-      <li>Continual improvement (10.1) is reworded and strengthened, core terms are now defined in the standard itself, and Annex A gives much more explanatory guidance.</li>
+      <li><b>Quality culture and ethical behaviour</b> in leadership (5.1.1) and awareness (7.3).</li>
+      <li><b>Risks and opportunities</b> handled separately (6.1).</li>
+      <li><b>Planning of changes</b> expanded (6.3).</li>
+      <li><b>Climate change</b> considered in context and interested parties (4.1/4.2). This came from the 2024 amendment, so you may already have it covered.</li>
+      <li>Continual improvement (10.1) strengthened, core terms defined in the standard, and a much larger explanatory Annex A.</li>
     </ul>
-    <p class="small"><b>Ask your CB</b> whether they plan to do your transition at surveillance 1 or later, and which edition your next audit will be against. Clauses changed in 2026 are tagged <span class="pill new">2026</span> in the Clauses tab.</p>
+    <p class="small" style="margin-bottom:0"><b>Ask your CB</b> when they plan to do your transition audit and which edition your next audit will use. Clauses that change are tagged <span class="pill new">2026</span>.</p>
   </div>
 
   <h3>Words you'll hear</h3>
   <div class="card">
     <dl>
-      <dt>Objective evidence</dt><dd>Something the auditor can see: a record, a document, an observation, or what someone says and can back up. Your opinion isn't evidence.</dd>
-      <dt>Audit criteria</dt><dd>What you're audited against: ISO 9001, your own procedures, customer requirements, and laws and regulations that apply.</dd>
-      <dt>Audit trail</dt><dd>Following one job or item through linked records to see whether the system holds together.</dd>
-      <dt>Nonconformity (NC)</dt><dd>A requirement not met. Graded <b>major</b> or <b>minor</b> (see Findings).</dd>
+      <dt>Objective evidence</dt><dd>Something the auditor can see: a record, a document, an observation. Opinion doesn't count.</dd>
+      <dt>Audit criteria</dt><dd>What you're audited against: ISO 9001, your procedures, customer requirements, and applicable law.</dd>
+      <dt>Audit trail</dt><dd>Following one job through linked records to see whether the system holds together.</dd>
+      <dt>Nonconformity</dt><dd>A requirement not met, graded major or minor.</dd>
       <dt>OFI / observation</dt><dd>Opportunity for improvement. Not a nonconformity, and no formal response required.</dd>
-      <dt>Correction</dt><dd>Fixing the immediate problem, e.g. recalibrating the overdue gauge.</dd>
-      <dt>Corrective action</dt><dd>Removing the root cause so the problem doesn't happen again.</dd>
+      <dt>Correction vs corrective action</dt><dd>Correction fixes this instance (recalibrate the gauge). Corrective action removes the cause so it doesn't happen again.</dd>
       <dt>Documented information</dt><dd>"Maintain" means a controlled document (procedure, instruction). "Retain" means a record (proof something happened).</dd>
-      <dt>Scope</dt><dd>What your certificate covers: products, activities, sites. Any clause you say doesn't apply, such as 8.3 design, must be justified (4.3).</dd>
-      <dt>Interested parties</dt><dd>People and groups who affect or are affected by your QMS: customers, suppliers, employees, regulators, owners.</dd>
-      <dt>Concession</dt><dd>Formal permission to use or release product that doesn't meet requirements. Usually this is what your deviation approval is (8.7).</dd>
+      <dt>Concession</dt><dd>Authorised acceptance of product that doesn't meet requirements. Usually what your deviations are (8.7).</dd>
+      <dt>Special process</dt><dd>A process whose result can't be fully checked afterwards, e.g. welding, plating, nitriding, heat treatment. It must be validated (8.5.1).</dd>
       <dt>CB / AB</dt><dd>Certification body (audits you) and accreditation body (audits the CB, e.g. SCC, ANAB).</dd>
     </dl>
   </div>
@@ -237,68 +297,67 @@
   <div class="card warn oldData" id="oldData">
     <h4>Old tracker data found on this device</h4>
     <p class="small">The previous Quality Command tracker saved records in this browser. They haven't been deleted. Download them if you want to keep them.</p>
-    <button id="dlOld" style="appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px;font:inherit;font-weight:600;cursor:pointer">Download old data (.json)</button>
+    <button class="btn" id="dlOld">Download old data (.json)</button>
   </div>
 </section>
 
 <!-- ============================ PREPARE ============================ -->
 <section class="view" id="v-prepare">
-  <h2>Prepare</h2>
-  <p class="lead">What to do from about two months out through the closing meeting, and after it.</p>
+  <div class="vhead"><div class="eyebrow">Timeline</div><h2>Prepare</h2></div>
+  <p class="lead">From about two months out to the closing meeting, and after it.</p>
 
   <h3>6–8 weeks before</h3>
   <div class="card">
     <ul>
-      <li><b>Get the audit plan from your CB.</b> It gives the dates, auditor, scope, edition (2015 or 2026) and which processes and departments they'll visit. If it hasn't arrived, ask for it.</li>
-      <li><b>Re-read the recertification report.</b> For every finding, check that the correction is done, the root cause is recorded, the corrective action is in place, and you have <b>evidence it worked</b>. This is usually the first thing checked.</li>
-      <li><b>Internal audits.</b> Check that this year's audits were done as scheduled and cover the processes due. Findings should be raised and moving. If an area is behind, audit it now. An honest late audit is better than a gap.</li>
-      <li><b>Management review.</b> Has one been held since recertification, or is one due? Check that the minutes cover every required input and record decisions (see 9.3 in Clauses).</li>
-      <li><b>Corrective action / NCR log.</b> Nothing should be overdue without a documented reason and a new date. Old open items get noticed.</li>
-      <li><b>Tell the CB about changes</b>: new management rep (you), reorganisation, new processes or equipment, scope changes. You're normally required to report significant changes.</li>
+      <li><b>Get the audit plan from your CB</b>: dates, auditor, scope, edition (2015 or 2026), and which processes they'll visit.</li>
+      <li><b>Re-read the recertification report.</b> For each finding, check the correction, root cause, corrective action and <b>evidence it worked</b> are all on file.</li>
+      <li><b>Internal audits.</b> This year's audits done as scheduled, findings raised and moving. If an area is behind, audit it now.</li>
+      <li><b>Management review.</b> Held since recertification, or due? Minutes should cover every required input (Clauses → 9.3).</li>
+      <li><b>CAPA / NCR log.</b> Nothing overdue without a documented reason and a new date.</li>
+      <li><b>Tell the CB about significant changes</b>: new management rep, reorganisation, new test stand or welding cell, scope changes.</li>
     </ul>
   </div>
 
   <h3>2–4 weeks before</h3>
   <div class="card">
     <ul>
-      <li><b>Calibration.</b> Every gauge in use is in date and labelled. Anything found out of tolerance has a recorded check of the parts it measured (7.1.5.2).</li>
-      <li><b>Documents at point of use.</b> Walk the floor. Drawings and work instructions at each station should be the current revision, with no uncontrolled printouts or handwritten notes acting as instructions.</li>
-      <li><b>Competence.</b> Training matrix up to date, including new hires, CNC operators and inspectors. Records show they're qualified for what they do.</li>
-      <li><b>Suppliers.</b> Approved supplier list, performance data and re-evaluations. Include outsourced special processes (heat treat, nitriding, plating) and material certs.</li>
-      <li><b>Quality objectives.</b> Each one has a target, an owner, current data, and an action plan if it's off track.</li>
-      <li><b>Customers.</b> Complaints logged with responses, and customer satisfaction data actually analysed.</li>
-      <li><b>Risks and opportunities.</b> Reviewed this year and linked to real actions.</li>
-      <li><b>Certificate and logo.</b> Check the website, quotes and email signatures for correct use.</li>
+      <li><b>Calibration sweep.</b> Every gauge is on the list and in date: bore and thread gauges, micrometers, profilometer, CMM, <b>test stand gauges and transducers, torque wrenches</b>. Anything found out of tolerance has a product impact assessment.</li>
+      <li><b>Documents at the point of use.</b> Walk the cells: current drawing and BOM at the saw, lathes, welding, honing, assembly and test. No uncontrolled copies.</li>
+      <li><b>Welding.</b> Weld procedures at the station, welder qualifications current, and the welding certification on file if your customers require one.</li>
+      <li><b>Competence.</b> Training matrix covers new hires, CNC operators, welders, test bench operators and CMM users.</li>
+      <li><b>Suppliers.</b> Approved list and re-evaluations, including chrome bar, tube, seal kits and outsourced plating, nitriding and heat treatment. Mill certs checked against the spec.</li>
+      <li><b>Objectives, complaints, risks.</b> Current data, actions where you're off target, and the risk review done this year.</li>
+      <li><b>Certificate and logo.</b> Website, quotes, email signatures.</li>
     </ul>
   </div>
 
-  <h3>The final week</h3>
+  <h3>Final week</h3>
   <div class="card">
     <ul>
-      <li><b>Brief the people likely to be interviewed</b>: supervisors, inspectors, operators, purchasing, shipping. Go over how to answer (Interview tab). Don't script them.</li>
-      <li><b>Walk the shop.</b> Nonconforming and quarantined parts labelled and kept apart, every part's status clear, the area tidy.</li>
-      <li><b>Set up an audit folder</b>, digital or paper: org chart, process map, scope, quality policy, objectives with data, management review minutes, internal audit schedule and reports, CAPA log, calibration list, approved supplier list, recertification report and closure evidence.</li>
-      <li><b>Logistics.</b> Book a room, arrange PPE for the auditor, get screen access to your ERP and records, and name a <b>runner</b> to fetch records so you can stay with the auditor.</li>
+      <li><b>Brief the people likely to be interviewed</b>: supervisors, welders, test bench operators, inspectors, purchasing, shipping. Use the Practice drill. Don't script them.</li>
+      <li><b>Shop walk.</b> Quarantine area labelled, every part's status clear, rods protected, ports plugged, aisles clear.</li>
+      <li><b>Audit folder:</b> org chart, process map, scope, quality policy, objectives with data, MR minutes, internal audit schedule and reports, CAPA log, calibration list, supplier list, recertification report and closure evidence.</li>
+      <li><b>Logistics:</b> a room, PPE for the auditor (safety glasses, boots, hearing protection near the test stand), screen access to your ERP, and a named <b>runner</b> to fetch records.</li>
       <li><b>Top management</b> has the opening and closing meetings and their interview slot in their calendar.</li>
     </ul>
   </div>
 
   <h3>Audit day</h3>
   <div class="card">
-    <div class="step"><span class="n">1</span><div><b>Opening meeting</b> (15–30 min). Introductions. The auditor confirms scope, plan, timings, confidentiality and how findings will be reported. Ask anything you're unsure of here, for example "Will you tell us about possible findings at the end of each day?"</div></div>
-    <div class="step"><span class="n">2</span><div><b>The audit.</b> Interviews, shop-floor tours and record checks, process by process. The guide stays with the auditor and the runner fetches records. Log every request.</div></div>
-    <div class="step"><span class="n">3</span><div><b>Quick fixes.</b> If something small is wrong, fix it on the spot, such as replacing an obsolete drawing. That's a correction. It shows good faith, but the auditor may still write it up, because the question is <i>why</i> it happened.</div></div>
-    <div class="step"><span class="n">4</span><div><b>Daily wrap-up.</b> Most auditors summarise their concerns at the end of each day. This is when to bring evidence you couldn't find earlier.</div></div>
-    <div class="step"><span class="n">5</span><div><b>Closing meeting.</b> Findings are read out with the clause and the evidence. Ask for clarification and present evidence you have, but don't argue. Confirm response deadlines and the auditor's recommendation.</div></div>
+    <div class="phase" style="margin-top:0"><span class="badge">OPENING</span><div>15–30 min. Introductions; the auditor confirms scope, plan, timings, confidentiality and how findings are reported. Ask anything unclear here, e.g. "Will you share possible findings at the end of each day?"</div></div>
+    <div class="phase"><span class="badge">AUDIT</span><div>Interviews, shop-floor tour and record checks, process by process. The guide stays with the auditor, the runner fetches records, and you log every request.</div></div>
+    <div class="phase"><span class="badge">FIX</span><div>Small problem? Fix it on the spot, e.g. swap an old drawing. That's a correction. It may still be written up, because the question is <i>why</i> it happened.</div></div>
+    <div class="phase"><span class="badge">WRAP-UP</span><div>Daily summary of concerns. This is when to bring evidence you couldn't find earlier.</div></div>
+    <div class="phase" style="margin-bottom:0"><span class="badge">CLOSING</span><div>Findings read out with clause and evidence. Ask for clarification and present evidence you have, but don't argue. Confirm the response deadline and the recommendation.</div></div>
   </div>
 
-  <h3>After the audit</h3>
+  <h3>After</h3>
   <div class="card">
     <ul>
-      <li>Log each finding in your corrective action system the same day, with an owner.</li>
-      <li>Send your response by the CB's deadline. See Findings for how to write one.</li>
-      <li>Schedule an effectiveness check for each finding. The next auditor will ask about it.</li>
-      <li>Present the results at the next management review, where they're a required input.</li>
+      <li>Log every finding in your CAPA system the same day, with an owner.</li>
+      <li>Send your response by the CB's deadline (Findings tab).</li>
+      <li>Schedule an effectiveness check for each finding. The next auditor will ask.</li>
+      <li>Take the results to the next management review, where they're a required input.</li>
       <li>Write down what you'd do differently next time while it's fresh.</li>
     </ul>
   </div>
@@ -306,385 +365,365 @@
 
 <!-- ============================ CLAUSES ============================ -->
 <section class="view" id="v-clauses">
-  <h2>What the auditor checks</h2>
-  <p class="lead">ISO 9001 clauses 4–10 in plain language: what the auditor asks, what to have ready, and what typically gets written up in a machining shop. Numbering follows the 2015 edition you're certified to.</p>
-  <input class="search" id="cSearch" type="search" placeholder="Search: calibration, supplier, drawing, training…" aria-label="Search clauses">
+  <div class="vhead"><div class="eyebrow">Clauses 4–10</div><h2>What the auditor checks</h2></div>
+  <p class="lead">Each clause in plain language: what the auditor asks, what to have ready, the usual finding, and what it looks like in a cylinder shop. Numbering follows the 2015 edition you're certified to.</p>
+  <input class="search" id="cSearch" type="search" placeholder="Search: torque, weld, chrome, test stand, drawing…" aria-label="Search clauses">
   <div class="chips">
     <a href="#c4">4 Context</a><a href="#c5">5 Leadership</a><a href="#c6">6 Planning</a><a href="#c7">7 Support</a><a href="#c8">8 Operation</a><a href="#c9">9 Performance</a><a href="#c10">10 Improvement</a>
   </div>
-  <div id="clauseList">
-
-  <h3 id="c4">4 · Context of the organization</h3>
-  <details><summary><span class="no">4.1 4.2</span><span class="ti">Context and interested parties <span class="pill new">2026</span></span></summary><div class="body">
-    <p>Know the internal and external issues that affect your ability to deliver quality (market, competition, workforce, technology, regulations, climate), and who your interested parties are and what they need from you.</p>
-    <div class="lab">Auditor asks</div><p>"What are the main issues affecting the business? How do you keep this up to date? Where do they show up in your risks or objectives?"</p>
-    <div class="lab">Have ready</div><p>A context / interested-parties list (often in the management review or a SWOT), reviewed in the last year.</p>
-    <div class="lab">Common finding</div><p>The list was written years ago and never reviewed, or it doesn't connect to the risks and objectives.</p>
-    <p class="small"><span class="pill new">2026</span> Climate change must be considered. That came from the 2024 amendment, so check it's already in your list.</p>
-  </div></details>
-  <details><summary><span class="no">4.3</span><span class="ti">Scope of the QMS</span></summary><div class="body">
-    <p>What the system covers: products, activities, sites. A clause can be marked "not applicable" only if it truly doesn't affect product conformity, and you must give the reason.</p>
-    <div class="lab">Auditor asks</div><p>"Does the scope still describe what you do? You say design (8.3) doesn't apply. Who designs the cylinders?"</p>
-    <div class="lab">Common finding</div><p>The scope says "build to print", but the shop actually does design or engineering changes for customers.</p>
-  </div></details>
-  <details><summary><span class="no">4.4</span><span class="ti">QMS and its processes</span></summary><div class="body">
-    <p>Your processes are defined: inputs, outputs, sequence, owners, measures, resources, risks.</p>
-    <div class="lab">Have ready</div><p>A process map or "turtle diagrams" showing how quoting → order review → purchasing → machining → inspection → shipping connect.</p>
-    <div class="lab">Common finding</div><p>A process has no measure of whether it works, or the map doesn't match reality.</p>
-  </div></details>
-
-  <h3 id="c5">5 · Leadership</h3>
-  <details><summary><span class="no">5.1</span><span class="ti">Leadership and customer focus <span class="pill new">2026</span></span></summary><div class="body">
-    <p>Top management is accountable for the QMS, not just the quality department. They make sure policy and objectives fit the business strategy, resources are provided, and customer requirements and satisfaction stay a priority.</p>
-    <div class="lab">Auditor asks top management</div><p>"How are you involved in the QMS? What are your quality objectives and how are they doing? What did the last management review decide? How do you know customers are happy?"</p>
-    <div class="lab">Common finding</div><p>A manager can't talk about the objectives or results, which suggests the QMS belongs only to Quality.</p>
-    <p class="small"><span class="pill new">2026</span> Leaders must promote a <b>quality culture and ethical behaviour</b>. Expect questions like "How would someone raise a quality concern? What happens when schedule and quality conflict?"</p>
-  </div></details>
-  <details><summary><span class="no">5.2</span><span class="ti">Quality policy</span></summary><div class="body">
-    <p>A policy that fits your business, commits to meeting requirements and to improving, is communicated, and is understood.</p>
-    <div class="lab">Auditor asks an operator</div><p>"What does the quality policy mean for your job?" They don't need to recite it. A good answer in their own words: "Make it to the drawing, check it, and stop and tell someone if it's wrong."</p>
-  </div></details>
-  <details><summary><span class="no">5.3</span><span class="ti">Roles, responsibilities and authorities</span></summary><div class="body">
-    <p>People know who's responsible for what, including who can stop production, release product and approve a deviation.</p>
-    <div class="lab">Have ready</div><p>Org chart, job descriptions, and the authority list (who approves concessions and deviations, who releases product).</p>
-    <div class="lab">Common finding</div><p>A deviation was signed by someone without the authority your procedure gives.</p>
-  </div></details>
-
-  <h3 id="c6">6 · Planning</h3>
-  <details><summary><span class="no">6.1</span><span class="ti">Risks and opportunities <span class="pill new">2026</span></span></summary><div class="body">
-    <p>Identify what could stop you delivering quality (and what could help), take action in proportion to the risk, and check the actions worked. ISO 9001 doesn't require a formal FMEA or a risk register, but you need to show you did it.</p>
-    <div class="lab">Auditor asks</div><p>"What are your top risks? Show me one action from the risk review and how you know it worked."</p>
-    <div class="lab">Common finding</div><p>A risk register exists but is never reviewed, or the "actions" column is empty.</p>
-    <p class="small"><span class="pill new">2026</span> Risks and opportunities are treated separately, so they'll need separate entries.</p>
-  </div></details>
-  <details><summary><span class="no">6.2</span><span class="ti">Quality objectives</span></summary><div class="body">
-    <p>Measurable objectives (e.g. on-time delivery, scrap %, customer returns) with a plan: what will be done, resources, who, by when, and how results will be evaluated.</p>
-    <div class="lab">Auditor asks</div><p>"Show me the data. This one is red. What are you doing about it?"</p>
-    <div class="lab">Common finding</div><p>An objective is missed every month and nothing is done, or there's no data at all.</p>
-  </div></details>
-  <details><summary><span class="no">6.3</span><span class="ti">Planning of changes <span class="pill new">2026</span></span></summary><div class="body">
-    <p>Changes to the QMS (new process, new manager, new ERP, moving equipment) are planned: purpose, consequences, resources, and responsibilities.</p>
-    <div class="lab">Auditor asks</div><p>"What has changed since the last audit? How did you plan it?" Your own appointment as manager is an obvious example.</p>
-    <p class="small"><span class="pill new">2026</span> Expanded: changes should also be communicated, monitored and reviewed for effectiveness.</p>
-  </div></details>
-
-  <h3 id="c7">7 · Support</h3>
-  <details><summary><span class="no">7.1</span><span class="ti">People, infrastructure, work environment</span></summary><div class="body">
-    <p>Enough people, maintained machines and facilities, and a suitable work environment.</p>
-    <div class="lab">Have ready</div><p>Preventive maintenance schedule and records for CNC machines, test benches and cranes.</p>
-    <div class="lab">Common finding</div><p>PM overdue on a critical machine, or a breakdown with no record.</p>
-  </div></details>
-  <details><summary><span class="no">7.1.5</span><span class="ti">Monitoring and measuring resources (calibration)</span></summary><div class="body">
-    <p>Gauges and instruments used to verify product are suitable, calibrated at set intervals against traceable standards, identified with their status, and protected from damage or adjustment. <b>If a gauge is found out of tolerance, you must check whether earlier measurements are still valid</b> and act on the product they measured.</p>
-    <div class="lab">Auditor does</div><p>Picks a gauge off a bench, reads the ID, and asks to see its calibration record and certificate. They may also ask for a personal tool or a CMM probe qualification.</p>
-    <div class="lab">Have ready</div><p>Gauge list with due dates, certificates showing traceability (e.g. ISO/IEC 17025 lab), out-of-tolerance investigations, and the rule for personal or employee-owned tools.</p>
-    <div class="lab">Common finding</div><p>An overdue gauge in use; personal tools not controlled; an out-of-tolerance result with no product impact assessment; a CMM with no record of its verification.</p>
-  </div></details>
-  <details><summary><span class="no">7.1.6</span><span class="ti">Organizational knowledge</span></summary><div class="body">
-    <p>Knowledge needed to run processes (setups, tricks for a difficult bore, lessons learned) is captured and shared so it doesn't leave when someone retires.</p>
-    <div class="lab">Auditor asks</div><p>"If your best setup person left tomorrow, how would you know how to run this job?"</p>
-  </div></details>
-  <details><summary><span class="no">7.2 7.3</span><span class="ti">Competence and awareness <span class="pill new">2026</span></span></summary><div class="body">
-    <p>People are competent (education, training, experience), you act on gaps and check that training worked, and records are kept. Everyone knows the policy, the objectives that affect them, how they contribute, and what happens if they don't follow the system.</p>
-    <div class="lab">Auditor does</div><p>Picks an operator and asks for their training record, then checks it covers the job they're doing right now.</p>
-    <div class="lab">Common finding</div><p>Training matrix missing the new hire; no evidence the training was effective; inspector signing off a CMM program without recorded CMM training.</p>
-    <p class="small"><span class="pill new">2026</span> Awareness now includes quality culture and ethical behaviour.</p>
-  </div></details>
-  <details><summary><span class="no">7.4</span><span class="ti">Communication</span></summary><div class="body">
-    <p>You decide what gets communicated, when, to whom and how, e.g. shift meetings, quality alerts, KPI boards.</p>
-  </div></details>
-  <details><summary><span class="no">7.5</span><span class="ti">Documented information (documents and records)</span></summary><div class="body">
-    <p>Documents are reviewed, approved, revision-controlled and available at the point of use, and obsolete versions are removed or marked. Records are legible, protected, retained for a defined time, and retrievable.</p>
-    <div class="lab">Auditor does</div><p>Compares the drawing at the machine with the latest revision in the system. Asks how a revised drawing gets to the floor and how the old one is pulled.</p>
-    <div class="lab">Common finding</div><p>Old drawing revision at a workstation; uncontrolled printout with handwritten changes; records with no retention rule; forms filled in pencil or with blanks.</p>
-  </div></details>
-
-  <h3 id="c8">8 · Operation</h3>
-  <details><summary><span class="no">8.1</span><span class="ti">Operational planning and control</span></summary><div class="body">
-    <p>For each job, the requirements, acceptance criteria, resources and records needed are planned (router, control plan, inspection plan).</p>
-  </div></details>
-  <details><summary><span class="no">8.2</span><span class="ti">Customer requirements and order review</span></summary><div class="body">
-    <p>Before you accept an order, you confirm you can meet it: drawing revision, specs, quantities, dates, special requirements. Changes to an order are reviewed and communicated.</p>
-    <div class="lab">Auditor does</div><p>Picks a recent PO and asks for evidence it was reviewed, then checks that the drawing revision on the PO matches the one used in production.</p>
-    <div class="lab">Common finding</div><p>No evidence of contract review; PO revision differs from the shop drawing; customer spec referenced on the PO but not flowed down to the floor or suppliers.</p>
-  </div></details>
-  <details><summary><span class="no">8.3</span><span class="ti">Design and development</span></summary><div class="body">
-    <p>Applies only if you design products. If you do, you need planning, inputs, reviews, verification, validation, outputs and change control. If you've declared it not applicable, be ready to justify that (see 4.3).</p>
-  </div></details>
-  <details><summary><span class="no">8.4</span><span class="ti">Purchasing and external providers</span></summary><div class="body">
-    <p>Suppliers, including outsourced processes, are selected, monitored and re-evaluated against criteria. POs give clear requirements: specs, revisions, certs needed, special process requirements. Incoming product is verified.</p>
-    <div class="lab">Auditor does</div><p>Picks a supplier, e.g. your nitriding or plating house, and asks for the evaluation, performance data and what the PO told them. Picks a material lot and asks for the mill cert.</p>
-    <div class="lab">Common finding</div><p>Supplier not on the approved list; never re-evaluated; PO missing the spec or the cert requirement; mill cert not checked against the spec.</p>
-  </div></details>
-  <details><summary><span class="no">8.5.1</span><span class="ti">Control of production</span></summary><div class="body">
-    <p>Work is done under controlled conditions: instructions, suitable equipment and gauges, competent people, inspection at the right stages. <b>Special processes</b> (where the result can't be fully checked afterwards, e.g. welding, heat treatment, nitriding, plating) must be validated and periodically revalidated.</p>
-    <div class="lab">Auditor does</div><p>Stands at a machine and asks the operator what they're making, how they know it's right, and what they check and how often.</p>
-    <div class="lab">Common finding</div><p>First-piece inspection not recorded; in-process checks missed; special process never validated, or the supplier's validation never requested.</p>
-  </div></details>
-  <details><summary><span class="no">8.5.2</span><span class="ti">Identification and traceability</span></summary><div class="body">
-    <p>Product is identified throughout production, its inspection status is clear, and where traceability is required (customer, heat or lot), it's recorded.</p>
-    <div class="lab">Auditor does</div><p>Picks a part off a rack: "What is this, what job, has it been inspected, and which material heat?"</p>
-    <div class="lab">Common finding</div><p>Untagged parts; status unclear (passed? waiting? rejected?); traceability chain broken.</p>
-  </div></details>
-  <details><summary><span class="no">8.5.3 8.5.4</span><span class="ti">Customer property and preservation</span></summary><div class="body">
-    <p>Customer-owned items (material, tooling, gauges, drawings) are identified and protected, and loss or damage is reported to the customer. Product is protected through handling, storage, packaging and shipping: rust prevention, plugged ports, protected rod surfaces.</p>
-  </div></details>
-  <details><summary><span class="no">8.5.5 8.5.6</span><span class="ti">Post-delivery and control of changes</span></summary><div class="body">
-    <p>Warranty, returns and field issues are handled. Unplanned production changes (substitute machine, alternate material, new program) are reviewed and authorised, and the review is recorded.</p>
-  </div></details>
-  <details><summary><span class="no">8.6</span><span class="ti">Release of products</span></summary><div class="body">
-    <p>Product isn't shipped until planned checks are complete (unless the customer authorises otherwise). Records show it met acceptance criteria and <b>who released it</b>.</p>
-    <div class="lab">Common finding</div><p>Final inspection record not signed; release done before all checks were finished.</p>
-  </div></details>
-  <details><summary><span class="no">8.7</span><span class="ti">Nonconforming outputs (NCRs and deviations)</span></summary><div class="body">
-    <p>Bad product is identified and controlled so it isn't used or shipped by mistake. It's corrected, segregated, returned, scrapped, or accepted under concession. Records describe the nonconformity, the action taken, any concession, and <b>who decided</b>.</p>
-    <div class="lab">Auditor does</div><p>Visits the quarantine area and picks a tagged part: "Show me the NCR and the decision." Asks for a recent deviation and checks it was approved by the right authority, and by the customer where the contract requires it.</p>
-    <div class="lab">Common finding</div><p>Rejected parts mixed with good ones; NCR open for months with no disposition; deviation signed by the wrong person; customer approval missing.</p>
-  </div></details>
-
-  <h3 id="c9">9 · Performance evaluation</h3>
-  <details><summary><span class="no">9.1</span><span class="ti">Monitoring, customer satisfaction, analysis</span></summary><div class="body">
-    <p>You decide what to measure and how, monitor customer perception, and analyse the data: product conformity, customer satisfaction, process performance, supplier performance, how well objectives are met, and whether risk actions worked.</p>
-    <div class="lab">Auditor asks</div><p>"What does the data tell you? What decisions came from it?"</p>
-    <div class="lab">Common finding</div><p>Data is collected but never analysed or acted on; no customer satisfaction measure (complaints alone usually aren't enough).</p>
-  </div></details>
-  <details><summary><span class="no">9.2</span><span class="ti">Internal audit</span></summary><div class="body">
-    <p>A planned audit programme covering the QMS, based on importance, changes and past results. Auditors are objective (they don't audit their own work). Results are reported to management, and corrections and corrective actions are taken without undue delay.</p>
-    <div class="lab">Auditor asks you</div><p>"Show me the programme. How did you decide the frequency? Show me a report and a finding from it through to closure. Who audited Quality?"</p>
-    <div class="lab">Common finding</div><p>Areas skipped; auditor audited their own area; reports with no evidence detail ("all OK"); findings never closed.</p>
-    <p class="small">Tip: internal audits that find real problems are a good sign to an external auditor. A year of "no findings" makes them suspicious.</p>
-  </div></details>
-  <details><summary><span class="no">9.3</span><span class="ti">Management review</span></summary><div class="body">
-    <p>Top management reviews the QMS at planned intervals. The minutes must show these <b>inputs</b> were covered:</p>
-    <ul class="small">
-      <li>Status of actions from previous reviews</li>
-      <li>Changes in internal and external issues</li>
-      <li>Performance: customer satisfaction and feedback; objectives; process performance and product conformity; nonconformities and corrective actions; monitoring and measurement results; audit results; external provider performance</li>
-      <li>Adequacy of resources</li>
-      <li>Effectiveness of actions on risks and opportunities</li>
-      <li>Opportunities for improvement</li>
-    </ul>
-    <p class="small">And <b>outputs</b>: decisions on improvements, needed changes to the QMS, and resource needs.</p>
-    <div class="lab">Common finding</div><p>An input is missing (often supplier performance or risk effectiveness); no decisions recorded; actions from the last review not followed up.</p>
-  </div></details>
-
-  <h3 id="c10">10 · Improvement</h3>
-  <details><summary><span class="no">10.2</span><span class="ti">Nonconformity and corrective action</span></summary><div class="body">
-    <p>When something goes wrong (including complaints): react and correct, find the root cause, check whether similar problems exist or could happen elsewhere, act, review effectiveness, and update risks or the QMS if needed. Keep records.</p>
-    <div class="lab">Auditor does</div><p>Picks a closed corrective action and reads it end to end. Is the root cause real? Does the action address it? Is there evidence it was effective?</p>
-    <div class="lab">Common finding</div><p>Root cause written as "operator error" or "retrained operator"; closed without an effectiveness check; the same problem keeps coming back.</p>
-  </div></details>
-  <details><summary><span class="no">10.1 10.3</span><span class="ti">Continual improvement <span class="pill new">2026</span></span></summary><div class="body">
-    <p>Show that the system gets better over time, with examples and data: scrap down, cycle time down, fewer complaints, a recurring problem eliminated.</p>
-    <div class="lab">Auditor asks</div><p>"What has improved since recertification? Show me the before and after."</p>
-  </div></details>
-  </div>
-  <p class="empty" id="cEmpty">No clause matches that search. Try a simpler word, such as "gauge", "supplier" or "record".</p>
+  <div id="clauseList"></div>
+  <p class="empty" id="cEmpty">No clause matches that search. Try a simpler word, such as "gauge", "weld", "supplier" or "record".</p>
 </section>
 
-<!-- ============================ INTERVIEW ============================ -->
-<section class="view" id="v-interview">
-  <h2>In the room</h2>
-  <p class="lead">How to answer, what they'll ask each group, and what to say when you're not sure.</p>
+<!-- ============================ PRACTICE ============================ -->
+<section class="view" id="v-practice">
+  <div class="vhead"><div class="eyebrow">Interview and drill</div><h2>Practice</h2></div>
+  <p class="lead">A mock auditor to rehearse with, how to answer, and the trails auditors follow through a cylinder shop.</p>
 
-  <h3>Golden rules: share with everyone</h3>
-  <div class="card">
-    <ol>
-      <li><b>Listen to the whole question.</b> Ask them to repeat it if needed.</li>
-      <li><b>Answer what was asked</b>, honestly and briefly. Don't add stories nobody asked for, but never hide anything.</li>
-      <li><b>Show, don't tell.</b> "Let me show you the record" beats any explanation.</li>
-      <li><b>"I don't know" is a fine answer</b>, followed by "…but I know where to find out" or "…[name] owns that."</li>
-      <li><b>Never guess or make something up.</b> One wrong answer makes the auditor dig deeper.</li>
-      <li><b>Avoid "always" and "never"</b> unless records prove it. The auditor will go looking for the one exception.</li>
-      <li><b>Pausing is fine.</b> Taking time to find the right record is normal.</li>
-      <li><b>Correct yourself straight away</b> if you got something wrong: "Sorry, I misspoke. It's a 12-month interval."</li>
-      <li><b>Don't argue.</b> If you disagree, ask which requirement it's against and show evidence calmly.</li>
-    </ol>
+  <h3>Mock auditor</h3>
+  <div class="seg" id="dWho">
+    <button data-who="all" class="on">All</button><button data-who="You">You</button><button data-who="Top mgmt">Top mgmt</button><button data-who="Shop floor">Shop floor</button><button data-who="Test and inspection">Test and inspection</button><button data-who="Purchasing">Purchasing</button>
+  </div>
+  <div class="card drill" id="drillCard">
+    <div><span class="pill acc" id="dTag"></span> <span class="muted small" id="dCount"></span></div>
+    <p class="dq" id="dQ"></p>
+    <p class="small muted" id="dHint">Answer out loud first, as if the auditor is standing there. Then reveal.</p>
+    <div id="dAns" hidden>
+      <div class="lab">A strong answer</div><p id="dGood" style="margin-top:2px"></p>
+      <div class="lab">Pull up</div><p id="dShow" style="margin-top:2px"></p>
+      <div class="lab bad">Watch out for</div><p id="dTrap" class="bad" style="margin-top:2px"></p>
+    </div>
+    <div class="btns"><button class="btn" id="dReveal">Reveal</button><button class="btn pri" id="dNext">Next question</button></div>
   </div>
 
+  <h3>Answering: the rules</h3>
+  <div class="card">
+    <ol>
+      <li><b>Listen to the whole question.</b> Ask for a repeat if needed.</li>
+      <li><b>Answer what was asked</b>, honestly and briefly. Don't volunteer side stories, and never hide anything.</li>
+      <li><b>Show, don't tell.</b> "Let me show you the record."</li>
+      <li><b>"I don't know"</b> is fine, followed by "…but [name] owns that" or "…let me find out."</li>
+      <li><b>Never guess.</b> One wrong answer makes the auditor dig deeper.</li>
+      <li><b>Avoid "always" and "never"</b> unless records prove it.</li>
+      <li><b>Pausing is fine.</b> So is correcting yourself: "Sorry, it's a 12-month interval."</li>
+      <li><b>Don't argue.</b> Ask which requirement it's against, and show evidence calmly.</li>
+    </ol>
+  </div>
   <div class="card hl">
     <h4>Problems you found yourself count in your favour</h4>
-    <p>If the auditor finds something you already know about, show them the NCR, CAPA or internal audit finding. A problem caught and being fixed by your own system shows the system <b>working</b>. Auditors often won't raise a finding for something already under control.</p>
+    <p class="small" style="margin-bottom:0">If the auditor finds something already on an NCR, CAPA or internal audit finding, show it. A problem caught and being fixed shows the system <b>working</b>, and often won't be written up.</p>
   </div>
 
   <h3>Useful phrases</h3>
   <div class="card">
-    <span class="say">"Just to check I understand: you're asking how we control drawing revisions at the machine?"</span>
+    <span class="say">"Just to check: you're asking how a new drawing revision reaches the welding cell?"</span>
     <span class="say">"Let me pull up the record rather than go from memory."</span>
     <span class="say">"That's owned by our purchasing lead. I'll bring them in."</span>
     <span class="say">"We picked that up in our own internal audit in June. Here's the corrective action."</span>
-    <span class="say">"Could you show me which requirement that's against, so we address it properly?"</span>
+    <span class="say">"Which requirement is that against, so we address it properly?"</span>
     <span class="say">"Is that a nonconformity, or an observation?"</span>
-  </div>
-
-  <h3>What they'll ask</h3>
-  <div class="grid2">
-    <div class="card">
-      <h4>Operators and inspectors</h4>
-      <div class="q">"What are you working on?"<div class="a">Job, part, revision, from the traveller.</div></div>
-      <div class="q">"How do you know it's right?"<div class="a">Drawing, inspection plan, first piece, the gauges and how often.</div></div>
-      <div class="q">"Is this gauge calibrated? How do you know?"<div class="a">Point to the label and the due date.</div></div>
-      <div class="q">"What do you do with a bad part?"<div class="a">Stop, tag it, quarantine it, tell the supervisor or QA, NCR.</div></div>
-      <div class="q">"Where's your instruction? Is it current?"<div class="a">Show it and know how they'd tell.</div></div>
-      <div class="q">"What training have you had?"<div class="a">Honest answer. The records will back it up.</div></div>
-      <div class="q">"What does quality mean in your job?"<div class="a">Their own words. No reciting.</div></div>
-    </div>
-    <div class="card">
-      <h4>Top management</h4>
-      <div class="q">"What are your quality objectives and how are they doing?"</div>
-      <div class="q">"What came out of the last management review?"</div>
-      <div class="q">"How do you make sure there are enough resources for quality?"</div>
-      <div class="q">"What are the biggest risks to the business?"</div>
-      <div class="q">"How do you build a quality culture? What happens when schedule pressure and quality conflict?" <span class="pill new">2026</span></div>
-      <div class="q">"What changed this year, and how was it planned?"</div>
-    </div>
-    <div class="card">
-      <h4>You (management rep)</h4>
-      <div class="q">"Walk me through closure of the recertification findings."</div>
-      <div class="q">"Show me the internal audit programme. How did you set the frequency?"</div>
-      <div class="q">"Pick a corrective action and take me through it."</div>
-      <div class="q">"How do you know your corrective actions work?"</div>
-      <div class="q">"Show me the management review minutes."</div>
-      <div class="q">"How are deviations and concessions authorised?"</div>
-      <div class="q">"What's changed in the QMS, including your role?"</div>
-    </div>
-    <div class="card">
-      <h4>Purchasing, receiving, shipping</h4>
-      <div class="q">"How is a new supplier approved? When was this one last evaluated?"</div>
-      <div class="q">"Show me this PO. Where are the spec, revision and cert requirements?"</div>
-      <div class="q">"How is incoming material checked? Where's the mill cert?"</div>
-      <div class="q">"How do you know this order is released for shipping?"</div>
-      <div class="q">"How is the product protected in transit?"</div>
-    </div>
   </div>
 
   <h3>If you're the guide</h3>
   <div class="card">
     <ul>
-      <li><b>Do</b> stay with the auditor, arrange PPE, introduce people, keep the request log, and send the runner for records.</li>
-      <li><b>Do</b> let people answer for themselves. Don't answer for an operator. If they're stuck, it's fine to ask "Who would you ask?"</li>
-      <li><b>Don't</b> coach or signal answers in front of the auditor.</li>
-      <li><b>Don't</b> steer the auditor away from areas. It's obvious, and it makes them look harder.</li>
-      <li><b>Do</b> note every possible finding the moment it comes up, so you can bring evidence before the wrap-up.</li>
+      <li><b>Do</b> stay with the auditor, sort out PPE, keep them clear of the test stand while it's under pressure, introduce people, keep the log.</li>
+      <li><b>Do</b> let people answer for themselves. If they're stuck: "Who would you ask?"</li>
+      <li><b>Don't</b> coach or signal answers, or steer the auditor away from an area. It's obvious and makes them look harder.</li>
+      <li><b>Do</b> note every possible finding the moment it comes up.</li>
     </ul>
-  </div>
-</section>
-
-<!-- ============================ DRILL ============================ -->
-<section class="view" id="v-drill">
-  <h2>Drill</h2>
-  <p class="lead">Practise before the real thing. Run the question drill on yourself, or use it to rehearse supervisors and operators. Then follow a trail the way an auditor would.</p>
-
-  <h3>Mock auditor</h3>
-  <div class="seg" id="dWho" role="tablist">
-    <button data-who="all" class="on">All</button><button data-who="You">You</button><button data-who="Top mgmt">Top mgmt</button><button data-who="Shop floor">Shop floor</button><button data-who="Purchasing">Purchasing</button>
-  </div>
-  <div class="card drill" id="drillCard">
-    <div class="dmeta"><span class="pill" id="dTag"></span> <span class="muted small" id="dCount"></span></div>
-    <p class="dq" id="dQ"></p>
-    <p class="small muted" id="dHint">Answer out loud first, as if the auditor is standing there. Then reveal.</p>
-    <div id="dAns" hidden>
-      <div class="lab">A strong answer</div><p id="dGood"></p>
-      <div class="lab">Pull up</div><p id="dShow"></p>
-      <div class="lab">Watch out for</div><p id="dTrap" class="bad"></p>
-    </div>
-    <div class="btns"><button class="btn" id="dReveal">Reveal</button><button class="btn pri" id="dNext">Next question</button></div>
   </div>
 
   <h3>Follow the trail</h3>
-  <p class="small">Auditors test a system by following one item through linked records. The <b>link</b> at each step is an identifier (PO number, drawing revision, job number, gauge ID, heat number) that has to match the next record. If it doesn't match, that's usually where a finding comes from.</p>
+  <p class="small">Auditors test the system by following one item through linked records. The <b>link</b> at each step is an identifier (PO number, drawing revision, heat number, serial number, gauge ID) that has to match the next record. Where it doesn't, there's usually a finding.</p>
   <div class="seg" id="tPick">
-    <button data-t="0" class="on">Customer order</button><button data-t="1">Supplier</button><button data-t="2">Bad part</button><button data-t="3">Complaint</button>
+    <button data-t="0" class="on">Customer order</button><button data-t="1">Supplier</button><button data-t="2">Bad part</button><button data-t="3">Field complaint</button>
   </div>
   <div id="trail"></div>
 </section>
 
 <!-- ============================ FINDINGS ============================ -->
 <section class="view" id="v-findings">
-  <h2>Findings and your response</h2>
+  <div class="vhead"><div class="eyebrow">After the closing meeting</div><h2>Findings and your response</h2></div>
   <p class="lead">How findings are graded, what happens next, and how to write a response the CB will accept.</p>
 
-  <h3>How findings are graded</h3>
+  <h3>Grades</h3>
   <div class="card">
-    <p><span class="pill red">Major NC</span> A nonconformity that <b>affects the capability of the management system to achieve its intended results</b>. Examples: a required process isn't there or isn't being done at all (no internal audits for a year, no management review); a breakdown likely to let bad product reach the customer. <b>Several minors against the same requirement can add up to a major.</b></p>
-    <p><span class="pill amber">Minor NC</span> A nonconformity that <b>doesn't affect</b> the system's capability, usually an isolated lapse: one overdue gauge, one unsigned record, one old drawing.</p>
-    <p><span class="pill green">OFI / observation</span> Not a nonconformity. Advice or a risk the auditor noticed. No formal response needed, but deal with it, or it could become a finding next time.</p>
-    <p class="small">Many CBs raise a minor from the last audit as a major if it wasn't actually fixed. Check your CB's rules.</p>
+    <div class="grade"><span class="pill red">MAJOR</span><div>Affects the capability of the QMS to achieve its intended results. Example: no internal audits for a year; cylinders shipping without a recorded pressure test. <b>Several minors against one requirement can add up to a major.</b></div></div>
+    <div class="grade"><span class="pill amber">MINOR</span><div>Doesn't affect that capability. An isolated lapse: one overdue torque wrench, one unsigned test record, one old drawing.</div></div>
+    <div class="grade"><span class="pill green">OFI</span><div>Opportunity for improvement, not a nonconformity. No formal response, but deal with it, or it may be a finding next time.</div></div>
+    <p class="small" style="margin-bottom:0">Many CBs raise a minor from the last audit as a major if it wasn't really fixed. Check your CB's rules.</p>
   </div>
 
   <h3>What happens next</h3>
   <div class="card">
     <ul>
-      <li><b>Minor:</b> you send a correction and corrective action plan, the CB reviews and accepts it, and the auditor checks implementation and effectiveness at the next audit.</li>
-      <li><b>Major:</b> the CB must review and <b>verify</b> your correction and corrective action, by document review or a follow-up visit, often at extra cost. If a major isn't resolved in time, your certificate can be suspended.</li>
-      <li><b>Deadlines are set by your CB</b>, not by ISO 9001. Check its certification rules or your contract. Commonly about 30 days to submit a response, with majors closed within about 90 days, but confirm at the closing meeting.</li>
+      <li><b>Minor:</b> you send a correction and corrective action plan; the CB accepts it; the next auditor checks it was done and worked.</li>
+      <li><b>Major:</b> the CB must <b>verify</b> your correction and corrective action, by document review or a follow-up visit (often at extra cost). If it isn't resolved in time, the certificate can be suspended.</li>
+      <li><b>Deadlines come from your CB</b>, not from ISO 9001. Commonly about 30 days to respond, with majors closed within about 90. Confirm at the closing meeting.</li>
     </ul>
   </div>
 
-  <h3>How to write the response</h3>
+  <h3>The response, in seven parts</h3>
   <div class="card">
-    <div class="step"><span class="n">1</span><div><b>Finding.</b> Copy the auditor's wording exactly, with the clause.</div></div>
-    <div class="step"><span class="n">2</span><div><b>Correction and containment.</b> What you fixed right away, and what you did about product that may have been affected.</div></div>
-    <div class="step"><span class="n">3</span><div><b>Extent.</b> Did the same thing happen elsewhere? Check other gauges, records, cells and suppliers, and say what you found.</div></div>
-    <div class="step"><span class="n">4</span><div><b>Root cause.</b> Why did the <i>system</i> allow it? Use 5 Whys or a fishbone. Keep asking until you reach something you can change.</div></div>
-    <div class="step"><span class="n">5</span><div><b>Corrective action.</b> A change to the system that removes that cause, with an owner and a date.</div></div>
-    <div class="step"><span class="n">6</span><div><b>Evidence.</b> Attach what proves it's done: revised procedure, screenshot, training record, photo.</div></div>
-    <div class="step"><span class="n">7</span><div><b>Effectiveness check.</b> How and when you'll confirm it worked, e.g. three months of data, or a follow-up internal audit.</div></div>
+    <div class="step" style="margin-top:0"><span class="n">1</span><div><b>Finding:</b> the auditor's exact wording and clause.</div></div>
+    <div class="step"><span class="n">2</span><div><b>Correction and containment:</b> what you fixed now, and what you did about product that may be affected.</div></div>
+    <div class="step"><span class="n">3</span><div><b>Extent:</b> did it happen elsewhere? Other gauges, cells, records, suppliers.</div></div>
+    <div class="step"><span class="n">4</span><div><b>Root cause:</b> why the <i>system</i> allowed it (5 Whys or fishbone).</div></div>
+    <div class="step"><span class="n">5</span><div><b>Corrective action:</b> a system change, with an owner and a date.</div></div>
+    <div class="step"><span class="n">6</span><div><b>Evidence:</b> revised procedure, screenshot, training record, photo.</div></div>
+    <div class="step" style="margin-bottom:0"><span class="n">7</span><div><b>Effectiveness check:</b> how and when you'll prove it worked.</div></div>
+  </div>
+
+  <h3>Worked example: test stand gauge</h3>
+  <div class="card">
+    <div class="resp">
+      <span class="k">Finding</span><div><span class="pill amber">MINOR · 7.1.5.2</span><br>"The pressure gauge on test stand 2 (ID PG-04), used to record proof-pressure results for released cylinders, was 6 weeks past its calibration due date."</div>
+      <span class="k">Correction</span><div>PG-04 taken out of service the same day, replaced with a calibrated spare, and sent for calibration. As-found readings were within tolerance across the test range, so test results in that period stand. Certificate attached.<br><span class="small">If it had read out of tolerance: list every serial number tested since its last good calibration, assess the effect on each test result, and decide on retest, recall or customer notification.</span></div>
+      <span class="k">Extent</span><div>All gauges, transducers and torque wrenches checked against the calibration list. Found one torque wrench in assembly not on the list at all; added and calibrated.</div>
+      <span class="k">Root cause</span><div>Test stand instruments were added when the stand was built but were never entered in the calibration system, which only covered inspection-room gauges. Nothing forced new measuring equipment onto the list.</div>
+      <span class="k">Action</span><div>New-equipment checklist now requires every measuring device to get a calibration ID before first use (owner: QA, due 2026-12-15). Due-date labels on all test stand instruments. Test record form now asks for the gauge ID and its due date.</div>
+      <span class="k">Effectiveness</span><div>Internal audit of 7.1.5 covering the test stands and assembly in Q2; target zero instruments in use that aren't on the list or are overdue.</div>
+    </div>
   </div>
 
   <h3>Weak vs strong root cause</h3>
   <div class="card">
-    <p class="bad"><b>✗ Weak:</b> "Operator error. Operator retrained."</p>
-    <p class="small">Retraining is the right fix only if the training really was missing. Otherwise the auditor will ask why the system let one person's mistake through, and why it won't happen with the next person.</p>
-    <p class="good"><b>✓ Strong:</b> "The drawing release process had no step to remove superseded copies from the floor. Printed copies stayed in the cell after an ECN."</p>
-    <p class="small">This points at something you can change (the process), so the fix sticks no matter who is on shift.</p>
+    <p class="bad" style="margin-top:0"><b>✗</b> "Assembler forgot to torque the piston nut to spec. Assembler retrained."</p>
+    <p class="small">Retraining only fixes it if training was really missing. The auditor will ask why the process let one missed step through.</p>
+    <p class="good"><b>✓</b> "The assembly instruction had no torque verification step and the wrench has no click or record, so a missed torque couldn't be detected before test."</p>
+    <p class="small" style="margin-bottom:0">This points at something you can change, such as a sign-off with the recorded value or a mark on the nut, so the fix holds on every shift.</p>
   </div>
 
   <h3>Root-cause checker</h3>
   <div class="card">
-    <p class="small">Paste a root cause or corrective action before you send it to the CB. This checks for the wording auditors usually reject. It runs in this page only, and nothing is saved or sent.</p>
-    <textarea id="rcIn" class="search" style="min-height:110px;resize:vertical;line-height:1.4" placeholder="e.g. Operator did not check the gauge label. Operator retrained."></textarea>
+    <p class="small" style="margin-top:0">Paste a root cause or corrective action before you send it. It flags wording auditors usually reject. Runs on this page only; nothing is saved or sent.</p>
+    <textarea id="rcIn" class="search" placeholder="e.g. Operator did not check the gauge label. Operator retrained."></textarea>
     <div class="btns"><button class="btn pri" id="rcGo">Check it</button></div>
     <div id="rcOut"></div>
   </div>
 
-  <h3>Worked example: overdue gauge</h3>
-  <div class="card">
-    <p class="lab">Finding (minor, 7.1.5.2)</p>
-    <p>"A 1–2 in outside micrometer (ID OM-17) was in use in the turning cell, 2 months past its calibration due date."</p>
-    <p class="lab">Correction and containment</p>
-    <p>OM-17 removed from use the same day and calibrated. As-found readings were within tolerance, so no product impact; the calibration record is attached. <i>(If it had been out of tolerance: list every job it measured since its last good calibration, assess the impact, and inform the customer if needed.)</i></p>
-    <p class="lab">Extent</p>
-    <p>All 140 gauges in the system checked against the recall list: 2 more found overdue (both in the tool crib, not in use). Both calibrated.</p>
-    <p class="lab">Root cause</p>
-    <p>The recall list was a spreadsheet maintained by one person, with no automatic reminder. When that person was on leave, the monthly recall was missed. Gauge labels showed a calibration date but not the due date, so operators couldn't check at the point of use.</p>
-    <p class="lab">Corrective action</p>
-    <p>Calibration system set to send a weekly due-in-30-days report to QA and the backup owner (owner: QA, done 2026-12-05). Labels changed to show the due date. Operators briefed to check the label before use, and the check added to the daily layered audit.</p>
-    <p class="lab">Effectiveness check</p>
-    <p>Zero overdue gauges in use across 12 weekly reports and the Q2 internal audit of 7.1.5.</p>
-  </div>
-
   <div class="card warn">
     <h4>Don't promise what you won't do</h4>
-    <p class="small">Every date in your response will be checked at the next audit. Choose actions you can really finish, with real owners. Missing your own CAPA dates can be raised as a new finding.</p>
+    <p class="small" style="margin-bottom:0">Every date in your response gets checked at the next audit. Choose actions you'll actually finish, with real owners. Missing your own CAPA dates can become a new finding.</p>
   </div>
 </section>
 
-<footer>A plain-language guide, not the standard. Always check against the purchased ISO 9001 text and your CB's rules.<br>Built by Harsh Patel</footer>
+<footer>A plain-language guide, not the standard. Check against the purchased ISO 9001 text and your CB's rules.<br>Shop examples are typical situations, not requirements.<br>Built by Harsh Patel</footer>
 </main>
-
-<nav class="bottom" aria-label="Sections">
-  <button data-view="basics" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg>Basics</button>
-  <button data-view="prepare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Prepare</button>
-  <button data-view="clauses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Clauses</button>
-  <button data-view="interview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Interview</button>
-  <button data-view="drill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>Drill</button>
-  <button data-view="findings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Findings</button>
-</nav>
 
 <script>
 "use strict";
 (function(){
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); }
+  var SHOP = '<div class="sh"><svg><use href="#cyl"/></svg>In a cylinder shop</div>';
+
+  /* ---- clauses: [section, no, title, is2026, plain (html), asks, ready, finding, shop (html), note2026] ---- */
+  var SECTIONS = { c4:"4 · Context", c5:"5 · Leadership", c6:"6 · Planning", c7:"7 · Support", c8:"8 · Operation", c9:"9 · Performance evaluation", c10:"10 · Improvement" };
+  var CL = [
+    ["c4","4.1 4.2","Context and interested parties",1,
+      "Know the internal and external issues that affect your ability to deliver quality, who your interested parties are, and what they need from you.",
+      "\"What are the main issues affecting the business? How do they show up in your risks or objectives?\"",
+      "A context and interested-parties list (often a SWOT in the management review), reviewed in the last year.",
+      "Written years ago and never reviewed, or not linked to risks and objectives.",
+      "Typical issues: demand cycles in agriculture, construction and mining equipment; steel prices and tariffs; lead times on chrome bar and honed tube; skilled machinists and welders. Interested parties: OEM customers and their quality manuals, distributors, steel suppliers, employees.",
+      "Climate change must be considered. This came from the 2024 amendment."],
+    ["c4","4.3","Scope of the QMS",0,
+      "What the system covers: products, activities, sites. Any clause marked not applicable needs a reason, and can't affect product conformity.",
+      "\"Does the scope still describe what you do? You say design (8.3) doesn't apply. Who designs the cylinders?\"",
+      "The scope statement and justification for any non-applicable clause.",
+      "Scope says build-to-print, but the shop actually sizes or designs custom cylinders for customers.",
+      "If engineering picks bore, rod, stroke and mounting from a customer's load and pressure requirements, that is design, and 8.3 applies."],
+    ["c4","4.4","QMS and its processes",0,
+      "Processes defined: inputs, outputs, sequence, owners, measures, resources and risks.",
+      "\"Show me how your processes connect. How do you know each one is working?\"",
+      "A process map from quote to shipment, with a measure for each process.",
+      "A process with no performance measure, or a map that doesn't match reality.",
+      "Quote → order review → engineering → purchasing → saw → machining → welding → honing / rod finishing → assembly → pressure test → paint → ship."],
+    ["c5","5.1","Leadership and customer focus",1,
+      "Top management is accountable for the QMS. They make sure policy and objectives fit the business, resources are provided, and customers stay the priority.",
+      "\"How are you involved in the QMS? How are your objectives doing? What did the last management review decide?\"",
+      "Top management prepared on objectives, management review decisions and customer results.",
+      "A manager who can't talk about objectives or results, which suggests the QMS belongs only to Quality.",
+      "A strong sign: the plant manager can explain the on-time delivery and warranty return numbers, and what was done when leaks at test went up.",
+      "Leaders must promote quality culture and ethical behaviour. Expect: \"What happens when shipping pressure conflicts with a failed test?\""],
+    ["c5","5.2","Quality policy",0,
+      "A policy that fits your business, commits to meeting requirements and to improving, and that people understand.",
+      "To an operator: \"What does the quality policy mean for your job?\"",
+      "The policy posted and communicated.",
+      "People can recite it but can't explain it, or have never seen it.",
+      "A good welder's answer: \"Weld to the procedure, check it, and if something's wrong, stop and tell the lead.\""],
+    ["c5","5.3","Roles, responsibilities and authorities",0,
+      "People know who's responsible for what, including who can stop production, release product and approve a deviation.",
+      "\"Who can approve a deviation? Who can release a cylinder that failed first test?\"",
+      "Org chart, job descriptions, and the authority list for concessions and release.",
+      "A deviation signed by someone without the authority your procedure gives.",
+      "Make sure your deviation procedure's authority levels match who actually signs, including on night shift."],
+    ["c6","6.1","Risks and opportunities",1,
+      "Identify what could stop you delivering quality (and what could help), act in proportion to the risk, and check the actions worked. A formal FMEA isn't required, but you need evidence.",
+      "\"What are your top risks? Show me one action and how you know it worked.\"",
+      "Risk review done this year, linked to real actions.",
+      "A register that's never reviewed, or an empty actions column.",
+      "Real examples: single-source chrome bar, one qualified welder per shift, one test stand for all production, an aging hone. Opportunity: a second plating source.",
+      "Risks and opportunities are handled separately."],
+    ["c6","6.2","Quality objectives",0,
+      "Measurable objectives with a plan: what, resources, who, when, and how results are evaluated.",
+      "\"Show me the data. This one is red. What are you doing about it?\"",
+      "Each objective with a target, owner, trend and action plan.",
+      "An objective missed every month with nothing done, or no data at all.",
+      "Typical objectives: first-time pass rate at pressure test, warranty returns per 1,000 cylinders, on-time delivery, scrap cost as % of sales."],
+    ["c6","6.3","Planning of changes",1,
+      "Changes to the QMS are planned: purpose, consequences, resources, responsibilities.",
+      "\"What has changed since the last audit, and how was it planned?\"",
+      "A record for each significant change.",
+      "Big change (new ERP, new test stand, a reorganisation) made without any planning record.",
+      "Your appointment as manager is a change. So is moving the hone or adding a new welding robot.",
+      "Expanded: changes should also be communicated, monitored and reviewed."],
+    ["c7","7.1","People, infrastructure, environment",0,
+      "Enough people, maintained machines and facilities, and a suitable work environment.",
+      "\"Show me the preventive maintenance for this machine.\"",
+      "PM schedule and records for critical equipment.",
+      "PM overdue on a critical machine, or a breakdown with no record.",
+      "Critical equipment: CNC lathes, the hone, welding equipment, test stand pumps and relief valves, overhead cranes for long tubes. Test stand fluid cleanliness may matter too, if customers set a cleanliness code."],
+    ["c7","7.1.5","Measuring equipment (calibration)",0,
+      "Measuring equipment is suitable, calibrated at set intervals against traceable standards, labelled with its status and protected. <b>If a device is found out of tolerance, you must check whether earlier results are still valid</b> and act on affected product.",
+      "The auditor picks a gauge off a bench, reads the ID, and asks for its record and certificate.",
+      "Calibration list with due dates, traceable certificates (e.g. ISO/IEC 17025 lab), out-of-tolerance assessments, and your rule for personal tools.",
+      "Overdue gauge in use; personal tools uncontrolled; no product impact assessment after an out-of-tolerance result.",
+      "Don't forget the equipment that isn't in the inspection room: <b>test stand pressure gauges and transducers, torque wrenches</b>, the profilometer for rod finish, bore gauges at the hone, thread gauges for ports, and CMM verification records."],
+    ["c7","7.1.6","Organizational knowledge",0,
+      "Knowledge needed to run processes is captured and shared so it isn't lost when people leave.",
+      "\"If your best setup person left tomorrow, how would you run this job?\"",
+      "Setup sheets, lessons learned, training material.",
+      "Critical know-how that exists only in one person's head.",
+      "Hone settings for a difficult tube, weld sequence to control distortion on a long cylinder, seal installation tricks: write them down."],
+    ["c7","7.2 7.3","Competence and awareness",1,
+      "People are competent through education, training and experience; gaps are acted on, training effectiveness is checked, and records are kept. Everyone knows the policy, their objectives, and why it matters.",
+      "The auditor picks an operator and checks their training record covers what they're doing now.",
+      "Training matrix, sign-offs, welder qualifications.",
+      "New hire missing from the matrix; expired welder qualification; CMM user with no training record.",
+      "Watch the roles that release product: <b>test bench operators</b> and final inspectors. Welder qualifications must be current for the process and position they're welding.",
+      "Awareness now includes quality culture and ethical behaviour."],
+    ["c7","7.4","Communication",0,
+      "You decide what is communicated, when, to whom and how.",
+      "\"How did the shop find out about the last quality alert?\"",
+      "Shift meeting notes, quality alerts, KPI boards.",
+      "A quality alert with no record of who saw it.",
+      "A quality alert on a seal kit change or a recurring weld porosity issue, signed off by each shift."],
+    ["c7","7.5","Documented information",0,
+      "Documents are reviewed, approved, revision-controlled and at the point of use, with obsolete copies removed. Records are legible, protected, kept for a defined time and retrievable.",
+      "\"How does a new drawing revision reach the floor, and how is the old one removed?\"",
+      "Document control procedure, master list, record retention rules.",
+      "Old revision at a workstation; handwritten changes on a printout; records with no retention rule.",
+      "The risk point is an ECN mid-job: the saw cuts to the new stroke, but the welding cell still has the old drawing."],
+    ["c8","8.1","Operational planning",0,
+      "For each job: requirements, acceptance criteria, resources and records are planned.",
+      "\"Show me the router and inspection plan for this job.\"",
+      "Routers, control or inspection plans, test specifications.",
+      "Inspection plan missing a characteristic that's on the drawing.",
+      "The test specification (pressure, hold time, acceptance criteria) is part of the plan. Know where it comes from: the customer drawing, your standard, or an industry test standard."],
+    ["c8","8.2","Customer requirements and order review",0,
+      "Before accepting an order, confirm you can meet it. Changes are reviewed and communicated.",
+      "The auditor picks a PO: \"Show me the review. Does the revision match the shop drawing?\"",
+      "Contract review record, customer drawings and specs, change records.",
+      "No review evidence; PO revision differs from the shop drawing; customer spec not passed to the floor.",
+      "Check that customer-specific requirements reach the floor: paint spec, test pressure, cleanliness, packaging, PPAP or a certificate of conformance."],
+    ["c8","8.3","Design and development",0,
+      "Applies if you design. Planning, inputs, reviews, verification, validation, outputs and change control.",
+      "\"Show me a design file from inputs to validation.\"",
+      "Design inputs (load, pressure, stroke, mounting, environment), calculations, reviews, validation tests.",
+      "Calculations not checked; no design review record; design changes not controlled.",
+      "Typical design verification: column buckling check on long strokes, pressure rating of tube, welds and ports, seal compatibility with the fluid and temperature."],
+    ["c8","8.4","Purchasing and external providers",0,
+      "Suppliers and outsourced processes are selected, monitored and re-evaluated. POs state clear requirements. Incoming product is verified.",
+      "\"How was this supplier approved? Where's the spec on the PO? Where's the mill cert?\"",
+      "Approved supplier list, evaluations, performance data, POs, receiving records, mill certs.",
+      "Supplier not approved or never re-evaluated; spec or cert requirement missing from the PO; mill cert never compared to the spec.",
+      "Key suppliers: chrome bar (check chrome thickness and hardness certs), honed or DOM tube, seal kits (compound and lot), steel for heads and clevises, and outsourced plating, nitriding and heat treatment."],
+    ["c8","8.5.1","Control of production",0,
+      "Work is done under controlled conditions. <b>Special processes</b>, where the result can't be fully verified afterwards, must be validated and periodically revalidated.",
+      "At a machine: \"What are you making, how do you know it's right, how often do you check?\"",
+      "First-piece and in-process records, weld procedures, welder qualifications, special process validation.",
+      "First piece not recorded; checks missed; special process never validated, or the supplier's validation never requested.",
+      "Welding is a special process: weld procedure at the station, qualified welders, and a defined way to accept welds. For outsourced plating or nitriding, ask the supplier for their process validation and records, not just a certificate of conformance."],
+    ["c8","8.5.2","Identification and traceability",0,
+      "Product is identified throughout, its inspection status is clear, and traceability is recorded where required.",
+      "The auditor points at a rack: \"What is this, what job, is it inspected, which heat?\"",
+      "Tags, travellers, serial number log.",
+      "Untagged parts; unclear status; traceability chain broken.",
+      "The chain auditors test: <b>serial number → test record → job → tube and rod heat numbers → mill certs</b>. The usual break is at the saw, when offcuts lose their heat number."],
+    ["c8","8.5.3 8.5.4","Customer property and preservation",0,
+      "Customer property is identified and protected, and loss or damage is reported. Product is protected through handling, storage and shipping.",
+      "\"How do you protect finished cylinders until delivery?\"",
+      "Packaging and preservation instructions.",
+      "Unprotected rods, open ports, rust on stored parts.",
+      "Rod protection (sleeves or wrap), port plugs, rust preventive on exposed machined surfaces, cylinders stored retracted where specified, customer-supplied clevises or pins tagged."],
+    ["c8","8.5.5 8.5.6","Post-delivery and control of changes",0,
+      "Warranty and returns are handled. Unplanned production changes are reviewed and authorised.",
+      "\"How do you handle a warranty return? Show me a production change.\"",
+      "Warranty teardown records, change approvals.",
+      "Alternate material or seal used with no recorded approval.",
+      "Changes to watch: substituting a seal compound, a different tube supplier, a new weld wire."],
+    ["c8","8.6","Release of products",0,
+      "Product isn't shipped until planned checks are complete. Records show conformity and <b>who released it</b>.",
+      "\"Show me the test and final inspection record for this serial number.\"",
+      "Signed test and final inspection records.",
+      "Test record missing pressure, hold time or result; no signature; shipped before release.",
+      "A good pressure test record has: serial number, test pressure, hold time, result (no leakage or drift as specified), gauge ID, tester name and date."],
+    ["c8","8.7","Nonconforming outputs (NCRs, deviations)",0,
+      "Bad product is identified and controlled. It's corrected, segregated, returned, scrapped or accepted under concession, and records show <b>who decided</b>.",
+      "In quarantine: \"Show me the NCR and the disposition for this part.\"",
+      "NCR log, quarantine area, deviation approvals, customer approvals where required.",
+      "Rejects mixed with good parts; NCR open for months; deviation signed by the wrong person; customer approval missing.",
+      "Common cases: chrome pitting or a scored rod, bore out of size after honing, weld porosity, leak at test. Rework (re-chrome, re-hone, re-weld) still needs an NCR and a recorded disposition."],
+    ["c9","9.1","Monitoring, customer satisfaction, analysis",0,
+      "Decide what to measure, monitor how customers see you, and analyse the data to make decisions.",
+      "\"What does the data tell you? What did you decide from it?\"",
+      "KPI trends, customer satisfaction data, analysis with conclusions.",
+      "Data collected but never analysed; no customer satisfaction measure beyond complaints.",
+      "Pareto test failures by cause (seal, weld leak, port thread) and warranty returns by failure mode. Your SPC Tools Pareto does this."],
+    ["c9","9.2","Internal audit",0,
+      "A planned programme based on importance, changes and past results. Auditors are objective. Results are reported, and actions are taken without undue delay.",
+      "\"How did you set the frequency? Who audited Quality? Show me a finding to closure.\"",
+      "Programme, reports with evidence detail, auditor qualifications, findings to closure.",
+      "Areas skipped; auditor audited their own area; reports that say \"all OK\"; findings never closed.",
+      "Audit by process, not just by clause: e.g. follow one cylinder from saw to shipping. A year with no internal findings makes external auditors suspicious."],
+    ["c9","9.3","Management review",0,
+      "Top management reviews the QMS at planned intervals. Minutes must cover: previous actions; changes in issues; customer satisfaction and feedback; objectives; process performance and product conformity; NCs and corrective actions; monitoring results; audit results; supplier performance; resources; effectiveness of risk actions; improvement opportunities. Outputs: improvement decisions, changes needed, resource needs.",
+      "\"Show me the minutes. What did you decide?\"",
+      "Minutes with every input covered and decisions recorded.",
+      "An input missing (often supplier performance or risk effectiveness); no decisions; last review's actions never followed up.",
+      "Use the inputs as your agenda headings. That way the minutes show every input was covered."],
+    ["c10","10.2","Nonconformity and corrective action",0,
+      "When something goes wrong, including complaints: react, find the root cause, check for similar problems, act, review effectiveness, and update risks if needed.",
+      "The auditor picks a closed CAPA and reads it end to end.",
+      "CAPA records with root cause evidence and an effectiveness check.",
+      "Root cause \"operator error\"; closed without an effectiveness check; the same problem keeps coming back.",
+      "Classic repeat problem: gland leaks at test. Root cause could be a seal groove finish, seal installation tool damage, or a supplier lot. Prove it, then fix the system."],
+    ["c10","10.1 10.3","Continual improvement",1,
+      "Show the system gets better over time, with data.",
+      "\"What has improved since recertification? Show me before and after.\"",
+      "Improvement examples with before and after data.",
+      "No examples, or claims without data.",
+      "First-time pass rate at test up, re-hone rate down, warranty returns per 1,000 down."]
+  ];
+  (function(){
+    var h = "", cur = "";
+    CL.forEach(function(c){
+      if(c[0] !== cur){ cur = c[0]; h += '<h3 id="' + cur + '">' + esc(SECTIONS[cur]) + '</h3>'; }
+      h += '<details><summary><span class="no">' + esc(c[1]) + '</span><span class="ti">' + esc(c[2]) + (c[3] ? ' <span class="pill new">2026</span>' : '') + '</span></summary><div class="body">' +
+        '<p>' + c[4] + '</p>' +
+        '<div class="lab">Auditor asks</div><p style="margin-top:2px">' + esc(c[5]) + '</p>' +
+        '<div class="lab">Have ready</div><p style="margin-top:2px">' + esc(c[6]) + '</p>' +
+        '<div class="lab bad">Common finding</div><p style="margin-top:2px">' + esc(c[7]) + '</p>' +
+        '<div class="shop">' + SHOP + c[8] + '</div>' +
+        (c[9] ? '<p class="small"><span class="pill new">2026</span> ' + esc(c[9]) + '</p>' : '') +
+        '</div></details>';
+    });
+    document.getElementById("clauseList").innerHTML = h;
+  })();
+
+  /* ---- navigation ---- */
   var btns = document.querySelectorAll("nav.bottom button");
   function show(v){
     document.querySelectorAll(".view").forEach(function(s){ s.classList.toggle("on", s.id === "v-" + v); });
@@ -694,14 +733,13 @@
   }
   btns.forEach(function(b){ b.addEventListener("click", function(){ show(b.dataset.view); }); });
   var start = (location.hash || "").slice(1);
+  if(start === "interview" || start === "drill") start = "practice";
   if(document.getElementById("v-" + start)) show(start);
-
-  /* clause chips: scroll within the Clauses view without changing the tab hash */
   document.querySelectorAll(".chips a").forEach(function(a){
     a.addEventListener("click", function(e){ e.preventDefault(); var t = document.querySelector(a.getAttribute("href")); if(t) t.scrollIntoView({ behavior:"smooth", block:"start" }); });
   });
 
-  /* clause search: filters cards, opens matches, hides empty section headings */
+  /* ---- clause search ---- */
   var input = document.getElementById("cSearch"), list = document.getElementById("clauseList"), empty = document.getElementById("cEmpty");
   input.addEventListener("input", function(){
     var q = input.value.trim().toLowerCase(), any = false;
@@ -717,32 +755,32 @@
     empty.style.display = any ? "none" : "block";
   });
 
-  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); }
-
-  /* ---- mock auditor: who, question, strong answer, what to pull up, trap ---- */
+  /* ---- mock auditor: who, question, strong answer, pull up, trap ---- */
   var QS = [
-    ["You","Show me how last audit's findings were closed.","Walk each finding: correction, root cause, corrective action, and the evidence it worked (data or a follow-up audit).","Recertification report, CAPA records, effectiveness evidence","Showing the action was done but not that it worked."],
-    ["You","How did you decide how often to audit each process?","Based on importance, risk, changes and past results. Show one area audited more often because of problems or a change.","Internal audit programme with the reasoning written down","\"We audit everything once a year\" with no reasoning."],
+    ["You","Show me how the recertification findings were closed.","Walk each one: correction, root cause, corrective action, and evidence it worked (data or a follow-up audit).","Recertification report, CAPA records, effectiveness evidence","Showing the action was done but not that it worked."],
+    ["You","How did you decide how often to audit each process?","Importance, risk, changes and past results. Show an area audited more often because of problems, e.g. assembly after leak failures.","Internal audit programme with the reasoning","\"We audit everything once a year\" with no reasoning."],
     ["You","Who audited the Quality department?","Someone independent of Quality, named, with their auditor training record.","Audit report, auditor competence record","You audited your own work."],
-    ["You","Pick a corrective action and take me through it.","Choose one you know is complete, with a real root cause and an effectiveness check. Tell it start to finish.","CAPA record with attachments","Root cause written as \"operator error\"."],
-    ["You","What has changed in the QMS since recertification?","Name the changes, including your own appointment, and show how each was planned: who, when, risks, communication.","Change records, org chart, management review minutes","Saying \"nothing\" when you've just changed roles."],
-    ["You","How are deviations and concessions authorised?","Name the procedure and the authority levels, and when customer approval is needed. Show a recent one with the right signatures.","Deviation procedure, a recent approved deviation","A signature from someone without the authority."],
-    ["You","What does your data tell you about the QMS this year?","Two or three trends (scrap, on-time delivery, complaints), what you concluded, and what you did about them.","KPI trends, management review inputs","Showing charts with no conclusions or actions."],
+    ["You","Take me through a corrective action.","Pick one that's complete, with a proven root cause and an effectiveness check. Tell it start to finish.","CAPA record with attachments","Root cause written as \"operator error\"."],
+    ["You","What has changed in the QMS since recertification?","Name the changes, including your own appointment, and show how each was planned.","Change records, org chart, MR minutes","Saying \"nothing\" when you've just changed roles."],
+    ["You","How are deviations authorised?","The procedure, the authority levels, and when customer approval is needed. Show a recent one with the right signatures.","Deviation procedure, a recent approved deviation","A signature from someone without the authority."],
+    ["You","What does your data tell you this year?","Two or three trends (test first-pass rate, warranty returns, on-time delivery), what you concluded, and what you did.","KPI trends, MR inputs","Charts with no conclusions or actions."],
     ["Top mgmt","What are your quality objectives and how are they doing?","Name them, give current numbers, and say what's being done about any that are behind.","Objectives with current data","\"Quality handles that.\""],
-    ["Top mgmt","What came out of your last management review?","Two or three decisions, such as resources, an improvement or a change, and their status now.","MR minutes with actions","Can't recall any decision."],
-    ["Top mgmt","What are the biggest risks to delivering quality?","Specific risks (skilled labour, a key supplier, an aging machine) and what's being done about each.","Risk and opportunity review","A generic answer that isn't about your business."],
-    ["Top mgmt","What happens when schedule pressure conflicts with quality?","Product doesn't ship until it conforms, and anyone can stop a job. Give a real example.","An NCR or held shipment, quality policy","An answer that implies deadlines win."],
+    ["Top mgmt","What came out of the last management review?","Two or three decisions, such as a second plating source or a new test stand, and their status now.","MR minutes with actions","Can't recall any decision."],
+    ["Top mgmt","What are the biggest risks to quality?","Specific ones: a single-source chrome bar supplier, welder availability, a single test stand. Say what's being done.","Risk review","A generic answer that isn't about your business."],
+    ["Top mgmt","What happens when a cylinder fails test the day it's due to ship?","It doesn't ship until it conforms or a deviation is properly authorised. Give a real example.","An NCR or held shipment","Anything that sounds like deadlines win."],
     ["Shop floor","What are you working on?","Job number, part, drawing revision, read from the traveller.","Traveller, drawing at the station","Not knowing the revision."],
     ["Shop floor","How do you know this part is right?","Drawing, inspection plan, first piece signed off, which gauges, how often checked.","First-piece and in-process records","\"I just know.\""],
-    ["Shop floor","Is this gauge calibrated? How do you know?","Point to the label: ID and due date. Check the date before using it.","Gauge label, calibration list","An expired label, or a gauge with no label."],
-    ["Shop floor","What do you do if you find a bad part?","Stop, tag it red, put it in quarantine, tell the supervisor or QA, and an NCR gets written.","Quarantine area, NCR form","Fixing it quietly or putting it back in the bin."],
-    ["Shop floor","Where's your work instruction? Is it the current one?","Show it, and know how a new revision reaches the station.","Controlled document at the station","A photocopy with handwritten changes."],
-    ["Shop floor","What does the quality policy mean for your job?","In their own words: make it to the drawing, check it, speak up if something's wrong.","Posted policy","Reciting it word for word without understanding."],
-    ["Shop floor","What training have you had for this job?","An honest answer. The training matrix will confirm it.","Training matrix, sign-offs","Running a machine or CMM with no record of training."],
-    ["Purchasing","How is a new supplier approved?","Criteria (quality system, capability, trial order, certs), who approves, and how it's recorded. Show the latest approval.","Supplier approval record, approved supplier list","A supplier being used that isn't on the list."],
-    ["Purchasing","When was this supplier last evaluated?","Show their performance data (on-time delivery, rejects) and the date of the last review.","Supplier scorecard","Never re-evaluated since they were approved."],
-    ["Purchasing","Where on this PO are the requirements?","Part number and revision, spec, material and cert requirements, special-process requirements.","A recent PO","A spec or cert requirement left off."],
-    ["Purchasing","How is incoming material checked?","Receiving inspection, mill cert checked against the spec, heat number recorded for traceability.","Receiving record, mill cert","Mill cert filed but never compared to the spec."]
+    ["Shop floor","Is this gauge calibrated? How do you know?","Point to the label: ID and due date. Check before use.","Gauge label, calibration list","An expired label, or no label."],
+    ["Shop floor","What do you do with a bad part?","Stop, tag it, put it in quarantine, tell the lead or QA, and an NCR is written.","Quarantine area, NCR form","Fixing it quietly, or putting it back in the bin."],
+    ["Shop floor","Welder: which procedure are you welding to?","Name the procedure at the station and show your current qualification.","Weld procedure, welder qualification record","No procedure at the station, or an expired qualification."],
+    ["Shop floor","What does the quality policy mean for your job?","Own words: build it to the drawing, check it, speak up if something's wrong.","Posted policy","Reciting it word for word without understanding."],
+    ["Test and inspection","Walk me through a pressure test.","Serial number, test pressure and hold time from the spec, what counts as a pass, and what gets recorded.","Test spec, completed test record","Not knowing where the test pressure comes from."],
+    ["Test and inspection","Is the gauge on this stand calibrated?","Show the ID, the due date and that it's on the calibration list.","Calibration list, certificate","Instruments on the test stand that aren't on the list."],
+    ["Test and inspection","What happens if a cylinder leaks at test?","Tag it, NCR, tear down to find the cause, rework under the NCR, retest, record both tests.","NCR, retest record","Fixing and retesting with no NCR."],
+    ["Test and inspection","Show me the record for this serial number.","Find it quickly: test record, final inspection, signature, gauge ID.","Test and final inspection records","Record can't be found, or isn't signed."],
+    ["Purchasing","How was this plating supplier approved?","Criteria, trial or first article, process validation evidence, who approved, and when it was last re-evaluated.","Supplier file, approved supplier list","Only a certificate of conformance, with no validation evidence."],
+    ["Purchasing","Where are the requirements on this PO?","Part number and revision, material spec, chrome thickness or hardness, and cert requirements.","A recent PO","Spec or cert requirement missing."],
+    ["Purchasing","How is incoming bar and tube checked?","Receiving check, mill cert compared to the spec, heat number recorded and carried to the saw.","Receiving record, mill cert","Mill cert filed but never compared."]
   ];
   var order = [], pos = 0, who = "all";
   function deck(){ order = QS.map(function(q, i){ return i; }).filter(function(i){ return who === "all" || QS[i][0] === who; });
@@ -758,65 +796,68 @@
     document.querySelectorAll("#dWho button").forEach(function(x){ x.classList.toggle("on", x === b); }); who = b.dataset.who; deck(); }); });
   deck();
 
-  /* ---- audit trails: step, clause, what they check, link to next record, where it breaks ---- */
+  /* ---- trails: step, clause, what they check, link, breaks when ---- */
   var TRAILS = [
-    [["Customer PO","8.2","Contract review done before accepting: quantity, date, drawing revision, specs.","PO number → sales order","PO revision differs from the drawing used"],
-     ["Drawing and router","7.5 / 8.1","The current revision is released, and the router and inspection plan match it.","Drawing rev → job traveller","Old revision in the cell"],
-     ["Machining","8.5.1","Setup, first-piece approval, in-process checks at the planned frequency.","Job number → inspection records","First piece not signed"],
-     ["Inspection records","8.5.1 / 8.6","Measured values against the tolerances, with the gauge IDs written on the record.","Gauge ID → calibration list","No gauge ID recorded"],
-     ["Gauge calibration","7.1.5","In date when it was used, with a traceable certificate.","Cert → accredited lab","Overdue on the date of use"],
-     ["Who did the work","7.2","The operator and inspector are trained for this operation.","Name → training matrix","Not on the matrix"],
-     ["Release and shipping","8.6 / 8.5.4","Final release signed by an authorised person, product protected, CoC if required.","Release → packing slip","Shipped before final sign-off"]],
-    [["Approved supplier list","8.4.1","The supplier is listed, with the approved scope (e.g. nitriding only).","Supplier → evaluation file","Used outside the approved scope"],
-     ["Evaluation","8.4.1","Approval criteria met, re-evaluated at the defined interval.","Evaluation → performance data","Never re-evaluated"],
-     ["Purchase order","8.4.3","Spec, revision, material, cert and special-process requirements are on the PO.","PO → receiving","Requirement missing from the PO"],
-     ["Receiving","8.4.2","Incoming check done; mill cert or CoC compared to the spec.","Heat number → material tag","Cert filed without being checked"],
-     ["Traceability","8.5.2","Heat or lot number carried through to the finished part where required.","Heat number → job / serial","The chain breaks at a cut or rework step"],
-     ["Supplier performance review","9.1.3 / 9.3","Supplier data analysed and reviewed in management review.","Scorecard → MR minutes","Not a management review input"]],
-    [["Tagged part in quarantine","8.7","Identified, segregated, can't be used by mistake.","Tag → NCR number","Untagged rejects mixed with good parts"],
-     ["NCR","8.7.2","What's wrong, how many, where, against which requirement.","NCR → disposition","Description too vague to act on"],
-     ["Disposition","8.7.1 / 5.3","Rework, scrap, return, or use-as-is decided by someone with the authority.","Disposition → approver","Approved by the wrong person"],
-     ["Concession or deviation","8.7.1","Customer approval obtained where the contract requires it.","Deviation → customer sign-off","Customer never asked"],
-     ["Is CAPA needed?","10.2","Repeat or serious NCs get a corrective action; the decision is recorded.","NCR → CAPA number","Same NC repeated with no CAPA"],
-     ["Trend","9.1.3 / 9.3","NCs analysed for trends and reviewed in management review.","NCR log → MR inputs","Never analysed"]],
-    [["Complaint received","9.1.2 / 8.2.1","Logged with date, customer, part, issue.","Complaint → log entry","Handled by email, never logged"],
-     ["Containment","8.7 / 10.2.1","Stock, WIP and in-transit product checked; customer told what's being done.","Complaint → affected lots","Only the returned parts checked"],
-     ["Root cause","10.2.1","A real system cause, verified, not just assumed.","CAPA → root cause evidence","\"Operator error\""],
-     ["Corrective action","10.2.1","System change made and the evidence attached.","Action → revised document or training","Action not finished"],
-     ["Effectiveness","10.2.1","Proof the problem hasn't come back.","Data → closure date","Closed the day the action was done"],
-     ["Customer satisfaction","9.1.2 / 9.3","Complaints feed into the customer perception data and management review.","Complaint log → MR minutes","Not reviewed"]]
+    [["Customer PO","8.2","Contract review: bore, rod, stroke, mounting, pressure rating, paint, test and packaging requirements, drawing revision, date.","PO number → sales order","PO revision differs from the shop drawing"],
+     ["Drawing, BOM, router","7.5 / 8.1","Current revision released; router, inspection plan and test spec match it.","Drawing rev → job traveller","Old revision in the welding or assembly cell"],
+     ["Saw","8.5.2","Tube and rod cut to the right length; heat numbers transferred to the cut pieces.","Heat number → job","Offcut loses its heat number"],
+     ["Machining and welding","8.5.1","First piece approved; weld procedure at the station; welder qualified.","Job → weld record / welder ID","Expired welder qualification"],
+     ["Honing and rod finish","8.5.1 / 7.1.5","Bore size and finish checked; bore gauge and profilometer in calibration.","Gauge ID → calibration list","Instrument not on the list"],
+     ["Assembly","8.5.1 / 7.1.5","Seal kit lot recorded; gland and piston nut torqued with a calibrated wrench.","Seal lot / wrench ID → records","Torque not recorded"],
+     ["Pressure test","8.6 / 7.1.5","Serial number, test pressure, hold time, result, gauge ID, tester, date.","Serial → test record","Gauge overdue or test record unsigned"],
+     ["Paint, protect, ship","8.5.4 / 8.6","Paint per spec, ports plugged, rod protected, release signed, certificate of conformance if required.","Serial → packing slip","Shipped before final release"]],
+    [["Approved supplier list","8.4.1","Plating supplier listed, with an approved scope (e.g. hard chrome on bar).","Supplier → evaluation file","Used outside the approved scope"],
+     ["Evaluation","8.4.1","Approval basis (validation evidence, first article) and re-evaluation at the defined interval.","Evaluation → performance data","Never re-evaluated"],
+     ["Purchase order","8.4.3","Spec, chrome thickness or hardness, cert requirements, drawing revision on the PO.","PO → receiving","Requirement missing from the PO"],
+     ["Receiving","8.4.2","Certificate checked against the PO; sample checks if planned; heat or lot recorded.","Lot → material tag","Certificate filed without being checked"],
+     ["In production","8.5.2","Lot traceable through to the serial number where required.","Lot → serial","Lot lost at kitting"],
+     ["Supplier performance","9.1.3 / 9.3","Rejects and late deliveries trended and reviewed in management review.","Scorecard → MR minutes","Not a management review input"]],
+    [["Rod with chrome pitting at assembly","8.7","Tagged, segregated, can't be used by mistake.","Tag → NCR number","Rejected rod back on the good rack"],
+     ["NCR","8.7.2","What's wrong, how many, where found, against which requirement.","NCR → disposition","Description too vague to act on"],
+     ["Disposition","8.7.1 / 5.3","Re-chrome, scrap, return to supplier, or use as is, decided by someone with the authority.","Disposition → approver","Approved by the wrong person"],
+     ["Deviation","8.7.1","If used as is: customer approval where the contract requires it.","Deviation → customer sign-off","Customer never asked"],
+     ["Supplier corrective action","8.4 / 10.2","If the plater caused it: a corrective action request to the supplier, with their response.","NCR → SCAR","No feedback to the supplier"],
+     ["Trend","9.1.3 / 9.3","Pitting NCRs trended by supplier and lot; reviewed in management review.","NCR log → MR inputs","Never analysed"]],
+    [["Complaint: gland leak in the field","9.1.2 / 8.2.1","Logged with customer, serial, hours in service and symptom.","Complaint → log entry","Handled by phone, never logged"],
+     ["Containment","8.7 / 10.2.1","Check stock, WIP and in-transit cylinders from the same seal lot or build period; tell the customer what's being done.","Serial → seal lot → other serials","Only the returned cylinder checked"],
+     ["Teardown and root cause","10.2.1","Teardown findings recorded; cause proven, e.g. groove finish, seal damage at install, seal lot.","CAPA → teardown evidence","\"Operator error\""],
+     ["Corrective action","10.2.1","System change made: install tool, groove finish check, or a supplier action. Evidence attached.","Action → revised document or tool","Action not finished"],
+     ["Effectiveness","10.2.1","No repeat leaks over a defined period or number of builds.","Data → closure date","Closed the day the action was done"],
+     ["Review","9.1.2 / 9.3","Complaint and warranty data in the management review.","Complaint log → MR minutes","Not reviewed"]]
   ];
   function trail(i){
     document.getElementById("trail").innerHTML = TRAILS[i].map(function(s, k){
       return '<div class="tr"><span class="n">' + (k + 1) + '</span><div class="card"><h4>' + esc(s[0]) + ' <span class="pill">' + esc(s[1]) + '</span></h4>' +
-        '<p class="small">' + esc(s[2]) + '</p><div class="link">link: ' + esc(s[3]) + '</div><p class="small bad" style="margin-bottom:0">Breaks when: ' + esc(s[4]) + '</p></div></div>';
+        '<p class="small" style="margin:4px 0">' + esc(s[2]) + '</p><span class="link">' + esc(s[3]) + '</span><p class="small bad" style="margin:8px 0 0">Breaks when: ' + esc(s[4]) + '</p></div></div>';
     }).join("");
   }
   document.querySelectorAll("#tPick button").forEach(function(b){ b.addEventListener("click", function(){
     document.querySelectorAll("#tPick button").forEach(function(x){ x.classList.toggle("on", x === b); }); trail(+b.dataset.t); }); });
   trail(0);
 
-  /* ---- root-cause checker: flags wording auditors usually reject ---- */
+  /* ---- root-cause checker ---- */
+  var SYS = /\b(procedure|process|system|instruction|form|checklist|label|alert|report|interval|control plan|software|fixture|tool(ing)?|poka|error[- ]proof|sign[- ]off)/i;
+  var EFF = /\b(verify|verified|effective|effectiveness|monitor|follow[- ]up|audit)\b/i;
   var RC = [
-    [/\b(operator|human|employee|worker|inspector)\s+(error|mistake)\b|\bcareless|\bnot paying attention|\bforgot\b/i, "r", "Blames a person. Ask why the system let one person's mistake reach the product or go unnoticed."],
-    [/\bre-?train(ed|ing)?\b|\bremind(ed)?\b|\bcounsel+ed\b|\bverbal warning\b/i, "a", "Retraining or reminding is only a fix if training was really missing. Add something that doesn't depend on memory: a check, a label, an error-proofing step, a system alert."],
+    [/\b(operator|assembler|welder|machinist|human|employee|worker|inspector|tester)\s+(error|mistake)\b|\bcareless|\bnot paying attention|\bforgot\b/i, "r", "Blames a person. Ask why the system let one person's mistake reach the product or go unnoticed."],
+    [/\bre-?train(ed|ing)?\b|\bremind(ed)?\b|\bcounsel+ed\b|\bverbal warning\b/i, "a", "Retraining or reminding only works if training was really missing. Add something that doesn't depend on memory: a check, a label, a fixture, a recorded sign-off."],
     [/\b(be more careful|pay more attention|increased? awareness)\b/i, "r", "\"Be more careful\" isn't a corrective action. The auditor will reject it."],
-    [/\bunknown\b|\bcould not (be )?determine|\bn\/a\b|\bone[- ]off\b|\bisolated\b/i, "a", "\"Unknown\" or \"isolated\" needs evidence. Say what you checked to reach that conclusion (extent check)."],
-    [/\b(procedure|process|system|instruction|form|checklist|label|alert|report|interval|control plan|software|fixture|poka|error[- ]proof)/i, "g", "Points at the system. Good."],
-    [/\b(verify|verified|effective|effectiveness|monitor|follow[- ]up|audit)\b/i, "g", "Mentions checking whether it worked. Good."]
+    [/\bunknown\b|\bcould not (be )?determine|\bn\/a\b|\bone[- ]off\b|\bisolated\b/i, "a", "\"Unknown\" or \"isolated\" needs evidence. Say what you checked to reach that conclusion."],
+    [SYS, "g", "Points at the system. Good."],
+    [EFF, "g", "Says how you'll check it worked. Good."]
   ];
   document.getElementById("rcGo").addEventListener("click", function(){
     var t = document.getElementById("rcIn").value.trim(), out = [];
     if(!t){ document.getElementById("rcOut").innerHTML = ""; return; }
     RC.forEach(function(r){ if(r[0].test(t)) out.push('<div class="rc ' + r[1] + '">' + esc(r[2]) + '</div>'); });
-    if(!/\b(verify|verified|effective|effectiveness|monitor|follow[- ]up|audit)\b/i.test(t)) out.push('<div class="rc a">No effectiveness check. Add how and when you\'ll confirm it worked, e.g. 3 months of data or a follow-up internal audit.</div>');
-    if(!/\b(procedure|process|system|instruction|form|checklist|label|alert|report|interval|control plan|software|fixture|poka|error[- ]proof)/i.test(t)) out.push('<div class="rc a">Doesn\'t name a process or system change. Auditors look for what changed in the system, not just what the person will do.</div>');
-    if(t.split(/\s+/).length < 12) out.push('<div class="rc a">Very short. A response the CB will accept usually states the cause, the action, and the check.</div>');
+    if(!EFF.test(t)) out.push('<div class="rc a">No effectiveness check. Add how and when you\'ll confirm it worked, e.g. 3 months of data or a follow-up internal audit.</div>');
+    if(!SYS.test(t)) out.push('<div class="rc a">Doesn\'t name a process or system change. Auditors look for what changed in the system, not just what a person will do.</div>');
+    if(t.split(/\s+/).length < 12) out.push('<div class="rc a">Very short. A response the CB accepts usually states the cause, the action, and the check.</div>');
     if(!out.some(function(x){ return x.indexOf('rc r') > -1 || x.indexOf('rc a') > -1; })) out.unshift('<div class="rc g"><b>Nothing flagged.</b> Last check: would this stop the problem with a different person on a different shift?</div>');
     document.getElementById("rcOut").innerHTML = out.join("");
   });
 
-  /* records saved by the old Quality Command tracker: offer a download, never delete */
+  /* ---- records saved by the old Quality Command tracker: offer a download, never delete ---- */
   try {
     var old = localStorage.getItem("qc.data");
     if(old && old.length > 200){
