@@ -1,7 +1,7 @@
 {
-  "name": "Quality Command",
-  "short_name": "Q Command",
-  "description": "A management representative's QMS desk: corrective actions, internal audits, due dates, management review and ISO 9001:2026 transition. Data stays on this device.",
+  "name": "ISO 9001 Audit Guide",
+  "short_name": "Audit Guide",
+  "description": "A plain-language guide to ISO 9001 and the external certification audit: what gets checked, how to prepare, how to answer, and how to respond to findings.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,8 +9,20 @@
   "background_color": "#121417",
   "theme_color": "#121417",
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" },
-    { "src": "../icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "../icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "../icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }

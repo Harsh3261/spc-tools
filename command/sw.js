@@ -1,5 +1,5 @@
-/* Quality Command offline copy. Caches the app's own files only — never data. */
-const CACHE = "qcmd-v1";
+/* ISO 9001 Audit Guide offline copy. Caches the app's own files only. */
+const CACHE = "qcmd-v2-guide";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", (e) => { e.waitUntil(caches.keys().then((k) => Promise.all(k.filter((x) => x.startsWith("qcmd-") && x !== CACHE).map((x) => caches.delete(x)))).then(() => self.clients.claim())); });

@@ -5,800 +5,830 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#121417">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Q Command">
+<meta name="apple-mobile-web-app-title" content="Audit Guide">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Quality Command</title>
+<title>ISO 9001 Audit Guide</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../icon-180.png">
 <!--
-  Quality Command — a management representative's desk for an ISO 9001 QMS:
-  corrective actions (CAPA), internal audit programme, due dates, management
-  review pack, quality objectives, ISO 9001:2026 transition and an audit
-  readiness check. Everything is stored in this browser on this device only
-  (localStorage "qc.data"); there is no server and no network request.
-  Logic that decides dates and the readiness score lives in the QCMD block
-  and is tested by ../tests/command.e2e.js.
+  ISO 9001 Audit Guide: a plain-language guide to a QMS and to the external
+  (certification body) audit, written for a management rep going into a first
+  surveillance audit after recertification. Reference only; it stores nothing
+  and makes no network request. Sources: ISO 9001:2015 clause structure,
+  ISO/IEC 17021-1:2015 (audit cycle, major/minor definitions, surveillance
+  content), ISO 9001:2026 publication notes from ISO, LRQA, DNV, Advisera.
+  Replaces the earlier "Quality Command" tracker at the same address.
 -->
 <style>
   :root{
     --bg:#121417; --bg2:#181B20; --panel:#1E2229; --panel2:#262B33; --line:#323944; --line-soft:#2A3038;
     --ink:#E9EDF2; --ink-dim:#AEB6C2; --ink-faint:#7D8794;
-    --blue:#2563EB; --blue-h:#1D4ED8; --blue-t:#60A5FA;
-    --green:#22C55E; --green-ink:#86EFAC; --amber:#F59E0B; --amber-ink:#FCD34D; --red:#EF4444; --red-ink:#FCA5A5;
+    --blue:#2563EB; --blue-t:#60A5FA; --green-ink:#86EFAC; --amber-ink:#FCD34D; --red-ink:#FCA5A5;
     --r:12px; --pad:16px;
     --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
     --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box}
-  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); font-size:16px; -webkit-text-size-adjust:100%}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); font-size:16px; line-height:1.5; -webkit-text-size-adjust:100%}
   body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
-  button,input,select,textarea{font:inherit; color:inherit}
-  header{padding:calc(14px + env(safe-area-inset-top)) var(--pad) 8px; position:relative}
+  header{padding:calc(14px + env(safe-area-inset-top)) var(--pad) 4px; position:relative; max-width:860px; margin:0 auto}
   header::before{content:""; position:absolute; left:var(--pad); right:var(--pad); top:calc(6px + env(safe-area-inset-top)); height:2px; background:var(--blue); border-radius:2px}
   .brand{display:flex; align-items:center; gap:10px; margin-top:6px}
   .brand svg{width:30px; height:30px; flex-shrink:0}
   .brand h1{font-size:21px; margin:0; letter-spacing:.2px}
   .brand h1 span{color:var(--blue-t)}
-  .tag{font-size:12.5px; color:var(--ink-faint); margin:4px 0 0}
-  main{padding:0 var(--pad); max-width:900px; margin:0 auto}
+  .tag{font-size:12.5px; color:var(--ink-faint); margin:2px 0 0}
+  main{padding:0 var(--pad); max-width:860px; margin:0 auto}
   .view{display:none} .view.on{display:block}
-  h2{font-size:19px; margin:18px 0 10px}
-  h3{font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); margin:20px 0 8px}
-  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:14px; margin:10px 0}
-  .muted{color:var(--ink-faint)} .small{font-size:13.5px; color:var(--ink-dim); line-height:1.45}
-  .row{display:flex; gap:10px; align-items:center} .row > *{flex:1} .wrap{flex-wrap:wrap}
-  .btn{appearance:none; border:1px solid var(--line); background:var(--panel2); border-radius:10px; padding:11px 14px; min-height:44px; cursor:pointer; font-weight:600; font-size:15px}
-  .btn.pri{background:var(--blue); border-color:var(--blue); color:#fff} .btn.pri:active{background:var(--blue-h)}
-  .btn.danger{color:var(--red-ink); border-color:#5a2a2a}
-  .btn.sm{min-height:36px; padding:7px 11px; font-size:14px}
-  .btns{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
-  label.f{display:block; font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim); margin:12px 0 5px}
-  input[type=text],input[type=date],input[type=number],select,textarea{width:100%; background:var(--bg2); border:1px solid var(--line); border-radius:10px; padding:11px 12px; min-height:44px; font-size:16px}
-  textarea{min-height:84px; resize:vertical; line-height:1.4}
-  input:focus,select:focus,textarea:focus{outline:2px solid var(--blue-t); outline-offset:1px}
+  h2{font-size:20px; margin:20px 0 6px}
+  h3{font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); margin:24px 0 8px}
+  p{margin:8px 0}
+  .lead{color:var(--ink-dim); margin:0 0 6px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; margin:10px 0}
+  .card h4{margin:0 0 6px; font-size:16.5px}
+  .card.hl{border-color:#2b4a8a; background:#172238}
+  .card.warn{border-color:#6b5320; background:#231e12}
+  ul,ol{margin:6px 0; padding-left:22px} li{margin:5px 0}
+  .small{font-size:14px; color:var(--ink-dim)}
+  .muted{color:var(--ink-faint)}
+  b,strong{color:#fff}
+  .pill{display:inline-block; font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:999px; border:1px solid var(--line); background:var(--panel2); color:var(--ink-dim); vertical-align:2px; white-space:nowrap}
+  .pill.new{color:#cfe0ff; border-color:#2b4a8a; background:#16233d}
+  .pill.red{color:var(--red-ink); border-color:#6b2b2b; background:#2a1717}
+  .pill.amber{color:var(--amber-ink); border-color:#6b5320; background:#2a2312}
+  .pill.green{color:var(--green-ink); border-color:#1f5a35; background:#11251a}
+  table{width:100%; border-collapse:collapse; font-size:14.5px}
+  th,td{text-align:left; padding:8px 6px; border-bottom:1px solid var(--line-soft); vertical-align:top}
+  th{color:var(--ink-dim); font-size:12px; letter-spacing:.06em; text-transform:uppercase}
+  tr.you td{background:#172238}
+  details{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); margin:8px 0; overflow:hidden}
+  details[open]{border-color:#3b4656}
+  summary{list-style:none; cursor:pointer; padding:13px 14px; display:flex; gap:10px; align-items:baseline; min-height:48px}
+  summary::-webkit-details-marker{display:none}
+  summary .no{font-family:var(--mono); color:var(--blue-t); font-weight:700; min-width:46px; flex-shrink:0}
+  summary .ti{font-weight:600; flex:1}
+  summary::after{content:"+"; color:var(--ink-faint); font-weight:700; margin-left:6px}
+  details[open] summary::after{content:"−"}
+  .body{padding:0 16px 14px}
+  .lab{font-size:12px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); margin:12px 0 2px; font-weight:700}
+  .q{border-left:3px solid var(--blue); padding:2px 0 2px 12px; margin:10px 0}
+  .q .a{color:var(--ink-dim); font-size:14.5px}
+  .say{display:block; background:var(--bg2); border:1px solid var(--line-soft); border-radius:8px; padding:8px 11px; margin:6px 0; font-size:15px}
+  .grid2{display:grid; grid-template-columns:1fr; gap:10px}
+  @media (min-width:700px){ .grid2{grid-template-columns:1fr 1fr} }
+  .bad{color:var(--red-ink)} .good{color:var(--green-ink)}
+  .step{display:flex; gap:12px; margin:10px 0}
+  .step .n{width:28px; height:28px; border-radius:50%; background:var(--blue); color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; margin-top:2px}
+  .search{width:100%; background:var(--bg2); border:1px solid var(--line); border-radius:10px; padding:11px 12px; min-height:46px; font-size:16px; color:var(--ink); margin:6px 0 4px}
+  .search:focus{outline:2px solid var(--blue-t); outline-offset:1px}
+  .chips{display:flex; gap:6px; overflow-x:auto; padding:4px 0 8px; -webkit-overflow-scrolling:touch}
+  .chips a{flex-shrink:0; text-decoration:none; color:var(--ink-dim); border:1px solid var(--line); background:var(--panel2); padding:6px 11px; border-radius:999px; font-size:13.5px; font-weight:600}
+  a{color:var(--blue-t)}
+  dl{margin:0} dt{font-weight:700; margin-top:12px; color:#fff} dd{margin:2px 0 0; color:var(--ink-dim); font-size:15px}
   nav.bottom{position:fixed; left:0; right:0; bottom:0; background:rgba(18,20,23,.96); border-top:1px solid var(--line); display:flex; padding:6px 6px calc(6px + env(safe-area-inset-bottom)); z-index:20; backdrop-filter:blur(8px)}
-  nav.bottom button{flex:1; background:none; border:0; color:var(--ink-faint); padding:6px 2px; border-radius:10px; font-size:12px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; min-height:52px; position:relative}
+  nav.bottom button{flex:1; min-width:0; background:none; border:0; color:var(--ink-faint); padding:6px 1px; border-radius:10px; font:inherit; font-size:11.5px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; min-height:52px; cursor:pointer}
   nav.bottom button svg{width:22px; height:22px}
   nav.bottom button[aria-current="page"]{color:#fff; background:var(--blue)}
-  nav.bottom .badge{position:absolute; top:3px; right:calc(50% - 22px); background:var(--red); color:#fff; font-size:10.5px; min-width:17px; height:17px; border-radius:9px; display:flex; align-items:center; justify-content:center; padding:0 4px}
-  /* readiness gauge */
-  .gauge{display:flex; gap:16px; align-items:center}
-  .gauge svg{width:118px; height:118px; flex-shrink:0}
-  .gauge .num{font-size:34px; font-weight:800; font-family:var(--mono)}
-  .pill{display:inline-block; font-size:12px; font-weight:700; padding:3px 8px; border-radius:999px; background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line)}
-  .pill.red{color:var(--red-ink); border-color:#6b2b2b; background:#2a1717} .pill.amber{color:var(--amber-ink); border-color:#6b5320; background:#2a2312} .pill.green{color:var(--green-ink); border-color:#1f5a35; background:#11251a} .pill.blue{color:#cfe0ff; border-color:#2b4a8a; background:#16233d}
-  .item{display:flex; gap:12px; align-items:flex-start; padding:12px 2px; border-bottom:1px dashed var(--line-soft); cursor:pointer}
-  .item:last-child{border-bottom:0}
-  .item .t{font-weight:600; line-height:1.3} .item .s{font-size:13px; color:var(--ink-dim); margin-top:3px; line-height:1.35}
-  .item .r{margin-left:auto; text-align:right; flex-shrink:0}
-  .dot{width:10px; height:10px; border-radius:50%; margin-top:6px; flex-shrink:0; background:var(--ink-faint)}
-  .dot.red{background:var(--red)} .dot.amber{background:var(--amber)} .dot.green{background:var(--green)} .dot.blue{background:var(--blue-t)}
-  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
-  .stat{background:var(--bg2); border:1px solid var(--line); border-radius:10px; padding:10px}
-  .stat .k{font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint)} .stat .v{font-size:22px; font-weight:800; font-family:var(--mono); margin-top:2px}
-  .stage{display:flex; gap:3px; margin-top:8px} .stage i{flex:1; height:5px; border-radius:3px; background:var(--line)} .stage i.on{background:var(--blue-t)}
-  .seg{display:flex; gap:6px; flex-wrap:wrap; margin:6px 0 4px} .seg button{min-height:38px; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--panel2); font-size:14px; font-weight:600; color:var(--ink-dim)} .seg button[aria-pressed="true"]{background:var(--blue); border-color:var(--blue); color:#fff}
-  .empty{padding:18px 4px; color:var(--ink-faint); font-size:14.5px}
-  /* bottom sheet */
-  .sheet-bg{position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:40; display:none}
-  .sheet{position:fixed; left:0; right:0; bottom:0; max-height:92vh; overflow:auto; background:var(--panel); border-top-left-radius:18px; border-top-right-radius:18px; border:1px solid var(--line); z-index:41; padding:8px var(--pad) calc(18px + env(safe-area-inset-bottom)); display:none; max-width:900px; margin:0 auto}
-  .sheet.on,.sheet-bg.on{display:block}
-  .sheet .grab{width:44px; height:5px; border-radius:3px; background:var(--line); margin:4px auto 6px}
-  .sheet h2{margin-top:6px}
-  .sub{border:1px solid var(--line-soft); border-radius:10px; padding:10px; margin-top:8px; background:var(--bg2)}
-  .why{display:flex; gap:8px; align-items:center; margin-top:6px} .why b{font-family:var(--mono); color:var(--blue-t); width:34px; flex-shrink:0; font-size:13px}
-  .q{padding:10px 0; border-bottom:1px dashed var(--line-soft)} .q:last-child{border-bottom:0}
-  .q .qt{font-size:14.5px; line-height:1.35} .q .seg{margin-top:6px}
-  .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(96px + env(safe-area-inset-bottom)); background:#0b0d10; border:1px solid var(--line); color:var(--ink); padding:10px 16px; border-radius:10px; z-index:60; font-size:14.5px; display:none; max-width:90vw}
-  .toast.on{display:block}
-  .banner{border:1px solid #6b5320; background:#2a2312; color:var(--amber-ink); border-radius:10px; padding:10px 12px; font-size:14px; margin:10px 0}
-  .banner.blue{border-color:#2b4a8a; background:#16233d; color:#cfe0ff}
-  table.t{width:100%; border-collapse:collapse; font-size:14px} table.t th,table.t td{padding:8px 6px; border-bottom:1px solid var(--line-soft); text-align:left; vertical-align:top} table.t th{color:var(--ink-dim); font-size:12px; text-transform:uppercase; letter-spacing:.05em}
-  .bar{height:8px; background:var(--line); border-radius:4px; overflow:hidden} .bar i{display:block; height:100%; background:var(--blue-t)}
-  .print-only{display:none}
-  @media (min-width:700px){ .stats{grid-template-columns:repeat(6,1fr)} }
-  /* management review report on paper */
-  @media print{
-    :root{--bg:#fff; --bg2:#fff; --panel:#fff; --panel2:#fff; --line:#999; --line-soft:#ccc; --ink:#000; --ink-dim:#222; --ink-faint:#444; --blue-t:#1d4ed8}
-    body{padding:0; background:#fff}
-    header, nav.bottom, .view, .sheet, .sheet-bg, .toast, .noprint{display:none !important}
-    #printArea{display:block !important}
-    #printArea h1{font-size:18pt; margin:0 0 4pt} #printArea h2{font-size:13pt; margin:14pt 0 4pt; border-bottom:1px solid #999} #printArea p,#printArea li,#printArea td,#printArea th{font-size:10.5pt}
-    #printArea table{width:100%; border-collapse:collapse} #printArea td,#printArea th{border:1px solid #999; padding:3pt 5pt; text-align:left}
-  }
-  #printArea{display:none}
+  @media (min-width:900px){ nav.bottom{max-width:860px; margin:0 auto; border:1px solid var(--line); border-bottom:0; border-radius:14px 14px 0 0} }
+  .seg{display:flex; gap:6px; overflow-x:auto; padding:2px 0 8px; -webkit-overflow-scrolling:touch}
+  .seg button{flex-shrink:0; appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--ink-dim); padding:8px 12px; border-radius:999px; font:inherit; font-size:14px; font-weight:600; min-height:38px; cursor:pointer}
+  .seg button.on{background:var(--blue); border-color:var(--blue); color:#fff}
+  .btn{appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--ink); border-radius:10px; padding:11px 14px; min-height:44px; cursor:pointer; font:inherit; font-weight:600; font-size:15px}
+  .btn.pri{background:var(--blue); border-color:var(--blue); color:#fff}
+  .btns{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+  .dq{font-size:19px; font-weight:700; line-height:1.35; margin:10px 0 4px}
+  .tr{position:relative; padding:0 0 4px 30px}
+  .tr::before{content:""; position:absolute; left:11px; top:28px; bottom:-6px; width:2px; background:var(--line)}
+  .tr:last-child::before{display:none}
+  .tr .n{position:absolute; left:0; top:12px; width:24px; height:24px; border-radius:50%; background:var(--blue); color:#fff; font-size:12.5px; font-weight:800; display:flex; align-items:center; justify-content:center}
+  .tr .card{margin:6px 0}
+  .link{font-family:var(--mono); font-size:12.5px; color:var(--blue-t)}
+  .rc{border-radius:8px; padding:8px 11px; margin:8px 0; font-size:14.5px; border:1px solid var(--line)}
+  .rc.r{border-color:#6b2b2b; background:#2a1717} .rc.a{border-color:#6b5320; background:#2a2312} .rc.g{border-color:#1f5a35; background:#11251a}
+  .oldData{display:none}
+  footer{color:var(--ink-faint); font-size:12.5px; text-align:center; margin:28px 0 10px}
+  .empty{display:none; color:var(--ink-faint); padding:10px 2px}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
     <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#323944" stroke-width="4"/><path d="M16 3 A13 13 0 1 1 4.6 22.2" fill="none" stroke="#2563EB" stroke-width="4" stroke-linecap="round"/><path d="M11 16.5l3.4 3.4L21.5 12" fill="none" stroke="#60A5FA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <div><h1>Quality <span>Command</span></h1><p class="tag">Your QMS desk · stored on this device only</p></div>
+    <div><h1>ISO 9001 <span>Audit Guide</span></h1><p class="tag">Your QMS and the external audit, explained plainly</p></div>
   </div>
 </header>
+
 <main>
-  <section class="view on" id="v-today" aria-label="Today"></section>
-  <section class="view" id="v-capa" aria-label="Corrective actions"></section>
-  <section class="view" id="v-audit" aria-label="Audits"></section>
-  <section class="view" id="v-due" aria-label="Due dates"></section>
-  <section class="view" id="v-review" aria-label="Review"></section>
+
+<!-- ============================ BASICS ============================ -->
+<section class="view on" id="v-basics">
+  <h2>Start here</h2>
+  <p class="lead">What an external audit is, which one comes next for you, and what your job is on the day.</p>
+
+  <div class="card hl">
+    <h4>Your next audit: surveillance audit 1</h4>
+    <p>You were recertified this year, so a new three-year cycle has started. Next comes a <b>surveillance audit</b>, about a year after recertification, then a second one the year after, then recertification again in year 3.</p>
+    <p class="small">A surveillance audit is shorter than a recertification audit. The auditor <b>samples</b> part of the system and doesn't go through every clause. But some areas get checked at every surveillance audit (next card).</p>
+  </div>
+
+  <div class="card">
+    <h4>You already do half of what the auditor checks</h4>
+    <p class="small">You haven't been through an external audit before, but the work behind most findings is work you already do every day:</p>
+    <table>
+      <tr><td><b>CMM, gauges, MSA</b></td><td>7.1.5 calibration and measurement traceability, one of the most common findings</td></tr>
+      <tr><td><b>NC investigations</b></td><td>8.7 nonconforming product and 10.2 corrective action</td></tr>
+      <tr><td><b>Deviation approvals</b></td><td>8.7 concessions and 5.3 authorities</td></tr>
+      <tr><td><b>Supplier quality</b></td><td>8.4 external providers</td></tr>
+      <tr><td><b>Training operators</b></td><td>7.2 competence and 7.3 awareness</td></tr>
+      <tr><td><b>CQE</b></td><td>The audit chapter of the CQE body of knowledge covers types, roles and root cause. This guide is the practical, on-the-day version.</td></tr>
+    </table>
+    <p class="small">What's new for you is the <b>system-level</b> part: management review, internal audit programme, objectives, risks and context. Spend most of your prep time there. Then use the <b>Drill</b> tab to practise.</p>
+  </div>
+
+  <div class="card">
+    <h4>What gets checked at every surveillance audit</h4>
+    <p class="small">These come from the rules certification bodies work to (ISO/IEC 17021-1). Have them ready no matter what else is on the plan:</p>
+    <ol>
+      <li><b>Findings from this year's recertification</b>: were they really fixed, and did the fix work? This is usually checked first.</li>
+      <li><b>Internal audits</b>: done as planned, with findings raised and followed up.</li>
+      <li><b>Management review</b>: held, with the required inputs and decisions recorded.</li>
+      <li><b>Customer complaints</b> and how you handled them.</li>
+      <li><b>Quality objectives</b>: are you hitting them, and what are you doing where you aren't?</li>
+      <li><b>Continual improvement</b>: actual improvements, with evidence.</li>
+      <li><b>Changes</b> since the last audit: people (including your new role), processes, equipment, products, sites.</li>
+      <li><b>Use of the certificate and logo</b> on your website, quotes and letterhead.</li>
+    </ol>
+    <p class="small">Plus whichever processes the audit plan lists for this visit, such as production, purchasing or calibration.</p>
+  </div>
+
+  <div class="card">
+    <h4>What an external audit is</h4>
+    <p>A <b>certification body</b> (CB, sometimes called a registrar) sends an auditor to check two things: that your quality management system (QMS) meets ISO 9001, and that people actually follow it. In Canada, CBs are usually accredited by SCC or another accreditation body that's a member of the IAF.</p>
+    <p>The auditor <b>samples</b>: a few records, a few jobs, a few people. Then they <b>follow trails</b>, for example from a customer PO through to the drawing, the inspection record, the gauge used and that gauge's calibration certificate.</p>
+    <p class="small">The auditor isn't there to inspect parts or to fail you. Their job is to report what the evidence shows, good or bad. A calm, organised site with records that are easy to find makes for a short, easy audit.</p>
+  </div>
+
+  <div class="card">
+    <h4>The three questions behind every audit question</h4>
+    <div class="step"><span class="n">1</span><div><b>Do you have it?</b> Is the requirement covered by a process, procedure or plan?</div></div>
+    <div class="step"><span class="n">2</span><div><b>Do you do it?</b> Do records show it happening, every time and not just sometimes?</div></div>
+    <div class="step"><span class="n">3</span><div><b>Does it work?</b> Do results show the process is effective: objectives met, problems not coming back?</div></div>
+    <p class="small">Shop-floor version: <i>say what you do, do what you say, prove it, and show it's working.</i></p>
+  </div>
+
+  <h3>Your role as management rep</h3>
+  <div class="card">
+    <p>ISO 9001:2015 doesn't require a job titled "management representative". It requires top management to assign responsibilities (clause 5.3), including reporting on how the QMS is performing. In practice, the auditor will treat you as the main contact. <b>Top management still owns the QMS</b> (5.1.1). Expect the auditor to interview them directly, so they need to be ready too.</p>
+    <p class="lab">On audit day you:</p>
+    <ul>
+      <li>Agree the audit plan and timings with the auditor, and make sure the right people are there.</li>
+      <li>Act as guide, or assign a guide who stays with the auditor the whole time.</li>
+      <li>Keep a <b>request log</b>: every record asked for, who got it, and what was shown.</li>
+      <li>Watch for possible findings as they come up, and bring evidence before the closing meeting.</li>
+      <li>Accept the findings professionally and own the response afterwards.</li>
+    </ul>
+  </div>
+
+  <h3>Audit types, for reference</h3>
+  <div class="card" style="padding:6px 10px">
+    <table>
+      <tr><th>Audit</th><th>When</th><th>What it covers</th></tr>
+      <tr><td><b>Stage 1</b></td><td>New certification only</td><td>Readiness check: scope, documents, internal audit and management review done</td></tr>
+      <tr><td><b>Stage 2</b></td><td>New certification only</td><td>The whole system, checked on site</td></tr>
+      <tr class="you"><td><b>Surveillance</b> <span class="pill new">next</span></td><td>Years 1 and 2, at least once per calendar year</td><td>A sample of processes, plus the "every time" list above</td></tr>
+      <tr><td><b>Recertification</b> <span class="pill green">done</span></td><td>Year 3, before the certificate expires</td><td>The whole system, and how it has performed over the cycle</td></tr>
+      <tr><td><b>Transition</b></td><td>Before 30 Sept 2029</td><td>The changes in ISO 9001:2026, usually done alongside a surveillance or recertification audit</td></tr>
+    </table>
+  </div>
+
+  <h3>ISO 9001:2026: what's coming</h3>
+  <div class="card">
+    <p>ISO 9001:2026 was published on <b>16 September 2026</b>. Certificates to the 2015 edition stay valid during the three-year transition, which ends on <b>30 September 2029</b>. After that date, 2015 certificates expire.</p>
+    <p class="small">It updates the 2015 edition rather than replacing it, and the changes are moderate. The main ones:</p>
+    <ul class="small">
+      <li><b>Quality culture and ethical behaviour</b> are now stated in leadership (5.1.1) and awareness (7.3).</li>
+      <li><b>Risks and opportunities</b> are split into separate requirements for identifying and addressing each (6.1).</li>
+      <li><b>Planning of changes</b> is expanded (6.3).</li>
+      <li><b>Climate change</b> must be considered in context and interested parties (4.1/4.2). This came from the 2024 amendment, so you may already have it covered.</li>
+      <li>Continual improvement (10.1) is reworded and strengthened, core terms are now defined in the standard itself, and Annex A gives much more explanatory guidance.</li>
+    </ul>
+    <p class="small"><b>Ask your CB</b> whether they plan to do your transition at surveillance 1 or later, and which edition your next audit will be against. Clauses changed in 2026 are tagged <span class="pill new">2026</span> in the Clauses tab.</p>
+  </div>
+
+  <h3>Words you'll hear</h3>
+  <div class="card">
+    <dl>
+      <dt>Objective evidence</dt><dd>Something the auditor can see: a record, a document, an observation, or what someone says and can back up. Your opinion isn't evidence.</dd>
+      <dt>Audit criteria</dt><dd>What you're audited against: ISO 9001, your own procedures, customer requirements, and laws and regulations that apply.</dd>
+      <dt>Audit trail</dt><dd>Following one job or item through linked records to see whether the system holds together.</dd>
+      <dt>Nonconformity (NC)</dt><dd>A requirement not met. Graded <b>major</b> or <b>minor</b> (see Findings).</dd>
+      <dt>OFI / observation</dt><dd>Opportunity for improvement. Not a nonconformity, and no formal response required.</dd>
+      <dt>Correction</dt><dd>Fixing the immediate problem, e.g. recalibrating the overdue gauge.</dd>
+      <dt>Corrective action</dt><dd>Removing the root cause so the problem doesn't happen again.</dd>
+      <dt>Documented information</dt><dd>"Maintain" means a controlled document (procedure, instruction). "Retain" means a record (proof something happened).</dd>
+      <dt>Scope</dt><dd>What your certificate covers: products, activities, sites. Any clause you say doesn't apply, such as 8.3 design, must be justified (4.3).</dd>
+      <dt>Interested parties</dt><dd>People and groups who affect or are affected by your QMS: customers, suppliers, employees, regulators, owners.</dd>
+      <dt>Concession</dt><dd>Formal permission to use or release product that doesn't meet requirements. Usually this is what your deviation approval is (8.7).</dd>
+      <dt>CB / AB</dt><dd>Certification body (audits you) and accreditation body (audits the CB, e.g. SCC, ANAB).</dd>
+    </dl>
+  </div>
+
+  <div class="card warn oldData" id="oldData">
+    <h4>Old tracker data found on this device</h4>
+    <p class="small">The previous Quality Command tracker saved records in this browser. They haven't been deleted. Download them if you want to keep them.</p>
+    <button id="dlOld" style="appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px;font:inherit;font-weight:600;cursor:pointer">Download old data (.json)</button>
+  </div>
+</section>
+
+<!-- ============================ PREPARE ============================ -->
+<section class="view" id="v-prepare">
+  <h2>Prepare</h2>
+  <p class="lead">What to do from about two months out through the closing meeting, and after it.</p>
+
+  <h3>6–8 weeks before</h3>
+  <div class="card">
+    <ul>
+      <li><b>Get the audit plan from your CB.</b> It gives the dates, auditor, scope, edition (2015 or 2026) and which processes and departments they'll visit. If it hasn't arrived, ask for it.</li>
+      <li><b>Re-read the recertification report.</b> For every finding, check that the correction is done, the root cause is recorded, the corrective action is in place, and you have <b>evidence it worked</b>. This is usually the first thing checked.</li>
+      <li><b>Internal audits.</b> Check that this year's audits were done as scheduled and cover the processes due. Findings should be raised and moving. If an area is behind, audit it now. An honest late audit is better than a gap.</li>
+      <li><b>Management review.</b> Has one been held since recertification, or is one due? Check that the minutes cover every required input and record decisions (see 9.3 in Clauses).</li>
+      <li><b>Corrective action / NCR log.</b> Nothing should be overdue without a documented reason and a new date. Old open items get noticed.</li>
+      <li><b>Tell the CB about changes</b>: new management rep (you), reorganisation, new processes or equipment, scope changes. You're normally required to report significant changes.</li>
+    </ul>
+  </div>
+
+  <h3>2–4 weeks before</h3>
+  <div class="card">
+    <ul>
+      <li><b>Calibration.</b> Every gauge in use is in date and labelled. Anything found out of tolerance has a recorded check of the parts it measured (7.1.5.2).</li>
+      <li><b>Documents at point of use.</b> Walk the floor. Drawings and work instructions at each station should be the current revision, with no uncontrolled printouts or handwritten notes acting as instructions.</li>
+      <li><b>Competence.</b> Training matrix up to date, including new hires, CNC operators and inspectors. Records show they're qualified for what they do.</li>
+      <li><b>Suppliers.</b> Approved supplier list, performance data and re-evaluations. Include outsourced special processes (heat treat, nitriding, plating) and material certs.</li>
+      <li><b>Quality objectives.</b> Each one has a target, an owner, current data, and an action plan if it's off track.</li>
+      <li><b>Customers.</b> Complaints logged with responses, and customer satisfaction data actually analysed.</li>
+      <li><b>Risks and opportunities.</b> Reviewed this year and linked to real actions.</li>
+      <li><b>Certificate and logo.</b> Check the website, quotes and email signatures for correct use.</li>
+    </ul>
+  </div>
+
+  <h3>The final week</h3>
+  <div class="card">
+    <ul>
+      <li><b>Brief the people likely to be interviewed</b>: supervisors, inspectors, operators, purchasing, shipping. Go over how to answer (Interview tab). Don't script them.</li>
+      <li><b>Walk the shop.</b> Nonconforming and quarantined parts labelled and kept apart, every part's status clear, the area tidy.</li>
+      <li><b>Set up an audit folder</b>, digital or paper: org chart, process map, scope, quality policy, objectives with data, management review minutes, internal audit schedule and reports, CAPA log, calibration list, approved supplier list, recertification report and closure evidence.</li>
+      <li><b>Logistics.</b> Book a room, arrange PPE for the auditor, get screen access to your ERP and records, and name a <b>runner</b> to fetch records so you can stay with the auditor.</li>
+      <li><b>Top management</b> has the opening and closing meetings and their interview slot in their calendar.</li>
+    </ul>
+  </div>
+
+  <h3>Audit day</h3>
+  <div class="card">
+    <div class="step"><span class="n">1</span><div><b>Opening meeting</b> (15–30 min). Introductions. The auditor confirms scope, plan, timings, confidentiality and how findings will be reported. Ask anything you're unsure of here, for example "Will you tell us about possible findings at the end of each day?"</div></div>
+    <div class="step"><span class="n">2</span><div><b>The audit.</b> Interviews, shop-floor tours and record checks, process by process. The guide stays with the auditor and the runner fetches records. Log every request.</div></div>
+    <div class="step"><span class="n">3</span><div><b>Quick fixes.</b> If something small is wrong, fix it on the spot, such as replacing an obsolete drawing. That's a correction. It shows good faith, but the auditor may still write it up, because the question is <i>why</i> it happened.</div></div>
+    <div class="step"><span class="n">4</span><div><b>Daily wrap-up.</b> Most auditors summarise their concerns at the end of each day. This is when to bring evidence you couldn't find earlier.</div></div>
+    <div class="step"><span class="n">5</span><div><b>Closing meeting.</b> Findings are read out with the clause and the evidence. Ask for clarification and present evidence you have, but don't argue. Confirm response deadlines and the auditor's recommendation.</div></div>
+  </div>
+
+  <h3>After the audit</h3>
+  <div class="card">
+    <ul>
+      <li>Log each finding in your corrective action system the same day, with an owner.</li>
+      <li>Send your response by the CB's deadline. See Findings for how to write one.</li>
+      <li>Schedule an effectiveness check for each finding. The next auditor will ask about it.</li>
+      <li>Present the results at the next management review, where they're a required input.</li>
+      <li>Write down what you'd do differently next time while it's fresh.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ CLAUSES ============================ -->
+<section class="view" id="v-clauses">
+  <h2>What the auditor checks</h2>
+  <p class="lead">ISO 9001 clauses 4–10 in plain language: what the auditor asks, what to have ready, and what typically gets written up in a machining shop. Numbering follows the 2015 edition you're certified to.</p>
+  <input class="search" id="cSearch" type="search" placeholder="Search: calibration, supplier, drawing, training…" aria-label="Search clauses">
+  <div class="chips">
+    <a href="#c4">4 Context</a><a href="#c5">5 Leadership</a><a href="#c6">6 Planning</a><a href="#c7">7 Support</a><a href="#c8">8 Operation</a><a href="#c9">9 Performance</a><a href="#c10">10 Improvement</a>
+  </div>
+  <div id="clauseList">
+
+  <h3 id="c4">4 · Context of the organization</h3>
+  <details><summary><span class="no">4.1 4.2</span><span class="ti">Context and interested parties <span class="pill new">2026</span></span></summary><div class="body">
+    <p>Know the internal and external issues that affect your ability to deliver quality (market, competition, workforce, technology, regulations, climate), and who your interested parties are and what they need from you.</p>
+    <div class="lab">Auditor asks</div><p>"What are the main issues affecting the business? How do you keep this up to date? Where do they show up in your risks or objectives?"</p>
+    <div class="lab">Have ready</div><p>A context / interested-parties list (often in the management review or a SWOT), reviewed in the last year.</p>
+    <div class="lab">Common finding</div><p>The list was written years ago and never reviewed, or it doesn't connect to the risks and objectives.</p>
+    <p class="small"><span class="pill new">2026</span> Climate change must be considered. That came from the 2024 amendment, so check it's already in your list.</p>
+  </div></details>
+  <details><summary><span class="no">4.3</span><span class="ti">Scope of the QMS</span></summary><div class="body">
+    <p>What the system covers: products, activities, sites. A clause can be marked "not applicable" only if it truly doesn't affect product conformity, and you must give the reason.</p>
+    <div class="lab">Auditor asks</div><p>"Does the scope still describe what you do? You say design (8.3) doesn't apply. Who designs the cylinders?"</p>
+    <div class="lab">Common finding</div><p>The scope says "build to print", but the shop actually does design or engineering changes for customers.</p>
+  </div></details>
+  <details><summary><span class="no">4.4</span><span class="ti">QMS and its processes</span></summary><div class="body">
+    <p>Your processes are defined: inputs, outputs, sequence, owners, measures, resources, risks.</p>
+    <div class="lab">Have ready</div><p>A process map or "turtle diagrams" showing how quoting → order review → purchasing → machining → inspection → shipping connect.</p>
+    <div class="lab">Common finding</div><p>A process has no measure of whether it works, or the map doesn't match reality.</p>
+  </div></details>
+
+  <h3 id="c5">5 · Leadership</h3>
+  <details><summary><span class="no">5.1</span><span class="ti">Leadership and customer focus <span class="pill new">2026</span></span></summary><div class="body">
+    <p>Top management is accountable for the QMS, not just the quality department. They make sure policy and objectives fit the business strategy, resources are provided, and customer requirements and satisfaction stay a priority.</p>
+    <div class="lab">Auditor asks top management</div><p>"How are you involved in the QMS? What are your quality objectives and how are they doing? What did the last management review decide? How do you know customers are happy?"</p>
+    <div class="lab">Common finding</div><p>A manager can't talk about the objectives or results, which suggests the QMS belongs only to Quality.</p>
+    <p class="small"><span class="pill new">2026</span> Leaders must promote a <b>quality culture and ethical behaviour</b>. Expect questions like "How would someone raise a quality concern? What happens when schedule and quality conflict?"</p>
+  </div></details>
+  <details><summary><span class="no">5.2</span><span class="ti">Quality policy</span></summary><div class="body">
+    <p>A policy that fits your business, commits to meeting requirements and to improving, is communicated, and is understood.</p>
+    <div class="lab">Auditor asks an operator</div><p>"What does the quality policy mean for your job?" They don't need to recite it. A good answer in their own words: "Make it to the drawing, check it, and stop and tell someone if it's wrong."</p>
+  </div></details>
+  <details><summary><span class="no">5.3</span><span class="ti">Roles, responsibilities and authorities</span></summary><div class="body">
+    <p>People know who's responsible for what, including who can stop production, release product and approve a deviation.</p>
+    <div class="lab">Have ready</div><p>Org chart, job descriptions, and the authority list (who approves concessions and deviations, who releases product).</p>
+    <div class="lab">Common finding</div><p>A deviation was signed by someone without the authority your procedure gives.</p>
+  </div></details>
+
+  <h3 id="c6">6 · Planning</h3>
+  <details><summary><span class="no">6.1</span><span class="ti">Risks and opportunities <span class="pill new">2026</span></span></summary><div class="body">
+    <p>Identify what could stop you delivering quality (and what could help), take action in proportion to the risk, and check the actions worked. ISO 9001 doesn't require a formal FMEA or a risk register, but you need to show you did it.</p>
+    <div class="lab">Auditor asks</div><p>"What are your top risks? Show me one action from the risk review and how you know it worked."</p>
+    <div class="lab">Common finding</div><p>A risk register exists but is never reviewed, or the "actions" column is empty.</p>
+    <p class="small"><span class="pill new">2026</span> Risks and opportunities are treated separately, so they'll need separate entries.</p>
+  </div></details>
+  <details><summary><span class="no">6.2</span><span class="ti">Quality objectives</span></summary><div class="body">
+    <p>Measurable objectives (e.g. on-time delivery, scrap %, customer returns) with a plan: what will be done, resources, who, by when, and how results will be evaluated.</p>
+    <div class="lab">Auditor asks</div><p>"Show me the data. This one is red. What are you doing about it?"</p>
+    <div class="lab">Common finding</div><p>An objective is missed every month and nothing is done, or there's no data at all.</p>
+  </div></details>
+  <details><summary><span class="no">6.3</span><span class="ti">Planning of changes <span class="pill new">2026</span></span></summary><div class="body">
+    <p>Changes to the QMS (new process, new manager, new ERP, moving equipment) are planned: purpose, consequences, resources, and responsibilities.</p>
+    <div class="lab">Auditor asks</div><p>"What has changed since the last audit? How did you plan it?" Your own appointment as manager is an obvious example.</p>
+    <p class="small"><span class="pill new">2026</span> Expanded: changes should also be communicated, monitored and reviewed for effectiveness.</p>
+  </div></details>
+
+  <h3 id="c7">7 · Support</h3>
+  <details><summary><span class="no">7.1</span><span class="ti">People, infrastructure, work environment</span></summary><div class="body">
+    <p>Enough people, maintained machines and facilities, and a suitable work environment.</p>
+    <div class="lab">Have ready</div><p>Preventive maintenance schedule and records for CNC machines, test benches and cranes.</p>
+    <div class="lab">Common finding</div><p>PM overdue on a critical machine, or a breakdown with no record.</p>
+  </div></details>
+  <details><summary><span class="no">7.1.5</span><span class="ti">Monitoring and measuring resources (calibration)</span></summary><div class="body">
+    <p>Gauges and instruments used to verify product are suitable, calibrated at set intervals against traceable standards, identified with their status, and protected from damage or adjustment. <b>If a gauge is found out of tolerance, you must check whether earlier measurements are still valid</b> and act on the product they measured.</p>
+    <div class="lab">Auditor does</div><p>Picks a gauge off a bench, reads the ID, and asks to see its calibration record and certificate. They may also ask for a personal tool or a CMM probe qualification.</p>
+    <div class="lab">Have ready</div><p>Gauge list with due dates, certificates showing traceability (e.g. ISO/IEC 17025 lab), out-of-tolerance investigations, and the rule for personal or employee-owned tools.</p>
+    <div class="lab">Common finding</div><p>An overdue gauge in use; personal tools not controlled; an out-of-tolerance result with no product impact assessment; a CMM with no record of its verification.</p>
+  </div></details>
+  <details><summary><span class="no">7.1.6</span><span class="ti">Organizational knowledge</span></summary><div class="body">
+    <p>Knowledge needed to run processes (setups, tricks for a difficult bore, lessons learned) is captured and shared so it doesn't leave when someone retires.</p>
+    <div class="lab">Auditor asks</div><p>"If your best setup person left tomorrow, how would you know how to run this job?"</p>
+  </div></details>
+  <details><summary><span class="no">7.2 7.3</span><span class="ti">Competence and awareness <span class="pill new">2026</span></span></summary><div class="body">
+    <p>People are competent (education, training, experience), you act on gaps and check that training worked, and records are kept. Everyone knows the policy, the objectives that affect them, how they contribute, and what happens if they don't follow the system.</p>
+    <div class="lab">Auditor does</div><p>Picks an operator and asks for their training record, then checks it covers the job they're doing right now.</p>
+    <div class="lab">Common finding</div><p>Training matrix missing the new hire; no evidence the training was effective; inspector signing off a CMM program without recorded CMM training.</p>
+    <p class="small"><span class="pill new">2026</span> Awareness now includes quality culture and ethical behaviour.</p>
+  </div></details>
+  <details><summary><span class="no">7.4</span><span class="ti">Communication</span></summary><div class="body">
+    <p>You decide what gets communicated, when, to whom and how, e.g. shift meetings, quality alerts, KPI boards.</p>
+  </div></details>
+  <details><summary><span class="no">7.5</span><span class="ti">Documented information (documents and records)</span></summary><div class="body">
+    <p>Documents are reviewed, approved, revision-controlled and available at the point of use, and obsolete versions are removed or marked. Records are legible, protected, retained for a defined time, and retrievable.</p>
+    <div class="lab">Auditor does</div><p>Compares the drawing at the machine with the latest revision in the system. Asks how a revised drawing gets to the floor and how the old one is pulled.</p>
+    <div class="lab">Common finding</div><p>Old drawing revision at a workstation; uncontrolled printout with handwritten changes; records with no retention rule; forms filled in pencil or with blanks.</p>
+  </div></details>
+
+  <h3 id="c8">8 · Operation</h3>
+  <details><summary><span class="no">8.1</span><span class="ti">Operational planning and control</span></summary><div class="body">
+    <p>For each job, the requirements, acceptance criteria, resources and records needed are planned (router, control plan, inspection plan).</p>
+  </div></details>
+  <details><summary><span class="no">8.2</span><span class="ti">Customer requirements and order review</span></summary><div class="body">
+    <p>Before you accept an order, you confirm you can meet it: drawing revision, specs, quantities, dates, special requirements. Changes to an order are reviewed and communicated.</p>
+    <div class="lab">Auditor does</div><p>Picks a recent PO and asks for evidence it was reviewed, then checks that the drawing revision on the PO matches the one used in production.</p>
+    <div class="lab">Common finding</div><p>No evidence of contract review; PO revision differs from the shop drawing; customer spec referenced on the PO but not flowed down to the floor or suppliers.</p>
+  </div></details>
+  <details><summary><span class="no">8.3</span><span class="ti">Design and development</span></summary><div class="body">
+    <p>Applies only if you design products. If you do, you need planning, inputs, reviews, verification, validation, outputs and change control. If you've declared it not applicable, be ready to justify that (see 4.3).</p>
+  </div></details>
+  <details><summary><span class="no">8.4</span><span class="ti">Purchasing and external providers</span></summary><div class="body">
+    <p>Suppliers, including outsourced processes, are selected, monitored and re-evaluated against criteria. POs give clear requirements: specs, revisions, certs needed, special process requirements. Incoming product is verified.</p>
+    <div class="lab">Auditor does</div><p>Picks a supplier, e.g. your nitriding or plating house, and asks for the evaluation, performance data and what the PO told them. Picks a material lot and asks for the mill cert.</p>
+    <div class="lab">Common finding</div><p>Supplier not on the approved list; never re-evaluated; PO missing the spec or the cert requirement; mill cert not checked against the spec.</p>
+  </div></details>
+  <details><summary><span class="no">8.5.1</span><span class="ti">Control of production</span></summary><div class="body">
+    <p>Work is done under controlled conditions: instructions, suitable equipment and gauges, competent people, inspection at the right stages. <b>Special processes</b> (where the result can't be fully checked afterwards, e.g. welding, heat treatment, nitriding, plating) must be validated and periodically revalidated.</p>
+    <div class="lab">Auditor does</div><p>Stands at a machine and asks the operator what they're making, how they know it's right, and what they check and how often.</p>
+    <div class="lab">Common finding</div><p>First-piece inspection not recorded; in-process checks missed; special process never validated, or the supplier's validation never requested.</p>
+  </div></details>
+  <details><summary><span class="no">8.5.2</span><span class="ti">Identification and traceability</span></summary><div class="body">
+    <p>Product is identified throughout production, its inspection status is clear, and where traceability is required (customer, heat or lot), it's recorded.</p>
+    <div class="lab">Auditor does</div><p>Picks a part off a rack: "What is this, what job, has it been inspected, and which material heat?"</p>
+    <div class="lab">Common finding</div><p>Untagged parts; status unclear (passed? waiting? rejected?); traceability chain broken.</p>
+  </div></details>
+  <details><summary><span class="no">8.5.3 8.5.4</span><span class="ti">Customer property and preservation</span></summary><div class="body">
+    <p>Customer-owned items (material, tooling, gauges, drawings) are identified and protected, and loss or damage is reported to the customer. Product is protected through handling, storage, packaging and shipping: rust prevention, plugged ports, protected rod surfaces.</p>
+  </div></details>
+  <details><summary><span class="no">8.5.5 8.5.6</span><span class="ti">Post-delivery and control of changes</span></summary><div class="body">
+    <p>Warranty, returns and field issues are handled. Unplanned production changes (substitute machine, alternate material, new program) are reviewed and authorised, and the review is recorded.</p>
+  </div></details>
+  <details><summary><span class="no">8.6</span><span class="ti">Release of products</span></summary><div class="body">
+    <p>Product isn't shipped until planned checks are complete (unless the customer authorises otherwise). Records show it met acceptance criteria and <b>who released it</b>.</p>
+    <div class="lab">Common finding</div><p>Final inspection record not signed; release done before all checks were finished.</p>
+  </div></details>
+  <details><summary><span class="no">8.7</span><span class="ti">Nonconforming outputs (NCRs and deviations)</span></summary><div class="body">
+    <p>Bad product is identified and controlled so it isn't used or shipped by mistake. It's corrected, segregated, returned, scrapped, or accepted under concession. Records describe the nonconformity, the action taken, any concession, and <b>who decided</b>.</p>
+    <div class="lab">Auditor does</div><p>Visits the quarantine area and picks a tagged part: "Show me the NCR and the decision." Asks for a recent deviation and checks it was approved by the right authority, and by the customer where the contract requires it.</p>
+    <div class="lab">Common finding</div><p>Rejected parts mixed with good ones; NCR open for months with no disposition; deviation signed by the wrong person; customer approval missing.</p>
+  </div></details>
+
+  <h3 id="c9">9 · Performance evaluation</h3>
+  <details><summary><span class="no">9.1</span><span class="ti">Monitoring, customer satisfaction, analysis</span></summary><div class="body">
+    <p>You decide what to measure and how, monitor customer perception, and analyse the data: product conformity, customer satisfaction, process performance, supplier performance, how well objectives are met, and whether risk actions worked.</p>
+    <div class="lab">Auditor asks</div><p>"What does the data tell you? What decisions came from it?"</p>
+    <div class="lab">Common finding</div><p>Data is collected but never analysed or acted on; no customer satisfaction measure (complaints alone usually aren't enough).</p>
+  </div></details>
+  <details><summary><span class="no">9.2</span><span class="ti">Internal audit</span></summary><div class="body">
+    <p>A planned audit programme covering the QMS, based on importance, changes and past results. Auditors are objective (they don't audit their own work). Results are reported to management, and corrections and corrective actions are taken without undue delay.</p>
+    <div class="lab">Auditor asks you</div><p>"Show me the programme. How did you decide the frequency? Show me a report and a finding from it through to closure. Who audited Quality?"</p>
+    <div class="lab">Common finding</div><p>Areas skipped; auditor audited their own area; reports with no evidence detail ("all OK"); findings never closed.</p>
+    <p class="small">Tip: internal audits that find real problems are a good sign to an external auditor. A year of "no findings" makes them suspicious.</p>
+  </div></details>
+  <details><summary><span class="no">9.3</span><span class="ti">Management review</span></summary><div class="body">
+    <p>Top management reviews the QMS at planned intervals. The minutes must show these <b>inputs</b> were covered:</p>
+    <ul class="small">
+      <li>Status of actions from previous reviews</li>
+      <li>Changes in internal and external issues</li>
+      <li>Performance: customer satisfaction and feedback; objectives; process performance and product conformity; nonconformities and corrective actions; monitoring and measurement results; audit results; external provider performance</li>
+      <li>Adequacy of resources</li>
+      <li>Effectiveness of actions on risks and opportunities</li>
+      <li>Opportunities for improvement</li>
+    </ul>
+    <p class="small">And <b>outputs</b>: decisions on improvements, needed changes to the QMS, and resource needs.</p>
+    <div class="lab">Common finding</div><p>An input is missing (often supplier performance or risk effectiveness); no decisions recorded; actions from the last review not followed up.</p>
+  </div></details>
+
+  <h3 id="c10">10 · Improvement</h3>
+  <details><summary><span class="no">10.2</span><span class="ti">Nonconformity and corrective action</span></summary><div class="body">
+    <p>When something goes wrong (including complaints): react and correct, find the root cause, check whether similar problems exist or could happen elsewhere, act, review effectiveness, and update risks or the QMS if needed. Keep records.</p>
+    <div class="lab">Auditor does</div><p>Picks a closed corrective action and reads it end to end. Is the root cause real? Does the action address it? Is there evidence it was effective?</p>
+    <div class="lab">Common finding</div><p>Root cause written as "operator error" or "retrained operator"; closed without an effectiveness check; the same problem keeps coming back.</p>
+  </div></details>
+  <details><summary><span class="no">10.1 10.3</span><span class="ti">Continual improvement <span class="pill new">2026</span></span></summary><div class="body">
+    <p>Show that the system gets better over time, with examples and data: scrap down, cycle time down, fewer complaints, a recurring problem eliminated.</p>
+    <div class="lab">Auditor asks</div><p>"What has improved since recertification? Show me the before and after."</p>
+  </div></details>
+  </div>
+  <p class="empty" id="cEmpty">No clause matches that search. Try a simpler word, such as "gauge", "supplier" or "record".</p>
+</section>
+
+<!-- ============================ INTERVIEW ============================ -->
+<section class="view" id="v-interview">
+  <h2>In the room</h2>
+  <p class="lead">How to answer, what they'll ask each group, and what to say when you're not sure.</p>
+
+  <h3>Golden rules: share with everyone</h3>
+  <div class="card">
+    <ol>
+      <li><b>Listen to the whole question.</b> Ask them to repeat it if needed.</li>
+      <li><b>Answer what was asked</b>, honestly and briefly. Don't add stories nobody asked for, but never hide anything.</li>
+      <li><b>Show, don't tell.</b> "Let me show you the record" beats any explanation.</li>
+      <li><b>"I don't know" is a fine answer</b>, followed by "…but I know where to find out" or "…[name] owns that."</li>
+      <li><b>Never guess or make something up.</b> One wrong answer makes the auditor dig deeper.</li>
+      <li><b>Avoid "always" and "never"</b> unless records prove it. The auditor will go looking for the one exception.</li>
+      <li><b>Pausing is fine.</b> Taking time to find the right record is normal.</li>
+      <li><b>Correct yourself straight away</b> if you got something wrong: "Sorry, I misspoke. It's a 12-month interval."</li>
+      <li><b>Don't argue.</b> If you disagree, ask which requirement it's against and show evidence calmly.</li>
+    </ol>
+  </div>
+
+  <div class="card hl">
+    <h4>Problems you found yourself count in your favour</h4>
+    <p>If the auditor finds something you already know about, show them the NCR, CAPA or internal audit finding. A problem caught and being fixed by your own system shows the system <b>working</b>. Auditors often won't raise a finding for something already under control.</p>
+  </div>
+
+  <h3>Useful phrases</h3>
+  <div class="card">
+    <span class="say">"Just to check I understand: you're asking how we control drawing revisions at the machine?"</span>
+    <span class="say">"Let me pull up the record rather than go from memory."</span>
+    <span class="say">"That's owned by our purchasing lead. I'll bring them in."</span>
+    <span class="say">"We picked that up in our own internal audit in June. Here's the corrective action."</span>
+    <span class="say">"Could you show me which requirement that's against, so we address it properly?"</span>
+    <span class="say">"Is that a nonconformity, or an observation?"</span>
+  </div>
+
+  <h3>What they'll ask</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>Operators and inspectors</h4>
+      <div class="q">"What are you working on?"<div class="a">Job, part, revision, from the traveller.</div></div>
+      <div class="q">"How do you know it's right?"<div class="a">Drawing, inspection plan, first piece, the gauges and how often.</div></div>
+      <div class="q">"Is this gauge calibrated? How do you know?"<div class="a">Point to the label and the due date.</div></div>
+      <div class="q">"What do you do with a bad part?"<div class="a">Stop, tag it, quarantine it, tell the supervisor or QA, NCR.</div></div>
+      <div class="q">"Where's your instruction? Is it current?"<div class="a">Show it and know how they'd tell.</div></div>
+      <div class="q">"What training have you had?"<div class="a">Honest answer. The records will back it up.</div></div>
+      <div class="q">"What does quality mean in your job?"<div class="a">Their own words. No reciting.</div></div>
+    </div>
+    <div class="card">
+      <h4>Top management</h4>
+      <div class="q">"What are your quality objectives and how are they doing?"</div>
+      <div class="q">"What came out of the last management review?"</div>
+      <div class="q">"How do you make sure there are enough resources for quality?"</div>
+      <div class="q">"What are the biggest risks to the business?"</div>
+      <div class="q">"How do you build a quality culture? What happens when schedule pressure and quality conflict?" <span class="pill new">2026</span></div>
+      <div class="q">"What changed this year, and how was it planned?"</div>
+    </div>
+    <div class="card">
+      <h4>You (management rep)</h4>
+      <div class="q">"Walk me through closure of the recertification findings."</div>
+      <div class="q">"Show me the internal audit programme. How did you set the frequency?"</div>
+      <div class="q">"Pick a corrective action and take me through it."</div>
+      <div class="q">"How do you know your corrective actions work?"</div>
+      <div class="q">"Show me the management review minutes."</div>
+      <div class="q">"How are deviations and concessions authorised?"</div>
+      <div class="q">"What's changed in the QMS, including your role?"</div>
+    </div>
+    <div class="card">
+      <h4>Purchasing, receiving, shipping</h4>
+      <div class="q">"How is a new supplier approved? When was this one last evaluated?"</div>
+      <div class="q">"Show me this PO. Where are the spec, revision and cert requirements?"</div>
+      <div class="q">"How is incoming material checked? Where's the mill cert?"</div>
+      <div class="q">"How do you know this order is released for shipping?"</div>
+      <div class="q">"How is the product protected in transit?"</div>
+    </div>
+  </div>
+
+  <h3>If you're the guide</h3>
+  <div class="card">
+    <ul>
+      <li><b>Do</b> stay with the auditor, arrange PPE, introduce people, keep the request log, and send the runner for records.</li>
+      <li><b>Do</b> let people answer for themselves. Don't answer for an operator. If they're stuck, it's fine to ask "Who would you ask?"</li>
+      <li><b>Don't</b> coach or signal answers in front of the auditor.</li>
+      <li><b>Don't</b> steer the auditor away from areas. It's obvious, and it makes them look harder.</li>
+      <li><b>Do</b> note every possible finding the moment it comes up, so you can bring evidence before the wrap-up.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ DRILL ============================ -->
+<section class="view" id="v-drill">
+  <h2>Drill</h2>
+  <p class="lead">Practise before the real thing. Run the question drill on yourself, or use it to rehearse supervisors and operators. Then follow a trail the way an auditor would.</p>
+
+  <h3>Mock auditor</h3>
+  <div class="seg" id="dWho" role="tablist">
+    <button data-who="all" class="on">All</button><button data-who="You">You</button><button data-who="Top mgmt">Top mgmt</button><button data-who="Shop floor">Shop floor</button><button data-who="Purchasing">Purchasing</button>
+  </div>
+  <div class="card drill" id="drillCard">
+    <div class="dmeta"><span class="pill" id="dTag"></span> <span class="muted small" id="dCount"></span></div>
+    <p class="dq" id="dQ"></p>
+    <p class="small muted" id="dHint">Answer out loud first, as if the auditor is standing there. Then reveal.</p>
+    <div id="dAns" hidden>
+      <div class="lab">A strong answer</div><p id="dGood"></p>
+      <div class="lab">Pull up</div><p id="dShow"></p>
+      <div class="lab">Watch out for</div><p id="dTrap" class="bad"></p>
+    </div>
+    <div class="btns"><button class="btn" id="dReveal">Reveal</button><button class="btn pri" id="dNext">Next question</button></div>
+  </div>
+
+  <h3>Follow the trail</h3>
+  <p class="small">Auditors test a system by following one item through linked records. The <b>link</b> at each step is an identifier (PO number, drawing revision, job number, gauge ID, heat number) that has to match the next record. If it doesn't match, that's usually where a finding comes from.</p>
+  <div class="seg" id="tPick">
+    <button data-t="0" class="on">Customer order</button><button data-t="1">Supplier</button><button data-t="2">Bad part</button><button data-t="3">Complaint</button>
+  </div>
+  <div id="trail"></div>
+</section>
+
+<!-- ============================ FINDINGS ============================ -->
+<section class="view" id="v-findings">
+  <h2>Findings and your response</h2>
+  <p class="lead">How findings are graded, what happens next, and how to write a response the CB will accept.</p>
+
+  <h3>How findings are graded</h3>
+  <div class="card">
+    <p><span class="pill red">Major NC</span> A nonconformity that <b>affects the capability of the management system to achieve its intended results</b>. Examples: a required process isn't there or isn't being done at all (no internal audits for a year, no management review); a breakdown likely to let bad product reach the customer. <b>Several minors against the same requirement can add up to a major.</b></p>
+    <p><span class="pill amber">Minor NC</span> A nonconformity that <b>doesn't affect</b> the system's capability, usually an isolated lapse: one overdue gauge, one unsigned record, one old drawing.</p>
+    <p><span class="pill green">OFI / observation</span> Not a nonconformity. Advice or a risk the auditor noticed. No formal response needed, but deal with it, or it could become a finding next time.</p>
+    <p class="small">Many CBs raise a minor from the last audit as a major if it wasn't actually fixed. Check your CB's rules.</p>
+  </div>
+
+  <h3>What happens next</h3>
+  <div class="card">
+    <ul>
+      <li><b>Minor:</b> you send a correction and corrective action plan, the CB reviews and accepts it, and the auditor checks implementation and effectiveness at the next audit.</li>
+      <li><b>Major:</b> the CB must review and <b>verify</b> your correction and corrective action, by document review or a follow-up visit, often at extra cost. If a major isn't resolved in time, your certificate can be suspended.</li>
+      <li><b>Deadlines are set by your CB</b>, not by ISO 9001. Check its certification rules or your contract. Commonly about 30 days to submit a response, with majors closed within about 90 days, but confirm at the closing meeting.</li>
+    </ul>
+  </div>
+
+  <h3>How to write the response</h3>
+  <div class="card">
+    <div class="step"><span class="n">1</span><div><b>Finding.</b> Copy the auditor's wording exactly, with the clause.</div></div>
+    <div class="step"><span class="n">2</span><div><b>Correction and containment.</b> What you fixed right away, and what you did about product that may have been affected.</div></div>
+    <div class="step"><span class="n">3</span><div><b>Extent.</b> Did the same thing happen elsewhere? Check other gauges, records, cells and suppliers, and say what you found.</div></div>
+    <div class="step"><span class="n">4</span><div><b>Root cause.</b> Why did the <i>system</i> allow it? Use 5 Whys or a fishbone. Keep asking until you reach something you can change.</div></div>
+    <div class="step"><span class="n">5</span><div><b>Corrective action.</b> A change to the system that removes that cause, with an owner and a date.</div></div>
+    <div class="step"><span class="n">6</span><div><b>Evidence.</b> Attach what proves it's done: revised procedure, screenshot, training record, photo.</div></div>
+    <div class="step"><span class="n">7</span><div><b>Effectiveness check.</b> How and when you'll confirm it worked, e.g. three months of data, or a follow-up internal audit.</div></div>
+  </div>
+
+  <h3>Weak vs strong root cause</h3>
+  <div class="card">
+    <p class="bad"><b>✗ Weak:</b> "Operator error. Operator retrained."</p>
+    <p class="small">Retraining is the right fix only if the training really was missing. Otherwise the auditor will ask why the system let one person's mistake through, and why it won't happen with the next person.</p>
+    <p class="good"><b>✓ Strong:</b> "The drawing release process had no step to remove superseded copies from the floor. Printed copies stayed in the cell after an ECN."</p>
+    <p class="small">This points at something you can change (the process), so the fix sticks no matter who is on shift.</p>
+  </div>
+
+  <h3>Root-cause checker</h3>
+  <div class="card">
+    <p class="small">Paste a root cause or corrective action before you send it to the CB. This checks for the wording auditors usually reject. It runs in this page only, and nothing is saved or sent.</p>
+    <textarea id="rcIn" class="search" style="min-height:110px;resize:vertical;line-height:1.4" placeholder="e.g. Operator did not check the gauge label. Operator retrained."></textarea>
+    <div class="btns"><button class="btn pri" id="rcGo">Check it</button></div>
+    <div id="rcOut"></div>
+  </div>
+
+  <h3>Worked example: overdue gauge</h3>
+  <div class="card">
+    <p class="lab">Finding (minor, 7.1.5.2)</p>
+    <p>"A 1–2 in outside micrometer (ID OM-17) was in use in the turning cell, 2 months past its calibration due date."</p>
+    <p class="lab">Correction and containment</p>
+    <p>OM-17 removed from use the same day and calibrated. As-found readings were within tolerance, so no product impact; the calibration record is attached. <i>(If it had been out of tolerance: list every job it measured since its last good calibration, assess the impact, and inform the customer if needed.)</i></p>
+    <p class="lab">Extent</p>
+    <p>All 140 gauges in the system checked against the recall list: 2 more found overdue (both in the tool crib, not in use). Both calibrated.</p>
+    <p class="lab">Root cause</p>
+    <p>The recall list was a spreadsheet maintained by one person, with no automatic reminder. When that person was on leave, the monthly recall was missed. Gauge labels showed a calibration date but not the due date, so operators couldn't check at the point of use.</p>
+    <p class="lab">Corrective action</p>
+    <p>Calibration system set to send a weekly due-in-30-days report to QA and the backup owner (owner: QA, done 2026-12-05). Labels changed to show the due date. Operators briefed to check the label before use, and the check added to the daily layered audit.</p>
+    <p class="lab">Effectiveness check</p>
+    <p>Zero overdue gauges in use across 12 weekly reports and the Q2 internal audit of 7.1.5.</p>
+  </div>
+
+  <div class="card warn">
+    <h4>Don't promise what you won't do</h4>
+    <p class="small">Every date in your response will be checked at the next audit. Choose actions you can really finish, with real owners. Missing your own CAPA dates can be raised as a new finding.</p>
+  </div>
+</section>
+
+<footer>A plain-language guide, not the standard. Always check against the purchased ISO 9001 text and your CB's rules.<br>Built by Harsh Patel</footer>
 </main>
-<div id="printArea"></div>
+
 <nav class="bottom" aria-label="Sections">
-  <button data-view="today" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today<span class="badge" id="bToday" hidden></span></button>
-  <button data-view="capa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg>CAPA<span class="badge" id="bCapa" hidden></span></button>
-  <button data-view="audit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Audits<span class="badge" id="bAudit" hidden></span></button>
-  <button data-view="due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Due<span class="badge" id="bDue" hidden></span></button>
-  <button data-view="review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/></svg>Review</button>
+  <button data-view="basics" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg>Basics</button>
+  <button data-view="prepare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Prepare</button>
+  <button data-view="clauses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Clauses</button>
+  <button data-view="interview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Interview</button>
+  <button data-view="drill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>Drill</button>
+  <button data-view="findings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Findings</button>
 </nav>
-<div class="sheet-bg" id="sheetBg"></div>
-<div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div id="sheetBody"></div></div>
-<div class="toast" id="toast" role="status"></div>
 
 <script>
 "use strict";
-/* @@QCMD BEGIN — dates, statuses and the readiness score (pure, tested) */
-var QCMD = (function(){
-  function pad(n){ return (n < 10 ? "0" : "") + n; }
-  /* local calendar date, never UTC — "today" must match the wall clock */
-  function today(d){ d = d || new Date(); return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()); }
-  function parse(iso){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ""); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; }
-  function addDays(iso, n){ var d = parse(iso); if(!d) return ""; d.setDate(d.getDate() + n); return today(d); }
-  /* add months, clamping to the month's last day (Jan 31 + 1 month = Feb 28/29) */
-  function addMonths(iso, n){
-    var d = parse(iso); if(!d) return "";
-    var y = d.getFullYear(), m = d.getMonth() + n, day = d.getDate();
-    var last = new Date(y, m + 1, 0).getDate();
-    return today(new Date(y, m, Math.min(day, last)));
-  }
-  function days(a, b){ var A = parse(a), B = parse(b); if(!A || !B) return null; return Math.round((B - A) / 86400000); }
-  function nextDue(last, months){ return last ? addMonths(last, months) : null; }
-  /* CAPA stage: 0 contain · 1 root cause · 2 action · 3 verify · 4 effectiveness · 5 done */
-  function capaStage(c){
-    if(c.closed){ return c.effResult === "effective" ? 5 : 4; }
-    var acts = c.actions || [];
-    if(acts.length && acts.every(function(a){ return a.done; })) return 3;
-    if((c.rootCause || "").trim()) return 2;
-    if((c.containment || "").trim()) return 1;
-    return 0;
-  }
-  var STAGES = ["Contain","Root cause","Action","Verify","Effectiveness check","Closed — effective"];
-  /* Readiness: what an auditor would pick on. Points are a rule of thumb for
-     priority, not a grade from any standard. Returns {score, items}. */
-  function readiness(D, now){
-    now = now || today();
-    var items = [], add = function(pts, sev, title, sub, go){ items.push({ pts:pts, sev:sev, title:title, sub:sub, go:go }); };
-    (D.capas || []).forEach(function(c){
-      var st = capaStage(c), lab = (c.no || "CAPA") + " · " + (c.title || "untitled");
-      if(!c.closed){
-        if(c.due && days(c.due, now) > 0) add(8, "red", "Overdue corrective action", lab + " — due " + c.due + " (" + days(c.due, now) + " days late)", "capa:" + c.id);
-        else if(st < 2 && c.opened && days(c.opened, now) > 30) add(4, "amber", "No root cause after 30 days", lab, "capa:" + c.id);
-        (c.actions || []).forEach(function(a){ if(!a.done && a.due && days(a.due, now) > 0) add(3, "amber", "Action step overdue", lab + " — " + (a.text || "step") + (a.owner ? " (" + a.owner + ")" : ""), "capa:" + c.id); });
-      } else if(c.effResult === "not effective"){
-        add(8, "red", "Action was not effective — reopen it", lab, "capa:" + c.id);
-      } else if(c.effResult !== "effective"){
-        if(c.effDue && days(c.effDue, now) > 0) add(5, "red", "Effectiveness check overdue", lab + " — due " + c.effDue, "capa:" + c.id);
-      }
-    });
-    (D.program || []).forEach(function(p){
-      var nd = p.last ? nextDue(p.last, p.freq) : null;
-      if(!p.last) add(6, "red", "Never audited", p.area + (p.clauses ? " · " + p.clauses : ""), "audit:" + p.id);
-      else if(days(nd, now) > 0) add(6, "red", "Internal audit overdue", p.area + " — due " + nd, "audit:" + p.id);
-    });
-    (D.audits || []).forEach(function(a){
-      (a.findings || []).forEach(function(f){
-        if((f.type === "Major NC" || f.type === "Minor NC") && !f.capaId) add(5, "red", "Audit finding with no corrective action", a.area + " " + a.date + " — " + f.type + ": " + (f.text || ""), "finding:" + a.id + ":" + f.id);
-      });
-    });
-    (D.dues || []).forEach(function(d){
-      var nd = nextDue(d.last, d.freq);
-      if(!nd) add(3, "amber", (d.kind || "Item") + " has no last date", d.name, "due:" + d.id);
-      else if(days(nd, now) > 0) add(d.kind === "Calibration" ? 6 : 4, "red", (d.kind || "Item") + " overdue", d.name + " — due " + nd, "due:" + d.id);
-    });
-    var lastMr = D.mrLast;
-    if(!lastMr) add(15, "red", "No management review on record", "ISO 9001 expects planned reviews — record your last one or hold one", "review");
-    else if(days(addMonths(lastMr, 12), now) > 0) add(15, "red", "Management review older than 12 months", "Last held " + lastMr, "review");
-    (D.objectives || []).forEach(function(o){
-      if(o.actual === "" || o.actual === null || o.actual === undefined) add(2, "amber", "Quality objective has no current result", o.name, "review");
-    });
-    items.sort(function(a, b){ return b.pts - a.pts; });
-    var total = items.reduce(function(s, i){ return s + i.pts; }, 0);
-    return { score: Math.max(0, 100 - total), items: items };
-  }
-  function objectiveMet(o){
-    var a = Number(o.actual), t = Number(o.target);
-    if(o.actual === "" || o.actual === null || !isFinite(a) || !isFinite(t)) return null;
-    return o.dir === "max" ? a <= t : a >= t;
-  }
-  return { today:today, addDays:addDays, addMonths:addMonths, days:days, nextDue:nextDue, capaStage:capaStage, STAGES:STAGES, readiness:readiness, objectiveMet:objectiveMet };
-})();
-/* @@QCMD END */
-
 (function(){
-  var KEY = "qc.data";
-  var $ = function(id){ return document.getElementById(id); };
-  function esc(s){ return String(s === undefined || s === null ? "" : s).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
-  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-  var T = QCMD.today;
-  /* ------------ data ------------ */
-  function blank(){
-    return { v:1, capas:[], program:[], audits:[], dues:[], objectives:[], mrLast:"", mrHistory:[], mrDraft:{}, transition:{}, backupAt:"", seq:{} };
-  }
-  var D;
-  function load(){
-    try{ D = JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){ D = null; }
-    if(!D || typeof D !== "object") D = blank();
-    var b = blank(); Object.keys(b).forEach(function(k){ if(D[k] === undefined) D[k] = b[k]; });
-  }
-  var storageOk = true;
-  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(D)); storageOk = true; }catch(e){ storageOk = false; toast("Could not save — this browser is blocking storage."); } render(); }
-  function nextNo(prefix){ var y = T().slice(0,4), k = prefix + y; D.seq[k] = (D.seq[k] || 0) + 1; return prefix + "-" + y + "-" + String(D.seq[k]).padStart(3, "0"); }
-  function toast(m){ var t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(function(){ t.classList.remove("on"); }, 2600); }
-  function pill(sev, txt){ return '<span class="pill ' + sev + '">' + esc(txt) + '</span>'; }
-  function rel(iso){ if(!iso) return ""; var d = QCMD.days(T(), iso); return d === 0 ? "today" : d > 0 ? "in " + d + " day" + (d===1?"":"s") : Math.abs(d) + " day" + (d===-1?"":"s") + " late"; }
-  function dueSev(iso, soon){ if(!iso) return "amber"; var d = QCMD.days(T(), iso); return d < 0 ? "red" : d <= (soon || 14) ? "amber" : "green"; }
-
-  /* ------------ navigation ------------ */
-  var view = "today";
-  function go(v){
-    view = v;
+  var btns = document.querySelectorAll("nav.bottom button");
+  function show(v){
     document.querySelectorAll(".view").forEach(function(s){ s.classList.toggle("on", s.id === "v-" + v); });
-    document.querySelectorAll("nav.bottom button").forEach(function(b){ if(b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
-    render(); window.scrollTo(0, 0);
+    btns.forEach(function(b){ if(b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+    window.scrollTo(0, 0);
+    if(history.replaceState) history.replaceState(null, "", "#" + v);
   }
-  document.querySelector("nav.bottom").addEventListener("click", function(e){ var b = e.target.closest("button[data-view]"); if(b) go(b.dataset.view); });
+  btns.forEach(function(b){ b.addEventListener("click", function(){ show(b.dataset.view); }); });
+  var start = (location.hash || "").slice(1);
+  if(document.getElementById("v-" + start)) show(start);
 
-  /* ------------ sheet (forms) ------------ */
-  function openSheet(html){ $("sheetBody").innerHTML = html; $("sheet").classList.add("on"); $("sheetBg").classList.add("on"); $("sheet").scrollTop = 0; document.body.style.overflow = "hidden"; }
-  function closeSheet(){ $("sheet").classList.remove("on"); $("sheetBg").classList.remove("on"); document.body.style.overflow = ""; }
-  $("sheetBg").addEventListener("click", closeSheet);
-  function val(id){ var e = $(id); return e ? e.value.trim() : ""; }
+  /* clause chips: scroll within the Clauses view without changing the tab hash */
+  document.querySelectorAll(".chips a").forEach(function(a){
+    a.addEventListener("click", function(e){ e.preventDefault(); var t = document.querySelector(a.getAttribute("href")); if(t) t.scrollIntoView({ behavior:"smooth", block:"start" }); });
+  });
 
-  /* ------------ TODAY ------------ */
-  function gaugeSVG(score){
-    var r = 50, c = 2 * Math.PI * r, col = score >= 85 ? "#22C55E" : score >= 65 ? "#F59E0B" : "#EF4444";
-    return '<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="' + r + '" fill="none" stroke="#2A3038" stroke-width="12"/>' +
-      '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + (c * score / 100) + ' ' + c + '" transform="rotate(-90 60 60)"/>' +
-      '<text x="60" y="68" text-anchor="middle" fill="#E9EDF2" font-size="30" font-weight="800" font-family="ui-monospace,Menlo,monospace">' + score + '</text></svg>';
-  }
-  function upcoming(){
-    var now = T(), list = [];
-    D.capas.forEach(function(c){
-      if(!c.closed && c.due) list.push({ date:c.due, t:(c.no || "CAPA") + " due", s:c.title, go:"capa:" + c.id });
-      if(c.closed && c.effResult !== "effective" && c.effResult !== "not effective" && c.effDue) list.push({ date:c.effDue, t:"Effectiveness check", s:(c.no || "") + " · " + c.title, go:"capa:" + c.id });
+  /* clause search: filters cards, opens matches, hides empty section headings */
+  var input = document.getElementById("cSearch"), list = document.getElementById("clauseList"), empty = document.getElementById("cEmpty");
+  input.addEventListener("input", function(){
+    var q = input.value.trim().toLowerCase(), any = false;
+    list.querySelectorAll("details").forEach(function(d){
+      var hit = !q || d.textContent.toLowerCase().indexOf(q) !== -1;
+      d.style.display = hit ? "" : "none"; d.open = !!q && hit; if(hit) any = true;
     });
-    D.program.forEach(function(p){ var nd = QCMD.nextDue(p.last, p.freq); if(nd) list.push({ date:nd, t:"Internal audit", s:p.area, go:"audit:" + p.id }); });
-    D.dues.forEach(function(d){ var nd = QCMD.nextDue(d.last, d.freq); if(nd) list.push({ date:nd, t:d.kind, s:d.name, go:"due:" + d.id }); });
-    if(D.mrLast) list.push({ date:QCMD.addMonths(D.mrLast, 12), t:"Management review (12 months)", s:"Last held " + D.mrLast, go:"review" });
-    return list.filter(function(x){ var d = QCMD.days(now, x.date); return d >= 0 && d <= 30; }).sort(function(a, b){ return a.date < b.date ? -1 : 1; });
-  }
-  function renderToday(){
-    var R = QCMD.readiness(D), now = T();
-    var open = D.capas.filter(function(c){ return !c.closed; }).length;
-    var h = "";
-    var bd = D.backupAt ? QCMD.days(D.backupAt.slice(0,10), now) : null;
-    var hasData = D.capas.length + D.program.length + D.dues.length + D.audits.length > 0;
-    if(hasData && (bd === null || bd > 14)) h += '<div class="banner">' + (bd === null ? "No backup yet." : "Last backup " + bd + " days ago.") + ' Your records live only in this browser. <b data-go="backup" style="text-decoration:underline;cursor:pointer">Back up now</b></div>';
-    if(!storageOk) h += '<div class="banner">This browser is not saving data. Turn off private browsing.</div>';
-    h += '<div class="card"><div class="gauge">' + gaugeSVG(R.score) + '<div><div style="font-weight:700;font-size:17px">Audit readiness</div><div class="small">' +
-      (R.items.length ? R.items.length + " thing" + (R.items.length===1?"":"s") + " an auditor would pick on. Fix the top ones first." : "Nothing an auditor would flag from what is recorded here.") +
-      '</div><div class="small muted" style="margin-top:6px">A rule-of-thumb check of your records, not an audit result.</div></div></div></div>';
-    h += '<div class="stats">' +
-      '<div class="stat"><div class="k">Open CAPA</div><div class="v">' + open + '</div></div>' +
-      '<div class="stat"><div class="k">Overdue</div><div class="v" style="color:' + (R.items.some(function(i){ return i.sev==="red"; }) ? "var(--red-ink)" : "var(--green-ink)") + '">' + R.items.filter(function(i){ return i.sev === "red"; }).length + '</div></div>' +
-      '<div class="stat"><div class="k">Next 30 days</div><div class="v">' + upcoming().length + '</div></div></div>';
-    h += '<h3>Fix first</h3><div class="card">';
-    if(!R.items.length) h += '<div class="empty">' + (hasData ? "All clear." : "Start by adding your audit programme, your calibration and document due dates, and any open corrective actions. The score updates as you go.") + '</div>';
-    R.items.slice(0, 12).forEach(function(i){ h += '<div class="item" data-go="' + esc(i.go) + '"><span class="dot ' + i.sev + '"></span><div><div class="t">' + esc(i.title) + '</div><div class="s">' + esc(i.sub) + '</div></div><div class="r"><span class="pill ' + i.sev + '">−' + i.pts + '</span></div></div>'; });
-    if(R.items.length > 12) h += '<div class="small muted" style="padding-top:8px">+ ' + (R.items.length - 12) + ' more</div>';
-    h += '</div>';
-    var up = upcoming();
-    h += '<h3>Coming up (30 days)</h3><div class="card">' + (up.length ? up.map(function(x){ return '<div class="item" data-go="' + esc(x.go) + '"><span class="dot ' + dueSev(x.date, 7) + '"></span><div><div class="t">' + esc(x.t) + '</div><div class="s">' + esc(x.s) + '</div></div><div class="r small">' + esc(rel(x.date)) + '</div></div>'; }).join("") : '<div class="empty">Nothing due in the next 30 days.</div>') + '</div>';
-    if(!hasData) h += '<div class="btns"><button class="btn" data-act="sample">Load example data to try it</button></div>';
-    $("v-today").innerHTML = h;
-    var red = R.items.filter(function(i){ return i.sev === "red"; }).length;
-    badge("bToday", red);
-  }
-  function badge(id, n){ var b = $(id); if(n > 0){ b.textContent = n > 99 ? "99+" : n; b.hidden = false; } else b.hidden = true; }
-
-  /* ------------ CAPA ------------ */
-  var capaFilter = "open";
-  var SOURCES = ["Internal audit","External audit","Customer complaint","NCR / scrap trend","Supplier","Management review","Process monitoring","Other"];
-  function renderCapa(){
-    var now = T();
-    var list = D.capas.filter(function(c){ return capaFilter === "all" ? true : capaFilter === "open" ? !c.closed : capaFilter === "verify" ? (c.closed && c.effResult !== "effective") : (c.closed && c.effResult === "effective"); });
-    list.sort(function(a, b){ return (a.due || "9") < (b.due || "9") ? -1 : 1; });
-    var h = '<h2>Corrective actions</h2><div class="seg" id="capaSeg">' +
-      [["open","Open"],["verify","Effectiveness"],["done","Closed"],["all","All"]].map(function(f){ return '<button data-f="' + f[0] + '" aria-pressed="' + (capaFilter===f[0]) + '">' + f[1] + '</button>'; }).join("") + '</div>';
-    h += '<div class="btns"><button class="btn pri" data-act="capaNew">+ New corrective action</button></div><div class="card">';
-    if(!list.length) h += '<div class="empty">None here.</div>';
-    list.forEach(function(c){
-      var st = QCMD.capaStage(c), late = !c.closed && c.due && QCMD.days(c.due, now) > 0;
-      var sev = st === 5 ? "green" : late ? "red" : st === 4 ? "blue" : "amber";
-      h += '<div class="item" data-go="capa:' + c.id + '"><span class="dot ' + sev + '"></span><div style="flex:1;min-width:0"><div class="t">' + esc(c.no) + ' · ' + esc(c.title || "untitled") + '</div>' +
-        '<div class="s">' + esc(c.source || "") + (c.owner ? " · " + esc(c.owner) : "") + (c.closed ? " · closed " + esc(c.closed) : c.due ? " · due " + esc(c.due) + " (" + rel(c.due) + ")" : "") + '</div>' +
-        '<div class="stage">' + [0,1,2,3,4].map(function(i){ return '<i class="' + (i < st || st === 5 ? "on" : "") + '"></i>'; }).join("") + '</div></div>' +
-        '<div class="r">' + pill(sev, QCMD.STAGES[st]) + '</div></div>';
+    list.querySelectorAll("h3").forEach(function(h){
+      var n = h.nextElementSibling, vis = false;
+      while(n && n.tagName === "DETAILS"){ if(n.style.display !== "none") vis = true; n = n.nextElementSibling; }
+      h.style.display = vis ? "" : "none";
     });
-    h += '</div>';
-    $("v-capa").innerHTML = h;
-    badge("bCapa", D.capas.filter(function(c){ return !c.closed && c.due && QCMD.days(c.due, now) > 0; }).length);
-  }
-  function capaForm(c){
-    var isNew = !c;
-    c = c || { id:uid(), no:"", title:"", source:"Internal audit", opened:T(), owner:"", due:QCMD.addDays(T(), 30), problem:"", containment:"", why:["","","","",""], rootCause:"", actions:[], closed:"", effDue:"", effMethod:"", effResult:"", effNote:"" };
-    var st = QCMD.capaStage(c);
-    var h = '<h2>' + (isNew ? "New corrective action" : esc(c.no)) + '</h2>' +
-      '<div class="stage">' + [0,1,2,3,4].map(function(i){ return '<i class="' + (i < st || st === 5 ? "on" : "") + '"></i>'; }).join("") + '</div><div class="small" style="margin-top:4px">Stage: <b>' + QCMD.STAGES[st] + '</b></div>' +
-      '<label class="f" for="cTitle">Title</label><input type="text" id="cTitle" value="' + esc(c.title) + '" placeholder="e.g. Bore oversize on lathe 7 after tool change">' +
-      '<div class="row"><div><label class="f" for="cSource">Source</label><select id="cSource">' + SOURCES.map(function(s){ return '<option' + (s===c.source?" selected":"") + '>' + s + '</option>'; }).join("") + '</select></div>' +
-      '<div><label class="f" for="cOwner">Owner</label><input type="text" id="cOwner" value="' + esc(c.owner) + '"></div></div>' +
-      '<div class="row"><div><label class="f" for="cOpened">Opened</label><input type="date" id="cOpened" value="' + esc(c.opened) + '"></div><div><label class="f" for="cDue">Due</label><input type="date" id="cDue" value="' + esc(c.due) + '"></div></div>' +
-      '<label class="f" for="cProblem">Problem — what, where, when, how many, how found</label><textarea id="cProblem" placeholder="State the facts. Avoid the cause here.">' + esc(c.problem) + '</textarea>' +
-      '<label class="f" for="cCont">1 · Containment — what was done now to protect the customer</label><textarea id="cCont" placeholder="Parts quarantined, sorted, 100% check…">' + esc(c.containment) + '</textarea>' +
-      '<label class="f">2 · Why did it happen? (5 Whys — stop when you reach a cause you can fix)</label>' +
-      (c.why || ["","","","",""]).map(function(w, i){ return '<div class="why"><b>Why ' + (i+1) + '</b><input type="text" id="cWhy' + i + '" value="' + esc(w) + '"></div>'; }).join("") +
-      '<label class="f" for="cRoot">Root cause</label><textarea id="cRoot" placeholder="The cause that, if removed, stops it coming back">' + esc(c.rootCause) + '</textarea>' +
-      '<label class="f">3 · Corrective actions</label><div id="cActs">' + (c.actions || []).map(actRow).join("") + '</div>' +
-      '<div class="btns"><button class="btn sm" data-act="addAct">+ Add action</button></div>';
-    if(c.closed){
-      h += '<label class="f">4 · Effectiveness — did it stop the problem coming back?</label>' +
-        '<div class="row"><div><label class="f" for="cEffDue">Check on</label><input type="date" id="cEffDue" value="' + esc(c.effDue) + '"></div><div><label class="f" for="cEffRes">Result</label><select id="cEffRes"><option value="">Not checked yet</option><option value="effective"' + (c.effResult==="effective"?" selected":"") + '>Effective</option><option value="not effective"' + (c.effResult==="not effective"?" selected":"") + '>Not effective</option></select></div></div>' +
-        '<label class="f" for="cEffMethod">How it was checked (evidence)</label><textarea id="cEffMethod" placeholder="e.g. 0 repeats in 60 days of NCR data; Cpk 1.6 on 30 parts">' + esc(c.effMethod) + '</textarea>';
-    }
-    h += '<div class="btns"><button class="btn pri" data-act="capaSave" data-id="' + c.id + '">Save</button>' +
-      (!isNew && !c.closed ? '<button class="btn" data-act="capaClose" data-id="' + c.id + '">Close &amp; schedule effectiveness check</button>' : '') +
-      (!isNew && c.closed ? '<button class="btn" data-act="capaReopen" data-id="' + c.id + '">Reopen</button>' : '') +
-      (!isNew ? '<button class="btn danger" data-act="capaDel" data-id="' + c.id + '">Delete</button>' : '') +
-      '<button class="btn" data-act="close">Cancel</button></div>';
-    if(!isNew && c.closed) h += '<p class="small">Closed ' + esc(c.closed) + '. ISO 9001 asks you to review whether the action worked — record the evidence above when you check.</p>';
-    openSheet(h);
-    capaForm.cur = JSON.parse(JSON.stringify(c)); capaForm.isNew = isNew;
-  }
-  function actRow(a, i){
-    a = a || { text:"", owner:"", due:"", done:false };
-    return '<div class="sub act"><input type="text" class="aText" value="' + esc(a.text) + '" placeholder="Action">' +
-      '<div class="row" style="margin-top:6px"><input type="text" class="aOwner" value="' + esc(a.owner) + '" placeholder="Owner"><input type="date" class="aDue" value="' + esc(a.due) + '"></div>' +
-      '<label class="small" style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" class="aDone"' + (a.done ? " checked" : "") + ' style="width:20px;height:20px"> Done</label></div>';
-  }
-  function capaCollect(){
-    var c = capaForm.cur;
-    c.title = val("cTitle"); c.source = val("cSource"); c.owner = val("cOwner"); c.opened = val("cOpened"); c.due = val("cDue");
-    c.problem = val("cProblem"); c.containment = val("cCont"); c.rootCause = val("cRoot");
-    c.why = [0,1,2,3,4].map(function(i){ return val("cWhy" + i); });
-    c.actions = Array.prototype.map.call(document.querySelectorAll("#cActs .act"), function(r){
-      return { text:r.querySelector(".aText").value.trim(), owner:r.querySelector(".aOwner").value.trim(), due:r.querySelector(".aDue").value, done:r.querySelector(".aDone").checked };
-    }).filter(function(a){ return a.text; });
-    if($("cEffDue")){ c.effDue = val("cEffDue"); c.effResult = val("cEffRes"); c.effMethod = val("cEffMethod"); }
-    return c;
-  }
-  function capaStore(c){
-    if(!c.title){ toast("Give it a title."); return false; }
-    if(!c.no) c.no = nextNo("CA");
-    var i = D.capas.findIndex(function(x){ return x.id === c.id; });
-    if(i >= 0) D.capas[i] = c; else D.capas.push(c);
-    return true;
-  }
+    empty.style.display = any ? "none" : "block";
+  });
 
-  /* ------------ AUDITS ------------ */
-  /* Questions are this app's own wording, grouped by ISO 9001 clause number. */
-  var QB = {
-    "4 Context": ["Can the team say which internal and external issues affect quality here, and when they were last reviewed?","Are the needs of interested parties (customers, regulators, owners) written down and current?","Is the QMS scope documented, including any requirements that do not apply and why?"],
-    "5 Leadership": ["Do people know the quality policy and what it means for their job?","Are roles, responsibilities and authorities clear (who can stop the line, approve deviations, release product)?","Is there evidence top management reviews quality results and acts on them?"],
-    "6 Planning": ["Are risks and opportunities for this process identified, with actions and owners?","Are quality objectives measurable, with a plan, an owner and a due date?","Were recent changes (new machine, new customer, layout) planned and controlled?"],
-    "7 Support": ["Are gauges in use calibrated and identified, with status traceable to a record?","Can operators show they are trained for the jobs they are doing today?","Is the document at the workstation the current revision?","Is knowledge from problems (lessons learned) kept and used?"],
-    "8 Operation": ["Is the drawing, revision and control plan / routing at the machine the one on the order?","Is first-piece / setup approval recorded before the run?","Is nonconforming product identified and segregated, with a disposition and an authorised approver?","Are supplier and outsourced process controls defined and checked on receipt?","Is product traceable to its job, material and inspection record?"],
-    "9 Performance evaluation": ["Is process and product data (scrap, NCRs, Cpk, delivery) analysed and acted on, not just collected?","Is customer feedback / satisfaction monitored?","Is the internal audit programme on schedule, and were past findings closed?"],
-    "10 Improvement": ["For recent nonconformities: was there containment, a root cause and an action that stopped it recurring?","Is effectiveness of corrective actions checked with evidence?","Are improvements being made, not just fixes?"]
-  };
-  function renderAudit(){
-    var now = T();
-    var prog = D.program.slice().sort(function(a, b){ var x = QCMD.nextDue(a.last, a.freq) || "0", y = QCMD.nextDue(b.last, b.freq) || "0"; return x < y ? -1 : 1; });
-    var h = '<h2>Internal audits</h2><p class="small">Your audit programme: each process or clause with how often it is audited. Record an audit and the next date moves on by itself.</p>' +
-      '<div class="btns"><button class="btn pri" data-act="progNew">+ Add to programme</button></div><h3>Programme</h3><div class="card">';
-    if(!prog.length) h += '<div class="empty">Add the processes you audit — e.g. "Machining – Dept 11 · clauses 7.1.5, 8.5, 8.7 · every 12 months".</div>';
-    prog.forEach(function(p){
-      var nd = QCMD.nextDue(p.last, p.freq), sev = p.last ? dueSev(nd, 30) : "red";
-      h += '<div class="item" data-go="audit:' + p.id + '"><span class="dot ' + sev + '"></span><div><div class="t">' + esc(p.area) + '</div><div class="s">' + esc(p.clauses || "") + ' · every ' + p.freq + ' months · ' + (p.last ? "last " + esc(p.last) : "never audited") + '</div></div>' +
-        '<div class="r small">' + (nd ? esc(rel(nd)) : '<span class="pill red">due</span>') + '</div></div>';
-    });
-    h += '</div><h3>Audit records</h3><div class="card">';
-    var recs = D.audits.slice().sort(function(a, b){ return a.date < b.date ? 1 : -1; });
-    if(!recs.length) h += '<div class="empty">No audits recorded yet.</div>';
-    recs.forEach(function(a){
-      var nc = (a.findings || []).filter(function(f){ return f.type === "Major NC" || f.type === "Minor NC"; }), open = nc.filter(function(f){ return !f.capaId; }).length;
-      h += '<div class="item" data-go="rec:' + a.id + '"><span class="dot ' + (open ? "red" : "green") + '"></span><div><div class="t">' + esc(a.area) + ' · ' + esc(a.date) + '</div><div class="s">' + (a.auditor ? esc(a.auditor) + " · " : "") + (a.findings || []).length + ' finding' + ((a.findings||[]).length===1?"":"s") + (nc.length ? " · " + nc.length + " NC" : "") + (open ? " · " + open + " without CAPA" : "") + '</div></div></div>';
-    });
-    h += '</div>';
-    $("v-audit").innerHTML = h;
-    badge("bAudit", D.program.filter(function(p){ return !p.last || QCMD.days(QCMD.nextDue(p.last, p.freq), now) > 0; }).length);
-  }
-  function progForm(p){
-    var isNew = !p; p = p || { id:uid(), area:"", clauses:"", freq:12, last:"", owner:"" };
-    openSheet('<h2>' + (isNew ? "Add to audit programme" : esc(p.area)) + '</h2>' +
-      '<label class="f" for="pArea">Process or area</label><input type="text" id="pArea" value="' + esc(p.area) + '" placeholder="e.g. Machining – Dept 11">' +
-      '<label class="f" for="pClauses">Clauses covered</label><input type="text" id="pClauses" value="' + esc(p.clauses) + '" placeholder="e.g. 7.1.5, 8.5, 8.7">' +
-      '<div class="row"><div><label class="f" for="pFreq">Every (months)</label><input type="number" id="pFreq" min="1" max="36" value="' + esc(p.freq) + '"></div><div><label class="f" for="pLast">Last audited</label><input type="date" id="pLast" value="' + esc(p.last) + '"></div></div>' +
-      '<div class="btns"><button class="btn pri" data-act="progSave" data-id="' + p.id + '">Save</button>' + (!isNew ? '<button class="btn" data-act="recNew" data-id="' + p.id + '">Record an audit</button><button class="btn danger" data-act="progDel" data-id="' + p.id + '">Remove</button>' : '') + '<button class="btn" data-act="close">Cancel</button></div>');
-    progForm.cur = p; progForm.isNew = isNew;
-  }
-  var FT = ["Major NC","Minor NC","OFI","Positive"];
-  function recForm(a, prog){
-    var isNew = !a;
-    a = a || { id:uid(), progId: prog ? prog.id : "", area: prog ? prog.area : "", date:T(), auditor:"", checks:{}, findings:[], notes:"" };
-    var h = '<h2>' + (isNew ? "Record audit" : "Audit · " + esc(a.area)) + '</h2>' +
-      '<div class="row"><div><label class="f" for="rDate">Date</label><input type="date" id="rDate" value="' + esc(a.date) + '"></div><div><label class="f" for="rAud">Auditor</label><input type="text" id="rAud" value="' + esc(a.auditor) + '"></div></div>' +
-      '<label class="f" for="rArea">Area</label><input type="text" id="rArea" value="' + esc(a.area) + '">' +
-      '<h3>Checklist</h3><p class="small">Tap OK, NC or N/A. An NC adds a finding below for you to describe.</p><div class="seg" id="qbSeg">' + Object.keys(QB).map(function(k, i){ return '<button data-qb="' + esc(k) + '" aria-pressed="' + (i===0) + '">' + esc(k.split(" ")[0]) + '</button>'; }).join("") + '</div><div class="card" id="qbList"></div>' +
-      '<h3>Findings</h3><div id="rFind">' + (a.findings || []).map(findRow).join("") + '</div>' +
-      '<div class="btns"><button class="btn sm" data-act="addFind">+ Add finding</button></div>' +
-      '<label class="f" for="rNotes">Notes / summary</label><textarea id="rNotes">' + esc(a.notes) + '</textarea>' +
-      '<div class="btns"><button class="btn pri" data-act="recSave" data-id="' + a.id + '">Save audit</button>' + (!isNew ? '<button class="btn danger" data-act="recDel" data-id="' + a.id + '">Delete</button>' : '') + '<button class="btn" data-act="close">Cancel</button></div>';
-    openSheet(h);
-    recForm.cur = JSON.parse(JSON.stringify(a)); recForm.isNew = isNew; recForm.qb = Object.keys(QB)[0];
-    drawQB();
-  }
-  function drawQB(){
-    var k = recForm.qb, a = recForm.cur;
-    $("qbList").innerHTML = QB[k].map(function(q, i){
-      var key = k + "|" + i, v = a.checks[key] || "";
-      return '<div class="q"><div class="qt">' + esc(q) + '</div><div class="seg">' + ["OK","NC","N/A"].map(function(o){ return '<button data-chk="' + esc(key) + '" data-v="' + o + '" aria-pressed="' + (v===o) + '">' + o + '</button>'; }).join("") + '</div></div>';
-    }).join("");
-    document.querySelectorAll("#qbSeg button").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.qb === k); });
-  }
-  function findRow(f){
-    f = f || { id:uid(), type:"Minor NC", clause:"", text:"", capaId:"" };
-    var cap = f.capaId ? D.capas.filter(function(c){ return c.id === f.capaId; })[0] : null;
-    return '<div class="sub find" data-fid="' + f.id + '" data-capa="' + esc(f.capaId || "") + '"><div class="row"><select class="fType">' + FT.map(function(t){ return '<option' + (t===f.type?" selected":"") + '>' + t + '</option>'; }).join("") + '</select><input type="text" class="fClause" value="' + esc(f.clause) + '" placeholder="Clause"></div>' +
-      '<textarea class="fText" style="margin-top:6px;min-height:64px" placeholder="What was seen — the evidence">' + esc(f.text) + '</textarea>' +
-      (cap ? '<div class="small" style="margin-top:6px">→ ' + esc(cap.no) + ' · ' + esc(QCMD.STAGES[QCMD.capaStage(cap)]) + '</div>' : '<div class="small muted" style="margin-top:6px">NC findings get a corrective action when you save.</div>') + '</div>';
-  }
-  function recCollect(){
-    var a = recForm.cur;
-    a.date = val("rDate"); a.auditor = val("rAud"); a.area = val("rArea"); a.notes = val("rNotes");
-    a.findings = Array.prototype.map.call(document.querySelectorAll("#rFind .find"), function(r){
-      return { id:r.dataset.fid, type:r.querySelector(".fType").value, clause:r.querySelector(".fClause").value.trim(), text:r.querySelector(".fText").value.trim(), capaId:r.dataset.capa || "" };
-    }).filter(function(f){ return f.text || f.clause; });
-    return a;
-  }
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); }
 
-  /* ------------ DUE ------------ */
-  var KINDS = ["Calibration","Document review","Training","Supplier evaluation","Maintenance","Other"];
-  var dueFilter = "All";
-  function renderDue(){
-    var now = T();
-    var list = D.dues.filter(function(d){ return dueFilter === "All" || d.kind === dueFilter; }).slice().sort(function(a, b){ return (QCMD.nextDue(a.last, a.freq) || "0") < (QCMD.nextDue(b.last, b.freq) || "0") ? -1 : 1; });
-    var h = '<h2>Due dates</h2><p class="small">Calibration, document reviews, training renewals, supplier evaluations — anything that repeats. Tap "Done" and the next date is set.</p>' +
-      '<div class="seg">' + ["All"].concat(KINDS).map(function(k){ return '<button data-kf="' + k + '" aria-pressed="' + (dueFilter===k) + '">' + k + '</button>'; }).join("") + '</div>' +
-      '<div class="btns"><button class="btn pri" data-act="dueNew">+ Add item</button><button class="btn" data-act="dueBulk">Paste a list</button></div><div class="card">';
-    if(!list.length) h += '<div class="empty">Nothing here yet.</div>';
-    list.forEach(function(d){
-      var nd = QCMD.nextDue(d.last, d.freq), sev = dueSev(nd, 14);
-      h += '<div class="item"><span class="dot ' + sev + '"></span><div data-go="due:' + d.id + '" style="flex:1;min-width:0"><div class="t">' + esc(d.name) + '</div><div class="s">' + esc(d.kind) + (d.owner ? " · " + esc(d.owner) : "") + ' · every ' + d.freq + ' mo · ' + (nd ? "due " + esc(nd) + " (" + rel(nd) + ")" : "no last date") + '</div></div>' +
-        '<div class="r"><button class="btn sm" data-act="dueDone" data-id="' + d.id + '">Done</button></div></div>';
-    });
-    h += '</div>';
-    $("v-due").innerHTML = h;
-    badge("bDue", D.dues.filter(function(d){ var nd = QCMD.nextDue(d.last, d.freq); return !nd || QCMD.days(nd, now) > 0; }).length);
-  }
-  function dueForm(d){
-    var isNew = !d; d = d || { id:uid(), kind:dueFilter !== "All" ? dueFilter : "Calibration", name:"", owner:"", freq:12, last:"", notes:"" };
-    openSheet('<h2>' + (isNew ? "Add due item" : esc(d.name)) + '</h2>' +
-      '<label class="f" for="dKind">Type</label><select id="dKind">' + KINDS.map(function(k){ return '<option' + (k===d.kind?" selected":"") + '>' + k + '</option>'; }).join("") + '</select>' +
-      '<label class="f" for="dName">Name</label><input type="text" id="dName" value="' + esc(d.name) + '" placeholder="e.g. Bore gauge BG-12, QP-08 Control of NC product">' +
-      '<div class="row"><div><label class="f" for="dFreq">Every (months)</label><input type="number" id="dFreq" min="1" max="120" value="' + esc(d.freq) + '"></div><div><label class="f" for="dLast">Last done</label><input type="date" id="dLast" value="' + esc(d.last) + '"></div></div>' +
-      '<label class="f" for="dOwner">Owner</label><input type="text" id="dOwner" value="' + esc(d.owner) + '">' +
-      '<label class="f" for="dNotes">Notes</label><textarea id="dNotes">' + esc(d.notes) + '</textarea>' +
-      '<div class="btns"><button class="btn pri" data-act="dueSave" data-id="' + d.id + '">Save</button>' + (!isNew ? '<button class="btn danger" data-act="dueDel" data-id="' + d.id + '">Delete</button>' : '') + '<button class="btn" data-act="close">Cancel</button></div>');
-    dueForm.cur = d;
-  }
-
-  /* ------------ REVIEW ------------ */
-  var TRANS = ["4 Context of the organization","5 Leadership","6 Planning","7 Support","8 Operation","9 Performance evaluation","10 Improvement"];
-  var MR_INPUTS = [
-    ["prev","Status of actions from previous reviews"],
-    ["issues","Changes in external and internal issues"],
-    ["customer","Customer satisfaction and feedback"],
-    ["process","Process performance and product conformity"],
-    ["ncca","Nonconformities and corrective actions"],
-    ["monitor","Monitoring and measurement results"],
-    ["audit","Audit results"],
-    ["supplier","Performance of external providers (suppliers)"],
-    ["resources","Adequacy of resources"],
-    ["risks","Effectiveness of actions on risks and opportunities"],
-    ["improve","Opportunities for improvement"]
+  /* ---- mock auditor: who, question, strong answer, what to pull up, trap ---- */
+  var QS = [
+    ["You","Show me how last audit's findings were closed.","Walk each finding: correction, root cause, corrective action, and the evidence it worked (data or a follow-up audit).","Recertification report, CAPA records, effectiveness evidence","Showing the action was done but not that it worked."],
+    ["You","How did you decide how often to audit each process?","Based on importance, risk, changes and past results. Show one area audited more often because of problems or a change.","Internal audit programme with the reasoning written down","\"We audit everything once a year\" with no reasoning."],
+    ["You","Who audited the Quality department?","Someone independent of Quality, named, with their auditor training record.","Audit report, auditor competence record","You audited your own work."],
+    ["You","Pick a corrective action and take me through it.","Choose one you know is complete, with a real root cause and an effectiveness check. Tell it start to finish.","CAPA record with attachments","Root cause written as \"operator error\"."],
+    ["You","What has changed in the QMS since recertification?","Name the changes, including your own appointment, and show how each was planned: who, when, risks, communication.","Change records, org chart, management review minutes","Saying \"nothing\" when you've just changed roles."],
+    ["You","How are deviations and concessions authorised?","Name the procedure and the authority levels, and when customer approval is needed. Show a recent one with the right signatures.","Deviation procedure, a recent approved deviation","A signature from someone without the authority."],
+    ["You","What does your data tell you about the QMS this year?","Two or three trends (scrap, on-time delivery, complaints), what you concluded, and what you did about them.","KPI trends, management review inputs","Showing charts with no conclusions or actions."],
+    ["Top mgmt","What are your quality objectives and how are they doing?","Name them, give current numbers, and say what's being done about any that are behind.","Objectives with current data","\"Quality handles that.\""],
+    ["Top mgmt","What came out of your last management review?","Two or three decisions, such as resources, an improvement or a change, and their status now.","MR minutes with actions","Can't recall any decision."],
+    ["Top mgmt","What are the biggest risks to delivering quality?","Specific risks (skilled labour, a key supplier, an aging machine) and what's being done about each.","Risk and opportunity review","A generic answer that isn't about your business."],
+    ["Top mgmt","What happens when schedule pressure conflicts with quality?","Product doesn't ship until it conforms, and anyone can stop a job. Give a real example.","An NCR or held shipment, quality policy","An answer that implies deadlines win."],
+    ["Shop floor","What are you working on?","Job number, part, drawing revision, read from the traveller.","Traveller, drawing at the station","Not knowing the revision."],
+    ["Shop floor","How do you know this part is right?","Drawing, inspection plan, first piece signed off, which gauges, how often checked.","First-piece and in-process records","\"I just know.\""],
+    ["Shop floor","Is this gauge calibrated? How do you know?","Point to the label: ID and due date. Check the date before using it.","Gauge label, calibration list","An expired label, or a gauge with no label."],
+    ["Shop floor","What do you do if you find a bad part?","Stop, tag it red, put it in quarantine, tell the supervisor or QA, and an NCR gets written.","Quarantine area, NCR form","Fixing it quietly or putting it back in the bin."],
+    ["Shop floor","Where's your work instruction? Is it the current one?","Show it, and know how a new revision reaches the station.","Controlled document at the station","A photocopy with handwritten changes."],
+    ["Shop floor","What does the quality policy mean for your job?","In their own words: make it to the drawing, check it, speak up if something's wrong.","Posted policy","Reciting it word for word without understanding."],
+    ["Shop floor","What training have you had for this job?","An honest answer. The training matrix will confirm it.","Training matrix, sign-offs","Running a machine or CMM with no record of training."],
+    ["Purchasing","How is a new supplier approved?","Criteria (quality system, capability, trial order, certs), who approves, and how it's recorded. Show the latest approval.","Supplier approval record, approved supplier list","A supplier being used that isn't on the list."],
+    ["Purchasing","When was this supplier last evaluated?","Show their performance data (on-time delivery, rejects) and the date of the last review.","Supplier scorecard","Never re-evaluated since they were approved."],
+    ["Purchasing","Where on this PO are the requirements?","Part number and revision, spec, material and cert requirements, special-process requirements.","A recent PO","A spec or cert requirement left off."],
+    ["Purchasing","How is incoming material checked?","Receiving inspection, mill cert checked against the spec, heat number recorded for traceability.","Receiving record, mill cert","Mill cert filed but never compared to the spec."]
   ];
-  function scrapSummary(){
-    /* SPC Tools (same site) keeps Scrap / NCR report history here, if the user saved it */
-    var h = null; try{ h = JSON.parse(localStorage.getItem("ncp.history") || "null"); }catch(e){}
-    if(!h || !h.rows || !h.rows.length) return null;
-    var cut = QCMD.addMonths(T(), -12), rows = h.rows.filter(function(r){ return r.date && r.date >= cut; });
-    if(!rows.length) return null;
-    var byM = {}, byC = {}, cost = 0;
-    rows.forEach(function(r){ var m = r.date.slice(0,7); byM[m] = (byM[m] || 0) + 1; var k = r.cause || "(no cause)"; byC[k] = (byC[k] || 0) + (r.cost || 0); cost += r.cost || 0; });
-    var top = Object.keys(byC).sort(function(a, b){ return byC[b] - byC[a]; }).slice(0, 3);
-    return { n:rows.length, cost:cost, months:Object.keys(byM).sort().map(function(m){ return [m, byM[m]]; }), top:top.map(function(k){ return [k, byC[k]]; }) };
-  }
-  function autoInputs(){
-    var now = T(), since = D.mrLast || QCMD.addMonths(now, -12), A = {};
-    var opened = D.capas.filter(function(c){ return c.opened >= since; }), open = D.capas.filter(function(c){ return !c.closed; });
-    var late = open.filter(function(c){ return c.due && QCMD.days(c.due, now) > 0; });
-    var eff = D.capas.filter(function(c){ return c.closed && c.closed >= since; }), effOk = eff.filter(function(c){ return c.effResult === "effective"; }), effNo = eff.filter(function(c){ return c.effResult === "not effective"; });
-    A.ncca = opened.length + " corrective actions opened since " + since + "; " + open.length + " open now (" + late.length + " overdue). " + eff.length + " closed: " + effOk.length + " verified effective, " + effNo.length + " not effective, " + (eff.length - effOk.length - effNo.length) + " awaiting the effectiveness check.";
-    var bySrc = {}; opened.forEach(function(c){ bySrc[c.source] = (bySrc[c.source] || 0) + 1; });
-    if(opened.length) A.ncca += " By source: " + Object.keys(bySrc).map(function(k){ return k + " " + bySrc[k]; }).join(", ") + ".";
-    var recs = D.audits.filter(function(a){ return a.date >= since; }), f = { "Major NC":0, "Minor NC":0, "OFI":0, "Positive":0 };
-    recs.forEach(function(a){ (a.findings || []).forEach(function(x){ f[x.type] = (f[x.type] || 0) + 1; }); });
-    var overdueProg = D.program.filter(function(p){ return !p.last || QCMD.days(QCMD.nextDue(p.last, p.freq), now) > 0; });
-    A.audit = recs.length + " internal audits since " + since + ": " + f["Major NC"] + " major NC, " + f["Minor NC"] + " minor NC, " + f.OFI + " OFIs, " + f.Positive + " positives. Programme: " + D.program.length + " areas, " + overdueProg.length + " overdue" + (overdueProg.length ? " (" + overdueProg.map(function(p){ return p.area; }).join(", ") + ")" : "") + ".";
-    var cal = D.dues.filter(function(d){ return d.kind === "Calibration"; }), calLate = cal.filter(function(d){ var nd = QCMD.nextDue(d.last, d.freq); return !nd || QCMD.days(nd, now) > 0; });
-    A.monitor = cal.length ? cal.length + " calibrated items tracked, " + calLate.length + " overdue" + (calLate.length ? " (" + calLate.map(function(d){ return d.name; }).join(", ") + ")" : "") + "." : "";
-    var obj = D.objectives.map(function(o){ var m = QCMD.objectiveMet(o); return o.name + ": " + (o.actual === "" ? "no result" : o.actual + (o.unit || "")) + " vs target " + (o.dir === "max" ? "≤ " : "≥ ") + o.target + (o.unit || "") + (m === null ? "" : m ? " — met" : " — NOT met"); });
-    var s = scrapSummary();
-    A.process = (obj.length ? "Quality objectives — " + obj.join("; ") + ". " : "") + (s ? "Scrap/NCR records (last 12 months, from SPC Tools on this device): " + s.n + " records, cost $" + s.cost.toFixed(2) + "; top causes by cost: " + s.top.map(function(t){ return t[0] + " ($" + t[1].toFixed(0) + ")"; }).join(", ") + "." : "");
-    var sup = D.dues.filter(function(d){ return d.kind === "Supplier evaluation"; });
-    A.supplier = sup.length ? sup.length + " supplier evaluations tracked." : "";
-    var prev = D.mrHistory.length ? D.mrHistory[D.mrHistory.length - 1] : null;
-    if(prev && prev.actionIds && prev.actionIds.length){
-      var pa = prev.actionIds.map(function(id){ return D.capas.filter(function(c){ return c.id === id; })[0]; }).filter(Boolean);
-      A.prev = pa.length + " actions from the " + prev.date + " review: " + pa.filter(function(c){ return c.closed; }).length + " closed, " + pa.filter(function(c){ return !c.closed; }).length + " open" + (pa.filter(function(c){ return !c.closed; }).length ? " (" + pa.filter(function(c){ return !c.closed; }).map(function(c){ return c.no; }).join(", ") + ")" : "") + ".";
-    }
-    return A;
-  }
-  function renderReview(){
-    var now = T(), h = '<h2>Management review</h2>';
-    h += '<div class="card"><div class="row"><div><div class="t" style="font-weight:700">' + (D.mrLast ? "Last held " + esc(D.mrLast) : "No review recorded") + '</div><div class="small">' + (D.mrLast ? "Next by " + esc(QCMD.addMonths(D.mrLast, 12)) + " (" + rel(QCMD.addMonths(D.mrLast, 12)) + ") if yearly" : "Record your last review date, or prepare one now.") + '</div></div></div>' +
-      '<div class="btns"><button class="btn pri" data-act="mrPrep">Prepare review pack</button><button class="btn" data-act="mrLastSet">Set last review date</button></div></div>';
-    h += '<h3>Quality objectives</h3><div class="card">';
-    if(!D.objectives.length) h += '<div class="empty">Add your measurable objectives — e.g. "Scrap cost ≤ $2,000 / week" or "On-time delivery ≥ 95%".</div>';
-    D.objectives.forEach(function(o){ var m = QCMD.objectiveMet(o); h += '<div class="item" data-go="obj:' + o.id + '"><span class="dot ' + (m === null ? "amber" : m ? "green" : "red") + '"></span><div><div class="t">' + esc(o.name) + '</div><div class="s">Target ' + (o.dir === "max" ? "≤ " : "≥ ") + esc(o.target) + esc(o.unit || "") + ' · now ' + (o.actual === "" ? "—" : esc(o.actual) + esc(o.unit || "")) + '</div></div><div class="r">' + (m === null ? pill("amber","no result") : m ? pill("green","met") : pill("red","not met")) + '</div></div>'; });
-    h += '<div class="btns"><button class="btn sm" data-act="objNew">+ Objective</button></div></div>';
-    var done = TRANS.filter(function(k){ return (D.transition[k] || {}).s === "done"; }).length, prog = TRANS.filter(function(k){ return (D.transition[k] || {}).s === "wip"; }).length;
-    var pct = Math.round((done + prog * 0.5) / TRANS.length * 100);
-    h += '<h3>ISO 9001:2026 transition</h3><div class="card"><div class="small">Published 16 Sept 2026; certified sites have a transition period of about three years. Mark each clause as you check your system against the new text.</div>' +
-      '<div class="bar" style="margin:10px 0 4px"><i style="width:' + pct + '%"></i></div><div class="small">' + pct + '% · ' + done + ' of ' + TRANS.length + ' clauses done</div>';
-    TRANS.forEach(function(k){ var t = D.transition[k] || {}; h += '<div class="item" data-go="tr:' + esc(k) + '"><span class="dot ' + (t.s === "done" ? "green" : t.s === "wip" ? "amber" : "") + '"></span><div><div class="t">' + esc(k) + '</div>' + (t.n ? '<div class="s">' + esc(t.n) + '</div>' : '') + '</div><div class="r">' + pill(t.s === "done" ? "green" : t.s === "wip" ? "amber" : "", t.s === "done" ? "done" : t.s === "wip" ? "in progress" : "not started") + '</div></div>'; });
-    h += '</div>';
-    var bd = D.backupAt ? D.backupAt.slice(0,10) : "";
-    h += '<h3>Your data</h3><div class="card" id="backupCard"><div class="small">Stored only in this browser on this device — nothing is sent anywhere. Safari can clear website data for sites you have not opened in a while, so add this app to your Home Screen and keep a backup file.' + (bd ? " Last backup: " + esc(bd) + "." : " No backup yet.") + '</div>' +
-      '<div class="btns"><button class="btn pri" data-act="backup">Back up (download file)</button><button class="btn" data-act="restore">Restore from file</button><button class="btn" data-act="capaCsv">Corrective actions as CSV</button><button class="btn danger" data-act="wipe">Delete everything</button></div>' +
-      '<input type="file" id="restoreFile" accept=".json,application/json" hidden></div>';
-    h += '<p class="small" style="text-align:center;margin:22px 0 6px"><a href="../" style="color:var(--blue-t)">Open SPC Tools →</a> · Built by Harsh Patel</p>';
-    $("v-review").innerHTML = h;
-  }
-  function mrPrep(){
-    var A = autoInputs(), dr = D.mrDraft || {};
-    var h = '<h2>Management review pack</h2><p class="small">Grey text was filled in from your records — edit freely. Add decisions and actions at the end; each action becomes a tracked corrective action.</p>' +
-      '<div class="row"><div><label class="f" for="mDate">Review date</label><input type="date" id="mDate" value="' + esc(dr.date || T()) + '"></div></div>' +
-      '<label class="f" for="mWho">Attendees</label><input type="text" id="mWho" value="' + esc(dr.who || "") + '">' +
-      '<h3>Inputs (ISO 9001 · 9.3.2)</h3>';
-    MR_INPUTS.forEach(function(x){
-      var v = dr[x[0]] !== undefined ? dr[x[0]] : (A[x[0]] || "");
-      h += '<label class="f" for="mi_' + x[0] + '">' + esc(x[1]) + '</label><textarea id="mi_' + x[0] + '" placeholder="Notes, evidence, data">' + esc(v) + '</textarea>';
-    });
-    h += '<h3>Outputs — decisions and actions</h3><div id="mActs">' + (dr.acts || []).map(actRow).join("") + '</div><div class="btns"><button class="btn sm" data-act="mAddAct">+ Action</button></div>' +
-      '<label class="f" for="mDec">Decisions (improvement, changes to the QMS, resources)</label><textarea id="mDec">' + esc(dr.dec || "") + '</textarea>' +
-      '<div class="btns"><button class="btn" data-act="mrDraftSave">Save draft</button><button class="btn" data-act="mrPrint">Print / PDF</button><button class="btn pri" data-act="mrFinish">Finish review</button><button class="btn" data-act="mrRefresh">Refill from records</button><button class="btn" data-act="close">Close</button></div>';
-    openSheet(h);
-  }
-  function mrCollect(){
-    var dr = { date:val("mDate"), who:val("mWho"), dec:val("mDec") };
-    MR_INPUTS.forEach(function(x){ dr[x[0]] = val("mi_" + x[0]); });
-    dr.acts = Array.prototype.map.call(document.querySelectorAll("#mActs .act"), function(r){ return { text:r.querySelector(".aText").value.trim(), owner:r.querySelector(".aOwner").value.trim(), due:r.querySelector(".aDue").value, done:r.querySelector(".aDone").checked }; }).filter(function(a){ return a.text; });
-    return dr;
-  }
-  function mrPrint(dr){
-    var p = '<h1>Management Review</h1><p>Date: ' + esc(dr.date) + ' &nbsp; · &nbsp; Attendees: ' + esc(dr.who || "—") + '</p>';
-    MR_INPUTS.forEach(function(x){ p += '<h2>' + esc(x[1]) + '</h2><p>' + (esc(dr[x[0]]) || "—").replace(/\n/g, "<br>") + '</p>'; });
-    p += '<h2>Decisions</h2><p>' + (esc(dr.dec) || "—").replace(/\n/g, "<br>") + '</p><h2>Actions</h2>';
-    p += dr.acts.length ? '<table><tr><th>Action</th><th>Owner</th><th>Due</th></tr>' + dr.acts.map(function(a){ return '<tr><td>' + esc(a.text) + '</td><td>' + esc(a.owner) + '</td><td>' + esc(a.due) + '</td></tr>'; }).join("") + '</table>' : '<p>—</p>';
-    p += '<p style="margin-top:18pt">Approved by: ______________________ &nbsp;&nbsp; Date: __________</p>';
-    $("printArea").innerHTML = p; window.print();
-  }
+  var order = [], pos = 0, who = "all";
+  function deck(){ order = QS.map(function(q, i){ return i; }).filter(function(i){ return who === "all" || QS[i][0] === who; });
+    for(var i = order.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = order[i]; order[i] = order[j]; order[j] = t; } pos = 0; card(); }
+  function card(){ var q = QS[order[pos]];
+    document.getElementById("dTag").textContent = q[0]; document.getElementById("dQ").textContent = "“" + q[1] + "”";
+    document.getElementById("dGood").textContent = q[2]; document.getElementById("dShow").textContent = q[3]; document.getElementById("dTrap").textContent = q[4];
+    document.getElementById("dCount").textContent = (pos + 1) + " of " + order.length;
+    document.getElementById("dAns").hidden = true; document.getElementById("dHint").hidden = false; document.getElementById("dReveal").hidden = false; }
+  document.getElementById("dReveal").addEventListener("click", function(){ document.getElementById("dAns").hidden = false; document.getElementById("dHint").hidden = true; this.hidden = true; });
+  document.getElementById("dNext").addEventListener("click", function(){ pos++; if(pos >= order.length) deck(); else card(); });
+  document.querySelectorAll("#dWho button").forEach(function(b){ b.addEventListener("click", function(){
+    document.querySelectorAll("#dWho button").forEach(function(x){ x.classList.toggle("on", x === b); }); who = b.dataset.who; deck(); }); });
+  deck();
 
-  /* ------------ actions (one delegated handler) ------------ */
-  function findBy(list, id){ return list.filter(function(x){ return x.id === id; })[0]; }
-  document.addEventListener("click", function(e){
-    var g = e.target.closest("[data-go]");
-    if(g && !e.target.closest("button")){
-      var k = g.dataset.go.split(":");
-      if(k[0] === "capa"){ var c = findBy(D.capas, k[1]); if(c) capaForm(c); }
-      else if(k[0] === "audit"){ var p = findBy(D.program, k[1]); if(p) progForm(p); }
-      else if(k[0] === "rec"){ var a = findBy(D.audits, k[1]); if(a) recForm(a); }
-      else if(k[0] === "finding"){ var a2 = findBy(D.audits, k[1]); if(a2) recForm(a2); }
-      else if(k[0] === "due"){ var d = findBy(D.dues, k[1]); if(d) dueForm(d); }
-      else if(k[0] === "obj"){ objForm(findBy(D.objectives, k[1])); }
-      else if(k[0] === "tr"){ trForm(g.dataset.go.slice(3)); }
-      else if(k[0] === "review"){ go("review"); }
-      else if(k[0] === "backup"){ go("review"); setTimeout(function(){ var b = $("backupCard"); if(b) b.scrollIntoView(); }, 50); }
-      return;
-    }
-    var b = e.target.closest("button"); if(!b) return;
-    if(b.dataset.f){ capaFilter = b.dataset.f; renderCapa(); return; }
-    if(b.dataset.kf){ dueFilter = b.dataset.kf; renderDue(); return; }
-    if(b.dataset.qb){ recCollectChecks(); recForm.qb = b.dataset.qb; drawQB(); return; }
-    if(b.dataset.chk){
-      recForm.cur.checks[b.dataset.chk] = b.dataset.v; drawQB();
-      if(b.dataset.v === "NC"){
-        var parts = b.dataset.chk.split("|"), q = QB[parts[0]][+parts[1]];
-        var f = { id:uid(), type:"Minor NC", clause:parts[0].split(" ")[0], text:"Checklist: " + q + " — ", capaId:"" };
-        $("rFind").insertAdjacentHTML("beforeend", findRow(f)); toast("Finding added — describe what you saw.");
-      }
-      return;
-    }
-    var act = b.dataset.act, id = b.dataset.id; if(!act) return;
-    switch(act){
-      case "close": closeSheet(); break;
-      case "sample": sample(); break;
-      case "capaNew": capaForm(); break;
-      case "addAct": $("cActs").insertAdjacentHTML("beforeend", actRow()); break;
-      case "mAddAct": $("mActs").insertAdjacentHTML("beforeend", actRow()); break;
-      case "capaSave": { var c1 = capaCollect(); if(capaStore(c1)){ closeSheet(); save(); toast("Saved " + c1.no); } break; }
-      case "capaClose": {
-        var c2 = capaCollect();
-        if(!c2.rootCause){ toast("Record the root cause before closing."); break; }
-        if(!c2.actions.length || !c2.actions.every(function(a){ return a.done; })){ toast("Finish (tick) every action before closing."); break; }
-        c2.closed = T(); if(!c2.effDue) c2.effDue = QCMD.addDays(c2.closed, 60);
-        if(capaStore(c2)){ closeSheet(); save(); toast("Closed. Effectiveness check set for " + c2.effDue + "."); }
-        break;
-      }
-      case "capaReopen": { var c3 = capaCollect(); c3.closed = ""; c3.effResult = ""; capaStore(c3); closeSheet(); save(); toast("Reopened."); break; }
-      case "capaDel": if(confirm("Delete this corrective action?")){ D.capas = D.capas.filter(function(x){ return x.id !== id; }); D.audits.forEach(function(a){ (a.findings||[]).forEach(function(f){ if(f.capaId === id) f.capaId = ""; }); }); closeSheet(); save(); } break;
-      case "progNew": progForm(); break;
-      case "progSave": {
-        var p1 = progForm.cur; p1.area = val("pArea"); p1.clauses = val("pClauses"); p1.freq = Math.max(1, parseInt(val("pFreq"), 10) || 12); p1.last = val("pLast");
-        if(!p1.area){ toast("Name the process or area."); break; }
-        if(progForm.isNew) D.program.push(p1); closeSheet(); save(); break;
-      }
-      case "progDel": if(confirm("Remove from the programme? Past audit records are kept.")){ D.program = D.program.filter(function(x){ return x.id !== id; }); closeSheet(); save(); } break;
-      case "recNew": { var pp = findBy(D.program, id); closeSheet(); recForm(null, pp); break; }
-      case "addFind": $("rFind").insertAdjacentHTML("beforeend", findRow()); break;
-      case "recSave": {
-        recCollectChecks(); var a = recCollect();
-        if(!a.date || !a.area){ toast("Date and area are needed."); break; }
-        a.findings.forEach(function(f){
-          if((f.type === "Major NC" || f.type === "Minor NC") && !f.capaId){
-            var nc = { id:uid(), no:"", title:(f.type + " " + (f.clause ? "(" + f.clause + ") " : "") + "— " + a.area).slice(0, 120), source:"Internal audit", opened:a.date, owner:"", due:QCMD.addDays(a.date, f.type === "Major NC" ? 30 : 60),
-                       problem:f.text, containment:"", why:["","","","",""], rootCause:"", actions:[], closed:"", effDue:"", effMethod:"", effResult:"", effNote:"" };
-            capaStore(nc); f.capaId = nc.id;
-          }
-        });
-        var i = D.audits.findIndex(function(x){ return x.id === a.id; }); if(i >= 0) D.audits[i] = a; else D.audits.push(a);
-        var pr = findBy(D.program, a.progId) || D.program.filter(function(p){ return p.area === a.area; })[0];
-        if(pr && (!pr.last || a.date > pr.last)) pr.last = a.date;
-        closeSheet(); save();
-        var made = a.findings.filter(function(f){ return f.type === "Major NC" || f.type === "Minor NC"; }).length;
-        toast("Audit saved" + (made ? " · " + made + " corrective action" + (made===1?"":"s") + " opened" : "") + ".");
-        break;
-      }
-      case "recDel": if(confirm("Delete this audit record?")){ D.audits = D.audits.filter(function(x){ return x.id !== id; }); closeSheet(); save(); } break;
-      case "dueNew": dueForm(); break;
-      case "dueSave": {
-        var d1 = dueForm.cur; d1.kind = val("dKind"); d1.name = val("dName"); d1.freq = Math.max(1, parseInt(val("dFreq"), 10) || 12); d1.last = val("dLast"); d1.owner = val("dOwner"); d1.notes = val("dNotes");
-        if(!d1.name){ toast("Give it a name."); break; }
-        if(!findBy(D.dues, d1.id)) D.dues.push(d1); closeSheet(); save(); break;
-      }
-      case "dueDel": if(confirm("Delete this item?")){ D.dues = D.dues.filter(function(x){ return x.id !== id; }); closeSheet(); save(); } break;
-      case "dueDone": { var d2 = findBy(D.dues, id); d2.last = T(); save(); toast(d2.name + " — next due " + QCMD.nextDue(d2.last, d2.freq)); break; }
-      case "dueBulk": bulkForm(); break;
-      case "bulkSave": bulkSave(); break;
-      case "objNew": objForm(); break;
-      case "objSave": {
-        var o = objForm.cur; o.name = val("oName"); o.target = val("oTarget"); o.actual = val("oActual"); o.unit = val("oUnit"); o.dir = val("oDir");
-        if(!o.name){ toast("Name the objective."); break; }
-        if(!findBy(D.objectives, o.id)) D.objectives.push(o); closeSheet(); save(); break;
-      }
-      case "objDel": D.objectives = D.objectives.filter(function(x){ return x.id !== id; }); closeSheet(); save(); break;
-      case "trSave": { D.transition[trForm.k] = { s:val("tS"), n:val("tN") }; closeSheet(); save(); break; }
-      case "mrPrep": mrPrep(); break;
-      case "mrRefresh": { var keep = mrCollect(), A = autoInputs(); MR_INPUTS.forEach(function(x){ if(A[x[0]] !== undefined) keep[x[0]] = A[x[0]]; }); D.mrDraft = keep; save(); mrPrep(); toast("Refilled from current records."); break; }
-      case "mrDraftSave": D.mrDraft = mrCollect(); save(); toast("Draft saved."); break;
-      case "mrPrint": { var dr = mrCollect(); D.mrDraft = dr; save(); mrPrint(dr); break; }
-      case "mrFinish": {
-        var dr2 = mrCollect(); if(!dr2.date){ toast("Set the review date."); break; }
-        var ids = dr2.acts.map(function(a){
-          var c = { id:uid(), no:"", title:a.text.slice(0, 120), source:"Management review", opened:dr2.date, owner:a.owner, due:a.due || QCMD.addDays(dr2.date, 90), problem:"Action from management review " + dr2.date, containment:"n/a — improvement action", why:["","","","",""], rootCause:"", actions:[{ text:a.text, owner:a.owner, due:a.due, done:false }], closed:"", effDue:"", effMethod:"", effResult:"", effNote:"" };
-          capaStore(c); return c.id;
-        });
-        D.mrHistory.push({ date:dr2.date, who:dr2.who, record:dr2, actionIds:ids }); D.mrLast = dr2.date > (D.mrLast || "") ? dr2.date : D.mrLast; D.mrDraft = {};
-        closeSheet(); save(); toast("Review recorded · " + ids.length + " action" + (ids.length===1?"":"s") + " tracked.");
-        break;
-      }
-      case "mrLastSet": openSheet('<h2>Last management review</h2><label class="f" for="mLast">Date</label><input type="date" id="mLast" value="' + esc(D.mrLast) + '"><div class="btns"><button class="btn pri" data-act="mrLastSave">Save</button><button class="btn" data-act="close">Cancel</button></div>'); break;
-      case "mrLastSave": D.mrLast = val("mLast"); closeSheet(); save(); break;
-      case "backup": backup(); break;
-      case "restore": $("restoreFile").click(); break;
-      case "capaCsv": capaCsv(); break;
-      case "wipe": if(confirm("Delete ALL Quality Command data from this device? Make a backup first if you may need it.") && confirm("Really delete everything?")){ D = blank(); save(); toast("Everything deleted from this device."); } break;
-    }
-  });
-  function recCollectChecks(){ /* checks are kept live in recForm.cur.checks */ }
-  function objForm(o){
-    var isNew = !o; o = o || { id:uid(), name:"", target:"", actual:"", unit:"", dir:"min" };
-    openSheet('<h2>' + (isNew ? "Quality objective" : esc(o.name)) + '</h2><label class="f" for="oName">Objective</label><input type="text" id="oName" value="' + esc(o.name) + '" placeholder="e.g. Scrap cost per week">' +
-      '<div class="row"><div><label class="f" for="oDir">Good is</label><select id="oDir"><option value="min"' + (o.dir==="min"?" selected":"") + '>at least (≥)</option><option value="max"' + (o.dir==="max"?" selected":"") + '>at most (≤)</option></select></div><div><label class="f" for="oTarget">Target</label><input type="number" step="any" id="oTarget" value="' + esc(o.target) + '"></div></div>' +
-      '<div class="row"><div><label class="f" for="oActual">Current result</label><input type="number" step="any" id="oActual" value="' + esc(o.actual) + '"></div><div><label class="f" for="oUnit">Unit</label><input type="text" id="oUnit" value="' + esc(o.unit) + '" placeholder="%, $, ppm"></div></div>' +
-      '<div class="btns"><button class="btn pri" data-act="objSave">Save</button>' + (!isNew ? '<button class="btn danger" data-act="objDel" data-id="' + o.id + '">Delete</button>' : '') + '<button class="btn" data-act="close">Cancel</button></div>');
-    objForm.cur = o;
+  /* ---- audit trails: step, clause, what they check, link to next record, where it breaks ---- */
+  var TRAILS = [
+    [["Customer PO","8.2","Contract review done before accepting: quantity, date, drawing revision, specs.","PO number → sales order","PO revision differs from the drawing used"],
+     ["Drawing and router","7.5 / 8.1","The current revision is released, and the router and inspection plan match it.","Drawing rev → job traveller","Old revision in the cell"],
+     ["Machining","8.5.1","Setup, first-piece approval, in-process checks at the planned frequency.","Job number → inspection records","First piece not signed"],
+     ["Inspection records","8.5.1 / 8.6","Measured values against the tolerances, with the gauge IDs written on the record.","Gauge ID → calibration list","No gauge ID recorded"],
+     ["Gauge calibration","7.1.5","In date when it was used, with a traceable certificate.","Cert → accredited lab","Overdue on the date of use"],
+     ["Who did the work","7.2","The operator and inspector are trained for this operation.","Name → training matrix","Not on the matrix"],
+     ["Release and shipping","8.6 / 8.5.4","Final release signed by an authorised person, product protected, CoC if required.","Release → packing slip","Shipped before final sign-off"]],
+    [["Approved supplier list","8.4.1","The supplier is listed, with the approved scope (e.g. nitriding only).","Supplier → evaluation file","Used outside the approved scope"],
+     ["Evaluation","8.4.1","Approval criteria met, re-evaluated at the defined interval.","Evaluation → performance data","Never re-evaluated"],
+     ["Purchase order","8.4.3","Spec, revision, material, cert and special-process requirements are on the PO.","PO → receiving","Requirement missing from the PO"],
+     ["Receiving","8.4.2","Incoming check done; mill cert or CoC compared to the spec.","Heat number → material tag","Cert filed without being checked"],
+     ["Traceability","8.5.2","Heat or lot number carried through to the finished part where required.","Heat number → job / serial","The chain breaks at a cut or rework step"],
+     ["Supplier performance review","9.1.3 / 9.3","Supplier data analysed and reviewed in management review.","Scorecard → MR minutes","Not a management review input"]],
+    [["Tagged part in quarantine","8.7","Identified, segregated, can't be used by mistake.","Tag → NCR number","Untagged rejects mixed with good parts"],
+     ["NCR","8.7.2","What's wrong, how many, where, against which requirement.","NCR → disposition","Description too vague to act on"],
+     ["Disposition","8.7.1 / 5.3","Rework, scrap, return, or use-as-is decided by someone with the authority.","Disposition → approver","Approved by the wrong person"],
+     ["Concession or deviation","8.7.1","Customer approval obtained where the contract requires it.","Deviation → customer sign-off","Customer never asked"],
+     ["Is CAPA needed?","10.2","Repeat or serious NCs get a corrective action; the decision is recorded.","NCR → CAPA number","Same NC repeated with no CAPA"],
+     ["Trend","9.1.3 / 9.3","NCs analysed for trends and reviewed in management review.","NCR log → MR inputs","Never analysed"]],
+    [["Complaint received","9.1.2 / 8.2.1","Logged with date, customer, part, issue.","Complaint → log entry","Handled by email, never logged"],
+     ["Containment","8.7 / 10.2.1","Stock, WIP and in-transit product checked; customer told what's being done.","Complaint → affected lots","Only the returned parts checked"],
+     ["Root cause","10.2.1","A real system cause, verified, not just assumed.","CAPA → root cause evidence","\"Operator error\""],
+     ["Corrective action","10.2.1","System change made and the evidence attached.","Action → revised document or training","Action not finished"],
+     ["Effectiveness","10.2.1","Proof the problem hasn't come back.","Data → closure date","Closed the day the action was done"],
+     ["Customer satisfaction","9.1.2 / 9.3","Complaints feed into the customer perception data and management review.","Complaint log → MR minutes","Not reviewed"]]
+  ];
+  function trail(i){
+    document.getElementById("trail").innerHTML = TRAILS[i].map(function(s, k){
+      return '<div class="tr"><span class="n">' + (k + 1) + '</span><div class="card"><h4>' + esc(s[0]) + ' <span class="pill">' + esc(s[1]) + '</span></h4>' +
+        '<p class="small">' + esc(s[2]) + '</p><div class="link">link: ' + esc(s[3]) + '</div><p class="small bad" style="margin-bottom:0">Breaks when: ' + esc(s[4]) + '</p></div></div>';
+    }).join("");
   }
-  function trForm(k){
-    var t = D.transition[k] || {}; trForm.k = k;
-    openSheet('<h2>' + esc(k) + '</h2><label class="f" for="tS">Status</label><select id="tS"><option value="">Not started</option><option value="wip"' + (t.s==="wip"?" selected":"") + '>In progress</option><option value="done"' + (t.s==="done"?" selected":"") + '>Done</option></select>' +
-      '<label class="f" for="tN">Gaps found / actions</label><textarea id="tN" placeholder="What changed for this clause, and what you need to update">' + esc(t.n || "") + '</textarea>' +
-      '<div class="btns"><button class="btn pri" data-act="trSave">Save</button><button class="btn" data-act="close">Cancel</button></div>');
-  }
-  function bulkForm(){
-    openSheet('<h2>Paste a list</h2><p class="small">One item per line: <b>type, name, every-months, last-done date (yyyy-mm-dd), owner</b>. Paste straight from Excel (tab-separated works too). Types: ' + KINDS.join(", ") + '.</p>' +
-      '<textarea id="bulkTxt" style="min-height:160px" placeholder="Calibration, Bore gauge BG-12, 6, 2026-07-14, Harsh&#10;Document review, QP-08 Control of NC product, 24, 2025-03-01"></textarea>' +
-      '<div class="btns"><button class="btn pri" data-act="bulkSave">Add</button><button class="btn" data-act="close">Cancel</button></div><div id="bulkMsg" class="small"></div>');
-  }
-  function bulkSave(){
-    var lines = val("bulkTxt").split(/\r?\n/).filter(Boolean), add = [], bad = [];
-    lines.forEach(function(l, i){
-      var c = l.split(/\t|,/).map(function(x){ return x.trim(); });
-      var kind = KINDS.filter(function(k){ return k.toLowerCase() === (c[0] || "").toLowerCase(); })[0], freq = parseInt(c[2], 10), last = c[3] || "";
-      if(!kind || !c[1] || !(freq > 0) || (last && !/^\d{4}-\d{2}-\d{2}$/.test(last))){ bad.push(i + 1); return; }
-      add.push({ id:uid(), kind:kind, name:c[1], freq:freq, last:last, owner:c[4] || "", notes:"" });
-    });
-    if(bad.length){ $("bulkMsg").textContent = "Line" + (bad.length>1?"s ":" ") + bad.join(", ") + " could not be read — check type, months and date (yyyy-mm-dd). Nothing was added."; return; }
-    D.dues = D.dues.concat(add); closeSheet(); save(); toast(add.length + " item" + (add.length===1?"":"s") + " added.");
-  }
-  function download(name, text, type){
-    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type:type })); a.download = name; document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-  }
-  function backup(){
-    D.backupAt = new Date().toISOString();
-    download("quality-command-backup-" + T() + ".json", JSON.stringify(D, null, 1), "application/json");
-    save(); toast("Backup downloaded. Keep it somewhere safe (it holds your records).");
-  }
-  document.addEventListener("change", function(e){
-    if(e.target.id !== "restoreFile" || !e.target.files.length) return;
-    var r = new FileReader();
-    r.onload = function(){
-      var x = null; try{ x = JSON.parse(r.result); }catch(err){}
-      if(!x || !Array.isArray(x.capas) || !Array.isArray(x.dues)){ toast("That is not a Quality Command backup file."); return; }
-      if(!confirm("Replace the data on this device with this backup (" + x.capas.length + " corrective actions, " + x.dues.length + " due items)?")) return;
-      D = x; var b = blank(); Object.keys(b).forEach(function(k){ if(D[k] === undefined) D[k] = b[k]; }); save(); toast("Restored.");
-    };
-    r.readAsText(e.target.files[0]); e.target.value = "";
-  });
-  function capaCsv(){
-    var q = function(s){ s = String(s === undefined || s === null ? "" : s); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    var L = ["No,Title,Source,Owner,Opened,Due,Stage,Closed,Effectiveness due,Effectiveness result,Root cause,Actions"];
-    D.capas.forEach(function(c){ L.push([c.no, c.title, c.source, c.owner, c.opened, c.due, QCMD.STAGES[QCMD.capaStage(c)], c.closed, c.effDue, c.effResult, c.rootCause, (c.actions||[]).map(function(a){ return a.text + (a.done ? " [done]" : ""); }).join(" | ")].map(q).join(",")); });
-    download("corrective-actions-" + T() + ".csv", L.join("\n"), "text/csv");
-  }
-  /* example data — clearly made up — so the app can be tried before real use */
-  function sample(){
-    var t = T(), A = QCMD.addDays, M = QCMD.addMonths;
-    D.program = [
-      { id:uid(), area:"Machining – CNC cells", clauses:"7.1.5, 8.5.1, 8.7", freq:12, last:M(t, -13) },
-      { id:uid(), area:"Receiving inspection", clauses:"8.4, 8.6", freq:12, last:M(t, -5) },
-      { id:uid(), area:"Calibration control", clauses:"7.1.5", freq:12, last:"" }
-    ];
-    D.dues = [
-      { id:uid(), kind:"Calibration", name:"Example bore gauge BG-1", owner:"", freq:6, last:M(t, -7), notes:"" },
-      { id:uid(), kind:"Calibration", name:"Example CMM", owner:"", freq:12, last:M(t, -2), notes:"" },
-      { id:uid(), kind:"Document review", name:"Example procedure QP-01", owner:"", freq:24, last:M(t, -23), notes:"" },
-      { id:uid(), kind:"Training", name:"Example: operator first-piece approval", owner:"", freq:12, last:M(t, -3), notes:"" }
-    ];
-    var c1 = { id:uid(), no:"", title:"Example: bore oversize after tool change", source:"NCR / scrap trend", opened:A(t, -45), owner:"", due:A(t, -5), problem:"Example data", containment:"Parts sorted", why:["Tool offset not updated","","","",""], rootCause:"", actions:[], closed:"", effDue:"", effMethod:"", effResult:"", effNote:"" };
-    var c2 = { id:uid(), no:"", title:"Example: wrong revision at machine", source:"Internal audit", opened:A(t, -120), owner:"", due:A(t, -80), problem:"Example data", containment:"Replaced drawing", why:["","","","",""], rootCause:"No check of revision at job release", actions:[{ text:"Add revision check to job release", owner:"", due:A(t, -90), done:true }], closed:A(t, -75), effDue:A(t, -15), effMethod:"", effResult:"", effNote:"" };
-    capaStore(c1); capaStore(c2);
-    D.objectives = [{ id:uid(), name:"Example: on-time delivery", target:"95", actual:"92", unit:"%", dir:"min" }];
-    save(); toast("Example data loaded — delete it from Review › Your data when you start for real.");
-  }
+  document.querySelectorAll("#tPick button").forEach(function(b){ b.addEventListener("click", function(){
+    document.querySelectorAll("#tPick button").forEach(function(x){ x.classList.toggle("on", x === b); }); trail(+b.dataset.t); }); });
+  trail(0);
 
-  function render(){
-    renderToday();
-    if(view === "capa") renderCapa(); else badge("bCapa", D.capas.filter(function(c){ return !c.closed && c.due && QCMD.days(c.due, T()) > 0; }).length);
-    if(view === "audit") renderAudit(); else badge("bAudit", D.program.filter(function(p){ return !p.last || QCMD.days(QCMD.nextDue(p.last, p.freq), T()) > 0; }).length);
-    if(view === "due") renderDue(); else badge("bDue", D.dues.filter(function(d){ var nd = QCMD.nextDue(d.last, d.freq); return !nd || QCMD.days(nd, T()) > 0; }).length);
-    if(view === "review") renderReview();
-  }
-  load(); render();
+  /* ---- root-cause checker: flags wording auditors usually reject ---- */
+  var RC = [
+    [/\b(operator|human|employee|worker|inspector)\s+(error|mistake)\b|\bcareless|\bnot paying attention|\bforgot\b/i, "r", "Blames a person. Ask why the system let one person's mistake reach the product or go unnoticed."],
+    [/\bre-?train(ed|ing)?\b|\bremind(ed)?\b|\bcounsel+ed\b|\bverbal warning\b/i, "a", "Retraining or reminding is only a fix if training was really missing. Add something that doesn't depend on memory: a check, a label, an error-proofing step, a system alert."],
+    [/\b(be more careful|pay more attention|increased? awareness)\b/i, "r", "\"Be more careful\" isn't a corrective action. The auditor will reject it."],
+    [/\bunknown\b|\bcould not (be )?determine|\bn\/a\b|\bone[- ]off\b|\bisolated\b/i, "a", "\"Unknown\" or \"isolated\" needs evidence. Say what you checked to reach that conclusion (extent check)."],
+    [/\b(procedure|process|system|instruction|form|checklist|label|alert|report|interval|control plan|software|fixture|poka|error[- ]proof)/i, "g", "Points at the system. Good."],
+    [/\b(verify|verified|effective|effectiveness|monitor|follow[- ]up|audit)\b/i, "g", "Mentions checking whether it worked. Good."]
+  ];
+  document.getElementById("rcGo").addEventListener("click", function(){
+    var t = document.getElementById("rcIn").value.trim(), out = [];
+    if(!t){ document.getElementById("rcOut").innerHTML = ""; return; }
+    RC.forEach(function(r){ if(r[0].test(t)) out.push('<div class="rc ' + r[1] + '">' + esc(r[2]) + '</div>'); });
+    if(!/\b(verify|verified|effective|effectiveness|monitor|follow[- ]up|audit)\b/i.test(t)) out.push('<div class="rc a">No effectiveness check. Add how and when you\'ll confirm it worked, e.g. 3 months of data or a follow-up internal audit.</div>');
+    if(!/\b(procedure|process|system|instruction|form|checklist|label|alert|report|interval|control plan|software|fixture|poka|error[- ]proof)/i.test(t)) out.push('<div class="rc a">Doesn\'t name a process or system change. Auditors look for what changed in the system, not just what the person will do.</div>');
+    if(t.split(/\s+/).length < 12) out.push('<div class="rc a">Very short. A response the CB will accept usually states the cause, the action, and the check.</div>');
+    if(!out.some(function(x){ return x.indexOf('rc r') > -1 || x.indexOf('rc a') > -1; })) out.unshift('<div class="rc g"><b>Nothing flagged.</b> Last check: would this stop the problem with a different person on a different shift?</div>');
+    document.getElementById("rcOut").innerHTML = out.join("");
+  });
+
+  /* records saved by the old Quality Command tracker: offer a download, never delete */
+  try {
+    var old = localStorage.getItem("qc.data");
+    if(old && old.length > 200){
+      document.getElementById("oldData").style.display = "block";
+      document.getElementById("dlOld").addEventListener("click", function(){
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([old], { type:"application/json" }));
+        a.download = "quality-command-backup.json"; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); }, 1000);
+      });
+    }
+  } catch(e) {}
+
   if("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function(){});
 })();
 </script>
