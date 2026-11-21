@@ -1,3 +1,20 @@
+# Note for Muse — General tolerances tool, ISO 2768 (2026-11-21, v45)
+
+Harsh asked for verified design standards in SPC Tools; ISO 2768 first. NEW TOOL #tool-gentol
+(Reference cluster, tab "General tol. (ISO 2768)", finder keywords 2768 / mK / title block / ...).
+- Data block GT (GT_LIN, GT_EDGE, GT_ANG, GT_STRAIGHT, GT_PERP, GT_SYM, GT_RUNOUT), mm.
+  ISO 2768-1:1989 Tables 1–3 and ISO 2768-2:1989 Tables 1–4. Each cell matched in the standard's
+  preview text and at least one independent reproduction (Wevolver; Starrapid, camcut, UW-Madison
+  metrology sheets). One reproduction (Dekmake) prints class c 120–400 mm angle as ±0°20′; the
+  standard text and the others say ±0°15′ — 15′ used.
+- Status shown in the tool: ISO 2768-1:1989 current; ISO 2768-2:1989 withdrawn, replaced by
+  ISO 22081:2021 (ISO catalogue: confirmed 2026), which has no H/K/L classes — existing H/K/L notes
+  still mean these values. Clause 6 (no automatic rejection unless function impaired) explained.
+- Pure lookups gtLookup / gtAngTxt; "over X up to Y" upper bound belongs to the lower row; inch
+  input converts to mm to pick the range. Part 2 values shown as zone widths, not ±.
+- tests/gentol.test.js: 124 checks (every cell vs an independently typed copy + boundaries).
+  All suites pass; smoke 21 tools, no page errors; 390 px no overflow. Cache v45-iso2768.
+
 # Note for Muse — UNC/UNF Classes 3A / 3B (2026-11-21, v44)
 
 Harsh's go-ahead (relayed by Satureday) on audit item (c). DATA CHANGE — please carry into

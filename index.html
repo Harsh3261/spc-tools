@@ -43,6 +43,7 @@
       convert   #tool-convert    reference   CONVERT (with hardness)
       stack     #tool-stack      reference   STACK-UP
       sigma     #tool-sigma      reference   SIGMA / PPM
+      gentol    #tool-gentol     reference   GENERAL TOLERANCES (ISO 2768)
       A tool is a #tabbtn-<id> button (data-tab, data-cluster) plus a
       section#tool-<id>. showTool() finds both by that naming convention.
 
@@ -744,6 +745,7 @@
         <button type="button" role="tab" id="tabbtn-ports" aria-selected="false" data-tab="ports" data-cluster="reference">Hydraulic ports</button>
         <button type="button" role="tab" id="tabbtn-seal" aria-selected="false" data-tab="seal" data-cluster="reference">Seal glands</button>
         <button type="button" role="tab" id="tabbtn-fits" aria-selected="false" data-tab="fits" data-cluster="reference">Fits (ISO 286)</button>
+        <button type="button" role="tab" id="tabbtn-gentol" aria-selected="false" data-tab="gentol" data-cluster="reference">General tol. (ISO 2768)</button>
         <button type="button" role="tab" id="tabbtn-cyl" aria-selected="false" data-tab="cyl" data-cluster="reference">Cylinder &amp; oil</button>
         <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Unit converters</button>
         <button type="button" role="tab" id="tabbtn-learn" aria-selected="false" data-tab="learn" data-cluster="reference">Learn</button>
@@ -1585,6 +1587,37 @@
             <strong>Inspect it right:</strong> a GO / NO-GO plug or ring at the two limits checks the band; a single measurement checks one point only — on round parts, out-of-roundness can pass a two-point check and still not assemble.</p>
           </details>
           <p class="cite">Built from ISO 286-1 base tables (standard tolerance grades IT4–IT11 and fundamental deviations d e f g h js k m n p, holes by the ISO 286-1 rules incl. Δ and the M6 250–315 special case). Checked cell-by-cell against a published ISO 286-2 table: 591 of 594 limits agree; the 3 that don't are typos in that table (each band's width disagrees with its own IT grade — f6 120–180, E7 315–400, K6 6–10). Common fits: the ISO preferred hole-basis fits. Reference only — ISO 286-2 governs.</p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL : GENERAL TOLERANCES (ISO 2768) ============ -->
+      <section class="tool" id="tool-gentol" role="tabpanel" aria-labelledby="tabbtn-gentol">
+        <div class="card">
+          <h2>General tolerances — ISO 2768</h2>
+          <p class="guru">When a drawing dimension has no tolerance of its own, the title-block note sets it. "ISO 2768-mK" means class <strong>m</strong> for sizes and angles (Part 1) and class <strong>K</strong> for form and orientation (Part 2). Enter the size, pick the classes, and read the limits.</p>
+          <div class="row3">
+            <div><label class="flabel" for="gtSize">Nominal size (or length)</label><input id="gtSize" type="number" step="any" inputmode="decimal" value="50"></div>
+            <div><label class="flabel" for="gtUnit">Unit</label><select id="gtUnit"><option value="mm" selected>mm</option><option value="in">inch (converted — ISO 2768 is metric)</option></select></div>
+            <div><label class="flabel" for="gtNote">Title-block note</label><select id="gtNote"></select></div>
+          </div>
+          <div class="row2">
+            <div><label class="flabel" for="gtShort">Shorter side of the angle / right angle (same unit) — optional</label><input id="gtShort" type="number" step="any" inputmode="decimal" placeholder="defaults to the size above"></div>
+            <div><label class="flabel" for="gtKind">Feature</label><select id="gtKind"><option value="lin" selected>Size, step, distance, diameter</option><option value="edge">Broken edge — external radius or chamfer height</option></select></div>
+          </div>
+          <div id="gtOut" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Full tables — ISO 2768-1 (f m c v) and ISO 2768-2 (H K L)</summary>
+            <div id="gtTables"></div>
+          </details>
+          <details class="thfind" style="margin-top:10px">
+            <summary>Learn — reading a general-tolerance note</summary>
+            <p class="small"><strong>Only untoleranced features.</strong> A dimension with its own tolerance, a basic (boxed) dimension, or a reference (bracketed) dimension is not covered.<br>
+            <strong>Over the general tolerance is not automatic rejection</strong> — ISO 2768-1 says a part outside a general tolerance should only be rejected if its function is impaired. Your customer's agreement or drawing can say otherwise.<br>
+            <strong>Part 2 does not cover</strong> cylindricity, profile of any line or surface, angularity, coaxiality, position or total run-out.<br>
+            <strong>"-E"</strong> on the end (e.g. ISO 2768-mK-E) adds the envelope requirement to every single feature of size.<br>
+            <strong>Status:</strong> ISO 2768-1:1989 is still current. ISO 2768-2:1989 was withdrawn and replaced by ISO 22081:2021, which has no H/K/L classes — but H/K/L notes are still on many drawings in use, and they mean these values.</p>
+          </details>
+          <p class="cite">ISO 2768-1:1989 Tables 1–3 and ISO 2768-2:1989 Tables 1–4. Every cell checked 2026-11-21 against the standards' own preview text and at least one independent reproduction (Wevolver transcription; Starrapid, camcut and University of Wisconsin metrology sheets). Where a reproduction disagreed (one prints ±0°20′ for class c, 120–400 mm), the standard's own text was used (±0°15′). Status: ISO 22081:2021 replaced ISO 2768-2 (ISO catalogue).</p>
         </div>
       </section>
 
@@ -9154,7 +9187,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v44";
+      var APP_BUILD = "v45";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -9839,6 +9872,131 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         if(cl) cl.addEventListener("click", function(){ setTimeout(sync, 0); });
         sync();
       })();
+      /* ===================== GENERAL TOLERANCES (ISO 2768) ===================== */
+      /* BEGIN DATA GT: ISO 2768-1:1989 Tables 1–3, ISO 2768-2:1989 Tables 1–4 (mm).
+         Provenance: standard preview text + Wevolver transcription, each cell also matched by at least
+         one of Starrapid / camcut / UW-Madison metrology sheets; verified 2026-11-21.
+         Range rows are [upper bound inclusive, ...values]; null = not specified by the standard.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
+      var GT_LIN = [ /* f, m, c, v — above 0.5 mm */
+        [3,    0.05, 0.1, 0.2, null],
+        [6,    0.05, 0.1, 0.3, 0.5],
+        [30,   0.1,  0.2, 0.5, 1],
+        [120,  0.15, 0.3, 0.8, 1.5],
+        [400,  0.2,  0.5, 1.2, 2.5],
+        [1000, 0.3,  0.8, 2,   4],
+        [2000, 0.5,  1.2, 3,   6],
+        [4000, null, 2,   4,   8]
+      ];
+      var GT_EDGE = [ /* broken edges: f, m, c, v */
+        [3,        0.2, 0.2, 0.4, 0.4],
+        [6,        0.5, 0.5, 1,   1],
+        [Infinity, 1,   1,   2,   2]
+      ];
+      var GT_ANG = [ /* shorter side of the angle; minutes of arc: f, m, c, v */
+        [10,       60, 60, 90, 180],
+        [50,       30, 30, 60, 120],
+        [120,      20, 20, 30, 60],
+        [400,      10, 10, 15, 30],
+        [Infinity, 5,  5,  10, 20]
+      ];
+      var GT_STRAIGHT = [ /* straightness & flatness: H, K, L */
+        [10, 0.02, 0.05, 0.1], [30, 0.05, 0.1, 0.2], [100, 0.1, 0.2, 0.4],
+        [300, 0.2, 0.4, 0.8], [1000, 0.3, 0.6, 1.2], [3000, 0.4, 0.8, 1.6]
+      ];
+      var GT_PERP = [ /* perpendicularity, shorter side: H, K, L */
+        [100, 0.2, 0.4, 0.6], [300, 0.3, 0.6, 1], [1000, 0.4, 0.8, 1.5], [3000, 0.5, 1, 2]
+      ];
+      var GT_SYM = [ /* symmetry: H, K, L */
+        [100, 0.5, 0.6, 0.6], [300, 0.5, 0.6, 1], [1000, 0.5, 0.8, 1.5], [3000, 0.5, 1, 2]
+      ];
+      var GT_RUNOUT = { H: 0.1, K: 0.2, L: 0.5 }; /* circular run-out, any size */
+      /* END DATA GT */
+
+      /* pure lookups (no DOM) */
+      function gtRow(table, mm){ for(var i = 0; i < table.length; i++) if(mm <= table[i][0] + 1e-9) return { i:i, row:table[i] }; return null; }
+      function gtLower(table, i){ return i === 0 ? null : table[i - 1][0]; }
+      function gtLookup(mm, shortMm, cls1, cls2, kind){
+        var c1 = { f:1, m:2, c:3, v:4 }[cls1], c2 = { H:1, K:2, L:3 }[cls2], r = { mm:mm, cls1:cls1, cls2:cls2 };
+        if(!(mm > 0)) return r;
+        if(cls1){
+          if(mm < 0.5) r.lin = { note:"below 0.5 mm — the standard says the deviation must be shown next to the dimension" };
+          else {
+            var t = kind === "edge" ? GT_EDGE : GT_LIN, h = gtRow(t, mm);
+            if(!h) r.lin = { note:"over 4000 mm — outside ISO 2768-1" };
+            else r.lin = { tol:h.row[c1], lo:(gtLower(t, h.i) === null ? 0.5 : gtLower(t, h.i)), hi:h.row[0], over:h.i > 0 };
+          }
+          var a = gtRow(GT_ANG, shortMm); r.ang = { min:a.row[c1], lo:gtLower(GT_ANG, a.i), hi:a.row[0] };
+        }
+        if(cls2){
+          var s = gtRow(GT_STRAIGHT, mm), p = gtRow(GT_PERP, shortMm), y = gtRow(GT_SYM, mm);
+          r.straight = s ? { tol:s.row[c2], lo:gtLower(GT_STRAIGHT, s.i), hi:s.row[0] } : { note:"over 3000 mm — outside ISO 2768-2" };
+          r.perp = p ? { tol:p.row[c2], lo:gtLower(GT_PERP, p.i), hi:p.row[0] } : { note:"over 3000 mm — outside ISO 2768-2" };
+          r.sym = y ? { tol:y.row[c2], lo:gtLower(GT_SYM, y.i), hi:y.row[0] } : { note:"over 3000 mm — outside ISO 2768-2" };
+          r.runout = GT_RUNOUT[cls2];
+        }
+        return r;
+      }
+      function gtAngTxt(min){ var d = Math.floor(min / 60), m = min % 60; return "±" + d + "°" + (m < 10 ? "0" : "") + m + "′"; }
+
+      (function(){
+        var el = function(id){ return document.getElementById(id); };
+        if(!el("gtSize")) return;
+        var e = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); };
+        var notes = [["mK","ISO 2768-mK (most common)"],["fH","ISO 2768-fH"],["mH","ISO 2768-mH"],["cL","ISO 2768-cL"],["vL","ISO 2768-vL"],["cK","ISO 2768-cK"],["fK","ISO 2768-fK"],
+                     ["f","ISO 2768-f (Part 1 only)"],["m","ISO 2768-m (Part 1 only)"],["c","ISO 2768-c (Part 1 only)"],["v","ISO 2768-v (Part 1 only)"],["H","ISO 2768-H (Part 2 only)"],["K","ISO 2768-K (Part 2 only)"],["L","ISO 2768-L (Part 2 only)"]];
+        notes.forEach(function(n){ var o = document.createElement("option"); o.value = n[0]; o.textContent = n[1]; el("gtNote").appendChild(o); });
+        function rng(lo, hi){ if(hi === Infinity) return "over " + lo + " mm"; return (lo === null || lo === undefined ? "up to " : "over " + lo + " up to ") + hi + " mm"; }
+        function both(mmTol, inch){ return "±" + mmTol + " mm" + (inch ? " (±" + (mmTol / 25.4).toFixed(4) + " in)" : ""); }
+        function render(){
+          var inch = el("gtUnit").value === "in", k = inch ? 25.4 : 1, size = Number(el("gtSize").value) * k;
+          var sh = el("gtShort").value === "" ? size : Number(el("gtShort").value) * k;
+          var n = el("gtNote").value, cls1 = /^[fmcv]/.test(n) ? n[0] : null, cls2 = /[HKL]$/.test(n) ? n[n.length - 1] : null;
+          var kind = el("gtKind").value, out = el("gtOut");
+          if(!(size > 0)){ out.innerHTML = '<p class="small">Enter a size above zero.</p>'; return; }
+          var r = gtLookup(size, sh > 0 ? sh : size, cls1, cls2, kind), h = "";
+          h += '<table class="dtable" aria-label="General tolerance result"><tr><th style="text-align:left">Applies to</th><th style="text-align:left">Size range used</th><th>Tolerance</th></tr>';
+          function row(label, rg, val){ h += '<tr><td style="text-align:left">' + e(label) + '</td><td style="text-align:left">' + e(rg) + "</td><td>" + val + "</td></tr>"; }
+          var szTxt = (+(size / k).toFixed(4)) + (inch ? " in = " + (+size.toFixed(3)) + " mm" : " mm");
+          if(cls1){
+            var L = r.lin;
+            if(L.note) row(kind === "edge" ? "Broken edge (class " + cls1 + ")" : "Size (class " + cls1 + ")", szTxt, e(L.note));
+            else if(L.tol === null) row(kind === "edge" ? "Broken edge (class " + cls1 + ")" : "Size (class " + cls1 + ")", rng(L.lo, L.hi), "not specified for class " + cls1 + " — tolerance it individually");
+            else {
+              var lim = kind === "edge" ? "" : '<br><span class="small">' + (+(size / k - L.tol / k).toFixed(inch ? 4 : 3)) + " to " + (+(size / k + L.tol / k).toFixed(inch ? 4 : 3)) + (inch ? " in" : " mm") + "</span>";
+              row((kind === "edge" ? "Broken edge" : "Size") + " (class " + cls1 + ")", (L.lo === 0.5 && L.hi === 3 ? "0.5 up to 3 mm" : rng(L.lo, L.hi)), "<strong>" + both(L.tol, inch) + "</strong>" + lim);
+            }
+            row("Angle (class " + cls1 + ")", "shorter side " + rng(r.ang.lo, r.ang.hi), "<strong>" + gtAngTxt(r.ang.min) + "</strong>");
+          }
+          if(cls2){
+            [["Straightness / flatness", r.straight], ["Perpendicularity (shorter side)", r.perp], ["Symmetry", r.sym]].forEach(function(x){
+              row(x[0] + " (class " + cls2 + ")", x[1].note ? szTxt : rng(x[1].lo, x[1].hi), x[1].note ? e(x[1].note) : "<strong>" + x[1].tol + " mm</strong>" + (inch ? " (" + (x[1].tol / 25.4).toFixed(4) + " in)" : ""));
+            });
+            row("Circular run-out (class " + cls2 + ")", "any size", "<strong>" + r.runout + " mm</strong>" + (inch ? " (" + (r.runout / 25.4).toFixed(4) + " in)" : ""));
+          }
+          h += "</table>";
+          if(cls2) h += '<p class="small">Part 2 values are form / orientation zones (total width), not ± values. ISO 2768-2 was replaced by ISO 22081:2021 — an H/K/L note on an existing drawing still means these values.</p>';
+          if(inch) h += '<p class="small">ISO 2768 ranges are in mm; your inch size was converted to pick the range. On an inch drawing, check that the note really is ISO 2768 and not the drawing\'s own block tolerances.</p>';
+          out.innerHTML = h;
+        }
+        function tables(){
+          var hd = function(cols){ return "<tr>" + cols.map(function(c, i){ return "<th" + (i === 0 ? ' style="text-align:left"' : "") + ">" + c + "</th>"; }).join("") + "</tr>"; };
+          var tb = function(caption, cols, rows){ return '<h3 style="margin-top:14px">' + caption + '</h3><table class="dtable">' + hd(cols) + rows.map(function(r){ return "<tr>" + r.map(function(c, i){ return "<td" + (i === 0 ? ' style="text-align:left"' : "") + ">" + c + "</td>"; }).join("") + "</tr>"; }).join("") + "</table>"; };
+          var lab = function(t, i, first){ var lo = i === 0 ? first : t[i - 1][0], hi = t[i][0]; return (i === 0 && first === null ? "up to " + hi : (hi === Infinity ? "over " + lo : (i === 0 ? lo + " up to " + hi : "over " + lo + " up to " + hi))); };
+          var pm = function(v){ return v === null ? "—" : "±" + v; };
+          var h = tb("Part 1 · linear sizes (mm) — Table 1", ["Size, mm","f","m","c","v"], GT_LIN.map(function(r, i){ return [lab(GT_LIN, i, 0.5), pm(r[1]), pm(r[2]), pm(r[3]), pm(r[4])]; }));
+          h += tb("Part 1 · broken edges: external radius, chamfer height (mm) — Table 2", ["Size, mm","f","m","c","v"], GT_EDGE.map(function(r, i){ return [lab(GT_EDGE, i, 0.5), pm(r[1]), pm(r[2]), pm(r[3]), pm(r[4])]; }));
+          h += tb("Part 1 · angles, by shorter side (mm) — Table 3", ["Shorter side, mm","f","m","c","v"], GT_ANG.map(function(r, i){ return [lab(GT_ANG, i, null), gtAngTxt(r[1]), gtAngTxt(r[2]), gtAngTxt(r[3]), gtAngTxt(r[4])]; }));
+          h += tb("Part 2 · straightness & flatness (mm) — Table 1", ["Length, mm","H","K","L"], GT_STRAIGHT.map(function(r, i){ return [lab(GT_STRAIGHT, i, null), r[1], r[2], r[3]]; }));
+          h += tb("Part 2 · perpendicularity, by shorter side (mm) — Table 2", ["Shorter side, mm","H","K","L"], GT_PERP.map(function(r, i){ return [lab(GT_PERP, i, null), r[1], r[2], r[3]]; }));
+          h += tb("Part 2 · symmetry (mm) — Table 3", ["Length, mm","H","K","L"], GT_SYM.map(function(r, i){ return [lab(GT_SYM, i, null), r[1], r[2], r[3]]; }));
+          h += tb("Part 2 · circular run-out (mm) — Table 4", ["Class","Tolerance"], [["H", GT_RUNOUT.H], ["K", GT_RUNOUT.K], ["L", GT_RUNOUT.L]]);
+          h += '<p class="small">Below 0.5 mm, Part 1 gives no general tolerance. Straightness / flatness uses the length of the line (flatness: the longer side, or the diameter of a round face). Perpendicularity and angles use the shorter side. Circularity may not exceed the run-out value.</p>';
+          el("gtTables").innerHTML = h;
+        }
+        ["gtSize","gtUnit","gtNote","gtShort","gtKind"].forEach(function(id){ el(id).addEventListener("input", render); el(id).addEventListener("change", render); });
+        tables(); render();
+      })();
     </script>
 
     <div id="rptHead" class="rpthead" aria-hidden="true"></div>
@@ -9872,6 +10030,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           ["gdt","GD&T & uncertainty","gdt gd&t mmc lmc bonus tolerance virtual condition resultant condition position fastener floating fixed uncertainty gum budget expanded k=2 tur 14253"],
           ["msa","More MSA","msa type 1 gage study cg cgk bias linearity attribute agreement kappa fleiss cohen effectiveness miss rate false alarm vda 5 aiag gauge capability"],
           ["fits","Fits (ISO 286)","fit fits tolerance iso 286 hole shaft h7 g6 h8 f7 k6 p6 clearance interference transition it grade limits bore pin bushing press fit"],
+          ["gentol","General tolerances (ISO 2768)","general tolerance tolerances iso 2768 2768-m 2768-mk mk fh title block untoleranced dimension default tolerance linear angular chamfer radius broken edge straightness flatness perpendicularity symmetry run-out runout H K L f m c v iso 22081"],
           ["seal","Seal glands","o-ring gland groove seal squeeze stretch gland fill piston rod static dynamic AS568 dash back-up ring extrusion clearance parker groove design"],
           ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 C04-2 C04-3 C09-2 C10-2T C10-3S C12-3L C12-4L C16-3S C20-3S sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],
