@@ -1,3 +1,15 @@
+# Note for Muse — thread data relation audit (2026-11-21, v41)
+
+New tests/threads.test.js checks every UN row (TH_U + TH_U_ADD, 174) and every B1.2 gauge
+entry (TH_G, 28) against the B1.1/B1.2 relations that hold regardless of how the PD
+tolerance was derived (2B = 1.3×2A, allowance = 0.3×2A, major max = D − allowance, PD max =
+E − allowance, GO/NOT GO/setting-plug ties to the product limits, …). 1761 checks.
+One slip found and fixed: 5/8-18 UNF allowance field 0.0015 → 0.0014 (the row's own major
+0.6236 and PD 0.5875 both imply 0.0014, as B1.1 prints). The field is not displayed, so no
+limit shown to users changed. Documented exception kept: 3/8-24 UNF NOT GO plug (D16).
+Also re-checked: E140 hardness table monotonic in all five columns and matches E140 at
+HRC 20/30/40/50/60.
+
 # Note for Muse — chart label precision + attribute-chart wording (2026-11-21, v40)
 
 1. PRE-Control (Short-run → Setup approval) printed its zones as "green 2.50 to 2.50" for a
