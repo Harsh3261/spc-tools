@@ -98,12 +98,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <title>SPC Tools</title>
+    <!-- 2026-11-20: graphite monochrome theme: every interactive accent is near-white / grey; only status colours (green / amber / red) and spec-limit violet carry hue. -->
     <style>
       /* ===== v19 · dark "instrument" theme (v19.2 palette) =====
          Palette (v19.2): graphite ramp bg #141516 · panel #1C1E20 ·
          raised #25282B · grid #2A2D30 · hairline #323538 · line #5A6572 ·
          text #E6EDF3 · muted #9AA5B1 · faint #828D99 · instrument-blue
-         accent #4DA3FF · centre #8B95A1 · spec-limit violet #B48EFF ·
+         accent #D4D7DC · centre #8B95A1 · spec-limit violet #B48EFF ·
          pass #3DD68C · warn #F2A93B · fail #FF5A5F.
          The old variable NAMES are kept (markup uses var(--cyan) etc. inline),
          only their values change. */
@@ -112,7 +113,7 @@
         --bg:#141516; --bg2:#141516; --panel:#1C1E20; --panel2:#25282B;
         --line:#63666B; --line-soft:#323538;
         --ink:#E8E6E1; --ink-dim:#A9A7A2; --ink-faint:#97958F;
-        --cyan:#4DA3FF; --cyan-dim:#4DA3FF; --on-accent:#081527;
+        --cyan:#D4D7DC; --cyan-dim:#D4D7DC; --on-accent:#16171A;
         --amber:#F2A93B; --red:#FF5A5F; --green:#3DD68C;
         --centre:#96989B; --grid:#2A2D30; --raised:#25282B;
         --amber-ink:#FFC978; --red-ink:#FFB3B8; --green-ink:#93EBC0;
@@ -148,7 +149,7 @@
         background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
         border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:600; letter-spacing:.02em;
       }
-      nav.tabs button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(77,163,255,.30)}
+      nav.tabs button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(212,215,220,.30)}
       nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       section.tool{display:none}
       section.tool.active{display:block; min-height:calc(100dvh - 230px)}
@@ -217,7 +218,7 @@
       }
       a.ghostlink:active{transform:translateY(1px)}
       a{color:var(--cyan)}
-      .snapshot{background:var(--bg2); border:1px dashed rgba(77,163,255,.55); border-radius:8px; padding:14px; margin-top:12px}
+      .snapshot{background:var(--bg2); border:1px dashed rgba(212,215,220,.55); border-radius:8px; padding:14px; margin-top:12px}
       .snapshot h4{margin:0 0 8px; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan)}
       .snapshot table{width:100%; border-collapse:collapse; font-size:14px; font-family:var(--mono); font-variant-numeric:tabular-nums}
       .snapshot td{padding:3px 0; vertical-align:top}
@@ -252,7 +253,7 @@
         background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
         border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:600; letter-spacing:.02em;
       }
-      .seg button[aria-pressed="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(77,163,255,.28)}
+      .seg button[aria-pressed="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(212,215,220,.28)}
       .seg button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       .hidden{display:none !important}
       /* Sheet input (Map & Preview) overlay */
@@ -299,7 +300,7 @@
       }
       nav.clusters .cl-name{font-size:14px; font-weight:600; letter-spacing:.02em; line-height:1.2}
       nav.clusters .cl-sub{font-size:11px; font-weight:400; color:var(--ink-faint); line-height:1.25}
-      nav.clusters button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(77,163,255,.30)}
+      nav.clusters button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(212,215,220,.30)}
       nav.clusters button[aria-selected="true"] .cl-sub{color:rgba(8,21,39,.85)}
       nav.clusters button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       @media (hover:hover){ nav.clusters button[aria-selected="false"]:hover{background:var(--panel2); color:var(--ink)} }
@@ -316,7 +317,7 @@
         flex:1 1 0; min-width:max-content; min-height:44px; padding:8px 14px; border-radius:999px;
         background:var(--panel); color:var(--ink-dim); border:1px solid var(--line); font-size:13.5px;
       }
-      nav.tabs button[aria-selected="true"]{background:rgba(77,163,255,.12); color:var(--cyan); border-color:var(--cyan); box-shadow:inset 0 0 0 1px var(--cyan)}
+      nav.tabs button[aria-selected="true"]{background:rgba(212,215,220,.12); color:var(--cyan); border-color:var(--cyan); box-shadow:inset 0 0 0 1px var(--cyan)}
       section.tool{padding-top:14px}
       /* cards: calmer rhythm, clearer hierarchy */
       .card{border-radius:12px; padding:18px 16px 16px; margin-bottom:16px}
@@ -329,7 +330,7 @@
       /* buttons: primary = filled accent, secondary = raised with a clear border */
       button.ghost, a.ghostlink{background:var(--panel2); border-color:var(--line); box-shadow:0 1px 2px rgba(0,0,0,.3)}
       @media (hover:hover){ button.ghost:hover, a.ghostlink:hover{border-color:var(--cyan); color:var(--cyan)} button.act:hover:not(:disabled){filter:brightness(1.08)} }
-      button.act{box-shadow:0 2px 10px rgba(77,163,255,.22)}
+      button.act{box-shadow:0 2px 10px rgba(212,215,220,.22)}
       .btnrow{gap:10px}
       /* form controls: >= 44 px everywhere */
       input[type="text"], input[type="number"], select{min-height:46px}
@@ -366,7 +367,7 @@
       .spcchart .zlayer{position:absolute; top:8px; left:4px; right:4px; pointer-events:none}
       .spcchart .zlayer svg{width:100%; height:auto; display:block}
       .spcchart .zlayer.under{z-index:0} .spcchart .zlayer.over{z-index:2}
-      .zone-c{fill:#4DA3FF; fill-opacity:.08} .zone-b{fill:#F2A93B; fill-opacity:.05} .zone-a{fill:#F2A93B; fill-opacity:.10}
+      .zone-c{fill:#D4D7DC; fill-opacity:.08} .zone-b{fill:#F2A93B; fill-opacity:.05} .zone-a{fill:#F2A93B; fill-opacity:.10}
       .ooc-ring{fill:none; stroke:#FF5A5F; stroke-width:1.8}
       .spcchart::after{content:""; position:absolute; inset:-1px; border-radius:9px; pointer-events:none; box-shadow:0 0 0 2px var(--ring, transparent); z-index:3}
       .spcchart.ring-pass{--ring:#3DD68C}
@@ -386,21 +387,21 @@
         #spcChart text[fill="#0b7f95"]{fill:#8B95A1}
         #spcChart line[stroke="#c93a3a"]{stroke:#B48EFF}                         /* SPEC limits: violet */
         #spcChart text[fill="#c93a3a"]{fill:#B48EFF}
-        #spcChart line[stroke="#7aa3bd"]{stroke:#4DA3FF; stroke-opacity:.8; stroke-width:1.6}  /* trace: accent */
-        #spcChart circle[fill="#0b7f95"]{fill:#4DA3FF}                          /* in-control points: accent */
+        #spcChart line[stroke="#7aa3bd"]{stroke:#D4D7DC; stroke-opacity:.8; stroke-width:1.6}  /* trace: accent */
+        #spcChart circle[fill="#0b7f95"]{fill:#D4D7DC}                          /* in-control points: accent */
         #spcChart circle[fill="#b97d0f"]{fill:#F2A93B}                          /* out-of-control points: warning */
         #spcChart circle[fill="#c93a3a"]{fill:#FF5A5F}                          /* out-of-spec points: breach red */
         #spcChart circle[stroke="#ffffff"]{stroke:#1C1E20; stroke-width:1.4}
         #spcChart text[fill="#6b8699"]{fill:#8B95A1}
         /* Data Check histogram */
-        #checkChart rect[fill="#0b7f95"]{fill:#4DA3FF; opacity:.85}
+        #checkChart rect[fill="#0b7f95"]{fill:#D4D7DC; opacity:.85}
         #checkChart text[fill="#3f5d73"]{fill:#E6EDF3}
         #checkChart text[fill="#6b8699"]{fill:#8B95A1}
         #checkChart line[stroke="#b9c9d6"]{stroke:#3A434D}
         #checkChart line[stroke="#c93a3a"]{stroke:#B48EFF}                      /* histogram spec lines: violet */
         #checkChart text[fill="#c93a3a"]{fill:#B48EFF}
         /* Pareto */
-        #paretoChart rect[fill="#0b7f95"]{fill:#4DA3FF; opacity:.85}
+        #paretoChart rect[fill="#0b7f95"]{fill:#D4D7DC; opacity:.85}
         #paretoChart text[fill="#132635"]{fill:#E8E6E1}
         #paretoChart text[fill="#3f5d73"]{fill:#8B95A1}
         #paretoChart line[stroke="#5f7f99"]{stroke:#8B95A1}
@@ -417,14 +418,14 @@
         display:flex; flex-direction:column; justify-content:center; padding:max(18px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
         font-family:var(--mono); font-variant-numeric:tabular-nums; cursor:pointer; -webkit-tap-highlight-color:transparent}
       .sightline:focus{outline:none}
-      .sightline .sl-tag{font-family:var(--sans); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#4DA3FF; margin:0 0 6px}
+      .sightline .sl-tag{font-family:var(--sans); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#D4D7DC; margin:0 0 6px}
       .sightline .sl-title{font-size:clamp(26px, 6.2vw, 64px); font-weight:500; line-height:1.1; margin:0 0 14px; color:#E6EDF3}
       .sightline table{border-collapse:collapse; width:100%}
       .sightline th{font-family:var(--sans); font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#8B95A1; text-align:right; padding:0 0 6px 18px}
       .sightline th:first-child{text-align:left; padding-left:0}
       .sightline td{border-top:1px solid #323538; padding:10px 0 10px 18px; text-align:right; font-size:clamp(22px, 5vw, 54px); font-weight:500; line-height:1.15; color:#E6EDF3; white-space:nowrap}
       .sightline td:first-child{text-align:left; padding-left:0; font-weight:400; font-size:clamp(13px, 2.2vw, 20px); color:#8B95A1; white-space:normal}
-      .sightline tr.sl-pd td:not(:first-child){color:#4DA3FF}
+      .sightline tr.sl-pd td:not(:first-child){color:#D4D7DC}
       .sightline .sl-hint{font-family:var(--sans); font-size:12px; color:#828D99; margin:14px 0 0}
 
       /* ===== v19 · motion (SPEC §4): 160–220 ms, transform/opacity only ===== */
@@ -517,7 +518,7 @@
           --bg:#ffffff; --bg2:#ffffff; --panel:#ffffff; --panel2:#f3f5f7;
           --line:#9aa9b5; --line-soft:#c9d3db;
           --ink:#111a22; --ink-dim:#36495a; --ink-faint:#55687a;
-          --cyan:#1F5FA8; --cyan-dim:#1F5FA8; --on-accent:#ffffff;
+          --cyan:#33373D; --cyan-dim:#33373D; --on-accent:#ffffff;
           --amber:#8a6200; --red:#b3302f; --green:#136b45;
           --amber-ink:#6d4d05; --red-ink:#7a1f1f; --green-ink:#145c3d;
         }
@@ -581,6 +582,16 @@
       }
       /* 2026-11-15 thread search */
       .thsearch{margin:4px 0 12px}
+      .thfind{margin:4px 0 14px; border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; background:var(--panel2)}
+      .thfind summary{cursor:pointer; font-weight:600; min-height:32px; display:flex; align-items:center}
+      .tfpair{display:flex; gap:6px} .tfpair input{flex:1; min-width:0} .tfpair select{flex:0 0 auto; width:auto}
+      .tfbtn{display:flex; align-items:flex-end} .tfbtn button{width:100%}
+      .tfres{display:flex; flex-direction:column; gap:6px; margin-top:10px}
+      .tfres button{display:flex; justify-content:space-between; align-items:center; gap:10px; min-height:48px; padding:8px 12px; text-align:left; cursor:pointer; background:var(--panel); color:var(--ink); border:1px solid var(--line-soft); border-radius:8px; font:inherit}
+      .tfres button:hover, .tfres button:focus-visible{border-color:var(--cyan)}
+      .tfres .tf-l{font-weight:600} .tfres .tf-f{font-size:13px; color:var(--ink-faint)} .tfres .tf-d{font-family:var(--mono); font-size:13px; text-align:right; white-space:nowrap}
+      .tfres .tf-fit{color:var(--green-ink)} .tfres .tf-near{color:var(--amber-ink)}
+      .tfhead{font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); margin:12px 0 0}
       .thsres{display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:340px; overflow:auto}
       .thsres:empty{display:none}
       .thsres button{display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:46px; padding:8px 12px; text-align:left; cursor:pointer;
@@ -590,8 +601,8 @@
       .ts-fam{color:var(--ink-dim); font-size:12.5px; text-align:right}
       .thsmore{margin:2px 0 0; color:var(--ink-dim); font-size:12.5px}
 
-      /* 2026-11-17: gradients replaced with solid engineering blue (#2563EB, white text) on primary
-         buttons and selected group tab; "Tools" in solid #60A5FA; top bar 2px solid. Red/amber/green
+      /* 2026-11-17: gradients replaced with solid engineering blue (#E8EAED, white text) on primary
+         buttons and selected group tab; "Tools" in solid #A8ADB4; top bar 2px solid. Red/amber/green
          stay reserved for chart and status signals. Chart colours unchanged. */
       /* ===== 2026-11-16 "Graphite" theme (dark grey; replaced the navy look the same day) — presentation only, screen only (print keeps
          its light theme). Neutral dark-grey base; instrument-blue accent kept
@@ -602,15 +613,15 @@
           --bg:#17181A; --bg2:#1C1E20; --panel:#232528; --panel2:#2D3033; --raised:#2D3033;
           --line:#70747A; --line-soft:#3A3D41; --grid:#303336;
           --ink:#EEEFF0; --ink-dim:#B9BCC0; --ink-faint:#A0A3A8;
-          --btn:#2563EB; --btn-hover:#1D4ED8; --btn-ink:#FFFFFF; --accent-text:#60A5FA;
+          --btn:#E8EAED; --btn-hover:#FFFFFF; --btn-ink:#16171A; --accent-text:#A8ADB4;
         }
         html{background:
           radial-gradient(ellipse 70% 45% at 100% 0%, rgba(255,255,255,.05) 0%, transparent 60%),
-          radial-gradient(ellipse 60% 40% at 0% 0%, rgba(77,163,255,.06) 0%, transparent 60%), #17181A}
+          radial-gradient(ellipse 60% 40% at 0% 0%, rgba(212,215,220,.06) 0%, transparent 60%), #17181A}
         body{background-color:transparent; background-image:radial-gradient(rgba(200,205,210,.05) 1px, transparent 1.15px)}
-        ::selection{background:rgba(77,163,255,.35); color:#fff}
+        ::selection{background:rgba(212,215,220,.35); color:#fff}
         header.top{position:relative; padding-top:14px}
-        header.top::before{content:""; position:absolute; left:0; right:0; top:0; height:2px; border-radius:2px; background:#3B82F6}
+        header.top::before{content:""; position:absolute; left:0; right:0; top:0; height:2px; border-radius:2px; background:#D4D6DA}
         header.top h1{font-size:30px; font-weight:700}
         header.top h1 .accent{color:var(--accent-text)}
         .card{border-radius:12px; border-color:var(--line-soft)}
@@ -619,7 +630,7 @@
         button.act:disabled{background:var(--panel2); color:var(--ink-faint); border-color:var(--line)}
         nav.clusters button[aria-selected="true"]{background:var(--btn); color:var(--btn-ink); border-color:var(--btn); box-shadow:0 1px 2px rgba(0,0,0,.35)}
         nav.clusters button[aria-selected="true"] .cl-sub{color:rgba(255,255,255,.85)}
-        input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus{outline:2px solid var(--cyan); outline-offset:1px; border-color:var(--cyan); box-shadow:0 0 0 4px rgba(77,163,255,.14)}
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus{outline:2px solid var(--cyan); outline-offset:1px; border-color:var(--cyan); box-shadow:0 0 0 4px rgba(212,215,220,.14)}
         .guru{color:var(--ink-dim)}
       }
 
@@ -638,7 +649,7 @@
       .learn details.lesson summary{cursor:pointer; padding:14px 0; font-weight:600; font-size:16px; color:var(--ink)}
       .learn details.lesson[open] summary{color:var(--cyan)}
       .learn p,.learn li{font-size:14.5px; line-height:1.6; color:var(--ink-dim)} .learn b{color:var(--ink)}
-      .learn .todo{border-left:3px solid var(--cyan); padding:6px 10px; background:rgba(77,163,255,.07); border-radius:4px}
+      .learn .todo{border-left:3px solid var(--cyan); padding:6px 10px; background:rgba(212,215,220,.07); border-radius:4px}
       .learn table.lt{width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:14px}
       .learn table.lt th,.learn table.lt td{border:1px solid var(--line-soft); padding:7px 9px; text-align:left; vertical-align:top}
       .learn td.g{color:var(--green); font-weight:600} .learn td.a{color:var(--amber); font-weight:600} .learn td.r{color:var(--red); font-weight:600}
@@ -1337,6 +1348,37 @@
             <input id="thSearch" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="e.g. M10, 1/2-13, 3/4 NPT, G 1/4, Tr20, 1-1/4-12 UNJ" />
             <div id="thSearchRes" class="thsres" role="listbox" aria-label="Matching threads"></div>
           </div>
+          <details class="thfind" id="thFind">
+            <summary>Identify a thread from measurements</summary>
+            <p class="small">Measured a thread you don't recognise? Enter what you measured and the finder lists the standard threads whose limits fit, then near misses. Diameter alone is often ambiguous — add the pitch (thread gauge or count threads over 1 in) to narrow it to one.</p>
+            <div class="row2">
+              <div>
+                <label class="flabel" for="tfSide">Thread</label>
+                <select id="tfSide">
+                  <option value="ext" selected>External — measure the OD (major Ø)</option>
+                  <option value="int">Internal — measure the bore at the crests (minor Ø)</option>
+                </select>
+              </div>
+              <div>
+                <label class="flabel" for="tfDia">Measured diameter</label>
+                <div class="tfpair">
+                  <input type="number" id="tfDia" step="any" min="0" inputmode="decimal" placeholder="e.g. 0.495" autocomplete="off" />
+                  <select id="tfDiaU" aria-label="Diameter unit"><option value="in" selected>in</option><option value="mm">mm</option></select>
+                </div>
+              </div>
+            </div>
+            <div class="row2">
+              <div>
+                <label class="flabel" for="tfPitch">Pitch (optional)</label>
+                <div class="tfpair">
+                  <input type="number" id="tfPitch" step="any" min="0" inputmode="decimal" placeholder="e.g. 13" autocomplete="off" />
+                  <select id="tfPitchU" aria-label="Pitch unit"><option value="tpi" selected>TPI</option><option value="mm">mm pitch</option></select>
+                </div>
+              </div>
+              <div class="tfbtn"><button type="button" class="act" id="tfRun">Find thread</button></div>
+            </div>
+            <div id="tfOut" aria-live="polite"></div>
+          </details>
           <div class="row2">
             <div>
               <label class="flabel" for="thFam">Family</label>
@@ -3505,7 +3547,7 @@
         var ok = pass && !outOfSize, pc = ok ? "var(--green)" : "var(--red)";
         var g = '<line x1="'+c+'" y1="10" x2="'+c+'" y2="'+(S-10)+'" style="stroke:var(--grid)"/><line x1="10" y1="'+c+'" x2="'+(S-10)+'" y2="'+c+'" style="stroke:var(--grid)"/>';
         if(hasBonus) g += '<circle cx="'+c+'" cy="'+c+'" r="'+(rTot*k)+'" style="fill:rgba(61,214,140,.08);stroke:var(--green)" stroke-width="1.6"/>';
-        g += '<circle cx="'+c+'" cy="'+c+'" r="'+(rTol*k)+'" style="fill:'+(hasBonus?'none':'rgba(77,163,255,.08)')+';stroke:var(--cyan)" stroke-width="1.6" stroke-dasharray="'+(hasBonus?'6 4':'0')+'"/>';
+        g += '<circle cx="'+c+'" cy="'+c+'" r="'+(rTol*k)+'" style="fill:'+(hasBonus?'none':'rgba(212,215,220,.08)')+';stroke:var(--cyan)" stroke-width="1.6" stroke-dasharray="'+(hasBonus?'6 4':'0')+'"/>';
         var px = c + dx * k, py = c - dy * k;
         g += '<line x1="'+c+'" y1="'+c+'" x2="'+px+'" y2="'+py+'" style="stroke:'+pc+'" stroke-width="1.6"/><circle cx="'+px+'" cy="'+py+'" r="6" style="fill:'+pc+';stroke:var(--bg)" stroke-width="2"/>';
         g += '<circle cx="'+c+'" cy="'+c+'" r="3" style="fill:var(--ink-dim)"/>';
@@ -7596,6 +7638,99 @@
           var r = $("thOut") || $("thSize"); if(r && r.scrollIntoView) r.scrollIntoView({ block:"nearest" });
         });
       })();
+
+      /* 2026-11-20 · thread finder (reverse lookup). Uses only the verified
+         limit tables already in this file (TH_M, TH_U + TH_U_ADD, TH_BSP2, TH_W2
+         Medium class, TH_A2, TH_S2, TH_TR2, TH_BAN, TH_NPT, TH_BSPT) — no new data.
+         External: measured major Ø against the external major band. Internal:
+         measured minor Ø (bore at crests) against the internal minor band.
+         Tapered pipe threads have no single band: the range shown runs from
+         the small end to the end of the effective thread (NPT: E0+h … E0+h+L2/16;
+         BSPT R: gauge-plane major − L/16 … gauge-plane major), so they are
+         labelled approximate. Pitch match tolerance 2.5 %. */
+      function tfCands(){
+        var C = [], IN = 25.4;
+        function lastNum(lbl){ var m = /-(\d+(?:\.\d+)?)\D*$/.exec(lbl.replace(/\s*(BSW|BSF)$/, "")); return m ? Number(m[1]) : null; }
+        function fld(r, pre){ for(var i = 0; i < r.fields.length; i++){ if(r.fields[i][0].indexOf(pre) === 0) return parseFloat(r.fields[i][1]); } return null; }
+        TH_M.forEach(function(r, i){ C.push({ fam:"metric", size:String(i), lab:r[0], famLab:"Metric ISO 6g / 6H", u:"mm", p:r[2], ext:[r[4], r[3]], int:[r[8], r[9]] }); });
+        thUAll().forEach(function(r, i){ C.push({ fam:"un", size:String(i), lab:r[0], famLab:"UN 2A / 2B", u:"in", p:IN / r[2], ext:[r[6], r[5]], int:[r[13], r[14]] }); });
+        TH_BSP2.forEach(function(r, i){ C.push({ fam:"bsp", size:String(i), lab:r[0].replace(/\s*—.*$/, ""), famLab:"BSP parallel G · " + r[1] + " TPI", u:"mm", p:r[2], ext:[r[8], r[9]], int:[r[6], r[7]] }); });
+        TH_W2.forEach(function(r, i){ var t = lastNum(r[0]); if(!t) return; C.push({ fam:"whitworth", size:String(i), lab:r[0], famLab:"Whitworth · Medium class", u:"in", p:IN / t, ext:r[2][1][0], int:r[3][0][1] }); });
+        TH_A2.forEach(function(r, i){ var t = lastNum(r[0]); if(!t) return; C.push({ fam:"acme", size:String(i), lab:r[0], famLab:"Acme 2G", u:"in", p:IN / t, ext:r[1], int:r[6] }); });
+        TH_S2.forEach(function(r, i){ var t = lastNum(r[0]); if(!t) return; C.push({ fam:"acme", size:String(TH_A2.length + i), lab:r[0], famLab:"Stub Acme", u:"in", p:IN / t, ext:r[1], int:r[6] }); });
+        TH_TR2.forEach(function(r, i){ var m = /×\s*([\d.]+)/.exec(r[0]); if(!m) return; C.push({ fam:"tr", size:String(i), lab:r[0], famLab:"Trapezoidal 7e / 7H", u:"mm", p:Number(m[1]), ext:r[1], int:r[6] }); });
+        TH_BAN.forEach(function(r, i){ C.push({ fam:"ba", size:String(i), lab:r[0], famLab:"BA · Normal class", u:"mm", p:r[1], ext:r[2], int:r[7] }); });
+        var off = TH_PIPE.length;
+        TH_NPT.forEach(function(r, i){
+          var t = fld(r, "Threads per inch"), e0 = fld(r, "E0"), e1 = fld(r, "E1"), l1 = fld(r, "L1"), l2 = fld(r, "L2"), h = fld(r, "Thread height");
+          if(!(t && e0 && e1 && l1 && l2 && h)) return;
+          C.push({ fam:"pipe", size:String(off + i), lab:r.label, famLab:"NPT / NPTF taper (approximate)", u:"in", p:IN / t, taper:true,
+            ext:[e0 + h, e0 + h + l2 / 16], int:[e1 - h - l1 / 16, e1 - h] });
+        });
+        off += TH_NPT.length;
+        TH_BSPT.forEach(function(r, i){
+          var pm = fld(r, "Pitch"), dmaj = fld(r, "Major diameter at gauge plane"), dmin = fld(r, "Minor diameter at gauge plane"), L = fld(r, "Basic gauge length");
+          if(!(pm && dmaj && dmin && L)) return;
+          C.push({ fam:"pipe", size:String(off + i), lab:r.label.replace("BSPT R", "BSPT R / Rc"), famLab:"BSPT taper, ISO 7-1 (approximate)", u:"mm", p:pm, taper:true,
+            ext:[dmaj - L / 16, dmaj], int:[dmin - L / 16, dmin] });
+        });
+        return C;
+      }
+      var TF_C = null;
+      function tfFind(side, diaMM, pitchMM){
+        if(!TF_C) TF_C = tfCands();
+        var out = [];
+        TF_C.forEach(function(c){
+          var b = c[side]; if(!b || b[0] == null || b[1] == null) return;
+          var k = c.u === "in" ? 25.4 : 1, lo = b[0] * k, hi = b[1] * k;
+          if(pitchMM){ if(Math.abs(c.p - pitchMM) / c.p > 0.025) return; }
+          var d = diaMM < lo ? diaMM - lo : (diaMM > hi ? diaMM - hi : 0);
+          var nom = (lo + hi) / 2, win = Math.max(0.03 * nom, 0.15, 2 * (hi - lo));
+          if(Math.abs(d) > win) return;
+          out.push({ c:c, lo:lo, hi:hi, d:d, mid:Math.abs(diaMM - nom) });
+        });
+        out.sort(function(a, b){ return Math.abs(a.d) - Math.abs(b.d) || a.mid - b.mid; });
+        return out;
+      }
+      function tfRun(){
+        var o = $("tfOut"), side = $("tfSide").value;
+        var dv = Number($("tfDia").value), pv = $("tfPitch").value.trim() === "" ? null : Number($("tfPitch").value);
+        if(!isFinite(dv) || dv <= 0){ o.innerHTML = '<p class="small" style="color:var(--red-ink)">Enter the measured diameter first.</p>'; return; }
+        if(pv !== null && (!isFinite(pv) || pv <= 0)){ o.innerHTML = '<p class="small" style="color:var(--red-ink)">Pitch must be a number above zero, or leave it blank.</p>'; return; }
+        var dmm = $("tfDiaU").value === "in" ? dv * 25.4 : dv;
+        var pmm = pv === null ? null : ($("tfPitchU").value === "tpi" ? 25.4 / pv : pv);
+        var hits = tfFind(side, dmm, pmm);
+        var fit = hits.filter(function(h){ return h.d === 0; }), near = hits.filter(function(h){ return h.d !== 0; });
+        function row(h){
+          var c = h.c, k = c.u === "in" ? 25.4 : 1, dp = c.u === "in" ? 4 : 3;
+          var band = (h.lo / k).toFixed(dp) + "–" + (h.hi / k).toFixed(dp) + " " + c.u;
+          var pTxt = c.u === "in" ? trimNum(25.4 / c.p, 1) + " TPI" : "P " + trimNum(c.p, 3) + " mm";
+          var dTxt = h.d === 0 ? '<span class="tf-fit">within limits</span>' : '<span class="tf-near">' + (h.d > 0 ? "+" : "−") + (Math.abs(h.d) / k).toFixed(dp) + " " + c.u + (h.d > 0 ? " over" : " under") + "</span>";
+          return '<button type="button" data-i="' + TF_C.indexOf(c) + '"><span><span class="tf-l">' + esc(c.lab) + '</span><br><span class="tf-f">' + esc(c.famLab) + " · " + esc(pTxt) + '</span></span><span class="tf-d">' + band + "<br>" + dTxt + "</span></button>";
+        }
+        var html = "";
+        if(fit.length) html += '<p class="tfhead">Fits the ' + (side === "ext" ? "major Ø" : "minor Ø") + " limits (" + fit.length + ")</p><div class=\"tfres\">" + fit.slice(0, 12).map(row).join("") + "</div>";
+        if(near.length) html += '<p class="tfhead">Near misses — worn, plated or a non-standard class?</p><div class="tfres">' + near.slice(0, 8).map(row).join("") + "</div>";
+        if(!hits.length) html = '<p class="small">No standard thread in this catalogue is within reach of that ' + (side === "ext" ? "OD" : "bore") + (pmm ? " at that pitch" : "") + ". Check the measurement and unit" + (pmm ? ", try without the pitch," : "") + " or the thread may be a special (UNS / custom).</p>";
+        var tips = [];
+        if(!pmm && fit.length > 1) tips.push("Several threads fit on diameter alone — add the pitch to tell them apart.");
+        if(fit.some(function(h){ return h.c.u === "in"; }) && fit.some(function(h){ return h.c.u === "mm"; })) tips.push("Inch and metric candidates both fit (e.g. 1/2-13 vs M12 × 1.75) — the pitch is the tie-breaker: 13 TPI = 1.954 mm, 1.75 mm = 14.5 TPI.");
+        if(fit.some(function(h){ return h.c.taper; }) && fit.some(function(h){ return !h.c.taper && (h.c.fam === "bsp" || h.c.fam === "un"); })) tips.push("Parallel and tapered threads share these sizes (G vs R / Rc, NPSM vs NPT) — measure the OD at both ends of the thread: a taper grows about 1/16 of the length on diameter (≈0.06 mm per mm, 0.0625 in per in).");
+        if(hits.some(function(h){ return h.c.taper; })) tips.push("Tapered pipe threads change diameter along the length — their range runs from the small end to the end of the effective thread, so treat those matches as approximate and confirm with the gauge.");
+        tips.push("Confirm the flank angle too (60° UN / metric, 55° Whitworth / BSP, 29° Acme, 30° Tr). Aerospace UNJ / MJ share diameters with UN / metric but have a controlled root radius.");
+        html += '<p class="small" style="margin-top:10px">' + tips.map(esc).join("<br>") + "</p>";
+        o.innerHTML = html;
+      }
+      $("tfRun").addEventListener("click", function(){ holdScroll(tfRun); });
+      ["tfDia", "tfPitch"].forEach(function(id){ $(id).addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); tfRun(); } }); });
+      $("tfOut").addEventListener("click", function(e){
+        var b = e.target.closest("button[data-i]"); if(!b) return;
+        var c = TF_C[+b.getAttribute("data-i")], side = $("tfSide").value;
+        $("thFam").value = c.fam; thFillSizes();
+        $("thSize").value = c.size; thFillSideClass();
+        if(Array.prototype.some.call($("thSide").options, function(op){ return op.value === side; })){ $("thSide").value = side; thFillSideClass(); }
+        var r = $("thMfg"); if(r && r.scrollIntoView) r.scrollIntoView({ block:"start" });
+      });
 
       $("thSize").addEventListener("change", function(){ holdScroll(function(){ thFillSideClass(); }); });
       $("thSide").addEventListener("change", function(){ holdScroll(function(){ thFillSideClass(); }); });

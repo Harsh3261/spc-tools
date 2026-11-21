@@ -1,3 +1,21 @@
+# Note for Muse — graphite theme + thread finder (2026-11-20)
+
+1. THEME (CSS only, no logic change): Harsh chose a monochrome "graphite" look so no accent
+   competes with the status colours. Every blue accent was mapped to greys:
+   #4DA3FF→#D4D7DC (accent / data traces / selected tabs), rgba(77,163,255,a)→rgba(212,215,220,a),
+   #2563EB→#E8EAED (primary buttons, text #16171A via --btn-ink / --on-accent), #1D4ED8→#FFFFFF (hover),
+   #60A5FA→#A8ADB4 ("Tools" title), #3B82F6→#D4D6DA (top rule). Print --cyan is now #33373D.
+   Green / amber / red status colours and spec-limit violet #B48EFF are unchanged.
+2. THREAD FINDER (Threads tool, collapsible "Identify a thread from measurements"):
+   reverse lookup over the existing verified tables only (TH_M, TH_U+TH_U_ADD, TH_BSP2,
+   TH_W2 Medium, TH_A2, TH_S2, TH_TR2, TH_BAN, TH_NPT, TH_BSPT) — no new data. External =
+   measured major Ø vs external major band; internal = measured minor Ø vs internal minor band.
+   Optional pitch (TPI or mm), match tolerance 2.5 %. Taper threads use an approximate range
+   (NPT E0+h … E0+h+L2/16; BSPT gauge-plane major − L/16 … gauge-plane major) and are labelled so.
+   Clicking a result opens that thread's limits. Tested: 13 known threads all identified
+   (1/2-13 UNC, M12, M10 nut, G1/4, NPT 1/2, Tr20×4, 1-8 UNC ext/int, Acme 1/4-16, 1/2-12 BSW,
+   G1/2 …); smoke, qc (1548), formats, ncp tests pass; axe wcag2a/aa clean on SPC + Threads.
+
 # Note for Muse — external audit corrections (2026-11-15)
 
 Harsh asked Claude to audit both live sites against independent sources. Four
