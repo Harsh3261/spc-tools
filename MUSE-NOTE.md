@@ -1,3 +1,17 @@
+# Note for Muse — Surface finish tool (2026-11-21, v46)
+
+NEW TOOL #tool-surf (Reference, "Surface finish"; finder: Ra, Rz, N7, 63, cutoff, profilometer…).
+- Data block SF: SF_N (ISO 1302 N1–N12, Ra µm + tabulated µin) and SF_CUT (ISO 4288 cut-off
+  selection by Ra / Rz aperiodic and RSm periodic → λc, ln). N-grades: ISO 1302:1978 preview +
+  Machinery's Handbook 31st Table 4 (+ Ceratizit, Xometry). Cut-off: Carl Zeiss "Surface
+  parameters" (citing ISO 4288) + Machinery's Handbook 31st Table 3 — every row agrees.
+- Status shown: ISO 4288 withdrawn → ISO 21920-3:2021 (ISO catalogue); ISO 1302 → ISO 21920-1
+  (no N-grades). Tool says the cut-off rule is what ISO 1302/4288 drawings assume.
+- Deliberately NOT included: Ra⇄Rz conversion (none exists — the tool says so) and a "typical Ra by
+  process" chart (published versions disagree on ranges; failed two-source).
+- µin input matches the tabulated µin first (63 µin = N7; exact 1.6002 µm would otherwise fall
+  between grades). tests/surf.test.js 37 checks; all suites + smoke (22 tools) pass.
+
 # Note for Muse — General tolerances tool, ISO 2768 (2026-11-21, v45)
 
 Harsh asked for verified design standards in SPC Tools; ISO 2768 first. NEW TOOL #tool-gentol

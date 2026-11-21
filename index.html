@@ -44,6 +44,7 @@
       stack     #tool-stack      reference   STACK-UP
       sigma     #tool-sigma      reference   SIGMA / PPM
       gentol    #tool-gentol     reference   GENERAL TOLERANCES (ISO 2768)
+      surf      #tool-surf       reference   SURFACE FINISH
       A tool is a #tabbtn-<id> button (data-tab, data-cluster) plus a
       section#tool-<id>. showTool() finds both by that naming convention.
 
@@ -746,6 +747,7 @@
         <button type="button" role="tab" id="tabbtn-seal" aria-selected="false" data-tab="seal" data-cluster="reference">Seal glands</button>
         <button type="button" role="tab" id="tabbtn-fits" aria-selected="false" data-tab="fits" data-cluster="reference">Fits (ISO 286)</button>
         <button type="button" role="tab" id="tabbtn-gentol" aria-selected="false" data-tab="gentol" data-cluster="reference">General tol. (ISO 2768)</button>
+        <button type="button" role="tab" id="tabbtn-surf" aria-selected="false" data-tab="surf" data-cluster="reference">Surface finish</button>
         <button type="button" role="tab" id="tabbtn-cyl" aria-selected="false" data-tab="cyl" data-cluster="reference">Cylinder &amp; oil</button>
         <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Unit converters</button>
         <button type="button" role="tab" id="tabbtn-learn" aria-selected="false" data-tab="learn" data-cluster="reference">Learn</button>
@@ -1618,6 +1620,33 @@
             <strong>Status:</strong> ISO 2768-1:1989 is still current. ISO 2768-2:1989 was withdrawn and replaced by ISO 22081:2021, which has no H/K/L classes — but H/K/L notes are still on many drawings in use, and they mean these values.</p>
           </details>
           <p class="cite">ISO 2768-1:1989 Tables 1–3 and ISO 2768-2:1989 Tables 1–4. Every cell checked 2026-11-21 against the standards' own preview text and at least one independent reproduction (Wevolver transcription; Starrapid, camcut and University of Wisconsin metrology sheets). Where a reproduction disagreed (one prints ±0°20′ for class c, 120–400 mm), the standard's own text was used (±0°15′). Status: ISO 22081:2021 replaced ISO 2768-2 (ISO catalogue).</p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL : SURFACE FINISH (N-grades, cut-off) ============ -->
+      <section class="tool" id="tool-surf" role="tabpanel" aria-labelledby="tabbtn-surf">
+        <div class="card">
+          <h2>Surface finish — Ra, N-grades &amp; cut-off</h2>
+          <p class="guru">Turn a drawing callout into numbers you can check: Ra in µm or µin, the old ISO N-grade, and the cut-off (λc) and evaluation length to set on the profilometer.</p>
+          <div class="row3">
+            <div><label class="flabel" for="sfVal">Value on the drawing</label><input id="sfVal" type="number" step="any" inputmode="decimal" value="0.8"></div>
+            <div><label class="flabel" for="sfParam">Parameter &amp; unit</label><select id="sfParam">
+              <option value="ra_um" selected>Ra, µm</option><option value="ra_uin">Ra, µin (AA / CLA)</option><option value="rz_um">Rz, µm</option><option value="rsm_mm">RSm, mm (periodic profile, e.g. turned)</option></select></div>
+            <div><label class="flabel" for="sfN">…or an N-grade</label><select id="sfN"><option value="">—</option></select></div>
+          </div>
+          <div id="sfOut" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Full tables — N-grades and cut-off selection</summary>
+            <div id="sfTables"></div>
+          </details>
+          <details class="thfind" style="margin-top:10px">
+            <summary>Learn — Ra, Rz and the cut-off</summary>
+            <p class="small"><strong>Ra</strong> is the average height of the profile from its mean line. <strong>Rz</strong> is the average peak-to-valley height over the sampling lengths. They measure different things, so <strong>there is no fixed Ra ⇄ Rz conversion</strong> — any ratio you see is a rule of thumb for one kind of surface. If the drawing says Rz, measure Rz.<br>
+            <strong>Cut-off λc</strong> is the filter that separates roughness from waviness, and it equals the sampling length. The wrong cut-off gives a different Ra on the same part — so when two people disagree on a finish, check the cut-off first.<br>
+            <strong>Turned or ground surfaces with a regular feed mark</strong> are periodic: choose the cut-off from RSm (the mark spacing, roughly the feed). Most other surfaces are aperiodic: choose from Ra or Rz.<br>
+            <strong>µin conversion:</strong> 1 µin = 0.0254 µm exactly. The N-grade table pairs each Ra in µm with a rounded µin value (0.8 µm ↔ 32 µin; exactly it is 31.5).</p>
+          </details>
+          <p class="cite">N-grades: ISO 1302:1978 Table 1 (preview text), matched by Machinery's Handbook 31st ed. Table 4 and Ceratizit / Xometry tables. Cut-off selection: ISO 4288:1996 rules as reproduced by Carl Zeiss "Surface parameters" (citing ISO 4288) and Machinery's Handbook 31st ed. Table 3 — every row agrees. Status (ISO catalogue): ISO 4288 withdrawn, revised by ISO 21920-3:2021; ISO 1302 replaced by ISO 21920-1:2021, which drops N-grades. Checked 2026-11-21.</p>
         </div>
       </section>
 
@@ -9187,7 +9216,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v45";
+      var APP_BUILD = "v46";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -9997,6 +10026,75 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         ["gtSize","gtUnit","gtNote","gtShort","gtKind"].forEach(function(id){ el(id).addEventListener("input", render); el(id).addEventListener("change", render); });
         tables(); render();
       })();
+      /* ===================== SURFACE FINISH ===================== */
+      /* BEGIN DATA SF: ISO 1302 roughness grades and ISO 4288 cut-off selection.
+         Provenance: ISO 1302:1978 Table 1 + Machinery's Handbook 31st Table 4 (N-grades);
+         ISO 4288:1996 via Carl Zeiss "Surface parameters" + Machinery's Handbook 31st Table 3 (cut-off).
+         Verified 2026-11-21. Edit data only via a verified data change, never by hand-tuning numbers. */
+      var SF_N = [ /* grade, Ra µm, Ra µin (as tabulated) */
+        ["N1", 0.025, 1], ["N2", 0.05, 2], ["N3", 0.1, 4], ["N4", 0.2, 8], ["N5", 0.4, 16], ["N6", 0.8, 32],
+        ["N7", 1.6, 63], ["N8", 3.2, 125], ["N9", 6.3, 250], ["N10", 12.5, 500], ["N11", 25, 1000], ["N12", 50, 2000]
+      ];
+      var SF_CUT = [ /* lower-exclusive, upper-inclusive ranges: Ra µm, Rz µm, RSm mm → λc mm, ln mm */
+        { ra:[0.006, 0.02], rz:[0.025, 0.1], rsm:[0.013, 0.04], lc:0.08, ln:0.4 },
+        { ra:[0.02, 0.1],   rz:[0.1, 0.5],   rsm:[0.04, 0.13],  lc:0.25, ln:1.25 },
+        { ra:[0.1, 2],      rz:[0.5, 10],    rsm:[0.13, 0.4],   lc:0.8,  ln:4 },
+        { ra:[2, 10],       rz:[10, 50],     rsm:[0.4, 1.3],    lc:2.5,  ln:12.5 },
+        { ra:[10, 80],      rz:[50, 200],    rsm:[1.3, 4],      lc:8,    ln:40 }
+      ];
+      /* END DATA SF */
+      var SF_UM_PER_UIN = 0.0254;
+      function sfCutoff(kind, v){ /* kind: "ra" | "rz" | "rsm" */
+        for(var i = 0; i < SF_CUT.length; i++){ var r = SF_CUT[i][kind]; if(v > r[0] && v <= r[1] + 1e-12) return SF_CUT[i]; }
+        return null;
+      }
+      function sfNGrade(raUm){ /* exact preferred value → grade; else the grades either side */
+        for(var i = 0; i < SF_N.length; i++) if(Math.abs(SF_N[i][1] - raUm) < 1e-9) return { exact:SF_N[i] };
+        var lo = null, hi = null;
+        SF_N.forEach(function(n){ if(n[1] < raUm) lo = n; if(n[1] > raUm && !hi) hi = n; });
+        return { lo:lo, hi:hi };
+      }
+
+      (function(){
+        var el = function(id){ return document.getElementById(id); };
+        if(!el("sfVal")) return;
+        SF_N.forEach(function(n){ var o = document.createElement("option"); o.value = n[0]; o.textContent = n[0] + " — Ra " + n[1] + " µm (" + n[2] + " µin)"; el("sfN").appendChild(o); });
+        var t = function(x){ return +(+x).toPrecision(4); };
+        function render(){
+          var p = el("sfParam").value, v = Number(el("sfVal").value), out = el("sfOut"), h = "";
+          if(!(v > 0)){ out.innerHTML = '<p class="small">Enter a value above zero.</p>'; return; }
+          var kind = p === "rsm_mm" ? "rsm" : (p === "rz_um" ? "rz" : "ra");
+          var raUm = p === "ra_uin" ? v * SF_UM_PER_UIN : v;
+          h += '<table class="dtable" aria-label="Surface finish result"><tr><th style="text-align:left">Item</th><th>Value</th></tr>';
+          var row = function(a, b){ h += '<tr><td style="text-align:left">' + a + "</td><td>" + b + "</td></tr>"; };
+          if(kind === "ra"){
+            row("Ra", "<strong>" + t(raUm) + " µm</strong> = <strong>" + t(raUm / SF_UM_PER_UIN) + " µin</strong>");
+            var g = sfNGrade(raUm);
+            if(p === "ra_uin") SF_N.forEach(function(n){ if(n[2] === v) g = { exact:n }; }); /* drawings in µin use the tabulated (rounded) values, e.g. 63 µin = N7 */
+            row("ISO 1302 N-grade", g.exact ? "<strong>" + g.exact[0] + "</strong>" : (g.lo && g.hi ? "between " + g.lo[0] + " (" + g.lo[1] + " µm) and " + g.hi[0] + " (" + g.hi[1] + " µm) — not a preferred value" : "outside N1–N12"));
+          } else if(kind === "rz") row("Rz", "<strong>" + t(v) + " µm</strong> (" + t(v / SF_UM_PER_UIN) + " µin) — no fixed conversion to Ra or an N-grade");
+          else row("RSm (mark spacing)", "<strong>" + t(v) + " mm</strong>");
+          var c = sfCutoff(kind, kind === "ra" ? raUm : v);
+          if(c) row("Cut-off λc = sampling length", "<strong>" + c.lc + " mm</strong>");
+          if(c) row("Evaluation length (5 × λc)", "<strong>" + c.ln + " mm</strong>");
+          if(!c) row("Cut-off", "outside the ISO 4288 selection table — agree the setting with the customer");
+          h += "</table>";
+          if(c && kind !== "rsm") h += '<p class="small">This is the aperiodic-profile rule. For a turned or ground surface with a regular feed mark, choose by RSm instead (Parameter → RSm). If the drawing states a cut-off, use the drawing.</p>';
+          h += '<p class="small">Cut-off rule from ISO 4288:1996 — what drawings citing ISO 1302 / 4288 assume. A drawing to ISO 21920 uses the ISO 21920-3 defaults; check them there.</p>';
+          out.innerHTML = h;
+        }
+        function tables(){
+          var h = '<h3 style="margin-top:14px">ISO 1302 roughness grades</h3><table class="dtable"><tr><th style="text-align:left">Grade</th><th>Ra, µm</th><th>Ra, µin</th></tr>' +
+            SF_N.slice().reverse().map(function(n){ return '<tr><td style="text-align:left">' + n[0] + "</td><td>" + n[1] + "</td><td>" + n[2] + "</td></tr>"; }).join("") + "</table>";
+          var r = function(a){ return "over " + a[0] + " up to " + a[1]; };
+          h += '<h3 style="margin-top:14px">Cut-off selection (ISO 4288)</h3><table class="dtable"><tr><th style="text-align:left">Ra, µm (aperiodic)</th><th style="text-align:left">Rz, µm (aperiodic)</th><th style="text-align:left">RSm, mm (periodic)</th><th>λc, mm</th><th>ln, mm</th></tr>' +
+            SF_CUT.map(function(c){ return '<tr><td style="text-align:left">' + r(c.ra) + '</td><td style="text-align:left">' + r(c.rz) + '</td><td style="text-align:left">' + r(c.rsm) + "</td><td>" + c.lc + "</td><td>" + c.ln + "</td></tr>"; }).join("") + "</table>";
+          el("sfTables").innerHTML = h;
+        }
+        el("sfN").addEventListener("change", function(){ var g = SF_N.filter(function(n){ return n[0] === el("sfN").value; })[0]; if(g){ el("sfParam").value = "ra_um"; el("sfVal").value = g[1]; } render(); });
+        ["sfVal","sfParam"].forEach(function(id){ el(id).addEventListener("input", function(){ el("sfN").value = ""; render(); }); el(id).addEventListener("change", render); });
+        tables(); render();
+      })();
     </script>
 
     <div id="rptHead" class="rpthead" aria-hidden="true"></div>
@@ -10031,6 +10129,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           ["msa","More MSA","msa type 1 gage study cg cgk bias linearity attribute agreement kappa fleiss cohen effectiveness miss rate false alarm vda 5 aiag gauge capability"],
           ["fits","Fits (ISO 286)","fit fits tolerance iso 286 hole shaft h7 g6 h8 f7 k6 p6 clearance interference transition it grade limits bore pin bushing press fit"],
           ["gentol","General tolerances (ISO 2768)","general tolerance tolerances iso 2768 2768-m 2768-mk mk fh title block untoleranced dimension default tolerance linear angular chamfer radius broken edge straightness flatness perpendicularity symmetry run-out runout H K L f m c v iso 22081"],
+          ["surf","Surface finish","surface finish roughness Ra Rz RSm N-grade N6 N7 N8 microinch µin micron 63 32 125 cut-off cutoff lambda c sampling length evaluation length profilometer iso 1302 iso 4288 21920 polish hone"],
           ["seal","Seal glands","o-ring gland groove seal squeeze stretch gland fill piston rod static dynamic AS568 dash back-up ring extrusion clearance parker groove design"],
           ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 C04-2 C04-3 C09-2 C10-2T C10-3S C12-3L C12-4L C16-3S C20-3S sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],
