@@ -50,6 +50,14 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-20 — Hydraulic ports: flanges, a cavity, and drawings
+
+- Added SAE J518 / ISO 6162 Code 61 (1/2–3 in) and Code 62 (1/2–2 in) four-bolt flange ports: bolt spacing, UNC bolts, metric bolts, pressure rating. Every value agrees in at least two published tables (Parker 4400, AFP/Hydraquip, Winner, ContiTech). Left out because only one source had them: tapped-hole depth, Code 61 metric bolts for 2-1/2 and 3 in, Code 62 metric bolts above 1 in, and Code 61 sizes over 3 in (the sources disagree on these).
+- Added the C10-2 two-way cartridge cavity (same as HydraForce VC10-2 and Danfoss SDC10-2). The Parker drawing and the Form Relief tool sheet agree on every value. Sun T-series and other Parker cavities are not included: their drawings online are images and could not be checked against a second source. The SCT tool table gives M20×1.5 for T-11A, and this has not been confirmed.
+- Every port view now has a schematic SVG drawing. The letters match the table and the values fill in live. The drawings are not to scale.
+- ISO 6149-1 M8/M10 chamfer depth L1 is now flagged: 1.6 (Parker plus two other sources) against 2.2 in one reproduction of the 2022 edition.
+- Cache v28.
+
 ## SPC Tools
 
 ### 1. AQL Table II-A — 105 of 176 cells were wrong (all AQLs except 0.65)

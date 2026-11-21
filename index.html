@@ -585,6 +585,9 @@
       .thsearch{margin:4px 0 12px}
       #ptOut table.grid td:first-child, #ptOut table.grid th:first-child{text-align:left; font-family:var(--sans)}
       .thfind{margin:4px 0 14px; border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; background:var(--panel2)}
+      .ptfig{margin:14px 0 0; border:1px solid var(--line-soft); border-radius:10px; padding:10px; background:var(--panel2)}
+      .ptfig svg{display:block; width:100%; max-width:520px; height:auto; margin:0 auto}
+      .ptfig figcaption{font-size:12px; color:var(--ink-dim); margin-top:6px; text-align:center}
       .thfind summary{cursor:pointer; font-weight:600; min-height:32px; display:flex; align-items:center}
       .tfpair{display:flex; gap:6px} .tfpair input{flex:1; min-width:0} .tfpair select{flex:0 0 auto; width:auto}
       .tfbtn{display:flex; align-items:flex-end} .tfbtn button{width:100%}
@@ -1457,7 +1460,7 @@
       <!-- ============ TOOL 7b : HYDRAULIC PORTS ============ -->
       <section class="tool" id="tool-ports" role="tabpanel" aria-labelledby="tabbtn-ports">
         <div class="card">
-          <h2>Hydraulic ports — O-ring boss port dimensions</h2>
+          <h2>Hydraulic ports — O-ring boss, flange &amp; cavity</h2>
           <p class="guru">A port leaks at the seal, not the thread: the chamfer diameter, chamfer depth and angle squeeze the O-ring, and the spotface gives the fitting something square to seat on. Inspect those, not just the thread.</p>
           <div class="row2">
             <div>
@@ -1465,6 +1468,9 @@
               <select id="ptStd">
                 <option value="j1926" selected>SAE J1926-1 — inch O-ring boss (ORB)</option>
                 <option value="i6149">ISO 6149-1 — metric O-ring port</option>
+                <option value="f61">SAE J518 / ISO 6162-1 — Code 61 4-bolt flange</option>
+                <option value="f62">SAE J518 / ISO 6162-2 — Code 62 4-bolt flange</option>
+                <option value="cav">Cartridge valve cavity (manufacturer spec)</option>
               </select>
             </div>
             <div>
@@ -1473,11 +1479,13 @@
             </div>
           </div>
           <div id="ptOut"></div>
+          <figure class="ptfig" id="ptFig" aria-labelledby="ptFigCap"></figure>
           <details class="thfind" style="margin-top:14px">
             <summary>Which port do I have?</summary>
             <p class="small"><strong>SAE ORB (J1926-1):</strong> UN / UNF thread, 12° or 15° O-ring chamfer at the mouth, flat spotface. Dash size = tube OD in 1/16 in (−8 = 1/2 in tube = 3/4-16).<br>
             <strong>ISO 6149-1:</strong> metric M thread with a 12° / 15° O-ring chamfer; may carry a raised identification ridge on the spotface.<br>
             <strong>BSPP (ISO 1179-1):</strong> G thread (55° form), flat spotface, <em>no</em> chamfer — the seal is a bonded washer or O-ring on the fitting face.<br>
+            <strong>4-bolt flange (J518 / ISO 6162):</strong> plain bore with four tapped holes in a rectangle — measure the long and short hole spacing; Code 62 is the bigger pattern for the same size.<br>
             <strong>NPT / NPTF:</strong> tapered thread, no spotface seal — seals on the thread.<br>
             Use the thread finder in Threads to identify the thread first, then pick the port here.</p>
           </details>
@@ -7827,11 +7835,39 @@
         ["M60 × 2",74,67,44,62.4,3.1,27.5,2.5,24.5,15]
       ];
       /* END DATA PT_6149 */
+      /* BEGIN DATA PT_FLANGE: nominal size, bolt spacing long A (in), short B (in), UNC bolt, metric bolt (null = not verified), max working pressure psi — SAE J518 / ISO 6162 */
+      var PT_F61 = [
+        ["1/2",1.500,.688,"5/16-18","M8",5000],
+        ["3/4",1.875,.875,"3/8-16","M10",5000],
+        ["1",2.062,1.031,"3/8-16","M10",5000],
+        ["1-1/4",2.312,1.188,"7/16-14","M10",4000],
+        ["1-1/2",2.750,1.406,"1/2-13","M12",3000],
+        ["2",3.062,1.688,"1/2-13","M12",3000],
+        ["2-1/2",3.500,2.000,"1/2-13",null,2500],
+        ["3",4.188,2.438,"5/8-11",null,2000]
+      ];
+      var PT_F62 = [
+        ["1/2",1.594,.718,"5/16-18","M8",6000],
+        ["3/4",2.000,.937,"3/8-16","M10",6000],
+        ["1",2.250,1.093,"7/16-14","M12",6000],
+        ["1-1/4",2.625,1.250,"1/2-13",null,6000],
+        ["1-1/2",3.125,1.437,"5/8-11",null,6000],
+        ["2",3.812,1.750,"3/4-10",null,6000]
+      ];
+      /* END DATA PT_FLANGE */
+      /* BEGIN DATA PT_CAV: name, interchangeable with, thread, nose bore Ø A, seal bore Ø B, spotface Ø, depth to A/B step, total cavity depth min — inches */
+      var PT_CAV = [
+        ["C10-2 (2-way, size 10)","HydraForce VC10-2 · Danfoss/Comatrol SDC10-2 · Parker C10-2","7/8-14 UNF-2B",[.625,.627],[.810,.814],1.188,[.932,.942],1.312,"Parker NFT10-2F (finisher) · Form Relief CT10-2H"]
+      ];
+      /* END DATA PT_CAV */
+
       function ptFill(){
-        var std = $("ptStd").value, opts = std === "j1926"
-          ? PT_J1926.map(function(r, i){ return [String(i), r[0] + " — " + r[2].replace(/-2B$/, "") + " (" + r[1] + " in tube)"]; })
-          : PT_6149.map(function(r, i){ return [String(i), r[0] + " 6H"]; });
-        thFillSelect($("ptSize"), opts, std === "j1926" ? "5" : "2");
+        var std = $("ptStd").value, opts, def = "0";
+        if(std === "j1926"){ opts = PT_J1926.map(function(r, i){ return [String(i), r[0] + " — " + r[2].replace(/-2B$/, "") + " (" + r[1] + " in tube)"]; }); def = "5"; }
+        else if(std === "i6149"){ opts = PT_6149.map(function(r, i){ return [String(i), r[0] + " 6H"]; }); def = "2"; }
+        else if(std === "f61" || std === "f62"){ opts = (std === "f61" ? PT_F61 : PT_F62).map(function(r, i){ return [String(i), r[0] + " in flange"]; }); def = "2"; }
+        else opts = PT_CAV.map(function(r, i){ return [String(i), r[0]]; });
+        thFillSelect($("ptSize"), opts, def);
         ptRender();
       }
       function ptThreadLink(std, r){
@@ -7845,8 +7881,100 @@
         var mm2 = /^M([\d.]+) × ([\d.]+)$/.exec(t);
         return mm2 ? { fam:"metric", size:"custom", lab:t + " — calculated (ISO 965-1)", D:mm2[1], P:mm2[2] } : null;
       }
+
+      function ptDimV(x, y1, y2, lab, side){
+        var tx = side === "r" ? x + 6 : side === "b" ? x : x - 6, an = side === "r" ? "start" : side === "b" ? "middle" : "end", ty = side === "b" ? y2 + 15 : (y1 + y2) / 2 + 4;
+        return '<line class="dm" x1="' + x + '" y1="' + y1 + '" x2="' + x + '" y2="' + y2 + '" marker-start="url(#ptAr)" marker-end="url(#ptAr)"/>' +
+          '<text x="' + tx + '" y="' + ty + '" text-anchor="' + an + '">' + esc(lab) + "</text>";
+      }
+      function ptDimH(y, x1, x2, lab){
+        return '<line class="dm" x1="' + x1 + '" y1="' + y + '" x2="' + x2 + '" y2="' + y + '" marker-start="url(#ptAr)" marker-end="url(#ptAr)"/>' +
+          '<text x="' + ((x1 + x2) / 2) + '" y="' + (y - 5) + '" text-anchor="middle">' + esc(lab) + "</text>";
+      }
+      function ptSvg(body, h){
+        return '<svg viewBox="0 0 400 ' + h + '" role="img" aria-labelledby="ptFigCap" font-family="var(--mono)" font-size="11">' +
+          '<defs><marker id="ptAr" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L7,4 L0,7 z" fill="var(--ink-dim)"/></marker>' +
+          '<pattern id="ptHatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="var(--line)" stroke-width="1"/></pattern></defs>' +
+          '<style>.dm{stroke:var(--ink-dim);stroke-width:1;fill:none}.ext{stroke:var(--line);stroke-width:.8;stroke-dasharray:3 3}.ol{stroke:var(--ink);stroke-width:1.6;fill:none}.cl{stroke:var(--cyan);stroke-width:.8;stroke-dasharray:10 3 2 3}text{fill:var(--ink)}</style>' +
+          body + "</svg>";
+      }
+      /* Boss port half-section schematic (both sides drawn). L = labels object. Not to scale. */
+      function ptSvgBoss(L){
+        var cx = 210, top = 70, sfD = 12, chD = 16, thBot = 170, drBot = 196;
+        var sfR = 110, chR = 58, thR = 42, drR = 36, psR = 18;
+        function X(r){ return [cx - r, cx + r]; }
+        var sf = X(sfR), ch = X(chR), th = X(thR), dr = X(drR), ps = X(psR);
+        var cav = "M" + sf[0] + "," + top + " L" + sf[0] + "," + (top + sfD) + " L" + ch[0] + "," + (top + sfD) + " L" + th[0] + "," + (top + sfD + chD) +
+          " L" + th[0] + "," + thBot + " L" + dr[0] + "," + (thBot + 4) + " L" + dr[0] + "," + drBot + " L" + ps[0] + "," + (drBot + 10) + " L" + ps[0] + ",250" +
+          " L" + ps[1] + ",250 L" + ps[1] + "," + (drBot + 10) + " L" + dr[1] + "," + drBot + " L" + dr[1] + "," + (thBot + 4) + " L" + th[1] + "," + thBot +
+          " L" + th[1] + "," + (top + sfD + chD) + " L" + ch[1] + "," + (top + sfD) + " L" + sf[1] + "," + (top + sfD) + " L" + sf[1] + "," + top;
+        var teeth = "";
+        for(var y = top + sfD + chD + 4; y < thBot - 4; y += 8){
+          teeth += '<path class="dm" d="M' + th[0] + "," + y + " l-5,4 l5,4 M" + th[1] + "," + y + " l5,4 l-5,4\"/>";
+        }
+        var b = '<rect x="20" y="' + top + '" width="360" height="180" fill="url(#ptHatch)"/>' +
+          '<path d="' + cav + ' L380,' + top + ' L380,250 L20,250 L20,' + top + ' Z" fill="none"/>' +
+          '<path d="' + cav + ' Z" fill="var(--panel2)" stroke="none"/>' +
+          '<path class="ol" d="M20,' + top + " L" + sf[0] + "," + top + " " + cav.slice(cav.indexOf("L")) + " L380," + top + '"/>' + teeth +
+          '<line class="cl" x1="' + cx + '" y1="' + (top - 50) + '" x2="' + cx + '" y2="255"/>' +
+          ptDimH(top - 34, sf[0], sf[1], L.sfD) + ptDimH(top - 12, ch[0], ch[1], L.chD) +
+          '<line class="ext" x1="' + ch[0] + '" y1="' + (top - 12) + '" x2="' + ch[0] + '" y2="' + (top + sfD) + '"/><line class="ext" x1="' + ch[1] + '" y1="' + (top - 12) + '" x2="' + ch[1] + '" y2="' + (top + sfD) + '"/>' +
+          '<line class="ext" x1="' + sf[0] + '" y1="' + (top - 34) + '" x2="' + sf[0] + '" y2="' + top + '"/><line class="ext" x1="' + sf[1] + '" y1="' + (top - 34) + '" x2="' + sf[1] + '" y2="' + top + '"/>' +
+          ptDimV(sf[1] + 22, top, top + sfD, L.sfH, "r") +
+          ptDimV(sf[1] + 22, top + sfD, top + sfD + chD, L.chH, "r") +
+          '<line class="ext" x1="' + th[1] + '" y1="' + (top + sfD + chD) + '" x2="' + (sf[1] + 26) + '" y2="' + (top + sfD + chD) + '"/>' +
+          ptDimV(64, top + sfD, thBot, L.thH, "l") + ptDimV(40, top + sfD, drBot, L.drH, "b") +
+          '<line class="ext" x1="36" y1="' + thBot + '" x2="' + th[0] + '" y2="' + thBot + '"/><line class="ext" x1="36" y1="' + drBot + '" x2="' + dr[0] + '" y2="' + drBot + '"/>' +
+          '<line class="ext" x1="36" y1="' + (top + sfD) + '" x2="' + sf[0] + '" y2="' + (top + sfD) + '"/>' +
+          '<text x="' + (th[1] + 10) + '" y="' + (thBot - 34) + '">' + esc(L.thr) + "</text>" +
+          '<text x="' + (ch[1] - 8) + '" y="' + (top + sfD + chD + 14) + '" text-anchor="start">' + esc(L.ang) + "</text>" +
+          '<text x="' + (ps[1] + 8) + '" y="242">' + esc(L.ps) + "</text>";
+        return ptSvg(b, 262);
+      }
+      /* Four-bolt flange pad, face view. */
+      function ptSvgFlange(L){
+        var cx = 200, cy = 140, a = 130, bb = 62, hr = 11, pr = 38;
+        var holes = [[-1,-1],[1,-1],[-1,1],[1,1]].map(function(k){ return '<circle class="ol" cx="' + (cx + k[0] * a / 2) + '" cy="' + (cy + k[1] * bb / 2) + '" r="' + hr + '"/>'; }).join("");
+        var b = '<rect x="' + (cx - a / 2 - 34) + '" y="' + (cy - bb / 2 - 34) + '" width="' + (a + 68) + '" height="' + (bb + 68) + '" rx="8" fill="url(#ptHatch)" class="ol"/>' +
+          '<circle cx="' + cx + '" cy="' + cy + '" r="' + pr + '" fill="var(--panel2)" class="ol"/>' +
+          '<circle cx="' + cx + '" cy="' + cy + '" r="' + (pr - 9) + '" fill="none" class="dm"/>' + holes +
+          '<line class="cl" x1="' + (cx - a / 2 - 50) + '" y1="' + cy + '" x2="' + (cx + a / 2 + 50) + '" y2="' + cy + '"/><line class="cl" x1="' + cx + '" y1="' + (cy - bb / 2 - 50) + '" x2="' + cx + '" y2="' + (cy + bb / 2 + 50) + '"/>' +
+          ptDimH(cy - bb / 2 - 50, cx - a / 2, cx + a / 2, L.A) +
+          '<line class="ext" x1="' + (cx - a / 2) + '" y1="' + (cy - bb / 2 - 50) + '" x2="' + (cx - a / 2) + '" y2="' + (cy - bb / 2 - hr) + '"/><line class="ext" x1="' + (cx + a / 2) + '" y1="' + (cy - bb / 2 - 50) + '" x2="' + (cx + a / 2) + '" y2="' + (cy - bb / 2 - hr) + '"/>' +
+          ptDimV(cx + a / 2 + 60, cy - bb / 2, cy + bb / 2, L.B, "r") +
+          '<line class="ext" x1="' + (cx + a / 2 + hr) + '" y1="' + (cy - bb / 2) + '" x2="' + (cx + a / 2 + 64) + '" y2="' + (cy - bb / 2) + '"/><line class="ext" x1="' + (cx + a / 2 + hr) + '" y1="' + (cy + bb / 2) + '" x2="' + (cx + a / 2 + 64) + '" y2="' + (cy + bb / 2) + '"/>' +
+          '<text x="' + cx + '" y="' + (cy + 4) + '" text-anchor="middle">port</text>' +
+          '<text x="' + cx + '" y="' + (cy + bb / 2 + 62) + '" text-anchor="middle">' + esc(L.bolt) + "</text>" +
+          '<text x="' + cx + '" y="' + (cy + bb / 2 + 78) + '" text-anchor="middle" fill="var(--ink-dim)">O-ring groove is in the flange/clamp half, not the port face</text>';
+        return ptSvg(b, 276);
+      }
+      /* Two-way cartridge cavity section. */
+      function ptSvgCav(L){
+        var cx = 215, top = 60, sfD = 6, thBot = 112, stp = 160, bot = 222;
+        var sfR = 96, thR = 56, bR = 46, aR = 34, pR = 16;
+        var cav = "M" + (cx - sfR) + "," + top + " L" + (cx - sfR) + "," + (top + sfD) + " L" + (cx - thR) + "," + (top + sfD) + " L" + (cx - thR) + "," + thBot +
+          " L" + (cx - bR) + "," + (thBot + 8) + " L" + (cx - bR) + "," + stp + " L" + (cx - aR) + "," + (stp + 8) + " L" + (cx - aR) + "," + bot + " L" + (cx - pR) + "," + (bot + 10) + " L" + (cx - pR) + ",250" +
+          " L" + (cx + pR) + ",250 L" + (cx + pR) + "," + (bot + 10) + " L" + (cx + aR) + "," + bot + " L" + (cx + aR) + "," + (stp + 8) + " L" + (cx + bR) + "," + stp + " L" + (cx + bR) + "," + (thBot + 8) +
+          " L" + (cx + thR) + "," + thBot + " L" + (cx + thR) + "," + (top + sfD) + " L" + (cx + sfR) + "," + (top + sfD) + " L" + (cx + sfR) + "," + top;
+        var teeth = "";
+        for(var y = top + sfD + 4; y < thBot - 4; y += 8) teeth += '<path class="dm" d="M' + (cx - thR) + "," + y + " l-5,4 l5,4 M" + (cx + thR) + "," + y + " l5,4 l-5,4\"/>";
+        var b = '<rect x="20" y="' + top + '" width="360" height="190" fill="url(#ptHatch)"/>' +
+          '<path d="' + cav + ' Z" fill="var(--panel2)"/>' +
+          '<path class="ol" d="M20,' + top + " L" + (cx - sfR) + "," + top + " " + cav.slice(cav.indexOf("L")) + " L380," + top + '"/>' + teeth +
+                    '<text x="' + (cx + pR + 6) + '" y="246" fill="var(--ink-dim)">port 1</text>' +
+          '<line class="cl" x1="' + cx + '" y1="' + (top - 46) + '" x2="' + cx + '" y2="255"/>' +
+          ptDimH(top - 30, cx - sfR, cx + sfR, L.sf) +
+          '<line class="ext" x1="' + (cx - sfR) + '" y1="' + (top - 30) + '" x2="' + (cx - sfR) + '" y2="' + top + '"/><line class="ext" x1="' + (cx + sfR) + '" y1="' + (top - 30) + '" x2="' + (cx + sfR) + '" y2="' + top + '"/>' +
+          '<text x="' + (cx + thR + 10) + '" y="' + (thBot - 18) + '">' + esc(L.thr) + "</text>" +
+          '<text x="' + (cx + bR + 8) + '" y="' + (stp - 14) + '">' + esc(L.B) + "</text>" +
+          '<text x="' + (cx + aR + 8) + '" y="' + (bot - 18) + '">' + esc(L.A) + "</text>" +
+          ptDimV(84, top + sfD, stp, L.step, "l") + ptDimV(46, top + sfD, bot, L.dep, "b") +
+          '<line class="ext" x1="' + (cx - bR) + '" y1="' + stp + '" x2="80" y2="' + stp + '"/><line class="ext" x1="' + (cx - aR) + '" y1="' + bot + '" x2="42" y2="' + bot + '"/>' +
+          '<line class="ext" x1="' + (cx - sfR) + '" y1="' + (top + sfD) + '" x2="42" y2="' + (top + sfD) + '"/>';
+        return ptSvg(b, 262);
+      }
       function ptRender(){
-        var std = $("ptStd").value, i = parseInt($("ptSize").value, 10) || 0, rows, title, notes, unit, cite;
+        var std = $("ptStd").value, i = parseInt($("ptSize").value, 10) || 0, rows, title, notes, unit, cite, fig = "", figcap = "Schematic — not to scale. Letters match the table.";
         function mm(v){ return trimNum(v * 25.4, 2); }
         if(std === "j1926"){
           var r = PT_J1926[i]; unit = "in";
@@ -7863,8 +7991,9 @@
             ["Passage Ø (D)", fmt(r[3], 3) + " min", mm(r[3]) + " mm", "Applies only where the tap drill does not pass through the boss."],
             ["O-ring", r[12] + " (Parker 3-" + r[12].slice(-3) + ")", "ID " + fmt(r[13], 3) + " ±" + fmt(r[14], 3) + " · CS " + fmt(r[15], 3) + " ±" + fmt(r[16], 3) + " in", "90 Shore A nitrile is the hydraulic default."]
           ];
+          fig = ptSvgBoss({ sfD:"Y " + fmt(r[10], 3) + " min", chD:"U " + fmt(r[9], 3), sfH:"S " + fmt(r[8], 3) + " max", chH:"K " + fmt(r[5], 3), thH:"J " + fmt(r[4], 3), drH:"P " + fmt(r[7], 3), thr:r[2].replace(/-2B$/, ""), ang:"Z " + r[11] + "°", ps:"D " + fmt(r[3], 3) });
           cite = "SAE J1926-1 port dimensions as reproduced by the Parker O-Ring Handbook (Table 4-5), EPCO / Zero-Leak (J1926 reference dimensions) and Fluid-Tech Hydraulics — three agreeing sources. O-rings per AS568 900-series. Reference only — SAE J1926-1 governs for acceptance.";
-        } else {
+        } else if(std === "i6149"){
           var m = PT_6149[i]; unit = "mm";
           title = "ISO 6149-1 port — " + m[0] + " 6H";
           rows = [
@@ -7878,13 +8007,48 @@
             ["Spotface depth (L3)", trimNum(m[7], 2) + " max", "", null],
             ["Passage Ø (d3)", trimNum(m[3], 2) + " ref.", "", "Reference only — the connecting hole can differ to suit the application."]
           ];
+          if(m[5] === 1.6) rows[3][3] = "Parker 4300 and two other published tables give 1.6; one reproduction of the 2022 edition shows 2.2. Check your edition of ISO 6149-1 and match the fitting maker's O-ring.";
+          fig = ptSvgBoss({ sfD:"d2 " + trimNum(m[1], 2) + " min", chD:"d5 " + trimNum(m[4], 2), sfH:"L3 " + trimNum(m[7], 2) + " max", chH:"L1 " + trimNum(m[5], 2), thH:"L4 " + trimNum(m[8], 2), drH:"L2 " + trimNum(m[6], 2), thr:m[0] + " 6H", ang:"Z " + m[9] + "°", ps:"d3 " + trimNum(m[3], 2) });
           cite = "ISO 6149-1 Table 1 as reproduced by Parker Catalog 4300 (Table U17) and a second published reproduction, agreeing on every row; spot-checked against ISO 6149-1:2022 preview pages. Thread M…6H per ISO 261 / ISO 965-1. Reference only — ISO 6149-1 governs for acceptance.";
+        } else if(std === "f61" || std === "f62"){
+          var f = (std === "f61" ? PT_F61 : PT_F62)[i], c61 = std === "f61"; unit = "in";
+          title = "SAE J518 " + (c61 ? "Code 61" : "Code 62") + " — " + f[0] + " in flange port";
+          rows = [
+            ["Bolt spacing, long (A)", fmt(f[1], 3), mm(f[1]) + " mm", "Hole-centre to hole-centre across the long side."],
+            ["Bolt spacing, short (B)", fmt(f[2], 3), mm(f[2]) + " mm", null],
+            ["Bolt thread — inch", f[3] + " UNC-2B", "", "Four tapped holes."],
+            ["Bolt thread — metric (ISO 6162)", f[4] ? f[4] + " coarse" : "not listed", "", f[4] ? null : "Only one source found for this size — not shown. Check ISO 6162-" + (c61 ? "1" : "2") + "."],
+            ["Max working pressure", f[5] + " psi", trimNum(f[5] / 14.5038, 0) + " bar", "Rating of the flange connection; the port body must be designed for it."]
+          ];
+          if(c61) rows.push(["Watch out", "Code 61 ≠ Code 62", "", "Same nominal size, different bolt spacing and bolts — a Code 62 flange will not bolt onto a Code 61 port."]);
+          fig = ptSvgFlange({ A:"A " + fmt(f[1], 3), B:"B " + fmt(f[2], 3), bolt:"4 × " + f[3] + " UNC-2B" + (f[4] ? "  (metric: " + f[4] + ")" : "") });
+          figcap = "Port face, flange removed — schematic, not to scale.";
+          cite = "Bolt spacing: Parker Catalog 4400, AFP/Hydraquip and Winner Hydraulics flange tables (Code 62 also ContiTech) — at least two agreeing per row. Bolts and pressure: Parker flange kits, AFP, Winner. Tapped-hole depth and the Code 62 metric bolts above 1 in had one source only, so they are left out. Reference only — SAE J518 / ISO 6162 govern.";
+        } else {
+          var cv = PT_CAV[i]; unit = "in";
+          function rng(v){ return fmt(v[0], 3) + "–" + fmt(v[1], 3); }
+          function rmm(v){ return trimNum(v[0] * 25.4, 2) + "–" + trimNum(v[1] * 25.4, 2) + " mm"; }
+          title = "Cavity " + cv[0];
+          rows = [
+            ["Fits", cv[1], "", "Same cavity under different makers' names — the cartridges are interchangeable by fit, not always by function."],
+            ["Thread", cv[2], "", "Gauge with a 7/8-14 UNF-2B GO / NO-GO plug."],
+            ["Seal bore Ø (B)", rng(cv[4]), rmm(cv[4]), "Upper O-ring seals here: finish matters (form-reamed)."],
+            ["Nose bore Ø (A)", rng(cv[3]), rmm(cv[3]), "Lower O-ring seals here; port 1 exits through the nose."],
+            ["Spotface Ø", fmt(cv[5], 3), mm(cv[5]) + " mm", "Cartridge hex seats here; must be square to the bore."],
+            ["Depth to A/B step", rng(cv[6]), rmm(cv[6]), "From the spotface."],
+            ["Cavity depth", fmt(cv[7], 3) + " min", mm(cv[7]) + " mm", "From the spotface, full-diameter A bore."],
+            ["Form tools", cv[8], "", "Pilot drill, form drill, form ream and thread in one setup — concentricity is what makes cavities leak."]
+          ];
+          fig = ptSvgCav({ sf:"Ø " + fmt(cv[5], 3), thr:cv[2].replace(/-2B$/, ""), B:"B Ø" + rng(cv[4]), A:"A Ø" + rng(cv[3]), step:rng(cv[6]), dep:fmt(cv[7], 3) + " min" });
+          figcap = "Cavity section — schematic, not to scale. Port 2 is cross-drilled between the two seal bores — its position varies, so use the maker's drawing for it.";
+          cite = "Parker Bodies & Cavities section (C10-2 drawing) checked against the Form Relief CT10-2H tool sheet for HydraForce VC10-2 — every value agrees. Interchangeability per Danfoss/Comatrol's cross-reference. Other cavities (Sun T-series, Parker C08/C16) are not shown: their drawings online are images and could not be checked against a second source. Manufacturer spec, not a standard — the cartridge maker's current cavity drawing governs.";
         }
-        var link = ptThreadLink(std, std === "j1926" ? PT_J1926[i] : PT_6149[i]);
+        var link = std === "j1926" || std === "i6149" ? ptThreadLink(std, std === "j1926" ? PT_J1926[i] : PT_6149[i]) : null;
         var h = "<h3>" + esc(title) + "</h3><table class=\"grid\"><thead><tr><th>Feature</th><th>" + (unit === "in" ? "Inch" : "mm") + "</th>" + (unit === "in" ? "<th>mm</th>" : "") + "</tr></thead><tbody>" +
           rows.map(function(x){ return "<tr><td>" + esc(x[0]) + (x[3] ? '<br><span class="small">' + esc(x[3]) + "</span>" : "") + "</td><td>" + esc(x[1]) + "</td>" + (unit === "in" ? "<td>" + esc(x[2]) + "</td>" : "") + "</tr>"; }).join("") + "</tbody></table>";
         if(link) h += '<p style="margin-top:10px"><button type="button" class="ghost" id="ptThLink" data-fam="' + link.fam + '" data-size="' + link.size + '"' + (link.D ? ' data-d="' + link.D + '" data-p="' + link.P + '"' : "") + '>Open thread limits — ' + esc(link.lab) + " (internal)</button></p>";
         $("ptOut").innerHTML = h; $("ptCite").textContent = cite;
+        $("ptFig").innerHTML = fig ? fig + '<figcaption id="ptFigCap">' + esc(figcap) + "</figcaption>" : "";
         var b = $("ptThLink");
         if(b) b.addEventListener("click", function(){
           showTool("threads");
@@ -8568,7 +8732,7 @@
           ["stack","Stack-Up","tolerance stack stack-up worst case RSS assembly gap"],
           ["aql","AQL Lookup","AQL sampling plan Z1.4 lot size sample size accept reject inspection level code letter"],
           ["threads","Threads","thread M10 UNC UNF NPT BSP pitch diameter gauge plug ring go no-go Acme metric class 6g 2A 3B tap"],
-          ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal"],
+          ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],
           ["learn","Learn","learn explain what does it mean help Cpk meaning control limits vs spec limits normality gauge AQL what to do next"]
         ];
