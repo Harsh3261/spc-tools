@@ -7881,6 +7881,14 @@
          segs: [feature, Ø, z top, z bottom, kind] — kind "c" = 15° O-ring chamfer at the mouth, "t" = thread (Ø = minor-diameter bore).
          ports: [port, centre z, cross-drill Ø max (null = not given)]. chk = what a second source confirmed. */
       var PT_PK = [
+        { id:"C04-2", w:2, thr:"7/16-20 UNF-2B", sf:.828, sfd:.031, drill:.345, tot:.870, tool:"NFT04-2F", lead:"30°", thB:true,
+          segs:[["O-ring chamfer Ø (15°)",[.487,.492],0,[.093,.108],"c"],["Thread",[.390,.396],[.093,.108],.454,"t"],["Bore Ø (= thread minor)",[.390,.396],.454,[.505,.515]],["Nose bore Ø (20° × .062 lead-in)",[.343,.345],[.505,.515],.870]],
+          ports:[[2,[.418,.428],.140]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bore cylindricity .001 · seal surfaces 63 µin",
+          chk:"Parker catalog only. The chamfer Ø .487–.492 and minor Ø .390 match Bucher's 4-size cavities, but Bucher's nose bore and depths are a different cavity.", ok:false },
+        { id:"C04-3", w:3, thr:"7/16-20 UNF-2B", sf:.828, sfd:.031, drill:.315, tot:1.290, tool:"NFT04-3F", lead:"30°", thB:true,
+          segs:[["O-ring chamfer Ø (15°)",[.487,.492],0,[.093,.108],"c"],["Thread",[.390,.396],[.093,.108],.454,"t"],["Bore Ø (= thread minor)",[.390,.396],.454,[.505,.515]],["Seal bore Ø (20° × .062 lead-in)",[.343,.345],[.505,.515],[.973,.983]],["Nose bore Ø (20° lead-in)",[.312,.314],[.973,.983],1.290]],
+          ports:[[3,[.418,.428],.140],[2,[.888,.898],.140]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bore cylindricity .001 · seal surfaces 63 µin",
+          chk:"Parker catalog only. The bore diameters (.343–.345 / .312–.314) match Bucher C0430, but the depths differ (Bucher's step is at .650), so it is not the same cavity.", ok:false },
         { id:"C08-2", w:2, thr:"3/4-16 UNF-2B", sf:1.188, sfd:.031, drill:.438, tot:1.125, tool:"NFT08-2F", lead:"30°",
           segs:[["O-ring chamfer Ø (15°)",[.811,.816],0,[.100,.115],"c"],["Thread",[.684,.691],[.100,.115],[.557,.567],"t"],["Bore Ø (= thread minor)",[.684,.691],[.557,.567],[.745,.755]],["Nose bore Ø (datum B)",[.500,.502],[.745,.755],1.125]],
           ports:[[2,[.552,.562],.312]], geo:"Thread runout .002 to B · B ⊥ Ø.002 to A · seal surfaces 63 µin",
@@ -7893,14 +7901,22 @@
           segs:[["O-ring chamfer Ø (15°)",[.811,.817],0,[.100,.115],"c"],["Thread",[.684,.691],[.100,.115],[.557,.567],"t"],["Bore Ø (= thread minor)",[.684,.691],[.557,.567],[.675,.685]],["Seal bore Ø (datum B)",[.625,.627],[.675,.685],[1.235,1.245]],["Seal bore Ø",[.562,.564],[1.235,1.245],[1.792,1.802]],["Nose bore Ø",[.500,.502],[1.792,1.802],2.125]],
           ports:[[4,[.545,.555],.218],[3,[1.109,1.119],.218],[2,1.672,.218]], geo:"Thread runout .002 to B · B ⊥ Ø.002 to A · lower bores runout .002 to B · seal surfaces 63 µin",
           chk:"Parker catalog only. Mouth, thread and spotface are the same as the verified C08-2.", ok:false },
+        { id:"C09-2", w:2, thr:"3/4-16 UNF-2B", sf:1.188, sfd:.031, drill:.627, tot:1.125, tool:"FT09-2", lead:"30°", thB:true,
+          segs:[["O-ring chamfer Ø (15°)",[.811,.816],0,[.100,.115],"c"],["Thread",[.684,.690],[.100,.115],.562,"t"],["Bore Ø (= thread minor)",[.684,.690],.562,[.745,.755]],["Nose bore Ø (20° × .062 lead-in)",[.625,.627],[.745,.755],1.125]],
+          ports:[[2,[.552,.562],.312]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bore cylindricity .001 · seal surfaces 63 µin",
+          chk:"Parker catalog only. It has the same mouth, thread and depths as C08-2 but a .625 nose, so an 08-size cartridge will not seal in it.", ok:false },
         { id:"C10-2", w:2, thr:"7/8-14 UNF-2B", sf:1.188, sfd:.031, drill:.609, tot:1.312, tool:"NFT10-2F", lead:"30°",
           segs:[["O-ring chamfer Ø (15°)",[.942,.947],0,[.100,.115],"c"],["Thread",[.810,.814],[.100,.115],[.620,.630],"t"],["Bore Ø (= thread minor)",[.810,.814],[.620,.630],[.932,.942]],["Nose bore Ø (datum B)",[.625,.627],[.932,.942],1.312]],
           ports:[[2,[.702,.712],.445]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · seal surfaces 63 µin",
-          chk:"HydraForce VC10-2 (as reproduced by Hengli) and Form Relief's CT10-2H tool sheet agree on every diameter and depth. Bucher C1020 (ISO 17209 7/8-01-0-13) agrees within .008 on depths.", ok:true },
-        { id:"C10-3", w:3, thr:"7/8-14 UNF-2B", sf:1.188, sfd:.031, drill:.609, tot:1.875, tool:"NFT10-3F", lead:"30°",
+          chk:"HydraForce VC10-2 (as reproduced by Hengli) and Form Relief's CT10-2H tool sheet agree on every diameter and depth. Bucher C1020 (ISO 17209 7/8-01-0-13) agrees within .008 on depths. Parker's C10-2T (T body) uses this same cavity.", ok:true },
+        { id:"C10-3", w:3, thr:"7/8-14 UNF-2B", sf:1.187, sfd:.031, drill:.609, tot:1.875, tool:"NFT10-3F", lead:"30°",
           segs:[["O-ring chamfer Ø (15°)",[.942,.947],0,[.100,.115],"c"],["Thread",[.810,.814],[.100,.115],[.620,.630],"t"],["Bore Ø (= thread minor)",[.810,.814],[.620,.630],[.845,.855]],["Seal bore Ø (datum B)",[.688,.690],[.845,.855],[1.495,1.505]],["Nose bore Ø",[.625,.627],[1.495,1.505],1.875]],
           ports:[[3,[.715,.725],.250],[2,[1.339,1.349],.250]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · nose runout .002 to B · seal surfaces 63 µin",
           chk:"Parker catalog only. Diameters match Bucher's 10-3, but its step depths and port positions differ (.875 / 1.525 / 1.900), so the two are NOT the same cavity. Check the cartridge maker's compatibility list.", ok:false },
+        { id:"C10-3S", w:3, thr:"7/8-14 UNF-2B", sf:1.188, sfd:.031, drill:.672, tot:1.890, tool:"NFT10S-3F", lead:"30°",
+          segs:[["O-ring chamfer Ø (15°)",[.942,.947],0,[.100,.115],"c"],["Thread",[.810,.814],[.100,.115],[.557,.567],"t"],["Bore Ø (= thread minor)",[.810,.814],[.557,.567],[.645,.655]],["Seal bore Ø (datum B)",[.750,.752],[.645,.655],[1.510,1.520]],["Nose bore Ø",[.688,.690],[1.510,1.520],1.890]],
+          ports:[[3,[.557,.567],.156],[2,[1.214,1.224],.500]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · nose runout .002 to B · seal surfaces 63 µin",
+          chk:"Parker catalog only. Short 3-way — it is not the same as C10-3; check the cartridge model.", ok:false },
         { id:"C10-4", w:4, thr:"7/8-14 UNF-2B", sf:1.188, sfd:.031, drill:.609, tot:2.500, tool:"NFT10-4F", lead:"31°",
           segs:[["O-ring chamfer Ø (15°)",[.942,.947],0,[.100,.115],"c"],["Thread",[.810,.814],[.100,.115],[.620,.630],"t"],["Bore Ø (= thread minor)",[.810,.814],[.620,.630],[.870,.880]],["Seal bore Ø (datum B)",[.750,.752],[.870,.880],[1.495,1.505]],["Seal bore Ø",[.688,.690],[1.495,1.505],[2.120,2.130]],["Nose bore Ø",[.625,.627],[2.120,2.130],2.500]],
           ports:[[4,[.715,.725],.250],[3,[1.339,1.349],.250],[2,[1.963,1.973],.250]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · lower bores runout .002 to B · seal surfaces 63 µin",
@@ -7913,10 +7929,18 @@
           segs:[["O-ring chamfer Ø (15°)",[1.148,1.153],0,[.130,.145],"c"],["Thread",[.972,.978],[.130,.145],.750,"t"],["Bore Ø (= thread minor)",[.972,.978],.750,1.062],["Seal bore Ø (20° × .062 lead-in)",[.937,.939],1.062,1.908],["Nose bore Ø",[.875,.877],1.908,2.326]],
           ports:[[3,.812,.437],[2,1.656,.437]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bore cylindricity .001 · seal surfaces 63 µin",
           chk:"Parker catalog only. The diameters match Danfoss CP12-3, but the depths do not (Danfoss's is a longer cavity).", ok:false },
+        { id:"C12-3L", w:3, thr:"1-1/16-12 UN-2B", sf:1.500, sfd:.031, drill:.781, tot:2.890, totX:true, tool:"NFT12L-3F", lead:"29°", thB:true,
+          segs:[["O-ring chamfer Ø (15°)",[1.148,1.152],0,[.130,.145],"c"],["Thread",[.972,.978],[.130,.145],.810,"t"],["Bore Ø (= thread minor)",[.972,.978],.810,1.400],["Seal bore Ø (R .062)",[.937,.939],1.400,2.370],["Nose bore Ø",[.866,.868],2.370,2.890]],
+          ports:[[3,1.120,.500],[2,2.090,.500]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bores cylindricity .001 · 15° chamfer 32 µin, bores 63 µin",
+          chk:"Parker catalog only. Long 3-way, which differs from C12-3: spotface 1.500 ±.005 × .031 ±.005, and Parker's drill note is Ø.781 max for the orifice disc. The diameters match Bucher C1240-family values, but the depths differ.", ok:false },
         { id:"C12-4", w:4, thr:"1-1/16-12 UN-2B", sf:1.625, sfd:.031, drill:.815, tot:3.176, tool:"NFT12-4F", lead:"30°", thB:true,
           segs:[["O-ring chamfer Ø (15°)",[1.148,1.153],0,[.130,.145],"c"],["Thread",[.972,.978],[.130,.145],.750,"t"],["Bore Ø (= thread minor)",[.972,.978],.750,1.062],["Seal bore Ø (20° × .062 lead-in)",[.937,.939],1.062,1.908],["Seal bore Ø",[.875,.877],1.908,2.758],["Nose bore Ø",[.813,.815],2.758,3.176]],
           ports:[[4,.812,.437],[3,1.656,.437],[2,2.508,.437]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bore cylindricity .001 · seal surfaces 63 µin",
           chk:"Parker catalog only. Upper features are the same as C12-3.", ok:false },
+        { id:"C12-4L", w:4, thr:"1-1/16-12 UN-2B", sf:1.500, sfd:.031, drill:.718, tot:3.860, totX:true, tool:"NFT12L-4F", lead:"29°", thB:true,
+          segs:[["O-ring chamfer Ø (15°)",[1.148,1.152],0,[.130,.145],"c"],["Thread",[.972,.978],[.130,.145],.810,"t"],["Bore Ø (= thread minor)",[.972,.978],.810,1.400],["Seal bore Ø (R .062)",[.937,.939],1.400,2.370],["Seal bore Ø",[.875,.877],2.370,3.330],["Nose bore Ø",[.812,.814],3.330,3.860]],
+          ports:[[4,1.120,.500],[3,2.090,.500],[2,3.060,.500]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bores cylindricity .001 · 15° chamfer 32 µin, bores 63 µin",
+          chk:"Parker catalog only. The diameters (1.148 / .938 / .876 / .813) match Bucher C1240, but Bucher's steps are 1.375 / 2.275 / 3.175, so it is not the same cavity. Parker's drill note is Ø.718 max for the orifice disc.", ok:false },
         { id:"C16-2", w:2, thr:"1-5/16-12 UNF-2B", sf:1.750, sfd:.031, drill:.938, tot:1.844, tool:"NFT16-2F", lead:"30°",
           segs:[["O-ring chamfer Ø (15°)",[1.398,1.403],0,[.130,.145],"c"],["Thread",[1.231,1.237],[.130,.145],[.745,.755],"t"],["Bore Ø (= thread minor)",[1.231,1.237],[.745,.755],[1.339,1.349]],["Nose bore Ø (datum B)",[1.126,1.128],[1.339,1.349],1.844]],
           ports:[[2,[.964,.974],.750]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · seal surfaces 63 µin",
@@ -7925,6 +7949,10 @@
           segs:[["O-ring chamfer Ø (15°)",[1.398,1.403],0,[.130,.145],"c"],["Thread",[1.231,1.237],[.130,.145],[.870,.880],"t"],["Bore Ø (= thread minor)",[1.231,1.237],[.870,.880],[1.344,1.354]],["Seal bore Ø (datum B)",[1.126,1.128],[1.344,1.354],[2.464,2.474]],["Nose bore Ø",[1.063,1.065],[2.464,2.474],2.968]],
           ports:[[3,[.964,.974],.625],[2,[2.089,2.099],.625]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · nose runout .002 to B · seal surfaces 63 µin",
           chk:"Bucher C1630 (ISO 17209 1 5/16-03-0-13 / NFPA T3.5.50) agrees on every diameter, port position and depth. The step at 1.344–1.354 is from Bucher, because Parker's drawing leaves it undimensioned.", ok:true },
+        { id:"C16-3S", w:3, thr:"1-5/16-12 UNF-2B", sf:1.750, sfd:.031, drill:.938, tot:2.188, tool:"NFT16S-3F", lead:"45°", thND:true,
+          segs:[["O-ring chamfer Ø (15°)",[1.398,1.403],0,[.130,.145],"c"],["Thread",[1.231,1.237],[.130,.145],[.683,.693],"t"],["Seal bore Ø (datum B, R .062)",[1.126,1.128],[.683,.693],[1.807,1.817]],["Nose bore Ø",[1.001,1.003],[1.807,1.817],2.188]],
+          ports:[[3,[.651,.661],.250],[2,[1.464,1.474],.625]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · nose runout .002 to B · seal surfaces 63 µin",
+          chk:"Parker catalog only. Parker does not dimension the thread depth on this drawing — the minor bore runs to the step at .683–.693.", ok:false },
         { id:"C16-4", w:4, thr:"1-5/16-12 UNF-2B", sf:1.750, sfd:.030, drill:.938, tot:4.094, tool:"NFT16-4F", lead:"30°",
           segs:[["O-ring chamfer Ø (15°)",[1.398,1.403],0,[.130,.145],"c"],["Thread",[1.231,1.237],[.130,.145],.875,"t"],["Bore Ø (= thread minor)",[1.231,1.237],.875,1.344],["Seal bore Ø (datum B, 20° lead-in)",[1.126,1.128],1.344,2.469],["Seal bore Ø",[1.063,1.065],2.469,3.594],["Nose bore Ø",[1.001,1.003],3.594,4.094]],
           ports:[[4,.970,null],[3,2.090,.625],[2,3.220,null]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · lower bores runout .002 to B · seal surfaces 63 µin",
@@ -7932,6 +7960,10 @@
         { id:"C20-2", w:2, thr:"1-5/8-12 UNF-2B", sf:2.270, sfd:.031, drill:1.187, tot:2.312, tool:"NFT20-2F", lead:"30°",
           segs:[["O-ring chamfer Ø (15°)",[1.713,1.718],0,[.127,.137],"c"],["Thread",[1.537,1.543],[.127,.137],[.807,.817],"t"],["Bore Ø (= thread minor)",[1.537,1.543],[.807,.817],[1.744,1.755]],["Nose bore Ø (datum B)",[1.438,1.440],[1.744,1.755],2.312]],
           ports:[[2,[1.214,1.224],1.000]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · seal surfaces 63 µin",
+          chk:"Parker catalog only.", ok:false },
+        { id:"C20-3S", w:3, thr:"1-5/8-12 UNF-2B", sf:2.270, sfd:.031, drill:1.187, tot:3.063, tool:"NFT20S-3F", lead:"30°",
+          segs:[["O-ring chamfer Ø (15°)",[1.713,1.718],0,[.127,.137],"c"],["Thread",[1.537,1.543],[.127,.137],[.807,.817],"t"],["Bore Ø (= thread minor)",[1.537,1.543],[.807,.817],[.933,.943]],["Seal bore Ø (datum B)",[1.438,1.440],[.933,.943],[2.526,2.536]],["Nose bore Ø",[1.313,1.315],[2.526,2.536],3.063]],
+          ports:[[3,[.776,.786],.250],[2,[1.933,1.943],1.000]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · nose runout .002 to B · seal surfaces 63 µin",
           chk:"Parker catalog only.", ok:false }
       ];
       /* END DATA PT_PK */
@@ -7975,7 +8007,7 @@
         else if(std === "i6149"){ opts = PT_6149.map(function(r, i){ return [String(i), r[0] + " 6H"]; }); def = "2"; }
         else if(std === "f61" || std === "f62"){ opts = (std === "f61" ? PT_F61 : PT_F62).map(function(r, i){ return [String(i), r[0] + " in flange"]; }); def = "2"; }
         else opts = PT_PK.map(function(r, i){ return ["p" + i, "Parker " + r.id + " — " + r.w + "-way, " + r.thr.replace(/-2B$/, "") + (r.ok ? " ✓" : "")]; }).concat(PT_SUN.map(function(r, i){ return ["s" + i, "Sun " + r.id + " — series " + r.ser + ", " + r.np + "-port, " + r.thr.replace(/-\d?[A-Z]+$/, "").replace(/-2B$/, "")]; }));
-        thFillSelect($("ptSize"), opts, std === "cav" ? "p3" : def);
+        thFillSelect($("ptSize"), opts, std === "cav" ? "p6" : def);
         ptRender();
       }
       function ptThreadLink(std, r){
@@ -8188,10 +8220,10 @@
           rows = [["Thread", q.thr, "", null], ["Spotface Ø (datum A)", fmt(q.sf, 3) + " × " + fmt(q.sfd, 3) + " deep max", mm(q.sf) + " mm", "Every depth below is measured from this face."]];
           q.segs.forEach(function(sg){
             if(sg[4] === "c"){ rows.push([sg[0], pr(sg[1]), prm(sg[1]), "Depth " + pr(sg[3]) + " from A — the hex O-ring seals here (63 µin)."]); return; }
-            if(sg[4] === "t"){ rows.push(["Thread depth", pr(sg[3]), prm(sg[3]), "Minor Ø (tap-drill bore) " + pr(sg[1]) + "."]); return; }
-            rows.push([sg[0], pr(sg[1]), prm(sg[1]), "From " + pr(sg[2]) + " to " + pr(sg[3]) + (sg === q.segs[q.segs.length - 1] ? " min" : "") + " deep."]);
+            if(sg[4] === "t"){ rows.push(["Thread depth", q.thND ? "not dimensioned" : pr(sg[3]), q.thND ? "" : prm(sg[3]), "Minor Ø (tap-drill bore) " + pr(sg[1]) + "." + (q.thND ? " Parker gives no thread depth on this drawing." : "")]); return; }
+            rows.push([sg[0], pr(sg[1]), prm(sg[1]), "From " + pr(sg[2]) + " to " + pr(sg[3]) + (sg === q.segs[q.segs.length - 1] && !q.totX ? " min" : "") + " deep."]);
           });
-          rows.push(["Cavity depth", fmt(q.tot, 3) + " min", mm(q.tot) + " mm", "Full nose diameter to here; nose lead-in " + q.lead + "."]);
+          rows.push(["Cavity depth", fmt(q.tot, 3) + (q.totX ? "" : " min"), mm(q.tot) + " mm", (q.totX ? "Printed without “min” on Parker's drawing. " : "Full nose diameter to here; ") + "nose lead-in " + q.lead + "."]);
           rows.push(["Ports (centre from A, cross-drill Ø max)", q.ports.map(function(p){ return p[0] + ": " + pr(p[1]) + (p[2] ? " (Ø" + fmt(p[2], 3) + ")" : ""); }).join(" · "), "", "Port 1 is the nose — drill Ø" + fmt(q.drill, 3) + " max through."]);
           rows.push(["Geometric limits", q.geo, "", null]);
           rows.push(["Finishing form tool", "Parker " + q.tool, "", "Drill, form-ream and thread in one setup."]);
@@ -8889,7 +8921,7 @@
           ["stack","Stack-Up","tolerance stack stack-up worst case RSS assembly gap"],
           ["aql","AQL Lookup","AQL sampling plan Z1.4 lot size sample size accept reject inspection level code letter"],
           ["threads","Threads","thread M10 UNC UNF NPT BSP pitch diameter gauge plug ring go no-go Acme metric class 6g 2A 3B tap"],
-          ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
+          ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 C04-2 C04-3 C09-2 C10-2T C10-3S C12-3L C12-4L C16-3S C20-3S sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],
           ["learn","Learn","learn explain what does it mean help Cpk meaning control limits vs spec limits normality gauge AQL what to do next"]
         ];

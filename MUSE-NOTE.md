@@ -50,6 +50,19 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-20 — Parker cavities complete (21)
+
+- Added C04-2, C04-3, C09-2, C10-3S, C12-3L, C12-4L, C16-3S and C20-3S. C10-2T is noted as using the C10-2 cavity.
+- Left out on purpose:
+  - C11-3: the page header says C11-3 (EPR111C) but the drawing callout says C10-3L, and it is a single-valve special.
+  - MHC counterbalance and pilot-piston cavities.
+- Checks run on all 21:
+  - Structure: depths in order with no gaps, bores shrink going down, port count = ways − 1, every port inside the cavity depth.
+  - Every number in the data was searched for in that cavity's catalog page text. All were found except (a) values computed from ± tolerances on C12-3L/4L and (b) the C16-3 step, which comes from Bucher.
+  - That search caught that the C10-3 spotface is printed as 1.187, so the entry now uses 1.187.
+- New second-source notes: the C04-3 diameters match Bucher C0430 and the C12-4L diameters match Bucher C1240, but in both cases the depths differ, so they are flagged as not the same cavity.
+- Cache v33.
+
 ## 2026-11-20 — Parker cavities (13), C10-2 corrected
 
 - Added Parker C08-2/3/4, C10-2/3/4, C12-2/3/4, C16-2/3/4 and C20-2. Values were read from Parker catalog HY15-3502/US "Bodies and Cavities" (2012), the copy Harsh supplied. Each entry carries: spotface, 15° O-ring chamfer, thread depth and minor bore, every bore step, total depth, ports (centre and cross-drill Ø max), drill Ø, geometric limits and the finishing form tool.
