@@ -7884,11 +7884,11 @@
         { id:"C04-2", w:2, thr:"7/16-20 UNF-2B", sf:.828, sfd:.031, drill:.345, tot:.870, tool:"NFT04-2F", lead:"30°", thB:true,
           segs:[["O-ring chamfer Ø (15°)",[.487,.492],0,[.093,.108],"c"],["Thread",[.390,.396],[.093,.108],.454,"t"],["Bore Ø (= thread minor)",[.390,.396],.454,[.505,.515]],["Nose bore Ø (20° × .062 lead-in)",[.343,.345],[.505,.515],.870]],
           ports:[[2,[.418,.428],.140]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bore cylindricity .001 · seal surfaces 63 µin",
-          chk:"Parker catalog only. The chamfer Ø .487–.492 and minor Ø .390 match Bucher's 4-size cavities, but Bucher's nose bore and depths are a different cavity.", ok:false },
+          chk:"Parker catalog only. The chamfer Ø .487–.492 and minor Ø .390 match Bucher's 4-size cavities, but Bucher's nose bore and depths are a different cavity. Note: Parker prints the minor bore as .390–.396, but ASME B1.1 caps the 7/16-20 UNF-2B internal minor at .395 — hold .395 max (the stricter limit) so the thread still gauges as 2B.", ok:false },
         { id:"C04-3", w:3, thr:"7/16-20 UNF-2B", sf:.828, sfd:.031, drill:.315, tot:1.290, tool:"NFT04-3F", lead:"30°", thB:true,
           segs:[["O-ring chamfer Ø (15°)",[.487,.492],0,[.093,.108],"c"],["Thread",[.390,.396],[.093,.108],.454,"t"],["Bore Ø (= thread minor)",[.390,.396],.454,[.505,.515]],["Seal bore Ø (20° × .062 lead-in)",[.343,.345],[.505,.515],[.973,.983]],["Nose bore Ø (20° lead-in)",[.312,.314],[.973,.983],1.290]],
           ports:[[3,[.418,.428],.140],[2,[.888,.898],.140]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bore cylindricity .001 · seal surfaces 63 µin",
-          chk:"Parker catalog only. The bore diameters (.343–.345 / .312–.314) match Bucher C0430, but the depths differ (Bucher's step is at .650), so it is not the same cavity.", ok:false },
+          chk:"Parker catalog only. The bore diameters (.343–.345 / .312–.314) match Bucher C0430, but the depths differ (Bucher's step is at .650), so it is not the same cavity. Note: Parker prints the minor bore as .390–.396, but ASME B1.1 caps the 7/16-20 UNF-2B internal minor at .395 — hold .395 max (the stricter limit) so the thread still gauges as 2B.", ok:false },
         { id:"C08-2", w:2, thr:"3/4-16 UNF-2B", sf:1.188, sfd:.031, drill:.438, tot:1.125, tool:"NFT08-2F", lead:"30°",
           segs:[["O-ring chamfer Ø (15°)",[.811,.816],0,[.100,.115],"c"],["Thread",[.684,.691],[.100,.115],[.557,.567],"t"],["Bore Ø (= thread minor)",[.684,.691],[.557,.567],[.745,.755]],["Nose bore Ø (datum B)",[.500,.502],[.745,.755],1.125]],
           ports:[[2,[.552,.562],.312]], geo:"Thread runout .002 to B · B ⊥ Ø.002 to A · seal surfaces 63 µin",
@@ -8132,6 +8132,26 @@
           '<defs><pattern id="ptHatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="var(--line)" stroke-width="1"/></pattern></defs>' +
           '<style>.dm{stroke:var(--ink-dim);stroke-width:1;fill:none}.ext{stroke:var(--line);stroke-width:.7;stroke-dasharray:2 3}.ol{stroke:var(--ink);stroke-width:1.4;fill:none}.cl{stroke:var(--cyan);stroke-width:.8;stroke-dasharray:10 3 2 3}text{fill:var(--ink)}</style>' + b + "</svg>";
       }
+      /* Thread callout -> thread-tool target. Handles "7/8-14 UNF-2B", "1-5/16-12 12-UN", "1.000-14 UNS-2B" (calculated UNS),
+         "M20 × 1.5-6H", and coarse metric bolts "M10". */
+      function ptThreadFor(t){
+        if(!t) return null;
+        var COARSE = { M8:"1.25", M10:"1.5", M12:"1.75", M14:"2", M16:"2", M20:"2.5" };
+        var m = /^M(\d+)(?:\s*×\s*([\d.]+))?/.exec(t);
+        if(m){
+          var lab = "M" + m[1] + " × " + (m[2] || COARSE["M" + m[1]] || "");
+          for(var j = 0; j < TH_M.length; j++){ if(TH_M[j][0] === lab) return { fam:"metric", size:String(j), lab:lab }; }
+          return m[2] ? { fam:"metric", size:"custom", lab:lab + " — calculated (ISO 965-1)", D:m[1], P:m[2] } : null;
+        }
+        var u = /^(\d+-\d+\/\d+|\d+\/\d+|\d+\.\d+|\d+)-(\d+)/.exec(t);
+        if(!u) return null;
+        var base = u[1].replace(/\.0+$/, "") + "-" + u[2], all = thUAll();
+        for(var i = 0; i < all.length; i++){ if(all[i][0].indexOf(base + " ") === 0) return { fam:"un", size:String(i), lab:all[i][0] }; }
+        var D = /^\d+(\.\d+)?$/.test(u[1]) ? Number(u[1]) : null;
+        /* Tabulated UNS sizes (e.g. 1-14 UNS, ASME B1.1 Table 3) use the LE = D basis, which reproduces the
+           pitch diameter printed on Sun's drawings (.9536/.9609); the UNS 9-pitch basis would give .9605. */
+        return D ? { fam:"un", size:"custom", lab:trimNum(D, 3) + "-" + u[2] + " UNS — calculated, LE = D basis", D:String(D), P:u[2], series:"UNF" } : null;
+      }
       function ptRender(){
         var std = $("ptStd").value, sv = $("ptSize").value, i = parseInt(sv, 10) || 0, rows, title, notes, unit, cite, fig = "", figcap = "Schematic — not to scale. Letters match the table.";
         function mm(v){ return trimNum(v * 25.4, 2); }
@@ -8220,7 +8240,7 @@
           rows = [["Thread", q.thr, "", null], ["Spotface Ø (datum A)", fmt(q.sf, 3) + " × " + fmt(q.sfd, 3) + " deep max", mm(q.sf) + " mm", "Every depth below is measured from this face."]];
           q.segs.forEach(function(sg){
             if(sg[4] === "c"){ rows.push([sg[0], pr(sg[1]), prm(sg[1]), "Depth " + pr(sg[3]) + " from A — the hex O-ring seals here (63 µin)."]); return; }
-            if(sg[4] === "t"){ rows.push(["Thread depth", q.thND ? "not dimensioned" : pr(sg[3]), q.thND ? "" : prm(sg[3]), "Minor Ø (tap-drill bore) " + pr(sg[1]) + "." + (q.thND ? " Parker gives no thread depth on this drawing." : "")]); return; }
+            if(sg[4] === "t"){ rows.push(["Thread depth", q.thND ? "not dimensioned" : pr(sg[3]), q.thND ? "" : prm(sg[3]), "Minor Ø (tap-drill bore) " + pr(sg[1]) + "." + (/^C04/.test(q.id) ? " ⚠ .396 max exceeds the ASME B1.1 2B minor max of .395 — hold .395." : "") + (q.thND ? " Parker gives no thread depth on this drawing." : "")]); return; }
             rows.push([sg[0], pr(sg[1]), prm(sg[1]), "From " + pr(sg[2]) + " to " + pr(sg[3]) + (sg === q.segs[q.segs.length - 1] && !q.totX ? " min" : "") + " deep."]);
           });
           rows.push(["Cavity depth", fmt(q.tot, 3) + (q.totX ? "" : " min"), mm(q.tot) + " mm", (q.totX ? "Printed without “min” on Parker's drawing. " : "Full nose diameter to here; ") + "nose lead-in " + q.lead + "."]);
@@ -8232,20 +8252,25 @@
           figcap = "Parker " + q.id + " — drawn to scale from the numbers (lead-ins and radii omitted). Depths from datum A on the left, diameters on the right.";
           cite = "Parker catalog HY15-3502/US, Bodies and Cavities (2012 edition) — Parker's drawing is the governing spec. " + q.chk + " Check against Parker's current catalog before machining.";
         }
-        var link = std === "j1926" || std === "i6149" ? ptThreadLink(std, std === "j1926" ? PT_J1926[i] : PT_6149[i]) : null;
+        var link = std === "j1926" || std === "i6149" ? ptThreadLink(std, std === "j1926" ? PT_J1926[i] : PT_6149[i])
+          : std === "cav" ? ptThreadFor(sv.charAt(0) === "s" ? PT_SUN[parseInt(sv.slice(1), 10) || 0].thr : PT_PK[parseInt(sv.slice(1), 10) || 0].thr)
+          : ptThreadFor((std === "f61" ? PT_F61 : PT_F62)[i][3]);
+        var link2 = (std === "f61" || std === "f62") && (std === "f61" ? PT_F61 : PT_F62)[i][4] ? ptThreadFor((std === "f61" ? PT_F61 : PT_F62)[i][4]) : null;
         var h = "<h3>" + esc(title) + "</h3><table class=\"grid\"><thead><tr><th>Feature</th><th>" + (unit === "in" ? "Inch" : "mm") + "</th>" + (unit === "in" ? "<th>mm</th>" : "") + "</tr></thead><tbody>" +
           rows.map(function(x){ return "<tr><td>" + esc(x[0]) + (x[3] ? '<br><span class="small">' + esc(x[3]) + "</span>" : "") + "</td><td>" + esc(x[1]) + "</td>" + (unit === "in" ? "<td>" + esc(x[2]) + "</td>" : "") + "</tr>"; }).join("") + "</tbody></table>";
-        if(link) h += '<p style="margin-top:10px"><button type="button" class="ghost" id="ptThLink" data-fam="' + link.fam + '" data-size="' + link.size + '"' + (link.D ? ' data-d="' + link.D + '" data-p="' + link.P + '"' : "") + '>Open thread limits — ' + esc(link.lab) + " (internal)</button></p>";
+        function lb(L, id){ return '<button type="button" class="ghost ptthl" id="' + id + '" data-fam="' + L.fam + '" data-size="' + L.size + '"' + (L.D ? ' data-d="' + L.D + '" data-p="' + L.P + '"' : "") + (L.series ? ' data-series="' + L.series + '"' : "") + '>Open thread limits — ' + esc(L.lab) + " (internal)</button>"; }
+        if(link || link2) h += '<p style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">' + (link ? lb(link, "ptThLink") : "") + (link2 ? lb(link2, "ptThLink2") : "") + "</p>";
         $("ptOut").innerHTML = h; $("ptCite").textContent = cite;
         $("ptFig").innerHTML = fig ? fig + '<figcaption id="ptFigCap">' + esc(figcap) + "</figcaption>" : "";
-        var b = $("ptThLink");
-        if(b) b.addEventListener("click", function(){
+        Array.prototype.forEach.call(document.querySelectorAll("#ptOut .ptthl"), function(b){ b.addEventListener("click", function(){
           showTool("threads");
+          thState.view = "mfg";
           $("thFam").value = b.getAttribute("data-fam"); thFillSizes();
           $("thSize").value = b.getAttribute("data-size"); thFillSideClass();
+          if(b.getAttribute("data-series")) $("thSeries").value = b.getAttribute("data-series");
           if(b.getAttribute("data-d")){ $("thCD").value = b.getAttribute("data-d"); $("thCP").value = b.getAttribute("data-p"); thRender(); }
           if(Array.prototype.some.call($("thSide").options, function(o){ return o.value === "int"; })){ $("thSide").value = "int"; thFillSideClass(); }
-        });
+        }); });
       }
       $("ptStd").addEventListener("change", function(){ holdScroll(ptFill); });
       $("ptSize").addEventListener("change", function(){ holdScroll(ptRender); });

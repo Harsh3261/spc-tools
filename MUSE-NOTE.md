@@ -50,6 +50,13 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-20 — Thread links from every port, flange and cavity
+
+- New `ptThreadFor()` turns a thread callout into a thread-tool target. Every cavity (Parker and Sun) and every flange now has an "Open thread limits" button, and flanges get one for the inch bolt and one for the metric bolt. Tested on all 43 combinations.
+- Sun's 1.000-14 UNS opens as a calculated size on the LE = D basis. That reproduces the pitch diameter Sun prints (.9536/.9609); the UNS 9-pitch basis would give .9605. Sun's M20 × 1.5-6H PD (.7491/.7565) matches the ISO table exactly.
+- Cross-check: every Parker thread-minor bore was compared with the ASME B1.1 2B minor limits. 19 of 21 fall inside. C04-2 and C04-3 print .396 max against B1.1's .395, so both now carry a "hold .395" warning (the stricter-limit rule).
+- Cache v34.
+
 ## 2026-11-20 — Parker cavities complete (21)
 
 - Added C04-2, C04-3, C09-2, C10-3S, C12-3L, C12-4L, C16-3S and C20-3S. C10-2T is noted as using the C10-2 cavity.
