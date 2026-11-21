@@ -8126,24 +8126,27 @@
           var c = PT_SUN[parseInt(sv.slice(1), 10) || 0]; unit = "in";
           function rg(v){ return Array.isArray(v) ? (v.length > 1 ? fmt(v[0], 3) + "–" + fmt(v[1], 3) : fmt(v[0], 3)) : fmt(Math.abs(v), 3); }
           function rgm(v){ return Array.isArray(v) ? (v.length > 1 ? trimNum(v[0] * 25.4, 2) + "–" + trimNum(v[1] * 25.4, 2) : trimNum(v[0] * 25.4, 2)) + " mm" : trimNum(Math.abs(v) * 25.4, 2) + " mm"; }
-          function zw(z){ var m = Array.isArray(z) ? z[0] : z; return m < 0 ? rg(z) + " above L.S." : m === 0 ? "L.S." : rg(z) + " below"; }
+          function tl(v){ return (Array.isArray(v) && v.length > 1) ? rg(v) : rg(v) + " ±.005"; }
+          function zw(z){ var m = Array.isArray(z) ? z[0] : z; return m < 0 ? tl(z) + " above L.S." : m === 0 ? "L.S." : tl(z) + " below"; }
           var chk = c.sct ? " ✓ SCT" : "";
           title = "Sun " + c.id + " cavity — series " + c.ser + ", " + c.np + "-port";
           rows = [["Thread", c.thr + chk, "PD " + fmt(c.pd[0], 4) + "–" + fmt(c.pd[1], 4) + " in", "Concentric to datum A within .002 (thread and every diameter)."]];
           c.segs.forEach(function(sg){
-            if(sg[4] === "t"){ rows.push(["Min full thread", "to " + rg(sg[3]) + " below L.S.", rgm(sg[3]), "Thread starts " + rg(sg[2]) + " below L.S."]); return; }
+            if(sg[4] === "t"){ rows.push(["Min full thread", "to " + rg(sg[3]) + " below L.S.", rgm(sg[3]), "Thread starts " + tl(sg[2]) + " below L.S."]); return; }
             var isTop = sg === c.segs[0] && /Hex clearance/.test(sg[0]), isNose = /Nose/.test(sg[0]);
-            rows.push([sg[0], rg(sg[1]) + (c.sct && (isTop || isNose) ? " ✓ SCT" : ""), rgm(sg[1]), (sg[4] === "d" ? "Drill to " + rg(sg[3]) + " min below L.S. (working-parts clearance)." : "From " + (sg === c.segs[0] ? "the surface" : zw(sg[2])) + " to " + zw(sg[3]) + (zw(sg[3]) === "L.S." ? "" : "."))]);
-            if(sg[1] && /datum A/.test(sg[0])) rows.splice(rows.length - 1, 0, ["L.S. Ø (30° lead-in)", rg(c.ls), rgm(c.ls), "The locating shoulder — every depth is measured from here."]);
+            var seal = /datum A|Nose|Seal bore/.test(sg[0]);
+            rows.push([sg[0], tl(sg[1]) + (seal ? " · 63 µin Ra" : "") + (c.sct && (isTop || isNose) ? " ✓ SCT" : ""), rgm(sg[1]), (sg[4] === "d" ? "Drill to " + rg(sg[3]) + " min below L.S. (working-parts clearance)." : "From " + (sg === c.segs[0] ? "the surface" : sg[2] === (c.segs.filter(function(q){ return q[4] === "t"; })[0] || [])[3] ? "the end of full thread" : zw(sg[2])) + " to " + zw(sg[3]) + (/\.$/.test(zw(sg[3])) ? "" : "."))]);
+            if(sg[1] && /datum A/.test(sg[0])) rows.splice(rows.length - 1, 0, ["L.S. Ø (30° ±½° lead-in)", rg(c.ls), rgm(c.ls), "The locating shoulder — every depth is measured from here. Lead-in smooth, free of nicks and sharp edges."]);
           });
           if(c.cb) rows.push(["Counterbore Ø", fmt(c.cb[0], 3), mm(c.cb[0]) + " mm", "Steps down to the upper bore " + fmt(-c.cb[1], 3) + " above L.S."]);
-          rows.push(["Ports (centre, window)", c.ports.map(function(p){ return p[0] + ": " + zw(p[1]) + " (" + fmt(p[2], 3) + ")"; }).join(" · "), "", "Window = the zone the cross-drill must stay inside, between the seals. Port 1 is the nose."]);
+          rows.push(["Ports (centre, window)", c.ports.map(function(p){ return p[0] + ": " + zw(p[1]) + " (window " + fmt(p[2], 3) + ")"; }).join(" · "), "", "Window = the zone the cross-drill must stay inside, between the seals. Port 1 is the nose."]);
           rows.push(["Cartridge hex / socket clearance", fmt(c.hex, 3) + " hex · " + fmt(c.sock, 3) + " Ø drill", "", "Separate drill for socket-wrench clearance."]);
           if(c.refLS) rows.push(["Max L.S. depth without socket drill", fmt(c.refLS, 3) + " rec.", mm(c.refLS) + " mm", null]);
           if(c.minLS) rows.push(["Min L.S. depth", fmt(c.minLS, 3), mm(c.minLS) + " mm", null]);
           if(c.clr) rows.push(["Clearance drills", c.clr.map(function(q){ return fmt(q[1], 3) + " Ø if L.S. deeper than " + fmt(q[0], 3); }).join(" · "), "", null]);
           rows.push(["Min hex extension", fmt(c.hexExt, 3), mm(c.hexExt) + " mm", null]);
           rows.push(["Min centreline to edge / to centreline", fmt(c.edge, 3) + " / " + fmt(c.cc, 3), mm(c.edge) + " / " + mm(c.cc) + " mm", "Manifold layout limits."]);
+          rows.push(["Default tolerances (title block)", ".x ±.030 · .xx ±.015 · .xxx ±.005 · angles ±½°", "", "Applied above to every single-value dimension (shown ±.005). Surfaces 80 µin Ra unless marked; O-ring seal bores 63 µin Ra. Remove all burrs."]);
           rows.push(["Form drill / form reamer", c.tool.replace(/(\d{3}-\d{3})/g, "$1-***"), "", "*** = Sun's tool variant suffix. Drill, ream and thread in one setup."]);
           fig = ptSvgSun(c);
           figcap = "Sun " + c.id + " — drawn to scale from the numbers (chamfers and lead-ins omitted). Depths left, diameters right.";
@@ -8158,10 +8161,11 @@
             ["Thread", cv[2], "", "Gauge with a 7/8-14 UNF-2B GO / NO-GO plug."],
             ["Seal bore Ø (B)", rng(cv[4]), rmm(cv[4]), "Upper O-ring seals here: finish matters (form-reamed)."],
             ["Nose bore Ø (A)", rng(cv[3]), rmm(cv[3]), "Lower O-ring seals here; port 1 exits through the nose."],
-            ["Spotface Ø", fmt(cv[5], 3), mm(cv[5]) + " mm", "Cartridge hex seats here; must be square to the bore."],
+            ["Spotface Ø", fmt(cv[5], 3) + " ±.005", mm(cv[5]) + " mm", "Cartridge hex seats here; must be square to the bore."],
             ["Depth to A/B step", rng(cv[6]), rmm(cv[6]), "From the spotface."],
             ["Cavity depth", fmt(cv[7], 3) + " min", mm(cv[7]) + " mm", "From the spotface, full-diameter A bore."],
-            ["Form tools", cv[8], "", "Pilot drill, form drill, form ream and thread in one setup — concentricity is what makes cavities leak."]
+            ["Form tools", cv[8], "", "Pilot drill, form drill, form ream and thread in one setup — concentricity is what makes cavities leak."],
+            ["Geometric limits", "Ø concentric .002 TIR · ⊥ spotface .001 TIR", "", "HydraForce cavity general notes; unspecified tolerances ±.005; depths from the spotface."]
           ];
           fig = ptSvgCav({ sf:"Ø " + fmt(cv[5], 3), thr:cv[2].replace(/-2B$/, ""), B:"B Ø" + rng(cv[4]), A:"A Ø" + rng(cv[3]), step:rng(cv[6]), dep:fmt(cv[7], 3) + " min" });
           figcap = "Cavity section — schematic, not to scale. Port 2 is cross-drilled between the two seal bores — its position varies, so use the maker's drawing for it.";

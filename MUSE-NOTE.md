@@ -50,6 +50,13 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-20 — Cavity tolerances
+
+- Sun cavities now apply the drawing's title-block tolerances (.x ±.030, .xx ±.015, .xxx ±.005, angles ±½°) to every dimension given as a single value. Bores given as limits keep their limits; min/max values are unchanged.
+- Added surface finish: O-ring seal bores (datum A, nose and the lower seal bores) 63 µin Ra; everything else 80 µin Ra. The cavity's .002 concentricity is shown with the thread.
+- C10-2 gets ±.005 on the spotface and a geometric-limits row from the HydraForce general notes: .002 TIR concentricity, .001 TIR perpendicularity to the spotface, depths measured from the spotface.
+- Cache v31.
+
 ## 2026-11-20 — Sun cavities (8) with to-scale drawings
 
 - Added Sun T-10A, T-11A, T-13A, T-21A and T-31A (series 1, M20×1.5-6H) and T-2A, T-22A and T-32A (series 2, 1.000-14 UNS-2B).
