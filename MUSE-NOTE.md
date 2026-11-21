@@ -1,3 +1,15 @@
+# Note for Muse — chart label precision + attribute-chart wording (2026-11-21, v40)
+
+1. PRE-Control (Short-run → Setup approval) printed its zones as "green 2.50 to 2.50" for a
+   2.4990–2.5010 tolerance: qcG() picks decimals from a value's magnitude, not its spread.
+   New qcGd(x, step) keeps enough decimals that values `step` apart stay distinct. Used for
+   the PRE-Control zone sentence (step = zone width) and every label/tooltip in qcChartSVG
+   (step = plotted range / 20). Now "green 2.4995 to 2.5005".
+2. Attribute charts, Auto limits: the over-dispersion sentence said "no strong evidence" at
+   p = 0.0479, which reads wrong to anyone used to 0.05. The rule is unchanged (Laney only
+   when p < 0.01 and σz > 1); the text now names the 0.01 cut-off.
+Tests: qc.test.js 1548 pass, smoke 20 tools pass.
+
 # Note for Muse — Hydraulic ports tool (2026-11-20)
 
 New tool #tool-ports (cluster reference, tab "Hydraulic ports", finder keywords ORB / J1926 / 6149).
