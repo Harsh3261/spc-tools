@@ -736,6 +736,7 @@
         <button type="button" role="tab" id="tabbtn-pareto" aria-selected="false" data-tab="pareto" data-cluster="analyse">Pareto</button>
         <button type="button" role="tab" id="tabbtn-ncp" aria-selected="false" data-tab="ncp" data-cluster="analyse">Scrap / NCR report</button>
         <button type="button" role="tab" id="tabbtn-grr" aria-selected="false" data-tab="grr" data-cluster="measure">Gage R&amp;R</button>
+        <button type="button" role="tab" id="tabbtn-msa" aria-selected="false" data-tab="msa" data-cluster="measure">More MSA</button>
         <button type="button" role="tab" id="tabbtn-tp" aria-selected="false" data-tab="tp" data-cluster="measure">True Position</button>
         <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
         <button type="button" role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads" data-cluster="reference">Threads</button>
@@ -1582,6 +1583,48 @@
             <strong>Inspect it right:</strong> a GO / NO-GO plug or ring at the two limits checks the band; a single measurement checks one point only — on round parts, out-of-roundness can pass a two-point check and still not assemble.</p>
           </details>
           <p class="cite">Built from ISO 286-1 base tables (standard tolerance grades IT4–IT11 and fundamental deviations d e f g h js k m n p, holes by the ISO 286-1 rules incl. Δ and the M6 250–315 special case). Checked cell-by-cell against a published ISO 286-2 table: 591 of 594 limits agree; the 3 that don't are typos in that table (each band's width disagrees with its own IT grade — f6 120–180, E7 315–400, K6 6–10). Common fits: the ISO preferred hole-basis fits. Reference only — ISO 286-2 governs.</p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL : MORE MSA (Type 1, bias & linearity, attribute agreement) ============ -->
+      <section class="tool" id="tool-msa" role="tabpanel" aria-labelledby="tabbtn-msa">
+        <div class="card">
+          <h2>More MSA — Type 1, bias &amp; linearity, attribute agreement</h2>
+          <p class="guru">Gage R&amp;R asks "do people and repeats agree?". These ask the other questions an auditor asks: is the gauge itself capable, is it accurate across its range, and do inspectors make the same good / bad call?</p>
+          <label class="flabel" for="msStudy">Study</label>
+          <select id="msStudy">
+            <option value="t1" selected>Type 1 gauge study — Cg / Cgk (one part, one operator, 25–50 readings)</option>
+            <option value="lin">Bias &amp; linearity — AIAG (5+ reference parts, 10+ readings each)</option>
+            <option value="att">Attribute agreement — kappa (pass / fail calls)</option>
+          </select>
+          <div id="msT1">
+            <div class="row3">
+              <div><label class="flabel" for="msRef">Reference value</label><input id="msRef" type="number" step="any" inputmode="decimal"></div>
+              <div><label class="flabel" for="msLsl">LSL</label><input id="msLsl" type="number" step="any" inputmode="decimal"></div>
+              <div><label class="flabel" for="msUsl">USL</label><input id="msUsl" type="number" step="any" inputmode="decimal"></div>
+            </div>
+            <label class="flabel" for="msT1Data">Readings (one per line, or separated by spaces / commas)</label>
+            <textarea id="msT1Data" rows="6" spellcheck="false"></textarea>
+          </div>
+          <div id="msLin" class="hidden">
+            <label class="flabel" for="msPV">Process variation (6σ or tolerance) — optional, for %linearity</label>
+            <input id="msPV" type="number" step="any" inputmode="decimal">
+            <label class="flabel" for="msLinData">One line per reading: reference, measured</label>
+            <textarea id="msLinData" rows="8" spellcheck="false"></textarea>
+          </div>
+          <div id="msAtt" class="hidden">
+            <label class="flabel" for="msAttData">One line per part: reference call, then each appraiser's trials — e.g. <code>1, 1 1, 1 0, 1 1</code> (commas between appraisers, spaces between trials; 1 = pass, 0 = fail, or any labels)</label>
+            <textarea id="msAttData" rows="8" spellcheck="false"></textarea>
+          </div>
+          <p style="margin-top:10px"><button type="button" class="ghost" id="msEx">Load the worked example</button> <button type="button" id="msRun">Calculate</button></p>
+          <div id="msOut" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Learn — which study, and what passes</summary>
+            <p class="small"><strong>Type 1 (VDA 5 / Bosch booklet 10, Minitab method):</strong> one operator measures one reference part 25–50 times. <em>Cg</em> = 0.2·T ÷ 6s compares the gauge's scatter with 20 % of the tolerance; <em>Cgk</em> also subtracts the bias. Both ≥ 1.33 is the common acceptance. Run it <em>before</em> a Gage R&amp;R — a gauge that fails here can't pass R&amp;R.<br>
+            <strong>Bias &amp; linearity (AIAG MSA 4th ed.):</strong> bias = average reading − true value. Measure 5+ masters across the range; if bias changes with size, the gauge is non-linear. Look at the slope: if its t-test is significant (p &lt; 0.05) linearity is a problem; if the bias-at-each-reference or the intercept is significant, there is a bias problem. %Linearity = |slope| × 100.<br>
+            <strong>Attribute agreement (AIAG):</strong> for go / no-go and visual calls. <em>Kappa</em> is agreement corrected for luck: 1 = perfect, 0 = no better than guessing. AIAG: &gt; 0.75 good, &lt; 0.40 poor. <em>Effectiveness</em> = share of parts called right every time (≥ 90 % acceptable); <em>miss rate</em> = bad parts passed (≤ 2 %); <em>false alarm</em> = good parts rejected (≤ 5 %).</p>
+          </details>
+          <p class="cite">Formulas: Type 1 per Minitab's Type 1 gage study method (K = 20 %, L = 6, the VDA 5 / Bosch booklet 10 basis). Bias &amp; linearity per AIAG MSA 4th edition (§III-B); the worked example is the AIAG / Minitab linearity data set and this tool reproduces its published slope (−0.13167), intercept (0.73667) and R² (71.4 %). Kappa: Cohen (two ratings) and Fleiss (many ratings) — tested on the standard published examples (κ = 0.40 and κ = 0.210). Acceptance guidance: AIAG MSA 4th ed. Tested in tests/msa.test.js.</p>
         </div>
       </section>
       <!-- ============ TOOL 8 : STACK-UP ============ -->
@@ -8663,9 +8706,134 @@
       ftRender();
 
       /* ======================================================================
+         SECTION · MORE MSA (tool msa) — 2026-11-21. Tested in tests/msa.test.js. */
+      function msNums(txt){ return (txt || "").split(/[\s,;]+/).map(Number).filter(function(x){ return isFinite(x); }); }
+      function msMean(a){ var s = 0; a.forEach(function(x){ s += x; }); return s / a.length; }
+      function msSd(a){ var m = msMean(a), s = 0; a.forEach(function(x){ s += (x - m) * (x - m); }); return Math.sqrt(s / (a.length - 1)); }
+      function msTp(t, df){ return ibeta(df / 2, 0.5, df / (df + t * t)); } /* two-sided p */
+      function msType1(x, ref, tol){
+        var n = x.length, m = msMean(x), sd = msSd(x), bias = m - ref, K = 20, L = 6;
+        var cg = (K / 100 * tol) / (L * sd), cgk = (K / 200 * tol - Math.abs(bias)) / (L / 2 * sd);
+        var t = bias / (sd / Math.sqrt(n));
+        return { n:n, mean:m, sd:sd, bias:bias, cg:cg, cgk:cgk, t:t, p:msTp(t, n - 1), pctRep:K / cg, pctRepBias:K / cgk };
+      }
+      function msLinear(pairs, pv){
+        var x = pairs.map(function(q){ return q[0]; }), y = pairs.map(function(q){ return q[1] - q[0]; }), n = x.length;
+        var mx = msMean(x), my = msMean(y), sxx = 0, sxy = 0, syy = 0;
+        for(var i = 0; i < n; i++){ sxx += (x[i] - mx) * (x[i] - mx); sxy += (x[i] - mx) * (y[i] - my); syy += (y[i] - my) * (y[i] - my); }
+        var a = sxy / sxx, b = my - a * mx, sse = 0;
+        for(var j = 0; j < n; j++){ var e = y[j] - (a * x[j] + b); sse += e * e; }
+        var s = Math.sqrt(sse / (n - 2)), sa = s / Math.sqrt(sxx), sb = s * Math.sqrt(1 / n + mx * mx / sxx);
+        var refs = {}; pairs.forEach(function(q){ (refs[q[0]] = refs[q[0]] || []).push(q[1] - q[0]); });
+        var per = Object.keys(refs).map(Number).sort(function(u, v){ return u - v; }).map(function(r){ var d = refs[r], mb = msMean(d), sd = d.length > 1 ? msSd(d) : NaN, t = mb / (sd / Math.sqrt(d.length)); return { ref:r, n:d.length, bias:mb, t:t, p:d.length > 1 ? msTp(t, d.length - 1) : NaN }; });
+        return { slope:a, intercept:b, r2:1 - sse / syy, s:s, ta:a / sa, tb:b / sb, pa:msTp(a / sa, n - 2), pb:msTp(b / sb, n - 2), avgBias:my, per:per, n:n,
+                 linearity:pv ? Math.abs(a) * pv : null, pctLin:Math.abs(a) * 100, pctBias:pv ? Math.abs(my) / pv * 100 : null };
+      }
+      function msCohen(r1, r2){
+        var cats = {}, n = r1.length; r1.concat(r2).forEach(function(c){ cats[c] = 1; });
+        var po = 0, pe = 0; for(var i = 0; i < n; i++) if(r1[i] === r2[i]) po++;
+        po /= n; Object.keys(cats).forEach(function(c){ var a = r1.filter(function(v){ return v === c; }).length / n, b = r2.filter(function(v){ return v === c; }).length / n; pe += a * b; });
+        return pe === 1 ? 1 : (po - pe) / (1 - pe);
+      }
+      /* Fleiss: subjects = array of arrays of ratings (same count per subject) */
+      function msFleiss(subjects){
+        var N = subjects.length, nR = subjects[0].length, cats = {};
+        subjects.forEach(function(s){ s.forEach(function(c){ cats[c] = 1; }); });
+        var C = Object.keys(cats), pj = {}, Pbar = 0;
+        C.forEach(function(c){ pj[c] = 0; });
+        subjects.forEach(function(s){ var cnt = {}; s.forEach(function(c){ cnt[c] = (cnt[c] || 0) + 1; }); var Pi = 0; C.forEach(function(c){ var k = cnt[c] || 0; pj[c] += k; Pi += k * (k - 1); }); Pbar += Pi / (nR * (nR - 1)); });
+        Pbar /= N; var Pe = 0; C.forEach(function(c){ var q = pj[c] / (N * nR); Pe += q * q; });
+        return Pe === 1 ? 1 : (Pbar - Pe) / (1 - Pe);
+      }
+      function msAttribute(rows){
+        /* rows: [{ref, apps:[[t1,t2..],[..]]}] */
+        var nA = rows[0].apps.length, res = { app:[], n:rows.length };
+        for(var a = 0; a < nA; a++){
+          var within = 0, allRight = 0, miss = 0, badN = 0, fa = 0, goodN = 0, tr = rows[0].apps[a].length, flatA = [], flatR = [];
+          rows.forEach(function(r){
+            var t = r.apps[a], same = t.every(function(v){ return v === t[0]; }); if(same) within++;
+            if(t.every(function(v){ return v === r.ref; })) allRight++;
+            t.forEach(function(v){ flatA.push(v); flatR.push(r.ref); });
+          });
+          res.app.push({ within:within / rows.length * 100, eff:allRight / rows.length * 100, kappaStd:msCohen(flatA, flatR), trials:tr,
+            withinKappa: tr > 1 ? msFleiss(rows.map(function(r){ return r.apps[a]; })) : null });
+        }
+        /* miss / false alarm need a 2-level reference: the first label in sorted order of refs that looks like fail */
+        var labels = {}; rows.forEach(function(r){ labels[r.ref] = 1; }); res.labels = Object.keys(labels);
+        res.between = nA > 1 ? msFleiss(rows.map(function(r){ var all = []; r.apps.forEach(function(t){ all = all.concat(t); }); return all; })) : null;
+        var allAgree = 0; rows.forEach(function(r){ var all = []; r.apps.forEach(function(t){ all = all.concat(t); }); if(all.every(function(v){ return v === r.ref; })) allAgree++; });
+        res.allVsStd = allAgree / rows.length * 100;
+        return res;
+      }
+      function msMissFa(rows, a, passLabel){
+        var miss = 0, bad = 0, fa = 0, good = 0;
+        rows.forEach(function(r){ r.apps[a].forEach(function(v){ if(r.ref === passLabel){ good++; if(v !== passLabel) fa++; } else { bad++; if(v === passLabel) miss++; } }); });
+        return { miss:bad ? miss / bad * 100 : NaN, fa:good ? fa / good * 100 : NaN };
+      }
+      var MS_EX = {
+        t1:{ ref:"10.000", lsl:"9.950", usl:"10.050", data:"10.002 10.001 9.999 10.003 10.000 10.002 9.998 10.001 10.002 10.000 10.001 10.003 9.999 10.000 10.002 10.001 10.000 9.999 10.002 10.001 10.000 10.003 10.001 9.998 10.002" },
+        lin:{ pv:"14.1941", data:(function(){ var d = {2:[2.7,2.5,2.4,2.5,2.7,2.3,2.5,2.5,2.4,2.4,2.6,2.4],4:[5.1,3.9,4.2,5.0,3.8,3.9,3.9,3.9,3.9,4.0,4.1,3.8],6:[5.8,5.7,5.9,5.9,6.0,6.1,6.0,6.1,6.4,6.3,6.0,6.1],8:[7.6,7.7,7.8,7.7,7.8,7.8,7.8,7.7,7.8,7.5,7.6,7.7],10:[9.1,9.3,9.5,9.3,9.4,9.5,9.5,9.5,9.6,9.2,9.3,9.4]}, L = []; Object.keys(d).forEach(function(r){ d[r].forEach(function(v){ L.push(r + ", " + v); }); }); return L.join("\n"); })() },
+        att:{ data:"1, 1 1, 1 1, 1 1\n1, 1 1, 1 1, 1 1\n0, 0 0, 0 0, 0 0\n0, 0 0, 0 1, 0 0\n1, 1 1, 1 1, 1 1\n1, 1 0, 1 1, 1 1\n0, 0 0, 0 0, 0 0\n1, 1 1, 1 1, 0 1\n0, 1 0, 0 0, 0 0\n1, 1 1, 1 1, 1 1\n0, 0 0, 0 0, 0 0\n1, 1 1, 1 1, 1 1" }
+      };
+      function msShow(){
+        var st = $("msStudy").value;
+        $("msT1").classList.toggle("hidden", st !== "t1"); $("msLin").classList.toggle("hidden", st !== "lin"); $("msAtt").classList.toggle("hidden", st !== "att");
+      }
+      function msPass(ok, txt){ return '<span style="color:' + (ok ? "var(--green-ink)" : "var(--red-ink)") + ';font-weight:600">' + (ok ? "✓ " : "✗ ") + esc(txt) + "</span>"; }
+      function msRun(){
+        var st = $("msStudy").value, o = $("msOut"), h = "";
+        function tbl(rows, head){ return '<table class="grid"><thead><tr>' + head.map(function(x){ return "<th>" + esc(x) + "</th>"; }).join("") + "</tr></thead><tbody>" + rows.map(function(r){ return "<tr>" + r.map(function(c, i){ return "<td" + (i === 0 ? ' style="text-align:left;font-family:var(--sans)"' : "") + ">" + c + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>"; }
+        function f(x, d){ return isFinite(x) ? trimNum(x, d) : "—"; }
+        function fp(x){ return !isFinite(x) ? "= —" : (x < 0.0001 ? "< 0.0001" : "= " + trimNum(x, 4)); }
+        if(st === "t1"){
+          var x = msNums($("msT1Data").value), ref = Number($("msRef").value), L = Number($("msLsl").value), U = Number($("msUsl").value);
+          if(x.length < 10 || !isFinite(ref) || !(U > L) || $("msRef").value === ""){ o.innerHTML = '<p class="small">Enter the reference value, LSL &lt; USL and at least 10 readings (25–50 recommended).</p>'; return; }
+          var r = msType1(x, ref, U - L), ok = r.cg >= 1.33 && r.cgk >= 1.33;
+          h = "<h3>Type 1 study — " + (ok ? "gauge capable" : "gauge NOT capable") + "</h3>" + tbl([
+            ["Cg (repeatability vs 20 % of tolerance)", "<strong>" + f(r.cg, 2) + "</strong>", msPass(r.cg >= 1.33, "≥ 1.33")],
+            ["Cgk (repeatability + bias)", "<strong>" + f(r.cgk, 2) + "</strong>", msPass(r.cgk >= 1.33, "≥ 1.33")],
+            ["Readings / mean / std dev", r.n + " / " + f(r.mean, 5) + " / " + f(r.sd, 5), r.n < 25 ? '<span style="color:var(--amber-ink)">⚠ 25+ recommended</span>' : ""],
+            ["Bias (mean − reference)", f(r.bias, 5), "t = " + f(r.t, 3) + ", p " + fp(r.p) + (r.p < 0.05 ? " — significant" : " — not significant")],
+            ["%Var repeatability / with bias", f(r.pctRep, 1) + " % / " + f(r.pctRepBias, 1) + " %", "of the tolerance"]], ["Result", "Value", "Verdict"]);
+        } else if(st === "lin"){
+          var pairs = ($("msLinData").value || "").split(/\n/).map(function(l){ var q = l.split(/[\s,;]+/).filter(String).map(Number); return q.length >= 2 && isFinite(q[0]) && isFinite(q[1]) ? [q[0], q[1]] : null; }).filter(Boolean);
+          var refsN = {}; pairs.forEach(function(q){ refsN[q[0]] = 1; });
+          if(pairs.length < 10 || Object.keys(refsN).length < 2){ o.innerHTML = '<p class="small">Enter at least 2 reference values (5+ recommended) with several readings each — one line per reading: reference, measured.</p>'; return; }
+          var pv = Number($("msPV").value) || null, R = msLinear(pairs, pv);
+          h = "<h3>Bias &amp; linearity — " + (R.pa < 0.05 ? "linearity problem (slope significant)" : "linearity acceptable") + "</h3>" + tbl([
+            ["Slope (bias change per unit)", f(R.slope, 6), "t = " + f(R.ta, 3) + ", p " + fp(R.pa) + " " + msPass(!(R.pa < 0.05), R.pa < 0.05 ? "significant" : "not significant")],
+            ["Intercept", f(R.intercept, 6), "t = " + f(R.tb, 3) + ", p " + fp(R.pb)],
+            ["R² / s", f(R.r2 * 100, 1) + " % / " + f(R.s, 5), ""],
+            ["%Linearity", f(R.pctLin, 2) + " %" + (R.linearity != null ? " (linearity " + f(R.linearity, 4) + ")" : ""), ""],
+            ["Average bias", f(R.avgBias, 6) + (R.pctBias != null ? " (" + f(R.pctBias, 2) + " % of process)" : ""), ""]], ["Result", "Value", "Test"]) +
+            '<h3 style="margin-top:12px">Bias at each reference</h3>' + tbl(R.per.map(function(q){ return [f(q.ref, 4), q.n, f(q.bias, 5), "t = " + f(q.t, 3) + ", p " + fp(q.p) + (q.p < 0.05 ? " — significant" : "")]; }), ["Reference", "n", "Bias", "Test"]);
+        } else {
+          var rows = ($("msAttData").value || "").split(/\n/).map(function(l){ var parts = l.split(",").map(function(z){ return z.trim(); }).filter(String); if(parts.length < 2) return null; return { ref:parts[0], apps:parts.slice(1).map(function(z){ return z.split(/\s+/).filter(String); }) }; }).filter(Boolean);
+          if(rows.length < 5){ o.innerHTML = '<p class="small">Enter at least 5 parts (AIAG suggests 50): reference call, then each appraiser\'s trials.</p>'; return; }
+          var okShape = rows.every(function(r){ return r.apps.length === rows[0].apps.length && r.apps.every(function(t, i){ return t.length === rows[0].apps[i].length; }); });
+          if(!okShape){ o.innerHTML = '<p class="small">Every line needs the same number of appraisers and trials.</p>'; return; }
+          var A = msAttribute(rows), labs = A.labels.slice().sort(), pass = labs.indexOf("1") >= 0 ? "1" : (labs.indexOf("pass") >= 0 ? "pass" : (labs.indexOf("good") >= 0 ? "good" : labs[labs.length - 1]));
+          h = "<h3>Attribute agreement — " + rows.length + " parts, " + A.app.length + " appraiser" + (A.app.length > 1 ? "s" : "") + "</h3>" + tbl(A.app.map(function(q, i){ var mf = msMissFa(rows, i, pass); return ["Appraiser " + String.fromCharCode(65 + i), f(q.within, 1) + " %" + (q.withinKappa != null ? " (κ " + f(q.withinKappa, 2) + ")" : ""), f(q.kappaStd, 2) + " " + msPass(q.kappaStd > 0.75, q.kappaStd > 0.75 ? "good" : (q.kappaStd >= 0.4 ? "marginal" : "poor")), f(q.eff, 1) + " %", f(mf.miss, 1) + " %", f(mf.fa, 1) + " %"]; }),
+            ["Appraiser", "Agrees with self", "κ vs standard", "Effectiveness", "Miss rate", "False alarm"]) +
+            '<p class="small" style="margin-top:8px">' + (A.between != null ? "Between appraisers (Fleiss κ, all trials): <strong>" + f(A.between, 3) + "</strong>. " : "") + "All appraisers right on every trial: " + f(A.allVsStd, 1) + " % of parts. Pass label taken as “" + esc(pass) + "” for miss / false-alarm rates. AIAG guidance: κ &gt; 0.75 good, effectiveness ≥ 90 %, miss ≤ 2 %, false alarm ≤ 5 %.</p>";
+        }
+        o.innerHTML = h;
+      }
+      $("msStudy").addEventListener("change", function(){ msShow(); $("msOut").innerHTML = ""; });
+      $("msRun").addEventListener("click", function(){ holdScroll(msRun); });
+      $("msEx").addEventListener("click", function(){
+        var st = $("msStudy").value, e = MS_EX[st];
+        if(st === "t1"){ $("msRef").value = e.ref; $("msLsl").value = e.lsl; $("msUsl").value = e.usl; $("msT1Data").value = e.data; }
+        else if(st === "lin"){ $("msPV").value = e.pv; $("msLinData").value = e.data; }
+        else $("msAttData").value = e.data;
+        holdScroll(msRun);
+      });
+      msShow();
+
+      /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v37";
+      var APP_BUILD = "v38";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -9379,6 +9547,7 @@
           ["stack","Stack-Up","tolerance stack stack-up worst case RSS assembly gap"],
           ["aql","AQL Lookup","AQL sampling plan Z1.4 lot size sample size accept reject inspection level code letter"],
           ["threads","Threads","thread M10 UNC UNF NPT BSP pitch diameter gauge plug ring go no-go Acme metric class 6g 2A 3B tap"],
+          ["msa","More MSA","msa type 1 gage study cg cgk bias linearity attribute agreement kappa fleiss cohen effectiveness miss rate false alarm vda 5 aiag gauge capability"],
           ["fits","Fits (ISO 286)","fit fits tolerance iso 286 hole shaft h7 g6 h8 f7 k6 p6 clearance interference transition it grade limits bore pin bushing press fit"],
           ["seal","Seal glands","o-ring gland groove seal squeeze stretch gland fill piston rod static dynamic AS568 dash back-up ring extrusion clearance parker groove design"],
           ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 C04-2 C04-3 C09-2 C10-2T C10-3S C12-3L C12-4L C16-3S C20-3S sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],

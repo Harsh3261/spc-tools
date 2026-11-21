@@ -50,6 +50,20 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-21 — More MSA tool (measure cluster)
+
+- New tool `msa` with three studies:
+  - **Type 1:** Cg/Cgk, Minitab K = 20 %, L = 6; bias t-test; %Var.
+  - **Bias & linearity (AIAG MSA 4th ed.):** regression of bias on reference, t-tests on slope and intercept, bias per reference, %linearity.
+  - **Attribute agreement:** within-appraiser agreement and Fleiss κ, Cohen κ against the standard, effectiveness, miss rate, false alarm, and between-appraiser Fleiss κ.
+- "Load the worked example" button and a Learn panel with AIAG acceptance guidance.
+- `tests/msa.test.js`, 20 checks:
+  - reproduces the AIAG/Minitab linearity example (slope −0.131667, intercept 0.736667, R² 71.4 %, t = −12.043 and 10.158, per-reference biases);
+  - Cohen κ = 0.40 and Fleiss κ = 0.210 on the standard published examples;
+  - t p-values;
+  - Type 1 formula identities.
+- Cache v38.
+
 ## 2026-11-21 — Fits (ISO 286) tool
 
 - New tool `fits`: nominal size (mm or inch, up to 500 mm), hole class × shaft class. Shows limits in mm and inch, deviations, clearance or interference, and the fit type. Includes ISO preferred-fit presets and a Learn panel.
