@@ -2747,7 +2747,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           var x = padL + iw*i/bins, w = iw/bins;
           g += '<rect x="'+(x+1)+'" y="'+Y(c)+'" width="'+Math.max(w-2,1)+'" height="'+(padT+ih-Y(c))+'" fill="#0b7f95" opacity="0.88"/>';
           g += '<text x="'+(x+w/2)+'" y="'+(Y(c)-4)+'" fill="#3f5d73" font-size="'+chFS()+'" font-family="monospace" text-anchor="middle">'+(c||"")+'</text>';
-          g += '<text x="'+(x+w/2)+'" y="'+(H-16)+'" fill="#6b8699" font-size="9.5" font-family="monospace" text-anchor="middle">'+fmt(min+i*bw,3)+'</text>';
+          g += '<text x="'+(x+w/2)+'" y="'+(H-16)+'" fill="#6b8699" font-size="9.5" font-family="monospace" text-anchor="middle">'+fmt(min+i*bw, Math.min(6, Math.max(typedDp($("spcData").value), bw>0 ? Math.ceil(-Math.log10(bw)-1e-9) : 3)))+'</text>';
         });
         g += '<line x1="'+padL+'" y1="'+(padT+ih)+'" x2="'+(W-padR)+'" y2="'+(padT+ih)+'" stroke="#b9c9d6"/>';
         function specLine(v, label){
@@ -9102,7 +9102,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v42";
+      var APP_BUILD = "v43";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;

@@ -1,3 +1,9 @@
+# Note for Muse — histogram bin labels (2026-11-21, v43)
+
+Data Check histogram labelled bins with fmt(x, 3), so 0.0002-wide bins on a 3.0000–3.0020
+bore all read "3.001". Labels now use max(typed decimals, ceil(−log10(bin width))) ≤ 6.
+Integer data unchanged. qc 1548 / smoke 20 pass.
+
 # Note for Muse — import pop-up layering + statistic precision (2026-11-21, v42)
 
 1. Sheet input (Map & Preview) overlay was z-index 60, under nav.clusters (70) and, on phones,
