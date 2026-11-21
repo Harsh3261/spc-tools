@@ -50,6 +50,15 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-20 — Sun cavities (8) with to-scale drawings
+
+- Added Sun T-10A, T-11A, T-13A, T-21A and T-31A (series 1, M20×1.5-6H) and T-2A, T-22A and T-32A (series 2, 1.000-14 UNS-2B).
+- Values were transcribed from Sun's own cavity drawings (sheet 1, inch), which Harsh supplied as screenshots. The screenshots are not stored in the repo.
+- Each cavity carries: every bore (limits and depth from L.S.), L.S. Ø, minimum full thread, working-parts drill, port centres and windows, hex and socket clearance, L.S. depth limits, minimum hex extension, edge and centreline spacing, and form-tool numbers.
+- Second-source check: thread, top Ø and nose Ø for T-2A, T-10A, T-11A, T-13A and T-21A match SCT's Sun finisher table (marked "✓ SCT"). This confirms T-11A is M20×1.5, which was the open question. T-22A, T-31A and T-32A have no independent source, and the citation says so. Values shared across a series agree on every drawing.
+- New `ptSvgSun()` draws each cavity to scale (80 px/in) from the data, with depth and diameter labels pushed apart so they don't overlap. Chamfers are omitted.
+- Cache v30.
+
 ## 2026-11-20 — Thread finder shows the gauge for each match
 
 - Every thread-finder result now names the gauge to order: GO/NOT GO plug (internal) or rings (external), with the class and the gauging standard (ASME B1.2, ISO 1502, ISO 228-2, ASME B1.20.1 L1, ISO 7-2, DIN 103, ASME B1.5, BS 84, BS 93).
