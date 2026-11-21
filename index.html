@@ -5558,7 +5558,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SECTION · THREADS (tool threads): manufacturing limits and gauge values
          Data: TH_M, TH_U, TH_BSP2, TH_W2, TH_A2, TH_S2, TH_TR2, TH_BAN, TH_BAC,
-         TH_U_ADD, TH_U_NOTE, TH_G, TH_PIPE, the TH_*_NOTE strings and TH_PREF
+         TH_U_ADD, TH_U3, TH_U_NOTE, TH_G, TH_PIPE, the TH_*_NOTE strings and TH_PREF
          (each fenced below). The only computed values come from the labelled
          custom-size formula path (thCustomMetric, thCustomUN). Models:
          thMfgModel (manufacturing limits), thGaugeHTML (gauge view). Render:
@@ -5670,6 +5670,46 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         ["1-12 UNF",1,12,"UNF",0.0018,0.9982,0.9868,0.9441,0.9382,0.899,1,0.9459,0.9535,0.91,0.928]
       ];
       /* END DATA TH_U */
+      /* BEGIN DATA TH_U3: UNC/UNF limits, classes 3A / 3B (same 28 sizes as TH_U).
+         Provenance: ASME B1.1 Table 3 as reprinted in Machinery's Handbook Table 3 ("Standard Series and
+         Selected Combinations"), cross-checked cell by cell 2026-11-21 against eFunda's Unified Standard Series
+         table (#4 to 1/4 in, every column) and NBS Handbook H28 (1969) Part I Table 2.21 (5/16 to 1 in, every
+         column except UNR minor). 3A UNR minor max for 5/16 in and up (no UNR column in H28) equals the
+         verified 2A UNR minor max + 2A allowance in every row. All 280 cells also within 0.0001 of the B1.1
+         formulas. Edit data only via a verified data change, never by hand-tuning numbers. */
+      /* TH_U3 entry: e = [extMajMax, extMajMin, extPdMax, extPdMin, extUnrMinorMax] (3A, allowance 0);
+         i = [intMinorMin, intMinorMax, intPdMin, intPdMax, intMajMin] (3B). */
+      var TH_U3 = {
+        "#4-40 UNC": { e:[0.112, 0.1069, 0.0958, 0.0939, 0.0822], i:[0.0849, 0.0939, 0.0958, 0.0982, 0.112] },
+        "#4-48 UNF": { e:[0.112, 0.1075, 0.0985, 0.0967, 0.0871], i:[0.0894, 0.0968, 0.0985, 0.1008, 0.112] },
+        "#6-32 UNC": { e:[0.138, 0.132, 0.1177, 0.1156, 0.1008], i:[0.104, 0.114, 0.1177, 0.1204, 0.138] },
+        "#6-40 UNF": { e:[0.138, 0.1329, 0.1218, 0.1198, 0.1082], i:[0.111, 0.1186, 0.1218, 0.1243, 0.138] },
+        "#8-32 UNC": { e:[0.164, 0.158, 0.1437, 0.1415, 0.1268], i:[0.13, 0.1389, 0.1437, 0.1465, 0.164] },
+        "#8-36 UNF": { e:[0.164, 0.1585, 0.146, 0.1439, 0.1309], i:[0.134, 0.1416, 0.146, 0.1487, 0.164] },
+        "#10-24 UNC": { e:[0.19, 0.1828, 0.1629, 0.1604, 0.1404], i:[0.145, 0.1555, 0.1629, 0.1661, 0.19] },
+        "#10-32 UNF": { e:[0.19, 0.184, 0.1697, 0.1674, 0.1528], i:[0.156, 0.1641, 0.1697, 0.1726, 0.19] },
+        "1/4-20 UNC": { e:[0.25, 0.2419, 0.2175, 0.2147, 0.1905], i:[0.196, 0.2067, 0.2175, 0.2211, 0.25] },
+        "1/4-28 UNF": { e:[0.25, 0.2435, 0.2268, 0.2243, 0.2074], i:[0.211, 0.219, 0.2268, 0.23, 0.25] },
+        "5/16-18 UNC": { e:[0.3125, 0.3038, 0.2764, 0.2734, 0.2464], i:[0.252, 0.263, 0.2764, 0.2803, 0.3125] },
+        "5/16-24 UNF": { e:[0.3125, 0.3053, 0.2854, 0.2827, 0.2629], i:[0.267, 0.2754, 0.2854, 0.289, 0.3125] },
+        "3/8-16 UNC": { e:[0.375, 0.3656, 0.3344, 0.3311, 0.3005], i:[0.307, 0.3182, 0.3344, 0.3387, 0.375] },
+        "3/8-24 UNF": { e:[0.375, 0.3678, 0.3479, 0.345, 0.3254], i:[0.33, 0.3372, 0.3479, 0.3516, 0.375] },
+        "7/16-14 UNC": { e:[0.4375, 0.4272, 0.3911, 0.3876, 0.3525], i:[0.36, 0.3717, 0.3911, 0.3957, 0.4375] },
+        "7/16-20 UNF": { e:[0.4375, 0.4294, 0.405, 0.4019, 0.378], i:[0.383, 0.3916, 0.405, 0.4091, 0.4375] },
+        "1/2-13 UNC": { e:[0.5, 0.4891, 0.45, 0.4463, 0.4084], i:[0.417, 0.4284, 0.45, 0.4548, 0.5] },
+        "1/2-20 UNF": { e:[0.5, 0.4919, 0.4675, 0.4643, 0.4405], i:[0.446, 0.4537, 0.4675, 0.4717, 0.5] },
+        "9/16-12 UNC": { e:[0.5625, 0.5511, 0.5084, 0.5045, 0.4633], i:[0.472, 0.4843, 0.5084, 0.5135, 0.5625] },
+        "9/16-18 UNF": { e:[0.5625, 0.5538, 0.5264, 0.523, 0.4964], i:[0.502, 0.5106, 0.5264, 0.5308, 0.5625] },
+        "5/8-11 UNC": { e:[0.625, 0.6129, 0.566, 0.5619, 0.5168], i:[0.527, 0.5391, 0.566, 0.5714, 0.625] },
+        "5/8-18 UNF": { e:[0.625, 0.6163, 0.5889, 0.5854, 0.5589], i:[0.565, 0.573, 0.5889, 0.5934, 0.625] },
+        "3/4-10 UNC": { e:[0.75, 0.7371, 0.685, 0.6806, 0.6309], i:[0.642, 0.6545, 0.685, 0.6907, 0.75] },
+        "3/4-16 UNF": { e:[0.75, 0.7406, 0.7094, 0.7056, 0.6755], i:[0.682, 0.6908, 0.7094, 0.7143, 0.75] },
+        "7/8-9 UNC": { e:[0.875, 0.8611, 0.8028, 0.7981, 0.7427], i:[0.755, 0.7681, 0.8028, 0.8089, 0.875] },
+        "7/8-14 UNF": { e:[0.875, 0.8647, 0.8286, 0.8245, 0.79], i:[0.798, 0.8068, 0.8286, 0.8339, 0.875] },
+        "1-8 UNC": { e:[1, 0.985, 0.9188, 0.9137, 0.8512], i:[0.865, 0.8797, 0.9188, 0.9254, 1] },
+        "1-12 UNF": { e:[1, 0.9886, 0.9459, 0.9415, 0.9008], i:[0.91, 0.9198, 0.9459, 0.9516, 1] }
+      };
+      /* END DATA TH_U3 */
       /* ===== v14 expansion data — generated programmatically from
          manufacturing-expansion.md CSVs (BSP G §3, Whitworth §4, Acme/Stub §5,
          Tr/BA §6, UN series §7). Values verbatim; do not hand-edit. ===== */
@@ -7552,7 +7592,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         thFillSelect($("thSide"), sideOpts, sideOpts.some(function(o){ return o[0] === prevSide; }) ? prevSide : sideOpts[0][0]);
         var side = $("thSide").value;
         if(fam === "metric") clsOpts = side === "int" ? [["6H","6H"]] : [["6g","6g"]];
-        else if(fam === "un") clsOpts = side === "int" ? [["2B","2B"]] : [["2A","2A"]];
+        else if(fam === "un"){ var unRow = custom ? null : thUAll()[parseInt($("thSize").value, 10) || 0]; var un3 = unRow && TH_U3[unRow[0]]; clsOpts = side === "int" ? [["2B","2B"]].concat(un3 ? [["3B","3B"]] : []) : [["2A","2A"]].concat(un3 ? [["3A","3A"]] : []); }
         else if(fam === "bsp") clsOpts = side === "int" ? [["int","Internal — one class (ISO 228-1)"]] : [["A","Class A"],["B","Class B"]];
         else if(fam === "pipe"){ var pr = thPipeAll()[parseInt($("thSize").value, 10) || 0]; clsOpts = [[pr.std, pr.std]]; }
         else if(fam === "whitworth") clsOpts = side === "int" ? [["Medium","Medium"],["Normal","Normal"]] : [["Close","Close"],["Medium","Medium"],["Free","Free"]];
@@ -7625,6 +7665,16 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         }
         if(fam === "un"){
           var u = thUAll()[idx];
+          var u3 = (cls === "3A" || cls === "3B") ? TH_U3[u[0]] : null;
+          if(u3){
+            var rows3 = side === "int"
+              ? [["Minor diameter", u3.i[0], u3.i[1]], ["Pitch diameter", u3.i[2], u3.i[3]], ["Major diameter", u3.i[4], null, "The standard gives no max for internal major."]]
+              : [["Major diameter", u3.e[1], u3.e[0]], ["Pitch diameter", u3.e[3], u3.e[2]], ["Minor diameter (max)", null, u3.e[4], "UNR minor max (reference) — ASME B1.1 gives no min for the external minor; the root is controlled by form."]];
+            return { unit:"in", title:u[0] + " — " + (side === "int" ? "internal 3B" : "external 3A"), rows:rows3,
+              badge:"Table — ASME B1.1 Table 3", note: side === "ext" ? TH_UNR_NOTE : null,
+              meaning:"Class 3A / 3B is the close-tolerance fit: no allowance, so the 3A maximums and 3B minimums are basic, and coating has no room unless the size limits are adjusted for it. Machine and inspect to these limits.",
+              source:"Table — ASME B1.1 Table 3 (classes 3A / 3B), via Machinery's Handbook Table 3; cross-checked against eFunda and NBS H28 Table 2.21. For gauge acceptance, the gauge certificate governs." };
+          }
           var uNote = TH_U_NOTE[u[0]] || "";
           var rowsN = side === "int"
             ? [["Minor diameter", u[13], u[14], uNote.indexOf("int") >= 0 ? "Internal minor: single printed source" : null], ["Pitch diameter", u[11], u[12]], ["Major diameter", u[10], null, "The standard gives no max for internal major."]]
@@ -7838,6 +7888,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         var idx = parseInt($("thSize").value, 10) || 0;
         if(fam === "un"){
           var u = thUAll()[idx], g = TH_G[u[0]];
+          var gc = $("thClass").value;
+          if(gc === "3A" || gc === "3B") return "<h3>Gauge verification</h3><p>Class " + esc(gc) + " gauge limits are not included yet — the ASME B1.2 gauge values in this app are for classes 2A / 2B. Switch the class to 2A / 2B to see them.</p>" + calP;
           if(!g) return "<h3>Gauge verification</h3><p>Gauge data not included for this size — the ASME B1.2 gauge tables in this app cover the UNC / UNF catalogue sizes.</p>" + calP;
           function gRow(label, mn, mx, note){
             return "<tr><td>" + esc(label) + (note ? '<br><span class="small">' + esc(note) + "</span>" : "") + "</td><td>" +
@@ -9102,7 +9154,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v43";
+      var APP_BUILD = "v44";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;

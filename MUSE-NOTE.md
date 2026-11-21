@@ -1,3 +1,28 @@
+# Note for Muse — UNC/UNF Classes 3A / 3B (2026-11-21, v44)
+
+Harsh's go-ahead (relayed by Satureday) on audit item (c). DATA CHANGE — please carry into
+your research files and golden.json.
+1. New data block TH_U3 (after TH_U): Class 3A / 3B limits for all 28 TH_U sizes
+   (#4-40 UNC to 1-12 UNF). e = [majMax, majMin, pdMax, pdMin, UNR minorMax];
+   i = [minorMin, minorMax, pdMin, pdMax, majMin].
+   Verification, cell by cell (280 cells):
+   - Source 1: ASME B1.1 Table 3 as reprinted in Machinery's Handbook Table 3 (all cells).
+   - Source 2: eFunda Unified Standard Series table (#4–1/4 in, every column incl. UNR) and
+     NBS Handbook H28 (1969) Part I Table 2.21 (5/16–1 in, every column except UNR).
+     263 cells agree across two published sources, 0 disagreements.
+   - 3A UNR minor 5/16 in and up (17 cells, no UNR column in H28): equal in every row to the
+     verified 2A UNR minor + 2A allowance — now a test.
+   - All 280 also within 0.0001 of the B1.1 formulas (rounding only).
+   Known quirk kept as published: #10-32 UNF 3B minor max 0.1641 vs 2B 0.164 (2B printed to
+   3 decimals). H28 OCR shows 9/16-18 3B PD min ".5664" — read as .5264 (matches MH and basic E).
+2. Threads tool: Class / fit select for UN catalogue rows offers 2A+3A (ext) / 2B+3B (int)
+   where TH_U3 has the size. UNEF/UN/UNS rows and custom sizes stay 2A/2B only. 3A/3B view
+   carries its own meaning/source text. Gauge view on 3A/3B says the B1.2 gauge values in
+   the app are 2A/2B and asks to switch class — no 2A/2B gauge shown against a 3A/3B part.
+3. tests/threads.test.js: +364 3A/3B relation checks (basic max/min, 0.75× / 1.30× PD tol,
+   same major tol, 3B minor vs 2B, UNR = 2A UNR + allowance). 2125 pass.
+   qc 1548, seal 761, fits 594, msa 20, cyl-gdt 19 pass; smoke 20 tools, no page errors.
+   Cache spc-tools-v44-class3, APP_BUILD v44 (on top of the other session's v43 histogram-label fix).
 # Note for Muse — histogram bin labels (2026-11-21, v43)
 
 Data Check histogram labelled bins with fmt(x, 3), so 0.0002-wide bins on a 3.0000–3.0020

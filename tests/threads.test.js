@@ -46,6 +46,31 @@ rows.forEach(r => {
   check(lab + " limits in order", eMajMin < eMaj && ePdMin < ePd && iPd < iPdMax && iMinMin < iMinMax && ePd <= iPd && eMinMax < ePdMin, "order");
 });
 
+/* Classes 3A / 3B (TH_U3): no allowance, so 3A max and 3B min are basic;
+   3A PD tol = 0.75 × 2A, 3B PD tol = 1.30 × 3A; major tol same as 2A;
+   3B minor min = 2B minor min and 3B minor max ≤ 2B's (2B printed to 0.001);
+   3A UNR minor max = 2A UNR minor max + 2A allowance. */
+const U3 = grab("TH_U3");
+grab("TH_U").forEach(r => check(r[0] + " has 3A/3B entry", !!U3[r[0]], "missing"));
+Object.keys(U3).forEach(k => {
+  const u = U[k], e = U3[k].e, i = U3[k].i;
+  check(k + " 3A/3B has 2A/2B row", !!u, "missing");
+  if (!u) return;
+  const [, D, , , al, eMaj, eMajMin, ePd, ePdMin, eMinMax, , iPd, iPdMax, iMinMin, iMinMax] = u;
+  const t2a = ePd - ePdMin, t3a = e[2] - e[3], t3b = i[3] - i[2];
+  check(k + " 3A major max = D", e[0] === D, e[0]);
+  check(k + " 3A PD max = basic", near(e[2], iPd, 1e-9), e[2]);
+  check(k + " 3B PD min = basic", near(i[2], iPd, 1e-9), i[2]);
+  check(k + " 3B major min = D", i[4] === D, i[4]);
+  check(k + " 3A major tol = 2A", near(e[0] - e[1], eMaj - eMajMin, 0.00011), (e[0] - e[1]).toFixed(4));
+  check(k + " 3A PD tol = 0.75 × 2A", near(t3a, 0.75 * t2a, 0.00011), t3a.toFixed(4));
+  check(k + " 3B PD tol = 1.30 × 3A", near(t3b, 1.3 * t3a, 0.00015), t3b.toFixed(4));
+  check(k + " 3B minor min = 2B", near(i[0], iMinMin, 1e-9), i[0]);
+  check(k + " 3B minor max ≤ 2B", i[1] <= iMinMax + 0.000101 && i[1] > i[0], i[1]);
+  check(k + " 3A UNR = 2A UNR + allowance", near(e[4], eMinMax + al, 0.00006), e[4] + " vs " + (eMinMax + al).toFixed(4));
+  check(k + " 3A inside 2A+allowance", e[3] > ePdMin && e[2] > ePd, "order");
+});
+
 Object.keys(G).forEach(k => {
   const g = G[k], u = U[k];
   check(k + " has product row", !!u, "missing");
