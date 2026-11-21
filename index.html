@@ -585,7 +585,7 @@
       .thsearch{margin:4px 0 12px}
       #ptOut table.grid td:first-child, #ptOut table.grid th:first-child{text-align:left; font-family:var(--sans)}
       .thfind{margin:4px 0 14px; border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; background:var(--panel2)}
-      #ftOut table.grid td:first-child, #sgOut table.grid td:first-child{text-align:left;font-family:var(--sans)}
+      #cyOut table.grid td:first-child, #cyIso table.grid td:first-child, #ftOut table.grid td:first-child, #sgOut table.grid td:first-child{text-align:left;font-family:var(--sans)}
       .ptfig{margin:14px 0 0; border:1px solid var(--line-soft); border-radius:10px; padding:10px; background:var(--panel2)}
       .ptfig svg{display:block; width:100%; max-width:520px; height:auto; margin:0 auto}
       .ptfig figcaption{font-size:12px; color:var(--ink-dim); margin-top:6px; text-align:center}
@@ -737,12 +737,14 @@
         <button type="button" role="tab" id="tabbtn-ncp" aria-selected="false" data-tab="ncp" data-cluster="analyse">Scrap / NCR report</button>
         <button type="button" role="tab" id="tabbtn-grr" aria-selected="false" data-tab="grr" data-cluster="measure">Gage R&amp;R</button>
         <button type="button" role="tab" id="tabbtn-msa" aria-selected="false" data-tab="msa" data-cluster="measure">More MSA</button>
+        <button type="button" role="tab" id="tabbtn-gdt" aria-selected="false" data-tab="gdt" data-cluster="measure">GD&amp;T &amp; uncertainty</button>
         <button type="button" role="tab" id="tabbtn-tp" aria-selected="false" data-tab="tp" data-cluster="measure">True Position</button>
         <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
         <button type="button" role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads" data-cluster="reference">Threads</button>
         <button type="button" role="tab" id="tabbtn-ports" aria-selected="false" data-tab="ports" data-cluster="reference">Hydraulic ports</button>
         <button type="button" role="tab" id="tabbtn-seal" aria-selected="false" data-tab="seal" data-cluster="reference">Seal glands</button>
         <button type="button" role="tab" id="tabbtn-fits" aria-selected="false" data-tab="fits" data-cluster="reference">Fits (ISO 286)</button>
+        <button type="button" role="tab" id="tabbtn-cyl" aria-selected="false" data-tab="cyl" data-cluster="reference">Cylinder &amp; oil</button>
         <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Unit converters</button>
         <button type="button" role="tab" id="tabbtn-learn" aria-selected="false" data-tab="learn" data-cluster="reference">Learn</button>
         <button type="button" role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack" data-cluster="measure">Stack-Up</button>
@@ -1625,6 +1627,96 @@
             <strong>Attribute agreement (AIAG):</strong> for go / no-go and visual calls. <em>Kappa</em> is agreement corrected for luck: 1 = perfect, 0 = no better than guessing. AIAG: &gt; 0.75 good, &lt; 0.40 poor. <em>Effectiveness</em> = share of parts called right every time (≥ 90 % acceptable); <em>miss rate</em> = bad parts passed (≤ 2 %); <em>false alarm</em> = good parts rejected (≤ 5 %).</p>
           </details>
           <p class="cite">Formulas: Type 1 per Minitab's Type 1 gage study method (K = 20 %, L = 6, the VDA 5 / Bosch booklet 10 basis). Bias &amp; linearity per AIAG MSA 4th edition (§III-B); the worked example is the AIAG / Minitab linearity data set and this tool reproduces its published slope (−0.13167), intercept (0.73667) and R² (71.4 %). Kappa: Cohen (two ratings) and Fleiss (many ratings) — tested on the standard published examples (κ = 0.40 and κ = 0.210). Acceptance guidance: AIAG MSA 4th ed. Tested in tests/msa.test.js.</p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL : CYLINDER & OIL ============ -->
+      <section class="tool" id="tool-cyl" role="tabpanel" aria-labelledby="tabbtn-cyl">
+        <div class="card">
+          <h2>Cylinder &amp; oil — force, speed, rod buckling, tube stress, ISO 4406</h2>
+          <p class="guru">Quick engineering checks for a hydraulic cylinder: what it pushes and pulls, how fast it moves, whether the rod buckles, whether the tube holds the pressure — and what the oil cleanliness code means.</p>
+          <div class="row3">
+            <div><label class="flabel" for="cyU">Units</label><select id="cyU"><option value="in" selected>inch · psi · gpm</option><option value="mm">mm · bar · L/min</option></select></div>
+            <div><label class="flabel" for="cyBore" id="cyBoreL">Bore Ø</label><input id="cyBore" type="number" step="any" inputmode="decimal" value="3"></div>
+            <div><label class="flabel" for="cyRod" id="cyRodL">Rod Ø</label><input id="cyRod" type="number" step="any" inputmode="decimal" value="1.5"></div>
+            <div><label class="flabel" for="cyP" id="cyPL">Pressure</label><input id="cyP" type="number" step="any" inputmode="decimal" value="3000"></div>
+            <div><label class="flabel" for="cyQ" id="cyQL">Flow (optional)</label><input id="cyQ" type="number" step="any" inputmode="decimal" value="10"></div>
+            <div><label class="flabel" for="cyTube" id="cyTubeL">Tube OD (optional)</label><input id="cyTube" type="number" step="any" inputmode="decimal" value="3.5"></div>
+          </div>
+          <h3 style="margin-top:14px">Rod buckling (push)</h3>
+          <div class="row3">
+            <div><label class="flabel" for="cyL" id="cyLL">Column length, fully extended</label><input id="cyL" type="number" step="any" inputmode="decimal" value="40"></div>
+            <div><label class="flabel" for="cyEnd">Mounting / end fixity</label><select id="cyEnd"><option value="2">Fixed – free (K 2.0)</option><option value="1" selected>Pinned – pinned (K 1.0)</option><option value="0.7">Fixed – pinned (K 0.7)</option><option value="0.5">Fixed – fixed (K 0.5)</option></select></div>
+            <div><label class="flabel" for="cySF">Required safety factor</label><input id="cySF" type="number" step="any" inputmode="decimal" value="4"></div>
+            <div><label class="flabel" for="cySyR" id="cySyRL">Rod yield (ksi)</label><input id="cySyR" type="number" step="any" inputmode="decimal" value="75"></div>
+            <div><label class="flabel" for="cyE" id="cyEL">Elastic modulus (ksi)</label><input id="cyE" type="number" step="any" inputmode="decimal" value="29000"></div>
+            <div><label class="flabel" for="cySyT" id="cySyTL">Tube yield (ksi)</label><input id="cySyT" type="number" step="any" inputmode="decimal" value="70"></div>
+          </div>
+          <p class="small">Yield strengths: look your grade up in <a href="https://harsh3261.github.io/materials-atlas/" target="_blank" rel="noopener">Materials Atlas</a> (min yield, the right condition).</p>
+          <div id="cyOut" aria-live="polite"></div>
+          <h3 style="margin-top:16px">ISO 4406 cleanliness code</h3>
+          <div class="row3">
+            <div><label class="flabel" for="cy4">Particles ≥ 4 µm(c) per mL</label><input id="cy4" type="number" step="any" inputmode="decimal" value="2136"></div>
+            <div><label class="flabel" for="cy6">≥ 6 µm(c) per mL</label><input id="cy6" type="number" step="any" inputmode="decimal" value="463"></div>
+            <div><label class="flabel" for="cy14">≥ 14 µm(c) per mL</label><input id="cy14" type="number" step="any" inputmode="decimal" value="63"></div>
+          </div>
+          <label class="flabel" for="cyCode">…or decode a code (e.g. 18/16/13)</label><input id="cyCode" type="text" value="" placeholder="18/16/13" spellcheck="false">
+          <div id="cyIso" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Learn — what these checks mean</summary>
+            <p class="small"><strong>Force</strong> = pressure × area. Extending, pressure acts on the full bore; retracting, only on the annulus (bore area − rod area) — so a cylinder always pulls weaker and retracts faster.<br>
+            <strong>Buckling</strong> — a long, thin rod pushing a load fails sideways long before the steel yields. The column length is pin-to-pin (or mount-to-load) <em>fully extended</em>; the end fixity multiplies it (K). Slender rods follow Euler; short, stocky rods follow Johnson (yield matters). A safety factor of 3–4 on buckling is common practice for cylinders.<br>
+            <strong>Tube hoop stress</strong> — pressure tries to burst the tube. Barlow (thin wall, uses OD) is the quick check; Lamé (thick wall) gives the true peak at the bore surface, which is what matters for thick tubes.<br>
+            <strong>ISO 4406</strong> — three numbers for particles ≥ 4 / 6 / 14 µm per mL. Each step up doubles the particle count, so 19/17/14 is roughly twice as dirty as 18/16/13. Typical targets: servo / proportional valves 16/14/11 or cleaner, general industrial hydraulics 18/16/13–19/17/14 — check the component maker's requirement.</p>
+          </details>
+          <p class="cite">Formulas: area / force / speed — fluid power basics; buckling — Euler and J. B. Johnson column equations with effective-length factor K (theoretical values; Machinery's Handbook / Shigley); tube — Barlow and Lamé thick-wall equations. ISO 4406 scale numbers 0–28: Petro-Canada's ISO 4406:1999 table and an independent particle-count guide agree on every code. Reference only — design to your cylinder standard (NFPA / ISO 6020 / 6022) and the customer's spec.</p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL : GD&T & UNCERTAINTY ============ -->
+      <section class="tool" id="tool-gdt" role="tabpanel" aria-labelledby="tabbtn-gdt">
+        <div class="card">
+          <h2>GD&amp;T helpers &amp; measurement uncertainty</h2>
+          <p class="guru">Bonus tolerance, virtual condition and fastener formulas (ASME Y14.5) — and a GUM uncertainty budget so you know how big a measurement's ± really is.</p>
+          <label class="flabel" for="gdMode">Calculator</label>
+          <select id="gdMode"><option value="mmc" selected>Position at MMC / LMC — bonus, virtual &amp; resultant condition</option><option value="fast">Fastener formulas — floating / fixed</option><option value="unc">Uncertainty budget (GUM)</option></select>
+          <div id="gdMmc">
+            <div class="row3">
+              <div><label class="flabel" for="gdFeat">Feature</label><select id="gdFeat"><option value="hole" selected>Hole (internal)</option><option value="pin">Pin / shaft (external)</option></select></div>
+              <div><label class="flabel" for="gdMod">Modifier</label><select id="gdMod"><option value="M" selected>Ⓜ MMC</option><option value="L">Ⓛ LMC</option><option value="S">RFS (none)</option></select></div>
+              <div><label class="flabel" for="gdTol">Position tolerance Ø</label><input id="gdTol" type="number" step="any" inputmode="decimal" value="0.010"></div>
+              <div><label class="flabel" for="gdMin">Size min</label><input id="gdMin" type="number" step="any" inputmode="decimal" value="0.500"></div>
+              <div><label class="flabel" for="gdMax">Size max</label><input id="gdMax" type="number" step="any" inputmode="decimal" value="0.510"></div>
+              <div><label class="flabel" for="gdAct">Actual size (optional)</label><input id="gdAct" type="number" step="any" inputmode="decimal" value="0.505"></div>
+              <div><label class="flabel" for="gdDx">Measured Δx (optional)</label><input id="gdDx" type="number" step="any" inputmode="decimal" value="0.003"></div>
+              <div><label class="flabel" for="gdDy">Measured Δy (optional)</label><input id="gdDy" type="number" step="any" inputmode="decimal" value="0.004"></div>
+            </div>
+          </div>
+          <div id="gdFast" class="hidden">
+            <div class="row3">
+              <div><label class="flabel" for="gdH">Clearance hole MMC (smallest hole)</label><input id="gdH" type="number" step="any" inputmode="decimal" value="0.281"></div>
+              <div><label class="flabel" for="gdF">Fastener MMC (largest fastener)</label><input id="gdF" type="number" step="any" inputmode="decimal" value="0.250"></div>
+              <div><label class="flabel" for="gdT1">Fixed: tolerance on the clearance-hole part (optional)</label><input id="gdT1" type="number" step="any" inputmode="decimal" value=""></div>
+            </div>
+          </div>
+          <div id="gdUnc" class="hidden">
+            <p class="small">One line per source: <code>name, value, type, sensitivity</code> — type = <code>normal k</code> (e.g. <code>normal 2</code> for a calibration certificate's U), <code>rect</code> (± half-width, e.g. resolution/2, spec limits), <code>tri</code>, <code>u</code> (U-shaped), or <code>typeA n</code> (value = std dev of n repeat readings). Sensitivity defaults to 1.</p>
+            <textarea id="gdUData" rows="6" spellcheck="false" aria-label="Uncertainty sources, one per line">Calibration certificate U (k=2), 0.0020, normal 2
+Resolution 0.001 → ±0.0005, 0.0005, rect
+Repeatability (s of 10 readings), 0.0012, typeA 10
+Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
+            <div class="row2"><div><label class="flabel" for="gdK">Coverage factor k</label><input id="gdK" type="number" step="any" inputmode="decimal" value="2"></div>
+            <div><label class="flabel" for="gdUTol">Tolerance width (optional, for TUR)</label><input id="gdUTol" type="number" step="any" inputmode="decimal" value="0.05"></div></div>
+          </div>
+          <div id="gdOut" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Learn — bonus, virtual condition, uncertainty</summary>
+            <p class="small"><strong>MMC</strong> = the size with the most material (smallest hole, largest pin). With Ⓜ, the stated position tolerance applies at MMC; as the feature departs toward LMC it gains <strong>bonus</strong> tolerance equal to that departure — that's why a hole that measures bigger is allowed to be further off position.<br>
+            <strong>Virtual condition</strong> — the worst-case boundary the mating part must clear (hole: MMC − tolerance; pin: MMC + tolerance). It is what a functional gauge pin / ring is made to. <strong>Resultant condition</strong> — the other extreme, used for wall-thickness and minimum-material checks.<br>
+            <strong>Fasteners:</strong> floating (clearance holes in both parts) T = H − F; fixed (one part threaded / press-fit) T₁ + T₂ = H − F — split between the parts, often equally.<br>
+            <strong>Uncertainty (GUM):</strong> turn every error source into a standard uncertainty (rectangular ÷ √3, triangular ÷ √6, U-shaped ÷ √2, certificate U ÷ k, repeatability s ÷ √n), multiply by its sensitivity, add in quadrature (root-sum-square), then × k (2 ≈ 95 %). Rule of thumb: the expanded uncertainty should be ≤ 1/4 – 1/10 of the tolerance (TUR 4:1 – 10:1). Near a limit, ISO 14253-1 says conformance is only proven inside the tolerance shrunk by U.</p>
+          </details>
+          <p class="cite">GD&amp;T: ASME Y14.5-2018 definitions of MMC, LMC, bonus tolerance, virtual and resultant condition; floating / fixed fastener formulas per Y14.5 Appendix B. Position from coordinates: Ø = 2√(Δx² + Δy²). Uncertainty: JCGM 100 (GUM) — divisors √3 / √6 / √2, quadrature sum, expanded U = k·u<sub>c</sub>; decision rule ISO 14253-1. Tested in tests/cyl-gdt.test.js.</p>
         </div>
       </section>
       <!-- ============ TOOL 8 : STACK-UP ============ -->
@@ -8831,9 +8923,161 @@
       msShow();
 
       /* ======================================================================
+         SECTION · CYLINDER & OIL (tool cyl) and GD&T & UNCERTAINTY (tool gdt) — 2026-11-21. Tested in tests/cyl-gdt.test.js. */
+      /* SI core: lengths m, pressure Pa, flow m³/s, stress Pa */
+      function cyCalc(D, d, p, Q, L, K, SyR, E, Dout, SyT){
+        var A1 = Math.PI * D * D / 4, Ar = Math.PI * d * d / 4, A2 = A1 - Ar;
+        var r = { A1:A1, A2:A2, Ar:Ar, Fpush:p * A1, Fpull:p * A2, ratio:A1 / A2 };
+        if(Q > 0){ r.vExt = Q / A1; r.vRet = Q / A2; r.vRegen = Q / Ar; }
+        if(L > 0 && E > 0 && SyR > 0){
+          var I = Math.PI * Math.pow(d, 4) / 64, rg = d / 4, lam = K * L / rg, Cc = Math.sqrt(2 * Math.PI * Math.PI * E / SyR);
+          var Pe = Math.PI * Math.PI * E * I / Math.pow(K * L, 2), Pj = Ar * SyR * (1 - SyR * lam * lam / (4 * Math.PI * Math.PI * E));
+          r.lam = lam; r.Cc = Cc; r.method = lam >= Cc ? "Euler" : "Johnson"; r.Pcr = lam >= Cc ? Pe : Pj; r.Pe = Pe; r.fosB = r.Pcr / r.Fpush;
+          r.rodStress = r.Fpush / Ar; r.fosRodY = SyR / r.rodStress;
+        }
+        if(Dout > D && SyT > 0){
+          var t = (Dout - D) / 2, ro = Dout / 2, ri = D / 2;
+          r.t = t; r.barlow = p * Dout / (2 * t); r.lame = p * (ro * ro + ri * ri) / (ro * ro - ri * ri); r.fosTube = SyT / r.lame;
+        }
+        return r;
+      }
+      var CY_ISO = [[0,0.01],[0.01,0.02],[0.02,0.04],[0.04,0.08],[0.08,0.16],[0.16,0.32],[0.32,0.64],[0.64,1.3],[1.3,2.5],[2.5,5],[5,10],[10,20],[20,40],[40,80],[80,160],[160,320],[320,640],[640,1300],[1300,2500],[2500,5000],[5000,10000],[10000,20000],[20000,40000],[40000,80000],[80000,160000],[160000,320000],[320000,640000],[640000,1300000],[1300000,2500000]];
+      function cyIsoCode(n){ if(!(n >= 0)) return null; if(n > 2500000) return ">28"; for(var i = 0; i < CY_ISO.length; i++){ if(n > CY_ISO[i][0] && n <= CY_ISO[i][1]) return i; } return 0; }
+      function cyRender(){
+        var inch = $("cyU").value === "in";
+        $("cyBoreL").textContent = "Bore Ø (" + (inch ? "in" : "mm") + ")"; $("cyRodL").textContent = "Rod Ø (" + (inch ? "in" : "mm") + ")";
+        $("cyPL").textContent = "Pressure (" + (inch ? "psi" : "bar") + ")"; $("cyQL").textContent = "Flow, optional (" + (inch ? "gpm" : "L/min") + ")";
+        $("cyTubeL").textContent = "Tube OD, optional (" + (inch ? "in" : "mm") + ")"; $("cyLL").textContent = "Column length, fully extended (" + (inch ? "in" : "mm") + ")";
+        $("cySyRL").textContent = "Rod yield (" + (inch ? "ksi" : "MPa") + ")"; $("cyEL").textContent = "Elastic modulus (" + (inch ? "ksi" : "MPa") + ")"; $("cySyTL").textContent = "Tube yield (" + (inch ? "ksi" : "MPa") + ")";
+        function n(id){ var v = Number($(id).value); return isFinite(v) ? v : 0; }
+        var len = inch ? 0.0254 : 0.001, pr = inch ? 6894.757 : 1e5, fl = inch ? 3.785411784e-3 / 60 : 1e-3 / 60, st = inch ? 6894757 : 1e6;
+        var D = n("cyBore") * len, d = n("cyRod") * len, o = $("cyOut");
+        if(!(D > 0 && d > 0 && d < D && n("cyP") > 0)){ o.innerHTML = '<p class="small">Enter bore, rod (smaller than bore) and pressure.</p>'; return; }
+        var r = cyCalc(D, d, n("cyP") * pr, n("cyQ") * fl, n("cyL") * len, Number($("cyEnd").value), n("cySyR") * st, n("cyE") * st, n("cyTube") * len, n("cySyT") * st);
+        function F(N){ return inch ? trimNum(N / 4.448222, 0) + " lbf" : trimNum(N / 1000, 2) + " kN"; }
+        function A(m2){ return inch ? trimNum(m2 / 0.00064516, 3) + " in²" : trimNum(m2 * 1e6, 1) + " mm²"; }
+        function V(ms){ return inch ? trimNum(ms / 0.0254, 2) + " in/s" : trimNum(ms * 1000, 1) + " mm/s"; }
+        function S(pa){ return inch ? trimNum(pa / 6894757, 1) + " ksi" : trimNum(pa / 1e6, 0) + " MPa"; }
+        var sf = n("cySF") || 4, rows = [
+          ["Cap-end (bore) area / annulus area", A(r.A1) + " / " + A(r.A2), "Area ratio " + trimNum(r.ratio, 2) + " : 1"],
+          ["Push force (extend)", F(r.Fpush), "pressure × bore area"],
+          ["Pull force (retract)", F(r.Fpull), "pressure × annulus area"]];
+        if(r.vExt) rows.push(["Speed extend / retract / regen", V(r.vExt) + " / " + V(r.vRet) + " / " + V(r.vRegen), "flow ÷ area (no leakage)"]);
+        var h = '<table class="grid"><thead><tr><th>Result</th><th>Value</th><th>Note</th></tr></thead><tbody>' + rows.map(function(x){ return "<tr><td>" + esc(x[0]) + "</td><td>" + esc(x[1]) + "</td><td>" + esc(x[2]) + "</td></tr>"; }).join("");
+        if(r.Pcr){
+          var okB = r.fosB >= sf;
+          h += "<tr><td>Buckling load (" + r.method + ")</td><td>" + esc(F(r.Pcr)) + '</td><td>slenderness K·L/r = ' + trimNum(r.lam, 0) + " (transition " + trimNum(r.Cc, 0) + ")</td></tr>";
+          h += "<tr><td>Buckling safety factor</td><td><strong>" + trimNum(r.fosB, 2) + '</strong></td><td><span style="color:' + (okB ? "var(--green-ink)" : "var(--red-ink)") + ';font-weight:600">' + (okB ? "✓ ≥ " : "✗ below ") + sf + "</span></td></tr>";
+          h += "<tr><td>Rod compressive stress / factor vs yield</td><td>" + esc(S(r.rodStress)) + "</td><td>" + trimNum(r.fosRodY, 2) + "×</td></tr>";
+        }
+        if(r.lame){
+          h += "<tr><td>Tube wall / hoop stress (Barlow · Lamé)</td><td>" + esc((inch ? trimNum(r.t / 0.0254, 3) + " in" : trimNum(r.t * 1000, 2) + " mm")) + " · " + esc(S(r.barlow)) + " · " + esc(S(r.lame)) + '</td><td>factor vs yield (Lamé) <strong>' + trimNum(r.fosTube, 2) + "</strong></td></tr>";
+        }
+        h += "</tbody></table>";
+        o.innerHTML = h;
+      }
+      function cyIsoRender(){
+        var o = $("cyIso"), code = ($("cyCode").value || "").trim(), h = "";
+        function rng(i){ return i === ">28" ? "more than 2,500,000" : (CY_ISO[i][0].toLocaleString() + " – " + CY_ISO[i][1].toLocaleString()); }
+        if(code){
+          var parts = code.split("/").map(function(x){ return x.trim(); });
+          if(parts.length < 2 || parts.some(function(x){ return !/^\d{1,2}$/.test(x) || +x > 28; })){ o.innerHTML = '<p class="small">Write the code as 18/16/13 (scale numbers 0–28).</p>'; return; }
+          var sizes = parts.length === 3 ? ["≥ 4 µm(c)", "≥ 6 µm(c)", "≥ 14 µm(c)"] : ["≥ 6 µm(c)", "≥ 14 µm(c)"];
+          h = '<table class="grid"><thead><tr><th>Size</th><th>Code</th><th>Particles per mL</th><th>Per 100 mL</th></tr></thead><tbody>' + parts.map(function(c, i){ var k = +c; return "<tr><td>" + sizes[i] + "</td><td>" + k + "</td><td>" + rng(k) + "</td><td>" + (CY_ISO[k][0] * 100).toLocaleString() + " – " + (CY_ISO[k][1] * 100).toLocaleString() + "</td></tr>"; }).join("") + "</tbody></table>";
+        } else {
+          var c4 = cyIsoCode(Number($("cy4").value)), c6 = cyIsoCode(Number($("cy6").value)), c14 = cyIsoCode(Number($("cy14").value));
+          if(c4 == null || c6 == null || c14 == null){ o.innerHTML = '<p class="small">Enter particle counts per mL (or decode a code).</p>'; return; }
+          h = '<p style="margin-top:8px">ISO 4406 code: <strong style="font-size:1.3em">' + c4 + "/" + c6 + "/" + c14 + "</strong></p>";
+        }
+        o.innerHTML = h;
+      }
+      /* GD&T */
+      function gdMmc(feat, mod, tol, mn, mx, act){
+        var hole = feat === "hole", MMC = hole ? mn : mx, LMC = hole ? mx : mn, r = { MMC:MMC, LMC:LMC };
+        var span = Math.abs(LMC - MMC);
+        if(mod === "M"){ r.VC = hole ? MMC - tol : MMC + tol; r.RC = hole ? LMC + tol + span : LMC - tol - span; r.bonusMax = span; }
+        else if(mod === "L"){ r.VC = hole ? LMC + tol : LMC - tol; r.RC = hole ? MMC - tol - span : MMC + tol + span; r.bonusMax = span; }
+        else { r.VC = hole ? MMC - tol : MMC + tol; r.RC = hole ? LMC + tol : LMC - tol; r.bonusMax = 0; }
+        if(act != null){
+          r.inSize = act >= mn && act <= mx;
+          r.bonus = mod === "M" ? Math.abs(act - MMC) : (mod === "L" ? Math.abs(LMC - act) : 0);
+          r.allowed = tol + r.bonus;
+        }
+        return r;
+      }
+      function gdUnc(lines, k){
+        var rows = [], err = null;
+        lines.forEach(function(l){
+          if(!l.trim()) return;
+          var p = l.split(",").map(function(x){ return x.trim(); }); if(p.length < 3){ err = "Each line needs: name, value, type"; return; }
+          var v = Number(p[1]), tp = p[2].split(/\s+/), c = p.length > 3 && p[3] !== "" ? Number(p[3]) : 1, u;
+          var t0 = tp[0].toLowerCase();
+          if(!isFinite(v) || !isFinite(c)){ err = "Bad number in: " + l; return; }
+          if(t0 === "normal"){ var kk = Number(tp[1] || 2); u = v / kk; }
+          else if(t0 === "rect") u = v / Math.sqrt(3);
+          else if(t0 === "tri") u = v / Math.sqrt(6);
+          else if(t0 === "u") u = v / Math.sqrt(2);
+          else if(t0 === "typea"){ var nn = Number(tp[1] || 1); u = v / Math.sqrt(nn); }
+          else { err = "Unknown type “" + p[2] + "” — use normal k, rect, tri, u or typeA n"; return; }
+          rows.push({ name:p[0], v:v, type:p[2], c:c, u:u, cu:Math.abs(c * u) });
+        });
+        if(err) return { err:err };
+        var sum = 0; rows.forEach(function(r){ sum += r.cu * r.cu; });
+        var uc = Math.sqrt(sum); rows.forEach(function(r){ r.pct = sum ? r.cu * r.cu / sum * 100 : 0; });
+        return { rows:rows, uc:uc, U:k * uc };
+      }
+      function gdRender(){
+        var m = $("gdMode").value, o = $("gdOut");
+        $("gdMmc").classList.toggle("hidden", m !== "mmc"); $("gdFast").classList.toggle("hidden", m !== "fast"); $("gdUnc").classList.toggle("hidden", m !== "unc");
+        function n(id){ var s = $(id).value; if(s === "") return null; var v = Number(s); return isFinite(v) ? v : null; }
+        function f(x){ return trimNum(x, 5); }
+        var h = "";
+        if(m === "mmc"){
+          var tol = n("gdTol"), mn = n("gdMin"), mx = n("gdMax"); if(tol == null || mn == null || mx == null || mx < mn){ o.innerHTML = '<p class="small">Enter tolerance and size min ≤ max.</p>'; return; }
+          var feat = $("gdFeat").value, mod = $("gdMod").value, act = n("gdAct"), r = gdMmc(feat, mod, tol, mn, mx, act);
+          var rows = [["MMC / LMC", f(r.MMC) + " / " + f(r.LMC)], ["Virtual condition (gauge boundary)", f(r.VC)], ["Resultant condition", f(r.RC)], ["Max bonus available", f(r.bonusMax)]];
+          if(act != null){
+            rows.push(["Actual size", f(act) + (r.inSize ? " — within size limits" : " — OUT of size limits")]);
+            rows.push(["Bonus at this size / tolerance allowed", f(r.bonus) + " / Ø" + f(r.allowed)]);
+            var dx = n("gdDx"), dy = n("gdDy");
+            if(dx != null && dy != null){ var pos = 2 * Math.sqrt(dx * dx + dy * dy), ok = pos <= r.allowed + 1e-12 && r.inSize;
+              rows.push(["Measured position Ø = 2√(Δx²+Δy²)", "Ø" + f(pos) + ' <span style="color:' + (ok ? "var(--green-ink)" : "var(--red-ink)") + ';font-weight:600">' + (ok ? "✓ accept" : "✗ reject") + "</span>"]); }
+          }
+          h = '<table class="grid"><tbody>' + rows.map(function(x){ return '<tr><td style="text-align:left;font-family:var(--sans)">' + esc(x[0]) + "</td><td>" + x[1] + "</td></tr>"; }).join("") + "</tbody></table>";
+        } else if(m === "fast"){
+          var H = n("gdH"), F = n("gdF"), T1 = n("gdT1"); if(H == null || F == null || H <= F){ o.innerHTML = '<p class="small">Enter hole MMC larger than fastener MMC.</p>'; return; }
+          h = '<table class="grid"><tbody><tr><td style="text-align:left">Floating fastener — each part, position Ø at MMC</td><td>T = H − F = <strong>' + f(H - F) + "</strong></td></tr>" +
+            '<tr><td style="text-align:left">Fixed fastener — total to share (T₁ + T₂ = H − F)</td><td>' + f(H - F) + " → equal split " + f((H - F) / 2) + " each" + (T1 != null ? "; with T₁ = " + f(T1) + ", T₂ = <strong>" + f(H - F - T1) + "</strong>" : "") + "</td></tr></tbody></table>" +
+            '<p class="small">Fixed fastener with a threaded hole: use a projected tolerance zone Ⓟ on the threaded part (perpendicularity error of the hole otherwise eats into the clearance).</p>';
+        } else {
+          var k = n("gdK") || 2, res = gdUnc(($("gdUData").value || "").split(/\n/), k), tw = n("gdUTol");
+          if(res.err){ o.innerHTML = '<p class="small" style="color:var(--red-ink)">' + esc(res.err) + "</p>"; return; }
+          if(!res.rows.length){ o.innerHTML = '<p class="small">Add at least one source.</p>'; return; }
+          h = '<table class="grid"><thead><tr><th>Source</th><th>Value</th><th>Type</th><th>u (std)</th><th>Share</th></tr></thead><tbody>' + res.rows.map(function(r){ return '<tr><td style="text-align:left;font-family:var(--sans)">' + esc(r.name) + "</td><td>" + f(r.v) + "</td><td>" + esc(r.type) + "</td><td>" + f(r.cu) + "</td><td>" + trimNum(r.pct, 1) + " %</td></tr>"; }).join("") + "</tbody></table>";
+          h += '<p style="margin-top:8px">Combined standard uncertainty u<sub>c</sub> = <strong>' + f(res.uc) + "</strong> · Expanded U (k = " + trimNum(k, 2) + ") = <strong>±" + f(res.U) + "</strong>" + (tw ? " · TUR = tolerance ÷ 2U = <strong>" + trimNum(tw / (2 * res.U), 2) + " : 1</strong>" + (tw / (2 * res.U) >= 4 ? ' <span style="color:var(--green-ink)">✓ ≥ 4:1</span>' : ' <span style="color:var(--amber-ink)">⚠ below 4:1</span>') : "") + "</p>";
+          if(tw) h += '<p class="small">ISO 14253-1: to prove conformance, a reading must be inside the tolerance shrunk by U at each end (acceptance zone ' + f(tw - 2 * res.U) + " wide).</p>";
+        }
+        o.innerHTML = h;
+      }
+      ["cyU","cyEnd"].forEach(function(id){ $(id).addEventListener("change", function(){ holdScroll(cyRender); }); });
+      ["cyBore","cyRod","cyP","cyQ","cyTube","cyL","cySF","cySyR","cyE","cySyT"].forEach(function(id){ $(id).addEventListener("input", cyRender); });
+      $("cyU").addEventListener("change", function(){
+        var toMM = $("cyU").value === "mm";
+        [["cyBore",25.4],["cyRod",25.4],["cyQ",3.785411784],["cyTube",25.4],["cyL",25.4]].forEach(function(q){ var v = Number($(q[0]).value); if(isFinite(v) && $(q[0]).value !== "") $(q[0]).value = trimNum(toMM ? v * q[1] : v / q[1], 3); });
+        var pv = Number($("cyP").value); if(isFinite(pv)) $("cyP").value = trimNum(toMM ? pv / 14.5038 : pv * 14.5038, 1);
+        ["cySyR","cyE","cySyT"].forEach(function(id){ var v = Number($(id).value); if(isFinite(v)) $(id).value = trimNum(toMM ? v * 6.894757 : v / 6.894757, 0); });
+        cyRender();
+      });
+      ["cy4","cy6","cy14","cyCode"].forEach(function(id){ $(id).addEventListener("input", cyIsoRender); });
+      $("gdMode").addEventListener("change", function(){ holdScroll(gdRender); });
+      ["gdFeat","gdMod"].forEach(function(id){ $(id).addEventListener("change", function(){ holdScroll(gdRender); }); });
+      ["gdTol","gdMin","gdMax","gdAct","gdDx","gdDy","gdH","gdF","gdT1","gdUData","gdK","gdUTol"].forEach(function(id){ $(id).addEventListener("input", gdRender); });
+      cyRender(); cyIsoRender(); gdRender();
+
+      /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v38";
+      var APP_BUILD = "v39";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -9547,6 +9791,8 @@
           ["stack","Stack-Up","tolerance stack stack-up worst case RSS assembly gap"],
           ["aql","AQL Lookup","AQL sampling plan Z1.4 lot size sample size accept reject inspection level code letter"],
           ["threads","Threads","thread M10 UNC UNF NPT BSP pitch diameter gauge plug ring go no-go Acme metric class 6g 2A 3B tap"],
+          ["cyl","Cylinder & oil","cylinder force push pull area speed flow rod buckling euler johnson column tube hoop stress barlow lame pressure iso 4406 cleanliness particle count oil code"],
+          ["gdt","GD&T & uncertainty","gdt gd&t mmc lmc bonus tolerance virtual condition resultant condition position fastener floating fixed uncertainty gum budget expanded k=2 tur 14253"],
           ["msa","More MSA","msa type 1 gage study cg cgk bias linearity attribute agreement kappa fleiss cohen effectiveness miss rate false alarm vda 5 aiag gauge capability"],
           ["fits","Fits (ISO 286)","fit fits tolerance iso 286 hole shaft h7 g6 h8 f7 k6 p6 clearance interference transition it grade limits bore pin bushing press fit"],
           ["seal","Seal glands","o-ring gland groove seal squeeze stretch gland fill piston rod static dynamic AS568 dash back-up ring extrusion clearance parker groove design"],

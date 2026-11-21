@@ -50,6 +50,23 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-21 — Cylinder & oil, GD&T & uncertainty
+
+- New tool `cyl` (reference cluster):
+  - area, push/pull force, extend/retract/regen speed;
+  - rod buckling, Euler or Johnson chosen by slenderness against Cc, with the K end-fixity factor and a safety factor against a target;
+  - rod stress; tube Barlow and Lamé hoop stress with factor against yield;
+  - ISO 4406 code from counts, or decode a code;
+  - inch ⇄ mm unit switch converts the entered values; links to Materials Atlas for yield strengths.
+  - ISO 4406 table 0–28: Petro-Canada and an independent guide agree (the second has one typo: code 6 printed twice).
+- New tool `gdt` (measure cluster):
+  - position at MMC/LMC/RFS: VC, RC, bonus, allowed tolerance, pass/fail from Δx/Δy;
+  - floating/fixed fastener formulas;
+  - GUM uncertainty budget (normal k / rect / tri / U / Type A, sensitivity, RSS, k·uc, TUR, ISO 14253-1 note).
+- `tests/cyl-gdt.test.js`: 19 checks — hand force/speed, the textbook Euler case (37.85 kN), the Johnson formula and its continuity at Cc, Barlow/Lamé, ISO 4406 published example 18/16/13 plus boundaries, Y14.5 VC/RC for hole/pin × MMC/LMC/RFS, GUM divisors.
+- Bug caught by the test and fixed before publishing: pin resultant condition used a signed span.
+- Cache v39.
+
 ## 2026-11-21 — More MSA tool (measure cluster)
 
 - New tool `msa` with three studies:
