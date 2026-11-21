@@ -50,6 +50,18 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-21 — Metric thread table: 18 → 54 sizes
+
+- TH_M now covers M1.6 to M60 (coarse and common fine), 6H/6g, from the ASME B1.13M / ISO 965-2 chart. The data was accepted because:
+  - it matches all 18 previously verified rows on every limit;
+  - Wikipedia's ISO 965 tables agree on every external value for the 33 sizes they list (Wikipedia has a typo on M2.5 d2 max);
+  - ISO 965-2 preview rows agree on internal limits.
+- The browser test opens all 54 sizes and finds every source value on screen (0 mismatches).
+- **Finding:** the custom ISO 965-1 formula calculator differs from the printed table by up to 0.025 mm, because ISO rounds its tables in ways the formula does not reproduce. Worst cases: 2.5 mm pitch D1 max (25 µm) and M36×4 d min (26 µm). The custom-size note now says so.
+- **Knock-on fix:** ISO 6149 ports M18, M22, M27, M30, M33, M42 and M48 used to link to calculated limits; 12 of the 13 now link to table sizes. M60×2 is not in the chart and stays calculated.
+- Not added: micrometre-level ISO 1502 gauge tolerances (T_PL, Z_PL, W_GO and so on). The public copies are OCR-garbled, and one gauge site checked publishes wrong limits (M10×1.5 6H NO-GO shown as 9.096 instead of 9.206). The gauge view still shows the product limits each gauge checks, now for all 54 sizes.
+- Cache v35.
+
 ## 2026-11-20 — Thread links from every port, flange and cavity
 
 - New `ptThreadFor()` turns a thread callout into a thread-tool target. Every cavity (Parker and Sun) and every flange now has an "Open thread limits" button, and flanges get one for the inch bolt and one for the metric bolt. Tested on all 43 combinations.
