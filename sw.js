@@ -1,4 +1,4 @@
-const CACHE = "spc-tools-v41-thread-audit";
+const CACHE = "spc-tools-v42-precision";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

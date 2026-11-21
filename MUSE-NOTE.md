@@ -1,3 +1,16 @@
+# Note for Muse — import pop-up layering + statistic precision (2026-11-21, v42)
+
+1. Sheet input (Map & Preview) overlay was z-index 60, under nav.clusters (70) and, on phones,
+   nav.tabs — the column selector / "Use these values" could be covered and untappable.
+   Overlay now z-index 90; verified every control reachable at 1280×720 and 390×844.
+2. SPC & Capability and Data Check printed statistics at a fixed 4 decimals, so σ 0.00023
+   showed as "0.0002" (within and overall indistinguishable) and limits lost a digit.
+   New typedDp/statDp/fmtSd: stats one decimal finer than the readings as typed (raw text,
+   so trailing zeros count); σ always ≥2 significant figures. Calculations unchanged.
+   Verified against an independent Python/scipy implementation on four data sets
+   (mean, σ within/overall, limits, Cp/Cpk/Pp/Ppk, Bissell bound, PPM, run/trend/3σ flags,
+   Anderson–Darling A² and p): all agree.
+
 # Note for Muse — thread data relation audit (2026-11-21, v41)
 
 New tests/threads.test.js checks every UN row (TH_U + TH_U_ADD, 174) and every B1.2 gauge
