@@ -50,6 +50,14 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-21 — Fits (ISO 286) tool
+
+- New tool `fits`: nominal size (mm or inch, up to 500 mm), hole class × shaft class. Shows limits in mm and inch, deviations, clearance or interference, and the fit type. Includes ISO preferred-fit presets and a Learn panel.
+- Built from ISO 286-1 base tables: IT4–IT11, shaft fundamental deviations d e f g h js k m n p, and the hole rules (EI = −es; K/M/N/P with Δ; M6 250–315 special case).
+- `tests/fits.test.js` checks the build against a published ISO 286-2 table: 594 cells, 591 agree. The 3 that differ are typos in the published table (f6 120–180, E7 315–400, K6 6–10); each one's band width disagrees with its own IT grade.
+- Bug found by the test and fixed before publishing: hole K uses the IT4–7 k deviation for every grade, which fixed the K8 row.
+- Cache v37.
+
 ## 2026-11-21 — Seal glands tool + Suggest-a-change button
 
 - New tool `seal` (reference cluster): O-ring gland check and design for piston and rod glands, static or dynamic, with 0/1/2 back-up rings.

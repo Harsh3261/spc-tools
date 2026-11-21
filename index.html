@@ -585,7 +585,7 @@
       .thsearch{margin:4px 0 12px}
       #ptOut table.grid td:first-child, #ptOut table.grid th:first-child{text-align:left; font-family:var(--sans)}
       .thfind{margin:4px 0 14px; border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; background:var(--panel2)}
-      #sgOut table.grid td:first-child{text-align:left;font-family:var(--sans)}
+      #ftOut table.grid td:first-child, #sgOut table.grid td:first-child{text-align:left;font-family:var(--sans)}
       .ptfig{margin:14px 0 0; border:1px solid var(--line-soft); border-radius:10px; padding:10px; background:var(--panel2)}
       .ptfig svg{display:block; width:100%; max-width:520px; height:auto; margin:0 auto}
       .ptfig figcaption{font-size:12px; color:var(--ink-dim); margin-top:6px; text-align:center}
@@ -741,6 +741,7 @@
         <button type="button" role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads" data-cluster="reference">Threads</button>
         <button type="button" role="tab" id="tabbtn-ports" aria-selected="false" data-tab="ports" data-cluster="reference">Hydraulic ports</button>
         <button type="button" role="tab" id="tabbtn-seal" aria-selected="false" data-tab="seal" data-cluster="reference">Seal glands</button>
+        <button type="button" role="tab" id="tabbtn-fits" aria-selected="false" data-tab="fits" data-cluster="reference">Fits (ISO 286)</button>
         <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Unit converters</button>
         <button type="button" role="tab" id="tabbtn-learn" aria-selected="false" data-tab="learn" data-cluster="reference">Learn</button>
         <button type="button" role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack" data-cluster="measure">Stack-Up</button>
@@ -1555,6 +1556,32 @@
             <p class="small"><strong>Typical failures you can read from these numbers:</strong> leak at low pressure → squeeze too low; flat-sided ring (compression set) → squeeze too high or heat; nibbled edge → gap too big for the pressure; twisted / spiral cut ring in a dynamic gland → too much stretch, rough finish or a too-wide groove; cut at assembly → sharp edges, no lead-in chamfer.</p>
           </details>
           <p class="cite" id="sgCite">Gland design values: Parker O-Ring Handbook ORD 5700, Design Chart 4-1 (industrial static) and 5-2 (industrial reciprocating) — gland depth and squeeze ranges confirmed identical in Global O-Ring &amp; Seal's published tables. Cross-section reduction from stretch: Parker Figure 3-3 equations, which reproduce Freudenberg (FST) AS568 guide table values. Limits: Parker §3.5–3.7 (stretch ≤ 5 %, squeeze ≥ .007 in, dynamic ≈ 16 % max, static 30 % max, fill 60–85 %, ≥ 10 % void). AS568 sizes: Apple Rubber and Greene Tweed charts agree on 341 of 345 sizes; −391 ID (21.955, the other source's 21.995 breaks the series), −102 ID tol (.004 / .005 → .005 used) and −469 / −470 ID tol (.090 / .095 → .095 used) resolved toward the wider tolerance. Reference only — the seal maker's recommendation governs for critical applications.</p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL 7d : ISO 286 FITS ============ -->
+      <section class="tool" id="tool-fits" role="tabpanel" aria-labelledby="tabbtn-fits">
+        <div class="card">
+          <h2>Fits — ISO 286 hole &amp; shaft limits</h2>
+          <p class="guru">A fit is two tolerances meeting: the hole's band and the shaft's band. Where they sit relative to each other decides whether the parts slide, locate, or have to be pressed.</p>
+          <div class="row3">
+            <div><label class="flabel" for="ftSize">Nominal size</label><input id="ftSize" type="number" step="0.001" inputmode="decimal" value="50"></div>
+            <div><label class="flabel" for="ftUnit">Unit</label><select id="ftUnit"><option value="mm" selected>mm</option><option value="in">inch</option></select></div>
+            <div><label class="flabel" for="ftPreset">Common fit</label><select id="ftPreset"></select></div>
+          </div>
+          <div class="row2">
+            <div><label class="flabel" for="ftHole">Hole class</label><select id="ftHole"></select></div>
+            <div><label class="flabel" for="ftShaft">Shaft class</label><select id="ftShaft"></select></div>
+          </div>
+          <div id="ftOut" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Learn — reading a fit</summary>
+            <p class="small"><strong>Capital letter = hole, small letter = shaft.</strong> The letter is <em>where</em> the band sits (H holes start at the nominal size and go up; h shafts start at nominal and go down; a–g shafts sit below nominal → clearance; k–p sit above → grip). The number is the IT grade — <em>how wide</em> the band is (IT6 ≈ ground, IT7 ≈ fine-turned / reamed, IT8–9 ≈ turned / bored, IT11 ≈ rough).<br>
+            <strong>Clearance fit:</strong> the smallest hole is still bigger than the biggest shaft — always slides. <strong>Interference fit:</strong> the biggest hole is still smaller than the smallest shaft — must be pressed or shrunk. <strong>Transition:</strong> depends which parts meet — may slide, may need a tap.<br>
+            <strong>Hole basis</strong> (H hole, choose the shaft letter) is the usual system: holes are made with fixed reamers and gauges, shafts are easy to turn to any size.<br>
+            <strong>Inspect it right:</strong> a GO / NO-GO plug or ring at the two limits checks the band; a single measurement checks one point only — on round parts, out-of-roundness can pass a two-point check and still not assemble.</p>
+          </details>
+          <p class="cite">Built from ISO 286-1 base tables (standard tolerance grades IT4–IT11 and fundamental deviations d e f g h js k m n p, holes by the ISO 286-1 rules incl. Δ and the M6 250–315 special case). Checked cell-by-cell against a published ISO 286-2 table: 591 of 594 limits agree; the 3 that don't are typos in that table (each band's width disagrees with its own IT grade — f6 120–180, E7 315–400, K6 6–10). Common fits: the ISO preferred hole-basis fits. Reference only — ISO 286-2 governs.</p>
         </div>
       </section>
       <!-- ============ TOOL 8 : STACK-UP ============ -->
@@ -8557,9 +8584,88 @@
       sgRender();
 
       /* ======================================================================
+         SECTION · ISO 286 FITS (tool fits) — 2026-11-21. Verified in tests/fits.test.js. */
+      /* BEGIN DATA FT_286: ISO 286-1 base tables (µm). Ranges [over, up to] mm. IT5–IT11; shaft fundamental deviations
+         es (d e f g; h = 0) and ei (k for IT4–IT7 — 0 above IT7 — m n p). Holes derived by the ISO 286-1 rules:
+         A–H: EI = −es; K M N (≤ IT8) and P (≤ IT7): ES = −ei + Δ, Δ = IT(n) − IT(n−1) (Δ = 0 at ≤ 3 mm); P8+: ES = −ei. */
+      var FT_R = [[0,3],[3,6],[6,10],[10,18],[18,30],[30,50],[50,80],[80,120],[120,180],[180,250],[250,315],[315,400],[400,500]];
+      var FT_IT = {
+        4:[3,4,4,5,6,7,8,10,12,14,16,18,20],
+        5:[4,5,6,8,9,11,13,15,18,20,23,25,27],
+        6:[6,8,9,11,13,16,19,22,25,29,32,36,40],
+        7:[10,12,15,18,21,25,30,35,40,46,52,57,63],
+        8:[14,18,22,27,33,39,46,54,63,72,81,89,97],
+        9:[25,30,36,43,52,62,74,87,100,115,130,140,155],
+        10:[40,48,58,70,84,100,120,140,160,185,210,230,250],
+        11:[60,75,90,110,130,160,190,220,250,290,320,360,400] };
+      var FT_ES = { d:[-20,-30,-40,-50,-65,-80,-100,-120,-145,-170,-190,-210,-230], e:[-14,-20,-25,-32,-40,-50,-60,-72,-85,-100,-110,-125,-135],
+        f:[-6,-10,-13,-16,-20,-25,-30,-36,-43,-50,-56,-62,-68], g:[-2,-4,-5,-6,-7,-9,-10,-12,-14,-15,-17,-18,-20], h:[0,0,0,0,0,0,0,0,0,0,0,0,0] };
+      var FT_EI = { k:[0,1,1,1,2,2,2,3,3,4,4,4,5], m:[2,4,6,7,8,9,11,13,15,17,20,21,23], n:[4,8,10,12,15,17,20,23,27,31,34,37,40], p:[6,12,15,18,22,26,32,37,43,50,56,62,68] };
+      /* END DATA FT_286 */
+      function ftRange(D){ for(var i = 0; i < FT_R.length; i++){ if(D > FT_R[i][0] && D <= FT_R[i][1]) return i; } return -1; }
+      /* returns {up, lo} in µm, or null if the class is not offered */
+      function ftDev(letter, grade, D){
+        var r = ftRange(D); if(r < 0 || !FT_IT[grade]) return null;
+        var IT = FT_IT[grade][r], low = letter.toLowerCase(), hole = letter !== low;
+        if(!hole){
+          if(FT_ES[low]) return { up:FT_ES[low][r], lo:FT_ES[low][r] - IT };
+          if(low === "js") return { up:IT / 2, lo:-IT / 2 };
+          if(FT_EI[low]){ var ei = low === "k" && grade > 7 ? 0 : FT_EI[low][r]; return { up:ei + IT, lo:ei }; }
+          return null;
+        }
+        if(FT_ES[low]){ var EI = -FT_ES[low][r]; return { up:EI + IT, lo:EI }; }
+        if(low === "js") return { up:IT / 2, lo:-IT / 2 };
+        if(FT_EI[low]){
+          if((low === "k" || low === "m" || low === "n") && grade > 8) return null;
+          var ei2 = FT_EI[low][r]; /* holes K/M/N/P always use the IT4–IT7 column value of the shaft deviation */
+          var useDelta = r > 0 && (low !== "p" || grade <= 7) && FT_IT[grade - 1];
+          var Delta = useDelta ? IT - FT_IT[grade - 1][r] : 0;
+          var ES = -ei2 + Delta;
+          if(low === "m" && grade === 6 && r === 10) ES = -9; /* ISO 286-1 special case: M6, 250–315 mm, ES = −9 µm */
+          return { up:ES, lo:ES - IT };
+        }
+        return null;
+      }
+
+      var FT_HOLES = ["E7","E8","F6","F7","F8","G6","G7","H6","H7","H8","H9","H10","H11","JS6","JS7","JS8","K6","K7","K8","M6","M7","M8","N6","N7","N8","P6","P7","P8"];
+      var FT_SHAFTS = ["d8","d9","d10","e7","e8","e9","f6","f7","f8","g5","g6","g7","h5","h6","h7","h8","h9","h10","h11","js5","js6","js7","k5","k6","k7","m5","m6","m7","n5","n6","n7","p5","p6"];
+      var FT_PRESETS = [["", "— pick a common fit —"],["H9/d9","H9/d9 — free running (loose, low precision)"],["H8/f7","H8/f7 — close running (bushings, pistons in guides)"],["H7/g6","H7/g6 — sliding (precise location, moves freely)"],["H7/h6","H7/h6 — locational clearance (snug, can be assembled by hand)"],["H7/k6","H7/k6 — locational transition (accurate location, light tap)"],["H7/n6","H7/n6 — locational transition, tighter"],["H7/p6","H7/p6 — locational interference (pressed, no torque)"]];
+      function ftSplit(c){ var m = /^([A-Za-z]+)(\d+)$/.exec(c); return { l:m[1], g:parseInt(m[2], 10) }; }
+      function ftRender(){
+        var o = $("ftOut"), v = Number($("ftSize").value), unit = $("ftUnit").value;
+        if(!(v > 0)){ o.innerHTML = '<p class="small">Enter a nominal size above zero.</p>'; return; }
+        var D = unit === "in" ? v * 25.4 : v;
+        if(D > 500){ o.innerHTML = '<p class="small">This tool covers nominal sizes up to 500 mm (19.7 in).</p>'; return; }
+        var H = ftSplit($("ftHole").value), S = ftSplit($("ftShaft").value);
+        var h = ftDev(H.l, H.g, D), s = ftDev(S.l, S.g, D), r = ftRange(D);
+        if(!h || !s){ o.innerHTML = '<p class="small">That class is not defined at this size.</p>'; return; }
+        var hMax = D + h.up / 1000, hMin = D + h.lo / 1000, sMax = D + s.up / 1000, sMin = D + s.lo / 1000;
+        var cMax = (h.up - s.lo), cMin = (h.lo - s.up);
+        var kind = cMin >= 0 ? "Clearance fit — always slides" : (cMax <= 0 ? "Interference fit — must be pressed or shrunk" : "Transition fit — may slide or may need a light press");
+        function mmv(x){ return trimNum(x, 3); } function inv(x){ return trimNum(x / 25.4, 4); }
+        function um(x){ return (x > 0 ? "+" : "") + trimNum(x, 1) + " µm"; }
+        var rows = [
+          ["Hole " + $("ftHole").value, mmv(hMin) + " – " + mmv(hMax) + " mm", inv(hMin) + " – " + inv(hMax) + " in", um(h.lo) + " / " + um(h.up)],
+          ["Shaft " + $("ftShaft").value, mmv(sMin) + " – " + mmv(sMax) + " mm", inv(sMin) + " – " + inv(sMax) + " in", um(s.lo) + " / " + um(s.up)],
+          [cMin >= 0 ? "Clearance" : (cMax <= 0 ? "Interference" : "Clearance (−) / interference (+)"), cMin >= 0 ? (trimNum(cMin, 1) + " to " + trimNum(cMax, 1) + " µm") : (cMax <= 0 ? (trimNum(-cMax, 1) + " to " + trimNum(-cMin, 1) + " µm interference") : ("from " + trimNum(-cMin, 1) + " µm interference to " + trimNum(cMax, 1) + " µm clearance")), trimNum(cMin / 25400, 5) + " to " + trimNum(cMax / 25400, 5) + " in", ""]
+        ];
+        var t = "<h3>" + esc(trimNum(v, 4) + " " + unit + " " + $("ftHole").value + "/" + $("ftShaft").value) + " — " + esc(kind) + '</h3><table class="grid"><thead><tr><th>Feature</th><th>mm</th><th>inch</th><th>Deviation</th></tr></thead><tbody>' +
+          rows.map(function(x){ return "<tr><td>" + esc(x[0]) + "</td><td>" + esc(x[1]) + "</td><td>" + esc(x[2]) + "</td><td>" + esc(x[3]) + "</td></tr>"; }).join("") + "</tbody></table>";
+        t += '<p class="small" style="margin-top:8px">Size range used: over ' + FT_R[r][0] + " up to " + FT_R[r][1] + " mm. Hole IT" + H.g + " = " + FT_IT[H.g][r] + " µm, shaft IT" + S.g + " = " + FT_IT[S.g][r] + " µm.</p>";
+        o.innerHTML = t;
+      }
+      thFillSelect($("ftHole"), FT_HOLES.map(function(c){ return [c, c]; }), "H8");
+      thFillSelect($("ftShaft"), FT_SHAFTS.map(function(c){ return [c, c]; }), "f7");
+      thFillSelect($("ftPreset"), FT_PRESETS, "");
+      $("ftPreset").addEventListener("change", function(){ var v = $("ftPreset").value; if(v){ var p = v.split("/"); $("ftHole").value = p[0]; $("ftShaft").value = p[1]; } holdScroll(ftRender); });
+      ["ftHole","ftShaft","ftUnit"].forEach(function(id){ $(id).addEventListener("change", function(){ $("ftPreset").value = ""; holdScroll(ftRender); }); });
+      $("ftSize").addEventListener("input", ftRender);
+      ftRender();
+
+      /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v36";
+      var APP_BUILD = "v37";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -9273,6 +9379,7 @@
           ["stack","Stack-Up","tolerance stack stack-up worst case RSS assembly gap"],
           ["aql","AQL Lookup","AQL sampling plan Z1.4 lot size sample size accept reject inspection level code letter"],
           ["threads","Threads","thread M10 UNC UNF NPT BSP pitch diameter gauge plug ring go no-go Acme metric class 6g 2A 3B tap"],
+          ["fits","Fits (ISO 286)","fit fits tolerance iso 286 hole shaft h7 g6 h8 f7 k6 p6 clearance interference transition it grade limits bore pin bushing press fit"],
           ["seal","Seal glands","o-ring gland groove seal squeeze stretch gland fill piston rod static dynamic AS568 dash back-up ring extrusion clearance parker groove design"],
           ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 C04-2 C04-3 C09-2 C10-2T C10-3S C12-3L C12-4L C16-3S C20-3S sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],
