@@ -7876,11 +7876,65 @@
         ["2",3.812,1.750,"3/4-10",null,6000]
       ];
       /* END DATA PT_FLANGE */
-      /* BEGIN DATA PT_CAV: name, interchangeable with, thread, nose bore Ø A, seal bore Ø B, spotface Ø, depth to A/B step, total cavity depth min — inches */
-      var PT_CAV = [
-        ["C10-2 (2-way, size 10)","HydraForce VC10-2 · Danfoss/Comatrol SDC10-2 · Parker C10-2","7/8-14 UNF-2B",[.625,.627],[.810,.814],1.188,[.932,.942],1.312,"Parker NFT10-2F (finisher) · Form Relief CT10-2H"]
+      /* BEGIN DATA PT_PK: Parker standard cavities, read from Parker catalog HY15-3502/US "Bodies and Cavities" (2012 edition; the user's copy), inch values as printed
+         (drawings are dimensioned mm (in)). Depths z from datum A = spotface face, + into the body. Pairs are limits.
+         segs: [feature, Ø, z top, z bottom, kind] — kind "c" = 15° O-ring chamfer at the mouth, "t" = thread (Ø = minor-diameter bore).
+         ports: [port, centre z, cross-drill Ø max (null = not given)]. chk = what a second source confirmed. */
+      var PT_PK = [
+        { id:"C08-2", w:2, thr:"3/4-16 UNF-2B", sf:1.188, sfd:.031, drill:.438, tot:1.125, tool:"NFT08-2F", lead:"30°",
+          segs:[["O-ring chamfer Ø (15°)",[.811,.816],0,[.100,.115],"c"],["Thread",[.684,.691],[.100,.115],[.557,.567],"t"],["Bore Ø (= thread minor)",[.684,.691],[.557,.567],[.745,.755]],["Nose bore Ø (datum B)",[.500,.502],[.745,.755],1.125]],
+          ports:[[2,[.552,.562],.312]], geo:"Thread runout .002 to B · B ⊥ Ø.002 to A · seal surfaces 63 µin",
+          chk:"HydraForce VC08-2 drawing agrees: spotface 1.188 × .031, chamfer Ø.813 × .100–.115 at 15°, bore .686–.690 to .750 deep, nose .5005–.5020. HydraForce gives thread depth as .500 (full thread) — a different definition from Parker's .557–.567.", ok:true },
+        { id:"C08-3", w:3, thr:"3/4-16 UNF-2B", sf:1.188, sfd:.031, drill:.438, tot:1.719, tool:"NFT08-3F", lead:"31°",
+          segs:[["O-ring chamfer Ø (15°)",[.811,.816],0,[.100,.115],"c"],["Thread",[.684,.691],[.100,.115],[.557,.567],"t"],["Bore Ø (= thread minor)",[.684,.691],[.557,.567],[.675,.685]],["Seal bore Ø (datum B)",[.625,.627],[.675,.685],[1.235,1.245]],["Nose bore Ø",[.562,.564],[1.235,1.245],1.719]],
+          ports:[[3,[.545,.555],.312],[2,[1.109,1.119],.218]], geo:"Thread runout .002 to B · B ⊥ Ø.002 to A · nose runout .002 to B · seal surfaces 63 µin",
+          chk:"Parker catalog only. Mouth, thread and spotface are the same as the verified C08-2.", ok:false },
+        { id:"C08-4", w:4, thr:"3/4-16 UNF-2B", sf:1.188, sfd:.031, drill:.438, tot:2.125, tool:"NFT08-4F", lead:"31°",
+          segs:[["O-ring chamfer Ø (15°)",[.811,.817],0,[.100,.115],"c"],["Thread",[.684,.691],[.100,.115],[.557,.567],"t"],["Bore Ø (= thread minor)",[.684,.691],[.557,.567],[.675,.685]],["Seal bore Ø (datum B)",[.625,.627],[.675,.685],[1.235,1.245]],["Seal bore Ø",[.562,.564],[1.235,1.245],[1.792,1.802]],["Nose bore Ø",[.500,.502],[1.792,1.802],2.125]],
+          ports:[[4,[.545,.555],.218],[3,[1.109,1.119],.218],[2,1.672,.218]], geo:"Thread runout .002 to B · B ⊥ Ø.002 to A · lower bores runout .002 to B · seal surfaces 63 µin",
+          chk:"Parker catalog only. Mouth, thread and spotface are the same as the verified C08-2.", ok:false },
+        { id:"C10-2", w:2, thr:"7/8-14 UNF-2B", sf:1.188, sfd:.031, drill:.609, tot:1.312, tool:"NFT10-2F", lead:"30°",
+          segs:[["O-ring chamfer Ø (15°)",[.942,.947],0,[.100,.115],"c"],["Thread",[.810,.814],[.100,.115],[.620,.630],"t"],["Bore Ø (= thread minor)",[.810,.814],[.620,.630],[.932,.942]],["Nose bore Ø (datum B)",[.625,.627],[.932,.942],1.312]],
+          ports:[[2,[.702,.712],.445]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · seal surfaces 63 µin",
+          chk:"HydraForce VC10-2 (as reproduced by Hengli) and Form Relief's CT10-2H tool sheet agree on every diameter and depth. Bucher C1020 (ISO 17209 7/8-01-0-13) agrees within .008 on depths.", ok:true },
+        { id:"C10-3", w:3, thr:"7/8-14 UNF-2B", sf:1.188, sfd:.031, drill:.609, tot:1.875, tool:"NFT10-3F", lead:"30°",
+          segs:[["O-ring chamfer Ø (15°)",[.942,.947],0,[.100,.115],"c"],["Thread",[.810,.814],[.100,.115],[.620,.630],"t"],["Bore Ø (= thread minor)",[.810,.814],[.620,.630],[.845,.855]],["Seal bore Ø (datum B)",[.688,.690],[.845,.855],[1.495,1.505]],["Nose bore Ø",[.625,.627],[1.495,1.505],1.875]],
+          ports:[[3,[.715,.725],.250],[2,[1.339,1.349],.250]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · nose runout .002 to B · seal surfaces 63 µin",
+          chk:"Parker catalog only. Diameters match Bucher's 10-3, but its step depths and port positions differ (.875 / 1.525 / 1.900), so the two are NOT the same cavity. Check the cartridge maker's compatibility list.", ok:false },
+        { id:"C10-4", w:4, thr:"7/8-14 UNF-2B", sf:1.188, sfd:.031, drill:.609, tot:2.500, tool:"NFT10-4F", lead:"31°",
+          segs:[["O-ring chamfer Ø (15°)",[.942,.947],0,[.100,.115],"c"],["Thread",[.810,.814],[.100,.115],[.620,.630],"t"],["Bore Ø (= thread minor)",[.810,.814],[.620,.630],[.870,.880]],["Seal bore Ø (datum B)",[.750,.752],[.870,.880],[1.495,1.505]],["Seal bore Ø",[.688,.690],[1.495,1.505],[2.120,2.130]],["Nose bore Ø",[.625,.627],[2.120,2.130],2.500]],
+          ports:[[4,[.715,.725],.250],[3,[1.339,1.349],.250],[2,[1.963,1.973],.250]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · lower bores runout .002 to B · seal surfaces 63 µin",
+          chk:"Parker catalog only. Diameters match Bucher C1040, but its steps and ports differ (1.525 / 2.160 / 2.530), so the two are NOT the same cavity. Check the cartridge maker's compatibility list.", ok:false },
+        { id:"C12-2", w:2, thr:"1-1/16-12 UN-2B", sf:1.625, sfd:.031, drill:.877, tot:1.658, tool:"NFT12-2F", lead:"30°", thB:true,
+          segs:[["O-ring chamfer Ø (15°)",[1.148,1.153],0,[.130,.145],"c"],["Thread",[.972,.978],[.130,.145],.750,"t"],["Bore Ø (= thread minor)",[.972,.978],.750,[1.177,1.187]],["Nose bore Ø (20° × .062 lead-in)",[.875,.877],[1.177,1.187],1.658]],
+          ports:[[2,[.850,.860],.625]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · nose cylindricity .001 · seal surfaces 63 µin",
+          chk:"Parker catalog only. Chamfer, minor Ø and nose Ø match Danfoss CP12-series drawings (Ø1.149–1.153, .972–.976, .937–.939), but Danfoss's depths are a different cavity family.", ok:false },
+        { id:"C12-3", w:3, thr:"1-1/16-12 UN-2B", sf:1.625, sfd:.031, drill:.877, tot:2.326, tool:"NFT12-3F", lead:"30°", thB:true,
+          segs:[["O-ring chamfer Ø (15°)",[1.148,1.153],0,[.130,.145],"c"],["Thread",[.972,.978],[.130,.145],.750,"t"],["Bore Ø (= thread minor)",[.972,.978],.750,1.062],["Seal bore Ø (20° × .062 lead-in)",[.937,.939],1.062,1.908],["Nose bore Ø",[.875,.877],1.908,2.326]],
+          ports:[[3,.812,.437],[2,1.656,.437]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bore cylindricity .001 · seal surfaces 63 µin",
+          chk:"Parker catalog only. The diameters match Danfoss CP12-3, but the depths do not (Danfoss's is a longer cavity).", ok:false },
+        { id:"C12-4", w:4, thr:"1-1/16-12 UN-2B", sf:1.625, sfd:.031, drill:.815, tot:3.176, tool:"NFT12-4F", lead:"30°", thB:true,
+          segs:[["O-ring chamfer Ø (15°)",[1.148,1.153],0,[.130,.145],"c"],["Thread",[.972,.978],[.130,.145],.750,"t"],["Bore Ø (= thread minor)",[.972,.978],.750,1.062],["Seal bore Ø (20° × .062 lead-in)",[.937,.939],1.062,1.908],["Seal bore Ø",[.875,.877],1.908,2.758],["Nose bore Ø",[.813,.815],2.758,3.176]],
+          ports:[[4,.812,.437],[3,1.656,.437],[2,2.508,.437]], geo:"Datum B = the thread, ⊥ .002 to A · starred Ø runout .002 to B and ⊥ .002 to A · bore cylindricity .001 · seal surfaces 63 µin",
+          chk:"Parker catalog only. Upper features are the same as C12-3.", ok:false },
+        { id:"C16-2", w:2, thr:"1-5/16-12 UNF-2B", sf:1.750, sfd:.031, drill:.938, tot:1.844, tool:"NFT16-2F", lead:"30°",
+          segs:[["O-ring chamfer Ø (15°)",[1.398,1.403],0,[.130,.145],"c"],["Thread",[1.231,1.237],[.130,.145],[.745,.755],"t"],["Bore Ø (= thread minor)",[1.231,1.237],[.745,.755],[1.339,1.349]],["Nose bore Ø (datum B)",[1.126,1.128],[1.339,1.349],1.844]],
+          ports:[[2,[.964,.974],.750]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · seal surfaces 63 µin",
+          chk:"Diameters (chamfer 1.401, nose 1.127) match Bucher's ISO 17209 16-size cavities; the 2-way depths are Parker only.", ok:false },
+        { id:"C16-3", w:3, thr:"1-5/16-12 UNF-2B", sf:1.750, sfd:.031, drill:.938, tot:2.968, tool:"NFT16-3F", lead:"30°",
+          segs:[["O-ring chamfer Ø (15°)",[1.398,1.403],0,[.130,.145],"c"],["Thread",[1.231,1.237],[.130,.145],[.870,.880],"t"],["Bore Ø (= thread minor)",[1.231,1.237],[.870,.880],[1.344,1.354]],["Seal bore Ø (datum B)",[1.126,1.128],[1.344,1.354],[2.464,2.474]],["Nose bore Ø",[1.063,1.065],[2.464,2.474],2.968]],
+          ports:[[3,[.964,.974],.625],[2,[2.089,2.099],.625]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · nose runout .002 to B · seal surfaces 63 µin",
+          chk:"Bucher C1630 (ISO 17209 1 5/16-03-0-13 / NFPA T3.5.50) agrees on every diameter, port position and depth. The step at 1.344–1.354 is from Bucher, because Parker's drawing leaves it undimensioned.", ok:true },
+        { id:"C16-4", w:4, thr:"1-5/16-12 UNF-2B", sf:1.750, sfd:.030, drill:.938, tot:4.094, tool:"NFT16-4F", lead:"30°",
+          segs:[["O-ring chamfer Ø (15°)",[1.398,1.403],0,[.130,.145],"c"],["Thread",[1.231,1.237],[.130,.145],.875,"t"],["Bore Ø (= thread minor)",[1.231,1.237],.875,1.344],["Seal bore Ø (datum B, 20° lead-in)",[1.126,1.128],1.344,2.469],["Seal bore Ø",[1.063,1.065],2.469,3.594],["Nose bore Ø",[1.001,1.003],3.594,4.094]],
+          ports:[[4,.970,null],[3,2.090,.625],[2,3.220,null]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · lower bores runout .002 to B · seal surfaces 63 µin",
+          chk:"Bucher C1640 agrees on every diameter, step (1.344 / 2.469 / 3.594, +.010/−0) and port position (.969 / 2.094 / 3.220), and on the 4.094 depth.", ok:true },
+        { id:"C20-2", w:2, thr:"1-5/8-12 UNF-2B", sf:2.270, sfd:.031, drill:1.187, tot:2.312, tool:"NFT20-2F", lead:"30°",
+          segs:[["O-ring chamfer Ø (15°)",[1.713,1.718],0,[.127,.137],"c"],["Thread",[1.537,1.543],[.127,.137],[.807,.817],"t"],["Bore Ø (= thread minor)",[1.537,1.543],[.807,.817],[1.744,1.755]],["Nose bore Ø (datum B)",[1.438,1.440],[1.744,1.755],2.312]],
+          ports:[[2,[1.214,1.224],1.000]], geo:"Thread runout .002 to B · B ⊥ Ø.001 to A · seal surfaces 63 µin",
+          chk:"Parker catalog only.", ok:false }
       ];
-      /* END DATA PT_CAV */
+      /* END DATA PT_PK */
       /* BEGIN DATA PT_SUN: Sun Hydraulics cavities, transcribed from Sun's own cavity drawings (sheet 1, inch) supplied by the user 2026-11-20.
          Depths z are from the locating shoulder (L.S. = 0), + down into the body, − toward the surface. A pair [a,b] is a limit range.
          segs: [feature, Ø (one value = nominal / drill, pair = limits), z top, z bottom, kind]; kind "t" = thread, "d" = drill (working-parts clearance).
@@ -7920,8 +7974,8 @@
         if(std === "j1926"){ opts = PT_J1926.map(function(r, i){ return [String(i), r[0] + " — " + r[2].replace(/-2B$/, "") + " (" + r[1] + " in tube)"]; }); def = "5"; }
         else if(std === "i6149"){ opts = PT_6149.map(function(r, i){ return [String(i), r[0] + " 6H"]; }); def = "2"; }
         else if(std === "f61" || std === "f62"){ opts = (std === "f61" ? PT_F61 : PT_F62).map(function(r, i){ return [String(i), r[0] + " in flange"]; }); def = "2"; }
-        else opts = PT_CAV.map(function(r, i){ return [String(i), r[0]]; }).concat(PT_SUN.map(function(r, i){ return ["s" + i, "Sun " + r.id + " — series " + r.ser + ", " + r.np + "-port, " + r.thr.replace(/-\d?[A-Z]+$/, "").replace(/-2B$/, "")]; }));
-        thFillSelect($("ptSize"), opts, def);
+        else opts = PT_PK.map(function(r, i){ return ["p" + i, "Parker " + r.id + " — " + r.w + "-way, " + r.thr.replace(/-2B$/, "") + (r.ok ? " ✓" : "")]; }).concat(PT_SUN.map(function(r, i){ return ["s" + i, "Sun " + r.id + " — series " + r.ser + ", " + r.np + "-port, " + r.thr.replace(/-\d?[A-Z]+$/, "").replace(/-2B$/, "")]; }));
+        thFillSelect($("ptSize"), opts, std === "cav" ? "p3" : def);
         ptRender();
       }
       function ptThreadLink(std, r){
@@ -8002,35 +8056,10 @@
           '<text x="' + cx + '" y="' + (cy + bb / 2 + 78) + '" text-anchor="middle" fill="var(--ink-dim)">O-ring groove is in the flange/clamp half, not the port face</text>';
         return ptSvg(b, 276);
       }
-      /* Two-way cartridge cavity section. */
-      function ptSvgCav(L){
-        var cx = 215, top = 60, sfD = 6, thBot = 112, stp = 160, bot = 222;
-        var sfR = 96, thR = 56, bR = 46, aR = 34, pR = 16;
-        var cav = "M" + (cx - sfR) + "," + top + " L" + (cx - sfR) + "," + (top + sfD) + " L" + (cx - thR) + "," + (top + sfD) + " L" + (cx - thR) + "," + thBot +
-          " L" + (cx - bR) + "," + (thBot + 8) + " L" + (cx - bR) + "," + stp + " L" + (cx - aR) + "," + (stp + 8) + " L" + (cx - aR) + "," + bot + " L" + (cx - pR) + "," + (bot + 10) + " L" + (cx - pR) + ",250" +
-          " L" + (cx + pR) + ",250 L" + (cx + pR) + "," + (bot + 10) + " L" + (cx + aR) + "," + bot + " L" + (cx + aR) + "," + (stp + 8) + " L" + (cx + bR) + "," + stp + " L" + (cx + bR) + "," + (thBot + 8) +
-          " L" + (cx + thR) + "," + thBot + " L" + (cx + thR) + "," + (top + sfD) + " L" + (cx + sfR) + "," + (top + sfD) + " L" + (cx + sfR) + "," + top;
-        var teeth = "";
-        for(var y = top + sfD + 4; y < thBot - 4; y += 8) teeth += '<path class="dm" d="M' + (cx - thR) + "," + y + " l-5,4 l5,4 M" + (cx + thR) + "," + y + " l5,4 l-5,4\"/>";
-        var b = '<rect x="20" y="' + top + '" width="360" height="190" fill="url(#ptHatch)"/>' +
-          '<path d="' + cav + ' Z" fill="var(--panel2)"/>' +
-          '<path class="ol" d="M20,' + top + " L" + (cx - sfR) + "," + top + " " + cav.slice(cav.indexOf("L")) + " L380," + top + '"/>' + teeth +
-                    '<text x="' + (cx + pR + 6) + '" y="246" fill="var(--ink-dim)">port 1</text>' +
-          '<line class="cl" x1="' + cx + '" y1="' + (top - 46) + '" x2="' + cx + '" y2="255"/>' +
-          ptDimH(top - 30, cx - sfR, cx + sfR, L.sf) +
-          '<line class="ext" x1="' + (cx - sfR) + '" y1="' + (top - 30) + '" x2="' + (cx - sfR) + '" y2="' + top + '"/><line class="ext" x1="' + (cx + sfR) + '" y1="' + (top - 30) + '" x2="' + (cx + sfR) + '" y2="' + top + '"/>' +
-          '<text x="' + (cx + thR + 10) + '" y="' + (thBot - 18) + '">' + esc(L.thr) + "</text>" +
-          '<text x="' + (cx + bR + 8) + '" y="' + (stp - 14) + '">' + esc(L.B) + "</text>" +
-          '<text x="' + (cx + aR + 8) + '" y="' + (bot - 18) + '">' + esc(L.A) + "</text>" +
-          ptDimV(84, top + sfD, stp, L.step, "l") + ptDimV(46, top + sfD, bot, L.dep, "b") +
-          '<line class="ext" x1="' + (cx - bR) + '" y1="' + stp + '" x2="80" y2="' + stp + '"/><line class="ext" x1="' + (cx - aR) + '" y1="' + bot + '" x2="42" y2="' + bot + '"/>' +
-          '<line class="ext" x1="' + (cx - sfR) + '" y1="' + (top + sfD) + '" x2="42" y2="' + (top + sfD) + '"/>';
-        return ptSvg(b, 262);
-      }
 
       /* Sun cavity, drawn TO SCALE from the data (80 px per inch). Chamfers and lead-ins are omitted. */
       function ptSvgSun(c){
-        var k = 80, segs = c.segs, zs = segs[0][2], zb = segs[segs.length - 1][3];
+        var k = 80, segs = c.ser ? c.segs : c.segs.concat([["Drill Ø max", [c.drill], c.tot, c.tot + .15, "d", 1]]), zs = segs[0][2], zb = segs[segs.length - 1][3];
         function zm(z){ return Array.isArray(z) ? (z[0] + z[1]) / 2 : z; }
         function zt(z){ return Array.isArray(z) ? fmt(z[0], 3) + "–" + fmt(z[1], 3) : fmt(z, 3); }
         function dm(d){ return d ? (d.length > 1 ? (d[0] + d[1]) / 2 : d[0]) : null; }
@@ -8038,14 +8067,14 @@
         function Y(z){ return top + (zm(z) - zs) * k; }
         var thD = c.ser === 1 ? 20 / 25.4 : 1.0;
         var L = [], R = [];
-        segs.forEach(function(sg){ var d = sg[1] ? dm(sg[1]) : thD; L.push([cx - d / 2 * k, Y(sg[2]), Y(sg[3]), sg]); });
+        segs.forEach(function(sg, n){ var d = sg[1] ? dm(sg[1]) : thD, d2 = sg[4] === "c" && segs[n + 1] ? dm(segs[n + 1][1]) : d; L.push([cx - d / 2 * k, Y(sg[2]), Y(sg[3]), sg, cx - d2 / 2 * k]); });
         var cav = L[0][0] + "," + top;
-        L.forEach(function(l){ cav += " L" + l[0] + "," + l[1] + " L" + l[0] + "," + l[2]; });
-        for(var j = L.length - 1; j >= 0; j--){ var x = 2 * cx - L[j][0]; cav += " L" + x + "," + L[j][2] + " L" + x + "," + L[j][1]; }
+        L.forEach(function(l){ cav += " L" + l[0] + "," + l[1] + " L" + l[4] + "," + l[2]; });
+        for(var j = L.length - 1; j >= 0; j--){ var x = 2 * cx - L[j][0], x2 = 2 * cx - L[j][4]; cav += " L" + x2 + "," + L[j][2] + " L" + x + "," + L[j][1]; }
         var path = "M" + X0 + "," + top + " L" + cav + " L" + X1 + "," + top;
         var b = '<rect x="' + X0 + '" y="' + top + '" width="' + (X1 - X0) + '" height="' + (H - top - 22) + '" fill="url(#ptHatch)"/>';
         c.ports.forEach(function(pt){
-          var y0 = Y(pt[1]) - pt[2] / 2 * k, w = pt[2] * k, segAt = L.filter(function(l){ return Y(pt[1]) >= l[1] && Y(pt[1]) <= l[2]; })[0] || L[0];
+          var pw = pt[2] || .25, y0 = Y(pt[1]) - pw / 2 * k, w = pw * k, segAt = L.filter(function(l){ return Y(pt[1]) >= l[1] && Y(pt[1]) <= l[2]; })[0] || L[0];
           var xr = 2 * cx - segAt[0];
           b += '<rect x="' + xr + '" y="' + y0 + '" width="' + (X1 - xr) + '" height="' + w + '" fill="var(--panel2)" stroke="var(--line)" stroke-dasharray="3 3"/>' +
             '<text x="' + (X1 - 4) + '" y="' + (Y(pt[1]) + 4) + '" text-anchor="end" fill="var(--ink-dim)">port ' + pt[0] + "</text>";
@@ -8059,13 +8088,13 @@
         b += '<line class="cl" x1="' + cx + '" y1="' + (top - 16) + '" x2="' + cx + '" y2="' + (H - 16) + '"/>';
         b += '<line x1="' + (X0 - 4) + '" y1="' + Y(0) + '" x2="' + (X1 + 4) + '" y2="' + Y(0) + '" stroke="var(--cyan)" stroke-width="1.2"/>';
         b += '<text x="' + cx + '" y="' + (H - 6) + '" text-anchor="middle" fill="var(--ink-dim)">port 1</text>';
-        b += '<text x="' + X0 + '" y="' + (top - 6) + '" fill="var(--ink-dim)">surface (L.S. depth ' + fmt(-zs, 3) + ')</text>';
+        b += '<text x="' + X0 + '" y="' + (top - 6) + '" fill="var(--ink-dim)">' + (c.sf ? "datum A — spotface Ø" + fmt(c.sf, 3) + " × " + fmt(c.sfd, 3) + " max" : "surface (L.S. depth " + fmt(-zs, 3) + ")") + "</text>";
         /* left: depth ladder, right: diameter labels — de-overlapped */
         function ladder(items, minGap){ items.sort(function(a, q){ return a.y - q.y; }); var yy = -1e9; items.forEach(function(it){ it.ty = Math.max(it.y + 4, yy + minGap); yy = it.ty; }); return items; }
-        var zs2 = [{ y:Y(0), t:"L.S. 0" }], seen = {};
-        segs.forEach(function(sg){ [sg[2], sg[3]].forEach(function(z){ var key = zt(z); if(seen[key] || zm(z) === 0) return; seen[key] = 1; zs2.push({ y:Y(z), t:(zm(z) < 0 ? "−" : "") + zt(Array.isArray(z) ? z : Math.abs(z)).replace(/^-/, "") }); }); });
+        var zs2 = [{ y:Y(0), t:c.sf ? "A 0" : "L.S. 0" }], seen = {};
+        segs.forEach(function(sg){ [sg[2], sg[3]].forEach(function(z, zi){ if(sg[5] && zi) return; var key = zt(z); if(seen[key] || zm(z) === 0) return; seen[key] = 1; zs2.push({ y:Y(z), t:(zm(z) < 0 ? "−" : "") + zt(Array.isArray(z) ? z : Math.abs(z)).replace(/^-/, "") }); }); });
         ladder(zs2, 12).forEach(function(it){ b += '<line class="ext" x1="' + (X0 - 4) + '" y1="' + it.y + '" x2="' + (cx - 60) + '" y2="' + it.y + '"/><text x="' + (X0 - 8) + '" y="' + it.ty + '" text-anchor="end">' + esc(it.t) + "</text>"; });
-        var ds = segs.map(function(sg, n){ return { y:(L[n][1] + L[n][2]) / 2, x:2 * cx - L[n][0], t:sg[4] === "t" ? c.thr.replace(/ ISO.*$/, "").replace(/-(6H|2B)$/, "") : "Ø" + (sg[1].length > 1 ? fmt(sg[1][0], 3) + "–" + fmt(sg[1][1], 3) : fmt(sg[1][0], 3)) }; });
+        var ds = segs.map(function(sg, n){ return { y:(L[n][1] + L[n][2]) / 2, x:2 * cx - L[n][0], t:sg[4] === "t" ? c.thr.replace(/ ISO.*$/, "").replace(/-(6H|2B)$/, "") : (sg[4] === "c" ? "15° Ø" : "Ø") + (sg[1].length > 1 ? fmt(sg[1][0], 3) + "–" + fmt(sg[1][1], 3) : fmt(sg[1][0], 3)) + (sg[5] ? " max" : "") }; });
         ladder(ds, 12).forEach(function(it){ b += '<line class="ext" x1="' + it.x + '" y1="' + it.y + '" x2="' + (X1 + 4) + '" y2="' + (it.ty - 4) + '"/><text x="' + (X1 + 6) + '" y="' + it.ty + '">' + esc(it.t) + "</text>"; });
         return '<svg viewBox="0 0 400 ' + H + '" role="img" aria-labelledby="ptFigCap" font-family="var(--mono)" font-size="10" style="max-width:520px">' +
           '<defs><pattern id="ptHatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="var(--line)" stroke-width="1"/></pattern></defs>' +
@@ -8151,25 +8180,25 @@
           fig = ptSvgSun(c);
           figcap = "Sun " + c.id + " — drawn to scale from the numbers (chamfers and lead-ins omitted). Depths left, diameters right.";
           cite = "Transcribed from Sun Hydraulics' cavity drawing " + c.id + " (rev " + c.rev + ", sheet 1, inch) — Sun's drawing is the governing spec. " + (c.sct ? "Thread, top Ø and nose Ø match SCT's Sun form-tool table (marked ✓ SCT). " : "Not in SCT's tool table — no independent second source; ") + "shared features agree across Sun's drawings of the same series. Check against Sun's current drawing before machining.";
-        } else {
-          var cv = PT_CAV[i]; unit = "in";
-          function rng(v){ return fmt(v[0], 3) + "–" + fmt(v[1], 3); }
-          function rmm(v){ return trimNum(v[0] * 25.4, 2) + "–" + trimNum(v[1] * 25.4, 2) + " mm"; }
-          title = "Cavity " + cv[0];
-          rows = [
-            ["Fits", cv[1], "", "Same cavity under different makers' names — the cartridges are interchangeable by fit, not always by function."],
-            ["Thread", cv[2], "", "Gauge with a 7/8-14 UNF-2B GO / NO-GO plug."],
-            ["Seal bore Ø (B)", rng(cv[4]), rmm(cv[4]), "Upper O-ring seals here: finish matters (form-reamed)."],
-            ["Nose bore Ø (A)", rng(cv[3]), rmm(cv[3]), "Lower O-ring seals here; port 1 exits through the nose."],
-            ["Spotface Ø", fmt(cv[5], 3) + " ±.005", mm(cv[5]) + " mm", "Cartridge hex seats here; must be square to the bore."],
-            ["Depth to A/B step", rng(cv[6]), rmm(cv[6]), "From the spotface."],
-            ["Cavity depth", fmt(cv[7], 3) + " min", mm(cv[7]) + " mm", "From the spotface, full-diameter A bore."],
-            ["Form tools", cv[8], "", "Pilot drill, form drill, form ream and thread in one setup — concentricity is what makes cavities leak."],
-            ["Geometric limits", "Ø concentric .002 TIR · ⊥ spotface .001 TIR", "", "HydraForce cavity general notes; unspecified tolerances ±.005; depths from the spotface."]
-          ];
-          fig = ptSvgCav({ sf:"Ø " + fmt(cv[5], 3), thr:cv[2].replace(/-2B$/, ""), B:"B Ø" + rng(cv[4]), A:"A Ø" + rng(cv[3]), step:rng(cv[6]), dep:fmt(cv[7], 3) + " min" });
-          figcap = "Cavity section — schematic, not to scale. Port 2 is cross-drilled between the two seal bores — its position varies, so use the maker's drawing for it.";
-          cite = "Parker Bodies & Cavities section (C10-2 drawing) checked against the Form Relief CT10-2H tool sheet for HydraForce VC10-2 — every value agrees. Interchangeability per Danfoss/Comatrol's cross-reference. Parker C08/C16 are not shown yet — no second source in hand. Manufacturer spec, not a standard — the cartridge maker's current cavity drawing governs.";
+        } else if(std === "cav" && sv.charAt(0) === "p"){
+          var q = PT_PK[parseInt(sv.slice(1), 10) || 0]; unit = "in";
+          function pr(v){ return Array.isArray(v) ? (v.length > 1 ? fmt(v[0], 3) + "–" + fmt(v[1], 3) : fmt(v[0], 3)) : fmt(v, 3); }
+          function prm(v){ return Array.isArray(v) ? (v.length > 1 ? trimNum(v[0] * 25.4, 2) + "–" + trimNum(v[1] * 25.4, 2) : trimNum(v[0] * 25.4, 2)) + " mm" : trimNum(v * 25.4, 2) + " mm"; }
+          title = "Parker " + q.id + " cavity — " + q.w + "-way" + (q.ok ? " · second source ✓" : "");
+          rows = [["Thread", q.thr, "", null], ["Spotface Ø (datum A)", fmt(q.sf, 3) + " × " + fmt(q.sfd, 3) + " deep max", mm(q.sf) + " mm", "Every depth below is measured from this face."]];
+          q.segs.forEach(function(sg){
+            if(sg[4] === "c"){ rows.push([sg[0], pr(sg[1]), prm(sg[1]), "Depth " + pr(sg[3]) + " from A — the hex O-ring seals here (63 µin)."]); return; }
+            if(sg[4] === "t"){ rows.push(["Thread depth", pr(sg[3]), prm(sg[3]), "Minor Ø (tap-drill bore) " + pr(sg[1]) + "."]); return; }
+            rows.push([sg[0], pr(sg[1]), prm(sg[1]), "From " + pr(sg[2]) + " to " + pr(sg[3]) + (sg === q.segs[q.segs.length - 1] ? " min" : "") + " deep."]);
+          });
+          rows.push(["Cavity depth", fmt(q.tot, 3) + " min", mm(q.tot) + " mm", "Full nose diameter to here; nose lead-in " + q.lead + "."]);
+          rows.push(["Ports (centre from A, cross-drill Ø max)", q.ports.map(function(p){ return p[0] + ": " + pr(p[1]) + (p[2] ? " (Ø" + fmt(p[2], 3) + ")" : ""); }).join(" · "), "", "Port 1 is the nose — drill Ø" + fmt(q.drill, 3) + " max through."]);
+          rows.push(["Geometric limits", q.geo, "", null]);
+          rows.push(["Finishing form tool", "Parker " + q.tool, "", "Drill, form-ream and thread in one setup."]);
+          rows.push(["Second-source check", q.ok ? "✓ confirmed" : "single source", "", q.chk]);
+          fig = ptSvgSun(q);
+          figcap = "Parker " + q.id + " — drawn to scale from the numbers (lead-ins and radii omitted). Depths from datum A on the left, diameters on the right.";
+          cite = "Parker catalog HY15-3502/US, Bodies and Cavities (2012 edition) — Parker's drawing is the governing spec. " + q.chk + " Check against Parker's current catalog before machining.";
         }
         var link = std === "j1926" || std === "i6149" ? ptThreadLink(std, std === "j1926" ? PT_J1926[i] : PT_6149[i]) : null;
         var h = "<h3>" + esc(title) + "</h3><table class=\"grid\"><thead><tr><th>Feature</th><th>" + (unit === "in" ? "Inch" : "mm") + "</th>" + (unit === "in" ? "<th>mm</th>" : "") + "</tr></thead><tbody>" +
@@ -8860,7 +8889,7 @@
           ["stack","Stack-Up","tolerance stack stack-up worst case RSS assembly gap"],
           ["aql","AQL Lookup","AQL sampling plan Z1.4 lot size sample size accept reject inspection level code letter"],
           ["threads","Threads","thread M10 UNC UNF NPT BSP pitch diameter gauge plug ring go no-go Acme metric class 6g 2A 3B tap"],
-          ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
+          ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],
           ["learn","Learn","learn explain what does it mean help Cpk meaning control limits vs spec limits normality gauge AQL what to do next"]
         ];

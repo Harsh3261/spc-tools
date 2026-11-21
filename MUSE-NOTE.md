@@ -50,6 +50,20 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-20 — Parker cavities (13), C10-2 corrected
+
+- Added Parker C08-2/3/4, C10-2/3/4, C12-2/3/4, C16-2/3/4 and C20-2. Values were read from Parker catalog HY15-3502/US "Bodies and Cavities" (2012), the copy Harsh supplied. Each entry carries: spotface, 15° O-ring chamfer, thread depth and minor bore, every bore step, total depth, ports (centre and cross-drill Ø max), drill Ø, geometric limits and the finishing form tool.
+- **Correction:** the old C10-2 entry called .810–.814 the "seal bore B". It is actually the thread-minor bore, and the hex O-ring seals on the 15° Ø.942–.947 chamfer at the mouth. The entry has been replaced by the full catalog data.
+- Second sources:
+  - C08-2: matches the HydraForce VC08-2 drawing.
+  - C10-2: matches the HydraForce VC10-2 reproduction by Hengli and Form Relief's CT10-2H sheet; Bucher C1020 (ISO 17209) agrees within .008 on depths.
+  - C16-3: matches Bucher C1630 (ISO 17209 1 5/16-03-0-13). Parker leaves the 1.344 step undimensioned, so that value comes from Bucher.
+  - C16-4: matches Bucher C1640.
+  - C10-3 and C10-4: diameters match Bucher's 10-3/10-4, but the depths and ports do not, so they are flagged as not the same cavity.
+  - The rest are flagged as single source.
+- The cavity drawing renderer now handles the mouth chamfer, datum A and the drill.
+- Cache v32.
+
 ## 2026-11-20 — Cavity tolerances
 
 - Sun cavities now apply the drawing's title-block tolerances (.x ±.030, .xx ±.015, .xxx ±.005, angles ±½°) to every dimension given as a single value. Bores given as limits keep their limits; min/max values are unchanged.
