@@ -50,6 +50,12 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-20 — Thread finder shows the gauge for each match
+
+- Every thread-finder result now names the gauge to order: GO/NOT GO plug (internal) or rings (external), with the class and the gauging standard (ASME B1.2, ISO 1502, ISO 228-2, ASME B1.20.1 L1, ISO 7-2, DIN 103, ASME B1.5, BS 84, BS 93).
+- For UN, metric and pipe threads, a "Gauge limits" button opens the existing gauge view for that size. Those three families are the only ones with gauge data in the app.
+- Cache v29.
+
 ## 2026-11-20 — Hydraulic ports: flanges, a cavity, and drawings
 
 - Added SAE J518 / ISO 6162 Code 61 (1/2–3 in) and Code 62 (1/2–2 in) four-bolt flange ports: bolt spacing, UNC bolts, metric bolts, pressure rating. Every value agrees in at least two published tables (Parker 4400, AFP/Hydraquip, Winner, ContiTech). Left out because only one source had them: tapped-hole depth, Code 61 metric bolts for 2-1/2 and 3 in, Code 62 metric bolts above 1 in, and Code 61 sizes over 3 in (the sources disagree on these).
