@@ -1,4 +1,4 @@
-const CACHE = "spc-tools-v35-metric-54";
+const CACHE = "spc-tools-v36-seal-glands";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

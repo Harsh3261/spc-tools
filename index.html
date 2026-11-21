@@ -585,6 +585,7 @@
       .thsearch{margin:4px 0 12px}
       #ptOut table.grid td:first-child, #ptOut table.grid th:first-child{text-align:left; font-family:var(--sans)}
       .thfind{margin:4px 0 14px; border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; background:var(--panel2)}
+      #sgOut table.grid td:first-child{text-align:left;font-family:var(--sans)}
       .ptfig{margin:14px 0 0; border:1px solid var(--line-soft); border-radius:10px; padding:10px; background:var(--panel2)}
       .ptfig svg{display:block; width:100%; max-width:520px; height:auto; margin:0 auto}
       .ptfig figcaption{font-size:12px; color:var(--ink-dim); margin-top:6px; text-align:center}
@@ -739,6 +740,7 @@
         <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
         <button type="button" role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads" data-cluster="reference">Threads</button>
         <button type="button" role="tab" id="tabbtn-ports" aria-selected="false" data-tab="ports" data-cluster="reference">Hydraulic ports</button>
+        <button type="button" role="tab" id="tabbtn-seal" aria-selected="false" data-tab="seal" data-cluster="reference">Seal glands</button>
         <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Unit converters</button>
         <button type="button" role="tab" id="tabbtn-learn" aria-selected="false" data-tab="learn" data-cluster="reference">Learn</button>
         <button type="button" role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack" data-cluster="measure">Stack-Up</button>
@@ -1497,6 +1499,64 @@
         </div>
       </section>
 
+
+      <!-- ============ TOOL 7c : O-RING SEAL GLANDS ============ -->
+      <section class="tool" id="tool-seal" role="tabpanel" aria-labelledby="tabbtn-seal">
+        <div class="card">
+          <h2>Seal glands — O-ring groove check &amp; design</h2>
+          <p class="guru">An O-ring seals because it is squeezed. Too little squeeze leaks; too much wears, sets and won't assemble; a full gland has nowhere to swell; a big gap lets pressure push the ring out. This checks all four at the worst-case tolerance stack.</p>
+          <div class="row3">
+            <div><label class="flabel" for="sgType">Gland</label>
+              <select id="sgType"><option value="piston" selected>Piston (groove in piston, seals on bore)</option><option value="rod">Rod (groove in housing, seals on rod)</option></select></div>
+            <div><label class="flabel" for="sgSvc">Service</label>
+              <select id="sgSvc"><option value="dyn" selected>Dynamic — reciprocating</option><option value="stat">Static radial</option></select></div>
+            <div><label class="flabel" for="sgBu">Back-up rings</label>
+              <select id="sgBu"><option value="0" selected>None</option><option value="1">One</option><option value="2">Two</option></select></div>
+          </div>
+          <div class="row2">
+            <div><label class="flabel" for="sgDash">O-ring (AS568)</label><select id="sgDash"></select></div>
+            <div><label class="flabel" for="sgMode">Mode</label>
+              <select id="sgMode"><option value="design" selected>Design — suggest a groove for my bore / rod</option><option value="check">Check — my drawing dimensions</option></select></div>
+          </div>
+          <div id="sgCustom" class="row2 hidden">
+            <div><label class="flabel" for="sgID">O-ring ID (in)</label><input id="sgID" type="number" step="0.001" inputmode="decimal"></div>
+            <div><label class="flabel" for="sgCS">Cross-section (in)</label><input id="sgCS" type="number" step="0.001" inputmode="decimal"></div>
+            <div><label class="flabel" for="sgIDt">ID tolerance ± (in)</label><input id="sgIDt" type="number" step="0.001" inputmode="decimal"></div>
+            <div><label class="flabel" for="sgCSt">CS tolerance ± (in)</label><input id="sgCSt" type="number" step="0.001" inputmode="decimal"></div>
+          </div>
+          <div id="sgDesignIn">
+            <label class="flabel" for="sgNom" id="sgNomLab">Cylinder bore Ø (in)</label>
+            <input id="sgNom" type="number" step="0.001" inputmode="decimal" value="2.000">
+          </div>
+          <div id="sgCheckIn" class="hidden">
+            <p class="small" id="sgCheckHelp"></p>
+            <div class="row2">
+              <div><label class="flabel" for="sgA1" id="sgAL">Bore Ø min</label><input id="sgA1" type="number" step="0.0001" inputmode="decimal"></div>
+              <div><label class="flabel" for="sgA2" id="sgAL2">Bore Ø max</label><input id="sgA2" type="number" step="0.0001" inputmode="decimal"></div>
+              <div><label class="flabel" for="sgB1" id="sgBL">Groove Ø min</label><input id="sgB1" type="number" step="0.0001" inputmode="decimal"></div>
+              <div><label class="flabel" for="sgB2" id="sgBL2">Groove Ø max</label><input id="sgB2" type="number" step="0.0001" inputmode="decimal"></div>
+              <div><label class="flabel" for="sgC1" id="sgCL">Piston OD min</label><input id="sgC1" type="number" step="0.0001" inputmode="decimal"></div>
+              <div><label class="flabel" for="sgC2" id="sgCL2">Piston OD max</label><input id="sgC2" type="number" step="0.0001" inputmode="decimal"></div>
+              <div><label class="flabel" for="sgG1">Groove width min</label><input id="sgG1" type="number" step="0.001" inputmode="decimal"></div>
+              <div><label class="flabel" for="sgG2">Groove width max</label><input id="sgG2" type="number" step="0.001" inputmode="decimal"></div>
+            </div>
+          </div>
+          <div id="sgOut" aria-live="polite"></div>
+          <figure class="ptfig" id="sgFig"></figure>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Learn — what each number means</summary>
+            <p class="small"><strong>Gland depth (L)</strong> — the radial space the ring is squeezed into: bore − groove Ø, divided by 2 (piston) or groove Ø − rod, divided by 2 (rod). It already includes the running clearance.<br>
+            <strong>Squeeze</strong> — how much thinner the ring is made: (cross-section − L) ÷ cross-section. It is the seal. Below ≈ .007 in it can leak at low pressure; dynamic seals run about 10–16 % so they slide without tearing; static seals take up to 30 %.<br>
+            <strong>Stretch</strong> — a piston ring is stretched onto its groove. Stretch thins the cross-section (Parker's curve: 5 % stretch ≈ 3.4 % thinner), which lowers squeeze — that is why this tool uses the <em>stretched</em> cross-section. Over 5 % ages the ring faster.<br>
+            <strong>OD compression (rod)</strong> — a rod ring is pushed into its housing groove; a little OD interference holds it, too much makes it twist and roll.<br>
+            <strong>Gland fill</strong> — ring area ÷ groove area. Rubber is incompressible: it needs room to swell in oil and expand with heat. Aim 60–85 %; never above 90 %.<br>
+            <strong>Diametral clearance (E)</strong> — the gap the ring has to bridge. Pressure pushes rubber into it: the bigger the gap, the higher the pressure or the softer the ring, the sooner it extrudes (nibbled, "chewed" edges on the low-pressure side). Back-up rings close that door at high pressure.<br>
+            <strong>Worst case</strong> — every result is shown at both tolerance extremes: smallest ring in the biggest groove (least squeeze) and biggest ring in the smallest groove (most squeeze, most fill).</p>
+            <p class="small"><strong>Typical failures you can read from these numbers:</strong> leak at low pressure → squeeze too low; flat-sided ring (compression set) → squeeze too high or heat; nibbled edge → gap too big for the pressure; twisted / spiral cut ring in a dynamic gland → too much stretch, rough finish or a too-wide groove; cut at assembly → sharp edges, no lead-in chamfer.</p>
+          </details>
+          <p class="cite" id="sgCite">Gland design values: Parker O-Ring Handbook ORD 5700, Design Chart 4-1 (industrial static) and 5-2 (industrial reciprocating) — gland depth and squeeze ranges confirmed identical in Global O-Ring &amp; Seal's published tables. Cross-section reduction from stretch: Parker Figure 3-3 equations, which reproduce Freudenberg (FST) AS568 guide table values. Limits: Parker §3.5–3.7 (stretch ≤ 5 %, squeeze ≥ .007 in, dynamic ≈ 16 % max, static 30 % max, fill 60–85 %, ≥ 10 % void). AS568 sizes: Apple Rubber and Greene Tweed charts agree on 341 of 345 sizes; −391 ID (21.955, the other source's 21.995 breaks the series), −102 ID tol (.004 / .005 → .005 used) and −469 / −470 ID tol (.090 / .095 → .095 used) resolved toward the wider tolerance. Reference only — the seal maker's recommendation governs for critical applications.</p>
+        </div>
+      </section>
       <!-- ============ TOOL 8 : STACK-UP ============ -->
       <section class="tool" id="tool-stack" role="tabpanel" aria-labelledby="tabbtn-stack">
         <div class="card">
@@ -8315,6 +8375,233 @@
       $("ptStd").addEventListener("change", function(){ holdScroll(ptFill); });
       $("ptSize").addEventListener("change", function(){ holdScroll(ptRender); });
       ptFill();
+      /* ======================================================================
+         SECTION · SEAL GLANDS (tool seal) — 2026-11-21
+         Parker ORD 5700 Design Charts 4-1 / 5-2 (= Global O-Ring tables), Parker Fig. 3-3 stretch equations
+         (reproduce FST AS568-guide reduced-CS table), Parker §3.5–3.7 limits. Inch. */
+      /* BEGIN DATA SG_AS568: [dash, ID, ID tol ±, CS] — CS tol by series: .070/.103 ±.003, .139 ±.004, .210 ±.005, .275 ±.006 */
+      var SG_AS568 = [["005",0.101,0.005,0.07],["006",0.114,0.005,0.07],["007",0.145,0.005,0.07],["008",0.176,0.005,0.07],["009",0.208,0.005,0.07],["010",0.239,0.005,0.07],["011",0.301,0.005,0.07],["012",0.364,0.005,0.07],["013",0.426,0.005,0.07],["014",0.489,0.005,0.07],["015",0.551,0.007,0.07],["016",0.614,0.009,0.07],["017",0.676,0.009,0.07],["018",0.739,0.009,0.07],["019",0.801,0.009,0.07],["020",0.864,0.009,0.07],["021",0.926,0.009,0.07],["022",0.989,0.01,0.07],["023",1.051,0.01,0.07],["024",1.114,0.01,0.07],["025",1.176,0.011,0.07],["026",1.239,0.011,0.07],["027",1.301,0.011,0.07],["028",1.364,0.013,0.07],["029",1.489,0.013,0.07],["030",1.614,0.013,0.07],["031",1.739,0.015,0.07],["032",1.864,0.015,0.07],["033",1.989,0.018,0.07],["034",2.114,0.018,0.07],["035",2.239,0.018,0.07],["036",2.364,0.018,0.07],["037",2.489,0.018,0.07],["038",2.614,0.02,0.07],["039",2.739,0.02,0.07],["040",2.864,0.02,0.07],["041",2.989,0.024,0.07],["042",3.239,0.024,0.07],["043",3.489,0.024,0.07],["044",3.739,0.027,0.07],["045",3.989,0.027,0.07],["046",4.239,0.03,0.07],["047",4.489,0.03,0.07],["048",4.739,0.03,0.07],["049",4.989,0.037,0.07],["050",5.239,0.037,0.07],["102",0.049,0.005,0.103],["103",0.081,0.005,0.103],["104",0.112,0.005,0.103],["105",0.143,0.005,0.103],["106",0.174,0.005,0.103],["107",0.206,0.005,0.103],["108",0.237,0.005,0.103],["109",0.299,0.005,0.103],["110",0.362,0.005,0.103],["111",0.424,0.005,0.103],["112",0.487,0.005,0.103],["113",0.549,0.007,0.103],["114",0.612,0.009,0.103],["115",0.674,0.009,0.103],["116",0.737,0.009,0.103],["117",0.799,0.01,0.103],["118",0.862,0.01,0.103],["119",0.924,0.01,0.103],["120",0.987,0.01,0.103],["121",1.049,0.01,0.103],["122",1.112,0.01,0.103],["123",1.174,0.012,0.103],["124",1.237,0.012,0.103],["125",1.299,0.012,0.103],["126",1.362,0.012,0.103],["127",1.424,0.012,0.103],["128",1.487,0.012,0.103],["129",1.549,0.015,0.103],["130",1.612,0.015,0.103],["131",1.674,0.015,0.103],["132",1.737,0.015,0.103],["133",1.799,0.015,0.103],["134",1.862,0.015,0.103],["135",1.925,0.017,0.103],["136",1.987,0.017,0.103],["137",2.05,0.017,0.103],["138",2.112,0.017,0.103],["139",2.175,0.017,0.103],["140",2.237,0.017,0.103],["141",2.3,0.02,0.103],["142",2.362,0.02,0.103],["143",2.425,0.02,0.103],["144",2.487,0.02,0.103],["145",2.55,0.02,0.103],["146",2.612,0.02,0.103],["147",2.675,0.022,0.103],["148",2.737,0.022,0.103],["149",2.8,0.022,0.103],["150",2.862,0.022,0.103],["151",2.987,0.024,0.103],["152",3.237,0.024,0.103],["153",3.487,0.024,0.103],["154",3.737,0.028,0.103],["155",3.987,0.028,0.103],["156",4.237,0.03,0.103],["157",4.487,0.03,0.103],["158",4.737,0.03,0.103],["159",4.987,0.035,0.103],["160",5.237,0.035,0.103],["161",5.487,0.035,0.103],["162",5.737,0.035,0.103],["163",5.987,0.035,0.103],["164",6.237,0.04,0.103],["165",6.487,0.04,0.103],["166",6.737,0.04,0.103],["167",6.987,0.04,0.103],["168",7.237,0.045,0.103],["169",7.487,0.045,0.103],["170",7.737,0.045,0.103],["171",7.987,0.045,0.103],["172",8.237,0.05,0.103],["173",8.487,0.05,0.103],["174",8.737,0.05,0.103],["175",8.987,0.05,0.103],["176",9.237,0.055,0.103],["177",9.487,0.055,0.103],["178",9.737,0.055,0.103],["201",0.171,0.005,0.139],["202",0.234,0.005,0.139],["203",0.296,0.005,0.139],["204",0.359,0.005,0.139],["205",0.421,0.005,0.139],["206",0.484,0.005,0.139],["207",0.546,0.007,0.139],["208",0.609,0.009,0.139],["209",0.671,0.009,0.139],["210",0.734,0.01,0.139],["211",0.796,0.01,0.139],["212",0.859,0.01,0.139],["213",0.921,0.01,0.139],["214",0.984,0.01,0.139],["215",1.046,0.01,0.139],["216",1.109,0.012,0.139],["217",1.171,0.012,0.139],["218",1.234,0.012,0.139],["219",1.296,0.012,0.139],["220",1.359,0.012,0.139],["221",1.421,0.012,0.139],["222",1.484,0.015,0.139],["223",1.609,0.015,0.139],["224",1.734,0.015,0.139],["225",1.859,0.018,0.139],["226",1.984,0.018,0.139],["227",2.109,0.018,0.139],["228",2.234,0.02,0.139],["229",2.359,0.02,0.139],["230",2.484,0.02,0.139],["231",2.609,0.02,0.139],["232",2.734,0.024,0.139],["233",2.859,0.024,0.139],["234",2.984,0.024,0.139],["235",3.109,0.024,0.139],["236",3.234,0.024,0.139],["237",3.359,0.024,0.139],["238",3.484,0.024,0.139],["239",3.609,0.028,0.139],["240",3.734,0.028,0.139],["241",3.859,0.028,0.139],["242",3.984,0.028,0.139],["243",4.109,0.028,0.139],["244",4.234,0.03,0.139],["245",4.359,0.03,0.139],["246",4.484,0.03,0.139],["247",4.609,0.03,0.139],["248",4.734,0.03,0.139],["249",4.859,0.035,0.139],["250",4.984,0.035,0.139],["251",5.109,0.035,0.139],["252",5.234,0.035,0.139],["253",5.359,0.035,0.139],["254",5.484,0.035,0.139],["255",5.609,0.035,0.139],["256",5.734,0.035,0.139],["257",5.859,0.035,0.139],["258",5.984,0.035,0.139],["259",6.234,0.04,0.139],["260",6.484,0.04,0.139],["261",6.734,0.04,0.139],["262",6.984,0.04,0.139],["263",7.234,0.045,0.139],["264",7.484,0.045,0.139],["265",7.734,0.045,0.139],["266",7.984,0.045,0.139],["267",8.234,0.05,0.139],["268",8.484,0.05,0.139],["269",8.734,0.05,0.139],["270",8.984,0.05,0.139],["271",9.234,0.055,0.139],["272",9.484,0.055,0.139],["273",9.734,0.055,0.139],["274",9.984,0.055,0.139],["275",10.484,0.055,0.139],["276",10.984,0.065,0.139],["277",11.484,0.065,0.139],["278",11.984,0.065,0.139],["279",12.984,0.065,0.139],["280",13.984,0.065,0.139],["281",14.984,0.065,0.139],["282",15.955,0.075,0.139],["283",16.955,0.08,0.139],["284",17.955,0.085,0.139],["309",0.412,0.005,0.21],["310",0.475,0.005,0.21],["311",0.537,0.007,0.21],["312",0.6,0.009,0.21],["313",0.662,0.009,0.21],["314",0.725,0.01,0.21],["315",0.787,0.01,0.21],["316",0.85,0.01,0.21],["317",0.912,0.01,0.21],["318",0.975,0.01,0.21],["319",1.037,0.01,0.21],["320",1.1,0.012,0.21],["321",1.162,0.012,0.21],["322",1.225,0.012,0.21],["323",1.287,0.012,0.21],["324",1.35,0.012,0.21],["325",1.475,0.015,0.21],["326",1.6,0.015,0.21],["327",1.725,0.015,0.21],["328",1.85,0.015,0.21],["329",1.975,0.018,0.21],["330",2.1,0.018,0.21],["331",2.225,0.018,0.21],["332",2.35,0.018,0.21],["333",2.475,0.02,0.21],["334",2.6,0.02,0.21],["335",2.725,0.02,0.21],["336",2.85,0.02,0.21],["337",2.975,0.024,0.21],["338",3.1,0.024,0.21],["339",3.225,0.024,0.21],["340",3.35,0.024,0.21],["341",3.475,0.024,0.21],["342",3.6,0.028,0.21],["343",3.725,0.028,0.21],["344",3.85,0.028,0.21],["345",3.975,0.028,0.21],["346",4.1,0.028,0.21],["347",4.225,0.03,0.21],["348",4.35,0.03,0.21],["349",4.475,0.03,0.21],["350",4.6,0.03,0.21],["351",4.725,0.03,0.21],["352",4.85,0.03,0.21],["353",4.975,0.037,0.21],["354",5.1,0.037,0.21],["355",5.225,0.037,0.21],["356",5.35,0.037,0.21],["357",5.475,0.037,0.21],["358",5.6,0.037,0.21],["359",5.725,0.037,0.21],["360",5.85,0.037,0.21],["361",5.975,0.037,0.21],["362",6.225,0.04,0.21],["363",6.475,0.04,0.21],["364",6.725,0.04,0.21],["365",6.975,0.04,0.21],["366",7.225,0.045,0.21],["367",7.475,0.045,0.21],["368",7.725,0.045,0.21],["369",7.975,0.045,0.21],["370",8.225,0.05,0.21],["371",8.475,0.05,0.21],["372",8.725,0.05,0.21],["373",8.975,0.05,0.21],["374",9.225,0.055,0.21],["375",9.475,0.055,0.21],["376",9.725,0.055,0.21],["377",9.975,0.055,0.21],["378",10.475,0.06,0.21],["379",10.975,0.06,0.21],["380",11.475,0.065,0.21],["381",11.975,0.065,0.21],["382",12.975,0.065,0.21],["383",13.975,0.07,0.21],["384",14.975,0.07,0.21],["385",15.955,0.075,0.21],["386",16.955,0.08,0.21],["387",17.955,0.085,0.21],["388",18.955,0.09,0.21],["389",19.955,0.095,0.21],["390",20.955,0.095,0.21],["391",21.955,0.1,0.21],["392",22.94,0.105,0.21],["393",23.94,0.11,0.21],["394",24.94,0.115,0.21],["395",25.94,0.12,0.21],["425",4.475,0.033,0.275],["426",4.6,0.033,0.275],["427",4.725,0.033,0.275],["428",4.85,0.033,0.275],["429",4.975,0.037,0.275],["430",5.1,0.037,0.275],["431",5.225,0.037,0.275],["432",5.35,0.037,0.275],["433",5.475,0.037,0.275],["434",5.6,0.037,0.275],["435",5.725,0.037,0.275],["436",5.85,0.037,0.275],["437",5.975,0.037,0.275],["438",6.225,0.04,0.275],["439",6.475,0.04,0.275],["440",6.725,0.04,0.275],["441",6.975,0.04,0.275],["442",7.225,0.045,0.275],["443",7.475,0.045,0.275],["444",7.725,0.045,0.275],["445",7.975,0.045,0.275],["446",8.475,0.055,0.275],["447",8.975,0.055,0.275],["448",9.475,0.055,0.275],["449",9.975,0.055,0.275],["450",10.475,0.06,0.275],["451",10.975,0.06,0.275],["452",11.475,0.06,0.275],["453",11.975,0.06,0.275],["454",12.475,0.06,0.275],["455",12.975,0.06,0.275],["456",13.475,0.07,0.275],["457",13.975,0.07,0.275],["458",14.475,0.07,0.275],["459",14.975,0.07,0.275],["460",15.475,0.07,0.275],["461",15.955,0.075,0.275],["462",16.455,0.075,0.275],["463",16.955,0.08,0.275],["464",17.455,0.085,0.275],["465",17.955,0.085,0.275],["466",18.455,0.085,0.275],["467",18.955,0.09,0.275],["468",19.455,0.09,0.275],["469",19.955,0.095,0.275],["470",20.955,0.095,0.275],["471",21.955,0.1,0.275],["472",22.94,0.105,0.275],["473",23.94,0.11,0.275],["474",24.94,0.115,0.275],["475",25.94,0.12,0.275]];
+      /* END DATA SG_AS568 */
+      var SG_CST = { "0.07":.003, "0.103":.003, "0.139":.004, "0.21":.005, "0.275":.006 };
+      /* BEGIN DATA SG_CHART: per CS — static (Parker DC 4-1) and dynamic (Parker DC 5-2):
+         L gland depth [min,max], squeeze % [min,max], E diametral clearance [min,max], G width [none, one, two back-ups] (each [min,max]), R radius [min,max], max eccentricity */
+      var SG_CHART = {
+        stat:{
+          "0.07":{ L:[.050,.052], sq:[22,32], E:[.002,.005], G:[[.093,.098],[.138,.143],[.205,.210]], R:[.005,.015], ecc:.002 },
+          "0.103":{ L:[.081,.083], sq:[17,24], E:[.002,.005], G:[[.140,.145],[.171,.176],[.238,.243]], R:[.005,.015], ecc:.002 },
+          "0.139":{ L:[.111,.113], sq:[16,23], E:[.003,.006], G:[[.187,.192],[.208,.213],[.275,.280]], R:[.010,.025], ecc:.003 },
+          "0.21":{ L:[.170,.173], sq:[15,21], E:[.003,.006], G:[[.281,.286],[.311,.316],[.410,.415]], R:[.020,.035], ecc:.004 },
+          "0.275":{ L:[.226,.229], sq:[15,20], E:[.004,.007], G:[[.375,.380],[.408,.413],[.538,.543]], R:[.020,.035], ecc:.005 } },
+        dyn:{
+          "0.07":{ L:[.055,.057], sq:[15,25], E:[.002,.005], G:[[.093,.098],[.138,.143],[.205,.210]], R:[.005,.015], ecc:.002 },
+          "0.103":{ L:[.088,.090], sq:[10,17], E:[.002,.005], G:[[.140,.145],[.171,.176],[.238,.243]], R:[.005,.015], ecc:.002 },
+          "0.139":{ L:[.121,.123], sq:[9,16], E:[.003,.006], G:[[.187,.192],[.208,.213],[.275,.280]], R:[.010,.025], ecc:.003 },
+          "0.21":{ L:[.185,.188], sq:[8,14], E:[.003,.006], G:[[.281,.286],[.311,.316],[.410,.415]], R:[.020,.035], ecc:.004 },
+          "0.275":{ L:[.237,.240], sq:[11,16], E:[.004,.007], G:[[.375,.380],[.408,.413],[.538,.543]], R:[.020,.035], ecc:.005 } }
+      };
+      /* END DATA SG_CHART */
+      /* Parker Figure 3-3: % reduction of cross-section Y for % ID stretch X */
+      function sgRed(X){
+        if(X <= 0) return 0;
+        if(X <= 3) return -0.005 + 1.19 * X - 0.19 * X * X - 0.001 * X * X * X + 0.008 * X * X * X * X;
+        return 0.56 + 0.59 * X - 0.0046 * X * X;
+      }
+      function sgRing(){
+        var v = $("sgDash").value;
+        if(v === "custom"){
+          var id = Number($("sgID").value), cs = Number($("sgCS").value), it = Number($("sgIDt").value) || 0, ct = Number($("sgCSt").value) || 0;
+          if(!(id > 0 && cs > 0)) return null;
+          return { dash:"custom", id:id, idt:it, cs:cs, cst:ct, key:null };
+        }
+        var r = SG_AS568[parseInt(v, 10)];
+        return { dash:"-" + r[0], id:r[1], idt:r[2], cs:r[3], cst:SG_CST[String(r[3])], key:String(r[3]) };
+      }
+      function sgFillDash(){
+        var sel = $("sgDash"), cur = sel.value;
+        var opts = SG_AS568.map(function(r, i){ return [String(i), "-" + r[0] + " — ID " + r[1].toFixed(3) + " × CS " + r[3].toFixed(3)]; });
+        opts.push(["custom", "Custom O-ring…"]);
+        thFillSelect(sel, opts, cur || String(SG_AS568.map(function(r){ return r[0]; }).indexOf("224")));
+      }
+      /* stats helper: [min,max] */
+      function sgPct(x){ return trimNum(x, 1) + " %"; }
+      function sgVerdict(val, lo, hi){ return val < lo ? "low" : (val > hi ? "high" : "ok"); }
+      function sgBadge(state, txt){
+        var col = state === "ok" ? "var(--green-ink)" : (state === "warn" ? "var(--amber-ink)" : "var(--red-ink)");
+        var sym = state === "ok" ? "✓" : (state === "warn" ? "⚠" : "✗");
+        return '<span style="color:' + col + ';font-weight:600">' + sym + " " + esc(txt) + "</span>";
+      }
+      /* core worst-case analysis. g = {A:[min,max] bore (piston) or groove Ø A-1 (rod), B:[min,max] groove Ø B-1 (piston) or rod Ø (rod), C:[min,max] piston OD (piston) or rod-bore D (rod), G:[min,max]} */
+      function sgAnalyse(type, ring, g){
+        var idMin = ring.id - ring.idt, idMax = ring.id + ring.idt, wMin = ring.cs - ring.cst, wMax = ring.cs + ring.cst;
+        var L = type === "piston" ? [(g.A[0] - g.B[1]) / 2, (g.A[1] - g.B[0]) / 2] : [(g.A[0] - g.B[1]) / 2, (g.A[1] - g.B[0]) / 2];
+        /* stretch: piston ring sits on groove Ø (B); rod ring sits on rod Ø (B) */
+        var stMin = (g.B[0] - idMax) / idMax * 100, stMax = (g.B[1] - idMin) / idMin * 100;
+        /* reduced cross-section: least reduction (least stretch) with the biggest ring -> wR max; most reduction with smallest ring -> wR min */
+        var wRmax = wMax * (1 - sgRed(Math.max(stMin, 0)) / 100), wRmin = wMin * (1 - sgRed(Math.max(stMax, 0)) / 100);
+        var sqMin = (wRmin - L[1]) / wRmin * 100, sqMax = (wRmax - L[0]) / wRmax * 100;
+        var sqInMin = wRmin - L[1];
+        var fillMax = (Math.PI / 4 * wRmax * wRmax) / (L[0] * g.G[0]) * 100, fillMin = (Math.PI / 4 * wRmin * wRmin) / (L[1] * g.G[1]) * 100;
+        var E = type === "piston" ? [g.A[0] - g.C[1], g.A[1] - g.C[0]] : [g.C[0] - g.B[1], g.C[1] - g.B[0]];
+        var odMax = idMax + 2 * wMax, odMin = idMin + 2 * wMin;
+        var odComp = type === "rod" ? [(odMin - g.A[1]) / odMin * 100, (odMax - g.A[0]) / odMax * 100] : null;
+        return { L:L, st:[stMin, stMax], wR:[wRmin, wRmax], sq:[sqMin, sqMax], sqInMin:sqInMin, fill:[fillMin, fillMax], E:E, odComp:odComp, idMin:idMin, idMax:idMax, wMin:wMin, wMax:wMax };
+      }
+      function sgDesign(type, svc, bu, ring, nom){
+        var ch = SG_CHART[svc][ring.key]; if(!ch) return null;
+        var g = {};
+        if(type === "piston"){
+          /* bore A nominal +.002/-0 (Parker charts use a clearance band; we take bore as given +.002), groove B-1 from L */
+          g.A = [nom, nom + .002];
+          g.B = [g.A[1] - 2 * ch.L[1], g.A[0] - 2 * ch.L[0]];
+          g.C = [g.A[1] - ch.E[1], g.A[0] - ch.E[0]];
+        } else {
+          g.B = [nom - .001, nom];
+          g.A = [g.B[1] + 2 * ch.L[0], g.B[0] + 2 * ch.L[1]];
+          g.C = [g.B[1] + ch.E[0], g.B[0] + ch.E[1]];
+        }
+        g.G = ch.G[bu];
+        return { g:g, ch:ch };
+      }
+      /* suggest AS568 dashes for a seat diameter: ID <= seat, stretch 0..5 %, same CS series */
+      function sgSuggest(cs, seat){
+        return SG_AS568.filter(function(r){ return r[3] === cs && r[1] <= seat && (seat - r[1]) / r[1] * 100 <= 5; })
+          .map(function(r){ return { dash:"-" + r[0], idx:SG_AS568.indexOf(r), st:(seat - r[1]) / r[1] * 100 }; }).sort(function(a, b){ return Math.abs(a.st - 2.5) - Math.abs(b.st - 2.5); }).slice(0, 3);
+      }
+      function sgSvg(type, g, ring, res){
+        /* half-section schematic (not to scale). Piston: bore wall on top, piston with groove below. Rod: drawn flipped. */
+        var P = type === "piston";
+        var b = '<rect x="20" y="16" width="360" height="40" fill="url(#sgHatch)"/><line class="ol" x1="20" y1="56" x2="380" y2="56"/>' +
+          '<path d="M20,64 L150,64 L150,112 L250,112 L250,64 L380,64 L380,170 L20,170 Z" fill="url(#sgHatch)"/>' +
+          '<path class="ol" d="M20,64 L150,64 L150,112 L250,112 L250,64 L380,64"/>' +
+          '<ellipse cx="200" cy="84" rx="25" ry="28" fill="var(--panel2)" stroke="var(--cyan)" stroke-width="2.2"/>' +
+          '<line class="dm2" x1="272" y1="56" x2="272" y2="112"/><line class="dm2" x1="250" y1="112" x2="280" y2="112"/>' +
+          '<line class="dm2" x1="150" y1="126" x2="250" y2="126"/><line class="dm2" x1="150" y1="112" x2="150" y2="132"/><line class="dm2" x1="250" y1="112" x2="250" y2="132"/>';
+        var t = function(x, y, s, a){ return '<text x="' + x + '" y="' + (P ? y : 186 - y) + '"' + (a ? ' text-anchor="' + a + '"' : "") + ">" + esc(s) + "</text>"; };
+        var lab = t(28, 40, P ? "cylinder bore — sealing face" : "rod — sealing face") + t(28, 160, P ? "piston — groove cut here" : "housing — groove cut here") +
+          t(278, 88, "L " + fmt(res.L[0], 4) + "–" + fmt(res.L[1], 4)) + t(200, 142, "G " + fmt(g.G[0], 3) + "–" + fmt(g.G[1], 3), "middle") +
+          t(28, 78, "gap E/2 " + fmt(res.E[0] / 2, 4) + "–" + fmt(res.E[1] / 2, 4));
+        return '<svg viewBox="0 0 400 186" role="img" aria-label="Gland section schematic" font-family="var(--mono)" font-size="11"><defs><pattern id="sgHatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="var(--line)"/></pattern></defs><style>.ol{stroke:var(--ink);stroke-width:1.4;fill:none}.dm2{stroke:var(--ink-dim);stroke-width:1}text{fill:var(--ink)}</style>' +
+          '<g' + (P ? "" : ' transform="translate(0,186) scale(1,-1)"') + ">" + b + "</g>" + lab + "</svg>";
+      }
+      function sgRender(){
+        var type = $("sgType").value, svc = $("sgSvc").value, bu = parseInt($("sgBu").value, 10) || 0, mode = $("sgMode").value;
+        $("sgCustom").classList.toggle("hidden", $("sgDash").value !== "custom");
+        $("sgDesignIn").classList.toggle("hidden", mode !== "design");
+        $("sgCheckIn").classList.toggle("hidden", mode !== "check");
+        $("sgNomLab").textContent = type === "piston" ? "Cylinder bore Ø (in)" : "Rod Ø (in)";
+        var P = type === "piston";
+        $("sgAL").textContent = P ? "Bore Ø min" : "Housing groove Ø (A-1) min"; $("sgAL2").textContent = P ? "Bore Ø max" : "Housing groove Ø (A-1) max";
+        $("sgBL").textContent = P ? "Piston groove Ø (B-1) min" : "Rod Ø min"; $("sgBL2").textContent = P ? "Piston groove Ø (B-1) max" : "Rod Ø max";
+        $("sgCL").textContent = P ? "Piston OD min" : "Rod bore Ø (gland bore D) min"; $("sgCL2").textContent = P ? "Piston OD max" : "Rod bore Ø (gland bore D) max";
+        $("sgCheckHelp").textContent = P ? "Enter your drawing limits: cylinder bore, the piston's groove-bottom Ø, the piston OD and the groove width." : "Enter your drawing limits: the housing groove-bottom Ø, the rod Ø, the gland bore the rod runs in and the groove width.";
+        var ring = sgRing(), o = $("sgOut");
+        if(!ring){ o.innerHTML = '<p class="small">Enter the O-ring ID and cross-section.</p>'; $("sgFig").innerHTML = ""; return; }
+        var g, ch = ring.key ? SG_CHART[svc][ring.key] : null, h = "", note = "";
+        if(mode === "design"){
+          var nom = Number($("sgNom").value);
+          if(!(nom > 0)){ o.innerHTML = '<p class="small">Enter the ' + (P ? "bore" : "rod") + " diameter.</p>"; return; }
+          if(!ch){ o.innerHTML = '<p class="small">Design mode needs a standard AS568 cross-section (.070 / .103 / .139 / .210 / .275).</p>'; return; }
+          var d = sgDesign(type, svc, bu, ring, nom); g = d.g;
+          h += "<h3>Suggested gland — " + esc(ring.dash) + " in a " + (P ? "piston" : "rod") + " gland, " + (svc === "dyn" ? "dynamic" : "static") + "</h3>";
+          h += '<table class="grid"><thead><tr><th>Feature</th><th>Inch</th><th>mm</th></tr></thead><tbody>';
+          function row(a, v, n){ h += "<tr><td>" + esc(a) + (n ? '<br><span class="small">' + esc(n) + "</span>" : "") + "</td><td>" + esc(fmt(v[0], 4) + "–" + fmt(v[1], 4)) + "</td><td>" + trimNum(v[0] * 25.4, 3) + "–" + trimNum(v[1] * 25.4, 3) + "</td></tr>"; }
+          if(P){ row("Cylinder bore A", g.A, "As entered, +.002 / −0 assumed — put your real bore tolerance in Check mode."); row("Piston groove Ø B-1", g.B, "B-1 = A − 2L, using Parker gland depth L " + fmt(ch.L[0], 3) + "–" + fmt(ch.L[1], 3) + "."); row("Piston OD C", g.C, "Sets the diametral clearance E " + fmt(ch.E[0], 3) + "–" + fmt(ch.E[1], 3) + " (Parker chart)."); }
+          else { row("Rod Ø B", g.B, "As entered, +0 / −.001 assumed — put your real rod tolerance in Check mode."); row("Housing groove Ø A-1", g.A, "A-1 = B + 2L, using Parker gland depth L " + fmt(ch.L[0], 3) + "–" + fmt(ch.L[1], 3) + "."); row("Gland (rod) bore D", g.C, "Sets the diametral clearance E " + fmt(ch.E[0], 3) + "–" + fmt(ch.E[1], 3) + "."); }
+          row("Groove width G (" + ["no", "one", "two"][bu] + " back-up)", g.G, null);
+          row("Groove bottom radius R", ch.R, "Max eccentricity " + fmt(ch.ecc, 3) + ". Break groove edges ≈ .005 R.");
+          h += "</tbody></table>";
+          var seat = (g.B[0] + g.B[1]) / 2, sug = sgSuggest(ring.cs, seat), stNow = (seat - ring.id) / ring.id * 100;
+          /* design mode: if the chosen ring cannot sit on this groove / rod (stretch outside −1…5 %), switch to the best fit */
+          if(ring.key && (stNow < -1 || stNow > 5) && sug.length && !sgRender.busy){
+            $("sgDash").value = String(sug[0].idx); sgRender.busy = true; sgRender(); sgRender.busy = false;
+            var o2 = $("sgOut"); o2.insertAdjacentHTML("afterbegin", '<p class="small" style="color:var(--accent-text,var(--cyan))">Switched to ' + esc(sug[0].dash) + " — " + esc(ring.dash) + " can't fit a " + fmt(nom, 3) + " in " + (P ? "bore" : "rod") + " (stretch " + trimNum(stNow, 1) + " %).</p>");
+            return;
+          }
+          if(sug.length) note = '<p class="small" style="margin-top:8px">Best-fitting AS568 sizes for this ' + (P ? "groove" : "rod") + " (stretch 0–5 %, closest to ≈2.5 %): " + sug.map(function(x){ return '<button type="button" class="ghost sgpick" data-i="' + x.idx + '" style="min-height:32px;padding:2px 10px;margin:2px">' + x.dash + " (" + trimNum(x.st, 1) + " %)</button>"; }).join(" ") + "</p>";
+          else note = '<p class="small" style="margin-top:8px;color:var(--amber-ink)">No AS568 size in this cross-section stretches 0–5 % onto this ' + (P ? "groove" : "rod") + " — pick another cross-section or a custom ring.</p>";
+        } else {
+          function nv(id){ var x = Number($(id).value); return isFinite(x) && x > 0 ? x : null; }
+          g = { A:[nv("sgA1"), nv("sgA2")], B:[nv("sgB1"), nv("sgB2")], C:[nv("sgC1"), nv("sgC2")], G:[nv("sgG1"), nv("sgG2")] };
+          var miss = ["A", "B", "C", "G"].some(function(k){ return g[k][0] == null || g[k][1] == null || g[k][0] > g[k][1]; });
+          if(miss){ o.innerHTML = '<p class="small">Fill in every min / max (min ≤ max) — or use Design mode to start from a suggested groove.</p>'; $("sgFig").innerHTML = ""; return; }
+          h += "<h3>Check — " + esc(ring.dash) + " in your " + (P ? "piston" : "rod") + " gland</h3>";
+        }
+        var r = sgAnalyse(type, ring, g);
+        var lim = { sqLoIn:.007, sqHi: svc === "dyn" ? (ring.cs <= .103 ? 25 : 16) : 30, stMax:5, fillHi:85, fillAbs:90 };
+        var rows = [];
+        function chk(name, val, state, msg){ rows.push("<tr><td>" + esc(name) + '<br><span class="small">' + msg + "</span></td><td>" + val + "</td></tr>"); }
+        var sqState = r.sqInMin < lim.sqLoIn ? "bad" : (r.sq[1] > lim.sqHi ? (r.sq[1] > lim.sqHi + 5 ? "bad" : "warn") : "ok");
+        chk("Squeeze (worst case)", sgPct(r.sq[0]) + " – " + sgPct(r.sq[1]), sqState, sgBadge(sqState, sqState === "ok" ? "within Parker limits" : (r.sqInMin < lim.sqLoIn ? "min squeeze " + fmt(r.sqInMin, 4) + " in < .007 in" : "max above " + lim.sqHi + " %")) + (ch ? " · Parker chart range " + ch.sq[0] + "–" + ch.sq[1] + " %" : ""));
+        if(P){
+          var stState = r.st[1] > lim.stMax ? "bad" : (r.st[0] < 0 ? "warn" : "ok");
+          chk("ID stretch on groove", sgPct(r.st[0]) + " – " + sgPct(r.st[1]), stState, sgBadge(stState, stState === "ok" ? "0–5 %" : (r.st[1] > lim.stMax ? "over 5 % — faster ageing" : "ring can be loose (negative stretch) — may roll at assembly")) + " · stretched CS " + fmt(r.wR[0], 4) + "–" + fmt(r.wR[1], 4));
+        } else {
+          var oc = r.odComp, ocState = oc[1] > 5 ? "bad" : (oc[1] > 3 ? "warn" : "ok");
+          chk("OD compression into housing", sgPct(oc[0]) + " – " + sgPct(oc[1]), ocState, sgBadge(ocState, ocState === "ok" ? "≤ 3 %" : (ocState === "warn" ? "3–5 % — twist risk" : "over 5 %")) + " · stretch on rod " + sgPct(r.st[0]) + " – " + sgPct(r.st[1]));
+        }
+        var fState = r.fill[1] > lim.fillAbs ? "bad" : (r.fill[1] > lim.fillHi ? "warn" : "ok");
+        chk("Gland fill", sgPct(r.fill[0]) + " – " + sgPct(r.fill[1]), fState, sgBadge(fState, fState === "ok" ? "≤ 85 % (Parker 60–85 %)" : (fState === "warn" ? "85–90 % — little swell room" : "over 90 % — no room to swell")));
+        var eState = ch && r.E[1] > ch.E[1] + 1e-9 ? "warn" : "ok";
+        chk("Diametral clearance E", fmt(r.E[0], 4) + " – " + fmt(r.E[1], 4) + " in", eState, sgBadge(eState, eState === "ok" ? (ch ? "within chart E max " + fmt(ch.E[1], 3) : "—") : "above chart E max " + fmt(ch.E[1], 3) + " — extrusion risk; consider back-up rings") + " · extrusion also depends on pressure and hardness");
+        chk("Gland depth L", fmt(r.L[0], 4) + " – " + fmt(r.L[1], 4) + " in", "ok", ch ? "Parker chart L " + fmt(ch.L[0], 3) + "–" + fmt(ch.L[1], 3) : "custom ring — no chart");
+        h += '<table class="grid" style="margin-top:10px"><thead><tr><th>Check</th><th>Result</th></tr></thead><tbody>' + rows.join("") + "</tbody></table>" + note;
+        h += '<p class="small" style="margin-top:8px">Ring ' + esc(ring.dash) + ": ID " + fmt(ring.id, 3) + " ±" + fmt(ring.idt, 3) + ", CS " + fmt(ring.cs, 3) + " ±" + fmt(ring.cst, 3) + " in. Concentric worst case (Parker method); if the part can float off-centre, the tight side loses up to E/2 + eccentricity of gland depth.</p>";
+        o.innerHTML = h;
+        Array.prototype.forEach.call(o.querySelectorAll(".sgpick"), function(bt){ bt.addEventListener("click", function(){ $("sgDash").value = bt.getAttribute("data-i"); holdScroll(sgRender); }); });
+        $("sgFig").innerHTML = sgSvg(type, g, ring, r) + '<figcaption>Schematic — not to scale. The ring (amber) is squeezed between the groove bottom and the sealing face.</figcaption>';
+        if(mode === "design"){ ["A", "B", "C", "G"].forEach(function(k, i){ var ids = [["sgA1","sgA2"],["sgB1","sgB2"],["sgC1","sgC2"],["sgG1","sgG2"]][i]; $(ids[0]).value = g[k][0].toFixed(4); $(ids[1]).value = g[k][1].toFixed(4); }); }
+      }
+      sgFillDash();
+      ["sgType","sgSvc","sgBu","sgDash","sgMode"].forEach(function(id){ $(id).addEventListener("change", function(){ holdScroll(sgRender); }); });
+      ["sgNom","sgID","sgCS","sgIDt","sgCSt","sgA1","sgA2","sgB1","sgB2","sgC1","sgC2","sgG1","sgG2"].forEach(function(id){ $(id).addEventListener("input", function(){ sgRender(); }); });
+      sgRender();
+
+      /* ======================================================================
+         SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
+         so a change request never has to describe where the user was. Nothing is sent anywhere. */
+      var APP_BUILD = "v36";
+      (function(){
+        function lab(el){
+          var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
+          return (l ? l.textContent : (el.getAttribute("aria-label") || el.name || id || el.tagName)).replace(/\s+/g, " ").trim();
+        }
+        function note(sec){
+          var h = sec.querySelector("h2"), lines = ["SPC Tools " + APP_BUILD + " — " + (h ? h.textContent.trim() : sec.id)];
+          Array.prototype.forEach.call(sec.querySelectorAll("input, select, textarea"), function(el){
+            if(el.closest(".hidden") || el.type === "file" || el.type === "button") return;
+            var v = el.tagName === "SELECT" ? (el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : "") : el.value;
+            if(el.type === "checkbox") v = el.checked ? "on" : "off";
+            if(v === "" || v == null) return;
+            if(el.tagName === "TEXTAREA" && v.length > 200) v = v.slice(0, 200) + "… (" + v.length + " chars)";
+            lines.push("• " + lab(el) + ": " + v);
+          });
+          var out = sec.querySelector("h3"); if(out) lines.push("Showing: " + out.textContent.trim());
+          lines.push("", "What I expected / what should change:", "");
+          return lines.join("\n");
+        }
+        function copy(txt, done){
+          if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ done(true); }, function(){ fallback(); }); }
+          else fallback();
+          function fallback(){
+            var ta = document.createElement("textarea"); ta.value = txt; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+            document.body.appendChild(ta); ta.select(); var ok = false; try{ ok = document.execCommand("copy"); }catch(e){} document.body.removeChild(ta); done(ok, txt);
+          }
+        }
+        Array.prototype.forEach.call(document.querySelectorAll("section.tool"), function(sec){
+          var card = sec.querySelector(".card") || sec; if(card.querySelector(".suggest")) return;
+          var p = document.createElement("p"); p.className = "small suggest"; p.style.marginTop = "12px";
+          p.innerHTML = '<button type="button" class="ghost" style="min-height:36px;padding:4px 12px">Suggest a change</button> <span class="sg-msg" role="status"></span>';
+          card.appendChild(p);
+          var btn = p.querySelector("button"), msg = p.querySelector(".sg-msg");
+          btn.addEventListener("click", function(){
+            copy(note(sec), function(ok, txt){
+              msg.textContent = ok ? "Copied — paste it to Claude and add what you want changed." : "Couldn't copy automatically — the note is shown below.";
+              if(!ok && txt){ var pre = document.createElement("pre"); pre.className = "small"; pre.style.whiteSpace = "pre-wrap"; pre.textContent = txt; p.appendChild(pre); }
+            });
+          });
+        });
+      })();
+
 
       /* ======================================================================
          SECTION · STACK-UP (tool stack)
@@ -8986,6 +9273,7 @@
           ["stack","Stack-Up","tolerance stack stack-up worst case RSS assembly gap"],
           ["aql","AQL Lookup","AQL sampling plan Z1.4 lot size sample size accept reject inspection level code letter"],
           ["threads","Threads","thread M10 UNC UNF NPT BSP pitch diameter gauge plug ring go no-go Acme metric class 6g 2A 3B tap"],
+          ["seal","Seal glands","o-ring gland groove seal squeeze stretch gland fill piston rod static dynamic AS568 dash back-up ring extrusion clearance parker groove design"],
           ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 C04-2 C04-3 C09-2 C10-2T C10-3S C12-3L C12-4L C16-3S C20-3S sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],
           ["learn","Learn","learn explain what does it mean help Cpk meaning control limits vs spec limits normality gauge AQL what to do next"]

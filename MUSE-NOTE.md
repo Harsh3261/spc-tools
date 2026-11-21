@@ -50,6 +50,21 @@ your next build, or the self-test will flag the changed data blocks.
 Cache names were bumped to `spc-tools-v20-fix1` and `materials-atlas-v63-fix1`
 so they don't collide with your planned v20.1 (UNJ) numbering.
 
+## 2026-11-21 — Seal glands tool + Suggest-a-change button
+
+- New tool `seal` (reference cluster): O-ring gland check and design for piston and rod glands, static or dynamic, with 0/1/2 back-up rings.
+  - Worst-case squeeze uses the stretched cross-section. Also reports stretch (piston), OD compression (rod), gland fill, diametral clearance and gland depth.
+  - Design mode suggests B-1/A-1, piston OD / gland bore and groove width from Parker DC 4-1/5-2, and picks the best AS568 size (clickable). If the chosen ring can't fit, it auto-switches and says why.
+  - Includes a Learn panel and a schematic that flips for rod glands.
+- Data and verification:
+  - Parker gland depth and squeeze ranges = Global O-Ring tables, identical.
+  - Parker Fig. 3-3 stretch equations (fetched from the handbook) reproduce FST's reduced-CS table at all 25 points (`tests/seal.test.js`).
+  - AS568: 345 sizes. Apple Rubber and Greene Tweed agree on 341. -391 ID 21.955; -102, -469 and -470 ID tolerances resolved to the wider value.
+  - Limits from Parker §3.5–3.7.
+- `tests/seal.test.js`: 761 checks covering the FST table, chart squeeze reproduction, design round-trip (L and E exact), a hand-worked example, and AS568 ordering.
+- Suggest a change: every tool gets a button that copies a note with the tool name, every visible input and the current result heading. Nothing is sent anywhere.
+- Cache v36.
+
 ## 2026-11-21 — Metric thread table: 18 → 54 sizes
 
 - TH_M now covers M1.6 to M60 (coarse and common fine), 6H/6g, from the ASME B1.13M / ISO 965-2 chart. The data was accepted because:
