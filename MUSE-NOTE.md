@@ -1,3 +1,12 @@
+# Note for Muse — accent changed to muted amber (2026-11-20, later same evening)
+
+Harsh found pure graphite too dim. Accent (buttons, selected tabs, title, focus, links, top rule)
+is now muted brass-amber #C9963A (hover #D6A44A, text on it #1A1206, accent text #D9A957).
+To avoid any clash: WARNING colour moved from amber #F2A93B to orange #FF8A4C (ink #FFC2A0,
+flag tints rgba(255,138,76,…)); data series (SPC trace/points, Pareto/QC bars, true-position zone,
+GR&R bar, legend swatches) use a new --data var (#D4D7DC screen, #33373D print), never the accent.
+Pass green, fail red, spec violet unchanged. smoke / qc 1548 / ncp / formats pass; axe clean.
+
 # Note for Muse — graphite theme + thread finder (2026-11-20)
 
 1. THEME (CSS only, no logic change): Harsh chose a monochrome "graphite" look so no accent

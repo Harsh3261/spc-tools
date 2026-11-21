@@ -98,14 +98,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet" />
     <title>SPC Tools</title>
-    <!-- 2026-11-20: graphite monochrome theme: every interactive accent is near-white / grey; only status colours (green / amber / red) and spec-limit violet carry hue. -->
+    <!-- 2026-11-20: graphite base + muted brass-amber accent (#C9963A) for controls only; data traces stay light grey; warning moved to orange #FF8A4C so it never reads as the accent; pass green, fail red, spec violet unchanged. -->
     <style>
       /* ===== v19 · dark "instrument" theme (v19.2 palette) =====
          Palette (v19.2): graphite ramp bg #141516 · panel #1C1E20 ·
          raised #25282B · grid #2A2D30 · hairline #323538 · line #5A6572 ·
          text #E6EDF3 · muted #9AA5B1 · faint #828D99 · instrument-blue
          accent #D4D7DC · centre #8B95A1 · spec-limit violet #B48EFF ·
-         pass #3DD68C · warn #F2A93B · fail #FF5A5F.
+         pass #3DD68C · warn #FF8A4C · fail #FF5A5F.
          The old variable NAMES are kept (markup uses var(--cyan) etc. inline),
          only their values change. */
       :root{
@@ -113,10 +113,10 @@
         --bg:#141516; --bg2:#141516; --panel:#1C1E20; --panel2:#25282B;
         --line:#63666B; --line-soft:#323538;
         --ink:#E8E6E1; --ink-dim:#A9A7A2; --ink-faint:#97958F;
-        --cyan:#D4D7DC; --cyan-dim:#D4D7DC; --on-accent:#16171A;
-        --amber:#F2A93B; --red:#FF5A5F; --green:#3DD68C;
+        --data:#D4D7DC; --cyan:#C9963A; --cyan-dim:#B08130; --on-accent:#1A1206;
+        --amber:#FF8A4C; --red:#FF5A5F; --green:#3DD68C;
         --centre:#96989B; --grid:#2A2D30; --raised:#25282B;
-        --amber-ink:#FFC978; --red-ink:#FFB3B8; --green-ink:#93EBC0;
+        --amber-ink:#FFC2A0; --red-ink:#FFB3B8; --green-ink:#93EBC0;
         --spec:#B48EFF;
         --mono:"IBM Plex Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
         --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -149,7 +149,7 @@
         background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
         border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:600; letter-spacing:.02em;
       }
-      nav.tabs button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(212,215,220,.30)}
+      nav.tabs button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(201,150,58,.30)}
       nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       section.tool{display:none}
       section.tool.active{display:block; min-height:calc(100dvh - 230px)}
@@ -196,13 +196,13 @@
       .flags{margin-top:10px}
       .flag{border-radius:8px; padding:10px 12px; font-size:14px; line-height:1.5; margin-bottom:8px; border:1px solid}
       .flag.red{background:rgba(255,77,94,.09); border-color:rgba(255,77,94,.48); color:var(--red-ink)}
-      .flag.amber{background:rgba(255,176,32,.08); border-color:rgba(255,176,32,.45); color:var(--amber-ink)}
+      .flag.amber{background:rgba(255,138,76,.08); border-color:rgba(255,138,76,.45); color:var(--amber-ink)}
       .flag.green{background:rgba(61,220,151,.07); border-color:rgba(61,220,151,.42); color:var(--green-ink)}
       .flag strong{color:inherit}
       .badge{display:inline-block; padding:5px 12px; border-radius:6px; font-size:13px; font-weight:600; letter-spacing:.02em; margin-top:10px}
       .badge.table{border:2px solid var(--cyan); color:var(--cyan); background:transparent}
-      .badge.calc{border:2px dashed var(--amber); color:var(--amber-ink); background:rgba(255,176,32,.10)}
-      .demobanner{margin-top:12px; border-radius:8px; padding:11px 13px; font-size:14.5px; line-height:1.5; border:1.5px solid rgba(255,176,32,.65); background:rgba(255,176,32,.11); color:var(--amber-ink)}
+      .badge.calc{border:2px dashed var(--amber); color:var(--amber-ink); background:rgba(255,138,76,.10)}
+      .demobanner{margin-top:12px; border-radius:8px; padding:11px 13px; font-size:14.5px; line-height:1.5; border:1.5px solid rgba(255,138,76,.65); background:rgba(255,138,76,.11); color:var(--amber-ink)}
       .demobanner strong{color:var(--amber); font-family:var(--mono); font-weight:500; letter-spacing:.06em}
       /* AI analysis prompt panels */
       .aiwrap{margin-top:16px; border-top:1px dashed var(--line); padding-top:14px}
@@ -218,7 +218,7 @@
       }
       a.ghostlink:active{transform:translateY(1px)}
       a{color:var(--cyan)}
-      .snapshot{background:var(--bg2); border:1px dashed rgba(212,215,220,.55); border-radius:8px; padding:14px; margin-top:12px}
+      .snapshot{background:var(--bg2); border:1px dashed rgba(201,150,58,.55); border-radius:8px; padding:14px; margin-top:12px}
       .snapshot h4{margin:0 0 8px; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan)}
       .snapshot table{width:100%; border-collapse:collapse; font-size:14px; font-family:var(--mono); font-variant-numeric:tabular-nums}
       .snapshot td{padding:3px 0; vertical-align:top}
@@ -253,7 +253,7 @@
         background:var(--panel2); color:var(--ink-dim); border:1px solid var(--line);
         border-radius:8px; font-family:var(--sans); font-size:13.5px; font-weight:600; letter-spacing:.02em;
       }
-      .seg button[aria-pressed="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(212,215,220,.28)}
+      .seg button[aria-pressed="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(201,150,58,.28)}
       .seg button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       .hidden{display:none !important}
       /* Sheet input (Map & Preview) overlay */
@@ -300,7 +300,7 @@
       }
       nav.clusters .cl-name{font-size:14px; font-weight:600; letter-spacing:.02em; line-height:1.2}
       nav.clusters .cl-sub{font-size:11px; font-weight:400; color:var(--ink-faint); line-height:1.25}
-      nav.clusters button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(212,215,220,.30)}
+      nav.clusters button[aria-selected="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(201,150,58,.30)}
       nav.clusters button[aria-selected="true"] .cl-sub{color:rgba(8,21,39,.85)}
       nav.clusters button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       @media (hover:hover){ nav.clusters button[aria-selected="false"]:hover{background:var(--panel2); color:var(--ink)} }
@@ -317,7 +317,7 @@
         flex:1 1 0; min-width:max-content; min-height:44px; padding:8px 14px; border-radius:999px;
         background:var(--panel); color:var(--ink-dim); border:1px solid var(--line); font-size:13.5px;
       }
-      nav.tabs button[aria-selected="true"]{background:rgba(212,215,220,.12); color:var(--cyan); border-color:var(--cyan); box-shadow:inset 0 0 0 1px var(--cyan)}
+      nav.tabs button[aria-selected="true"]{background:rgba(201,150,58,.12); color:var(--cyan); border-color:var(--cyan); box-shadow:inset 0 0 0 1px var(--cyan)}
       section.tool{padding-top:14px}
       /* cards: calmer rhythm, clearer hierarchy */
       .card{border-radius:12px; padding:18px 16px 16px; margin-bottom:16px}
@@ -330,7 +330,7 @@
       /* buttons: primary = filled accent, secondary = raised with a clear border */
       button.ghost, a.ghostlink{background:var(--panel2); border-color:var(--line); box-shadow:0 1px 2px rgba(0,0,0,.3)}
       @media (hover:hover){ button.ghost:hover, a.ghostlink:hover{border-color:var(--cyan); color:var(--cyan)} button.act:hover:not(:disabled){filter:brightness(1.08)} }
-      button.act{box-shadow:0 2px 10px rgba(212,215,220,.22)}
+      button.act{box-shadow:0 2px 10px rgba(201,150,58,.22)}
       .btnrow{gap:10px}
       /* form controls: >= 44 px everywhere */
       input[type="text"], input[type="number"], select{min-height:46px}
@@ -355,7 +355,7 @@
       .headline .hl-sep{color:var(--ink-faint); padding:0 .25em}
       .headline .hl-t{font-family:var(--mono); font-weight:500; font-size:15px; display:inline}
       .headline.good{border-color:rgba(61,214,140,.45)} .headline.good .hl-v, .headline.good .hl-t{color:var(--green)}
-      .headline.warn{border-color:rgba(242,169,59,.45)} .headline.warn .hl-v, .headline.warn .hl-t{color:var(--amber)}
+      .headline.warn{border-color:rgba(255,138,76,.45)} .headline.warn .hl-v, .headline.warn .hl-t{color:var(--amber)}
       .headline.bad{border-color:rgba(255,90,95,.5)} .headline.bad .hl-v, .headline.bad .hl-t{color:var(--red)}
 
       /* ===== v19 · individuals chart: frame, zone bands, rings, status ring (SPEC §3, §8b) =====
@@ -367,11 +367,11 @@
       .spcchart .zlayer{position:absolute; top:8px; left:4px; right:4px; pointer-events:none}
       .spcchart .zlayer svg{width:100%; height:auto; display:block}
       .spcchart .zlayer.under{z-index:0} .spcchart .zlayer.over{z-index:2}
-      .zone-c{fill:#D4D7DC; fill-opacity:.08} .zone-b{fill:#F2A93B; fill-opacity:.05} .zone-a{fill:#F2A93B; fill-opacity:.10}
+      .zone-c{fill:#D4D7DC; fill-opacity:.08} .zone-b{fill:#FF8A4C; fill-opacity:.05} .zone-a{fill:#FF8A4C; fill-opacity:.10}
       .ooc-ring{fill:none; stroke:#FF5A5F; stroke-width:1.8}
       .spcchart::after{content:""; position:absolute; inset:-1px; border-radius:9px; pointer-events:none; box-shadow:0 0 0 2px var(--ring, transparent); z-index:3}
       .spcchart.ring-pass{--ring:#3DD68C}
-      .spcchart.ring-warn{--ring:#F2A93B}
+      .spcchart.ring-warn{--ring:#FF8A4C}
       .spcchart.ring-fail{--ring:#FF5A5F}
       .spcchart.ring-warn::after, .spcchart.ring-fail::after{animation:ringPulse 2.2s ease-in-out infinite}
       @keyframes ringPulse{0%,100%{box-shadow:0 0 0 2px var(--ring)} 50%{box-shadow:0 0 0 2px var(--ring), 0 0 14px 2px var(--ring)}}
@@ -389,7 +389,7 @@
         #spcChart text[fill="#c93a3a"]{fill:#B48EFF}
         #spcChart line[stroke="#7aa3bd"]{stroke:#D4D7DC; stroke-opacity:.8; stroke-width:1.6}  /* trace: accent */
         #spcChart circle[fill="#0b7f95"]{fill:#D4D7DC}                          /* in-control points: accent */
-        #spcChart circle[fill="#b97d0f"]{fill:#F2A93B}                          /* out-of-control points: warning */
+        #spcChart circle[fill="#b97d0f"]{fill:#FF8A4C}                          /* out-of-control points: warning */
         #spcChart circle[fill="#c93a3a"]{fill:#FF5A5F}                          /* out-of-spec points: breach red */
         #spcChart circle[stroke="#ffffff"]{stroke:#1C1E20; stroke-width:1.4}
         #spcChart text[fill="#6b8699"]{fill:#8B95A1}
@@ -406,9 +406,9 @@
         #paretoChart text[fill="#3f5d73"]{fill:#8B95A1}
         #paretoChart line[stroke="#5f7f99"]{stroke:#8B95A1}
         #paretoChart text[fill="#6b8699"]{fill:#8B95A1}
-        #paretoChart polyline[stroke="#b97d0f"]{stroke:#F2A93B}
-        #paretoChart circle[fill="#b97d0f"]{fill:#F2A93B}
-        #paretoChart text[fill="#b97d0f"]{fill:#F2A93B}
+        #paretoChart polyline[stroke="#b97d0f"]{stroke:#FF8A4C}
+        #paretoChart circle[fill="#b97d0f"]{fill:#FF8A4C}
+        #paretoChart text[fill="#b97d0f"]{fill:#FF8A4C}
         /* EXAMPLE DATA watermark (drawn into the SVG): stays alarm red */
         .chartbox text[fill="#c93a3a"][fill-opacity]{fill:#FF5A5F; fill-opacity:.2}   /* EXAMPLE watermark stays alarm red */
       }
@@ -518,7 +518,7 @@
           --bg:#ffffff; --bg2:#ffffff; --panel:#ffffff; --panel2:#f3f5f7;
           --line:#9aa9b5; --line-soft:#c9d3db;
           --ink:#111a22; --ink-dim:#36495a; --ink-faint:#55687a;
-          --cyan:#33373D; --cyan-dim:#33373D; --on-accent:#ffffff;
+          --data:#33373D; --cyan:#33373D; --cyan-dim:#33373D; --on-accent:#ffffff;
           --amber:#8a6200; --red:#b3302f; --green:#136b45;
           --amber-ink:#6d4d05; --red-ink:#7a1f1f; --green-ink:#145c3d;
         }
@@ -613,15 +613,15 @@
           --bg:#17181A; --bg2:#1C1E20; --panel:#232528; --panel2:#2D3033; --raised:#2D3033;
           --line:#70747A; --line-soft:#3A3D41; --grid:#303336;
           --ink:#EEEFF0; --ink-dim:#B9BCC0; --ink-faint:#A0A3A8;
-          --btn:#E8EAED; --btn-hover:#FFFFFF; --btn-ink:#16171A; --accent-text:#A8ADB4;
+          --btn:#C9963A; --btn-hover:#D6A44A; --btn-ink:#1A1206; --accent-text:#D9A957;
         }
         html{background:
           radial-gradient(ellipse 70% 45% at 100% 0%, rgba(255,255,255,.05) 0%, transparent 60%),
-          radial-gradient(ellipse 60% 40% at 0% 0%, rgba(212,215,220,.06) 0%, transparent 60%), #17181A}
+          radial-gradient(ellipse 60% 40% at 0% 0%, rgba(201,150,58,.06) 0%, transparent 60%), #17181A}
         body{background-color:transparent; background-image:radial-gradient(rgba(200,205,210,.05) 1px, transparent 1.15px)}
-        ::selection{background:rgba(212,215,220,.35); color:#fff}
+        ::selection{background:rgba(201,150,58,.35); color:#fff}
         header.top{position:relative; padding-top:14px}
-        header.top::before{content:""; position:absolute; left:0; right:0; top:0; height:2px; border-radius:2px; background:#D4D6DA}
+        header.top::before{content:""; position:absolute; left:0; right:0; top:0; height:2px; border-radius:2px; background:#C9963A}
         header.top h1{font-size:30px; font-weight:700}
         header.top h1 .accent{color:var(--accent-text)}
         .card{border-radius:12px; border-color:var(--line-soft)}
@@ -630,7 +630,7 @@
         button.act:disabled{background:var(--panel2); color:var(--ink-faint); border-color:var(--line)}
         nav.clusters button[aria-selected="true"]{background:var(--btn); color:var(--btn-ink); border-color:var(--btn); box-shadow:0 1px 2px rgba(0,0,0,.35)}
         nav.clusters button[aria-selected="true"] .cl-sub{color:rgba(255,255,255,.85)}
-        input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus{outline:2px solid var(--cyan); outline-offset:1px; border-color:var(--cyan); box-shadow:0 0 0 4px rgba(212,215,220,.14)}
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus{outline:2px solid var(--cyan); outline-offset:1px; border-color:var(--cyan); box-shadow:0 0 0 4px rgba(201,150,58,.14)}
         .guru{color:var(--ink-dim)}
       }
 
@@ -649,7 +649,7 @@
       .learn details.lesson summary{cursor:pointer; padding:14px 0; font-weight:600; font-size:16px; color:var(--ink)}
       .learn details.lesson[open] summary{color:var(--cyan)}
       .learn p,.learn li{font-size:14.5px; line-height:1.6; color:var(--ink-dim)} .learn b{color:var(--ink)}
-      .learn .todo{border-left:3px solid var(--cyan); padding:6px 10px; background:rgba(212,215,220,.07); border-radius:4px}
+      .learn .todo{border-left:3px solid var(--cyan); padding:6px 10px; background:rgba(201,150,58,.07); border-radius:4px}
       .learn table.lt{width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:14px}
       .learn table.lt th,.learn table.lt td{border:1px solid var(--line-soft); padding:7px 9px; text-align:left; vertical-align:top}
       .learn td.g{color:var(--green); font-weight:600} .learn td.a{color:var(--amber); font-weight:600} .learn td.r{color:var(--red); font-weight:600}
@@ -666,8 +666,8 @@
         body.print-tool .card{break-inside:auto !important}
       }
       /* ===== 2026-11-17 · Attribute charts + Short-run (colours via theme variables, so print stays light) ===== */
-      .qcchart .qc-trace{stroke:var(--cyan); stroke-opacity:.75; stroke-width:1.5}
-      .qcchart .qc-pt{fill:var(--cyan); stroke:var(--panel); stroke-width:1.2}
+      .qcchart .qc-trace{stroke:var(--data); stroke-opacity:.75; stroke-width:1.5}
+      .qcchart .qc-pt{fill:var(--data); stroke:var(--panel); stroke-width:1.2}
       .qcchart .qc-sig{fill:var(--amber); stroke:var(--panel); stroke-width:1.2}
       .qcchart .qc-red{fill:var(--red); stroke:var(--panel); stroke-width:1.2}
       .qcchart .qc-lim{stroke:var(--ink-dim); stroke-width:1.4; stroke-dasharray:6 4; fill:none}
@@ -688,7 +688,7 @@
       .ncpcols{display:grid; grid-template-columns:1fr; gap:4px} .ncpcol{display:flex; flex-direction:column; gap:2px; font-size:13.5px; color:var(--ink-dim)} @media(min-width:700px){ .ncpcols{grid-template-columns:1fr 1fr; column-gap:14px} }
       .ncpmerge{padding:8px 0; border-bottom:1px dashed var(--line-soft); font-size:14.5px; color:var(--ink)} .ncpmerge select{margin-top:6px}
       .ncpcheck .small{margin-left:auto; text-align:right}
-      .qcchart .qc-bar{fill:var(--cyan); fill-opacity:.85} .qcchart .qc-bar-o{fill:var(--ink-faint); fill-opacity:.6}
+      .qcchart .qc-bar{fill:var(--data); fill-opacity:.85} .qcchart .qc-bar-o{fill:var(--ink-faint); fill-opacity:.6}
       .qcchart .qc-val{fill:var(--ink)} .qcchart .qc-cum{fill:var(--amber)} .qcchart .qc-plab{fill:var(--ink-dim)}
       .ncptable tr.ncpp td{font-weight:700; color:var(--ink); background:var(--bg2)}
       #ncpFile{display:block; width:100%; margin-top:6px; padding:12px; border:1px dashed var(--line); border-radius:8px; background:var(--bg2); color:var(--ink); font:inherit}
@@ -791,7 +791,7 @@
             </div>
             <p class="small ptinfo" id="spcPointInfo" aria-live="polite">Tap a point on the chart to see its reading.</p>
             <div class="legend">
-              <span><i class="swatch" style="background:var(--cyan)"></i> In control</span>
+              <span><i class="swatch" style="background:var(--data)"></i> In control</span>
               <span><i class="swatch" style="background:var(--amber)"></i> Out of control</span>
               <span><i class="swatch" style="background:var(--red)"></i> Out of spec</span>
               <span>— Centre line x̄</span><span>– – Control limits (x̄ ± 3σ within)</span><span>– – Spec limits</span><span>Bands: zones C / B / A (±1σ / ±2σ / ±3σ)</span><span>◯ Ringed: flagged point</span>
@@ -1015,7 +1015,7 @@
             <h3>Pareto chart</h3>
             <div class="chartbox" id="paretoChart"></div>
             <div class="legend">
-              <span><i class="swatch" style="background:var(--cyan)"></i> Count per category</span>
+              <span><i class="swatch" style="background:var(--data)"></i> Count per category</span>
               <span><i class="swatch" style="background:var(--amber)"></i> Cumulative %</span>
               <span>– – 80% line</span>
             </div>
@@ -1701,7 +1701,7 @@
             <h3 id="attrChartTitle">Chart</h3>
             <div class="chartbox qcchart" id="attrChart"></div>
             <div class="legend">
-              <span><i class="swatch" style="background:var(--cyan)"></i> Period</span>
+              <span><i class="swatch" style="background:var(--data)"></i> Period</span>
               <span><i class="swatch" style="background:var(--amber)"></i> Signal</span>
               <span>– – control limits</span>
             </div>
@@ -3528,7 +3528,7 @@
         var g = "", d = "";
         [0, 0.25, 0.5, 0.75, 1].forEach(function(t){ g += '<line x1="'+pL+'" y1="'+Y(t)+'" x2="'+(W-pR)+'" y2="'+Y(t)+'" style="stroke:var(--grid)" stroke-width="1"/><text x="'+(pL-6)+'" y="'+(Y(t)+4)+'" text-anchor="end" font-size="'+fs+'" font-family="monospace" style="fill:var(--ink-faint)">'+Math.round(t*100)+'%</text>'; });
         for(var i = 0; i <= 160; i++){ var p = pmax * i / 160; d += (i ? "L" : "M") + X(p).toFixed(1) + " " + Y(aqlPa(n, ac, p)).toFixed(1); }
-        g += '<path d="'+d+'" fill="none" style="stroke:var(--cyan)" stroke-width="2.4"/>';
+        g += '<path d="'+d+'" fill="none" style="stroke:var(--data)" stroke-width="2.4"/>';
         var paA = aqlPa(n, ac, aq);
         g += '<line x1="'+X(aq)+'" y1="'+Y(0)+'" x2="'+X(aq)+'" y2="'+Y(paA)+'" style="stroke:var(--green)" stroke-dasharray="5 4" stroke-width="1.4"/><circle cx="'+X(aq)+'" cy="'+Y(paA)+'" r="5" style="fill:var(--green)"/>';
         if(lq <= pmax) g += '<line x1="'+X(lq)+'" y1="'+Y(0)+'" x2="'+X(lq)+'" y2="'+Y(0.10)+'" style="stroke:var(--red)" stroke-dasharray="5 4" stroke-width="1.4"/><circle cx="'+X(lq)+'" cy="'+Y(0.10)+'" r="5" style="fill:var(--red)"/>';
@@ -3547,13 +3547,13 @@
         var ok = pass && !outOfSize, pc = ok ? "var(--green)" : "var(--red)";
         var g = '<line x1="'+c+'" y1="10" x2="'+c+'" y2="'+(S-10)+'" style="stroke:var(--grid)"/><line x1="10" y1="'+c+'" x2="'+(S-10)+'" y2="'+c+'" style="stroke:var(--grid)"/>';
         if(hasBonus) g += '<circle cx="'+c+'" cy="'+c+'" r="'+(rTot*k)+'" style="fill:rgba(61,214,140,.08);stroke:var(--green)" stroke-width="1.6"/>';
-        g += '<circle cx="'+c+'" cy="'+c+'" r="'+(rTol*k)+'" style="fill:'+(hasBonus?'none':'rgba(212,215,220,.08)')+';stroke:var(--cyan)" stroke-width="1.6" stroke-dasharray="'+(hasBonus?'6 4':'0')+'"/>';
+        g += '<circle cx="'+c+'" cy="'+c+'" r="'+(rTol*k)+'" style="fill:'+(hasBonus?'none':'rgba(212,215,220,.08)')+';stroke:var(--data)" stroke-width="1.6" stroke-dasharray="'+(hasBonus?'6 4':'0')+'"/>';
         var px = c + dx * k, py = c - dy * k;
         g += '<line x1="'+c+'" y1="'+c+'" x2="'+px+'" y2="'+py+'" style="stroke:'+pc+'" stroke-width="1.6"/><circle cx="'+px+'" cy="'+py+'" r="6" style="fill:'+pc+';stroke:var(--bg)" stroke-width="2"/>';
         g += '<circle cx="'+c+'" cy="'+c+'" r="3" style="fill:var(--ink-dim)"/>';
         g += '<text x="'+(S-12)+'" y="'+(c-6)+'" text-anchor="end" font-size="'+fs+'" style="fill:var(--ink-faint)">+X</text><text x="'+(c+6)+'" y="'+(fs+12)+'" font-size="'+fs+'" style="fill:var(--ink-faint)">+Y</text>';
         var svg = '<svg viewBox="0 0 '+S+' '+S+'" style="max-width:'+S+'px;margin:0 auto" role="img" aria-label="True position zone plot">'+g+'</svg>';
-        return '<div class="viz"><h4>Position zone</h4>' + svg + '<p class="vcap"><span style="color:var(--cyan)">' + (hasBonus ? '- -' : '○') + '</span> stated zone ⌀ <strong>' + fmt(tol, 4) + '</strong>' +
+        return '<div class="viz"><h4>Position zone</h4>' + svg + '<p class="vcap"><span style="color:var(--data)">' + (hasBonus ? '- -' : '○') + '</span> stated zone ⌀ <strong>' + fmt(tol, 4) + '</strong>' +
           (hasBonus ? ' · <span style="color:var(--green)">○</span> with bonus ⌀ <strong>' + fmt(total, 4) + '</strong>' : '') +
           ' · <span style="color:' + pc + '">●</span> measured centre, ⌀ <strong>' + fmt(dev, 4) + '</strong> (Δx ' + fmt(dx, 4) + ', Δy ' + fmt(dy, 4) + '). Drawn to scale.</p></div>';
       }
@@ -3566,7 +3566,7 @@
         var g = "";
         [10, 30].forEach(function(t){ g += '<line x1="'+X(t)+'" y1="'+pT+'" x2="'+X(t)+'" y2="'+(pT+rows.length*rowH)+'" style="stroke:var(--line)" stroke-dasharray="4 4"/><text x="'+X(t)+'" y="'+(pT+rows.length*rowH+18)+'" text-anchor="middle" font-size="'+fs+'" font-family="monospace" style="fill:var(--ink-faint)">'+t+'%</text>'; });
         rows.forEach(function(r, i){
-          var pct = 100 * r[1] / TV, y = pT + i * rowH, col = i === 2 ? (pct < 10 ? "var(--green)" : pct <= 30 ? "var(--amber)" : "var(--red)") : (i === 3 ? "var(--cyan)" : "var(--ink-faint)");
+          var pct = 100 * r[1] / TV, y = pT + i * rowH, col = i === 2 ? (pct < 10 ? "var(--green)" : pct <= 30 ? "var(--amber)" : "var(--red)") : (i === 3 ? "var(--data)" : "var(--ink-faint)");
           var lab = N ? ["EV", "AV", "GRR", "PV"][i] : r[0];
           g += '<text x="'+(pL-8)+'" y="'+(y+rowH/2+4)+'" text-anchor="end" font-size="'+fs+'" style="fill:var(--ink-dim)">'+esc(lab)+'</text>';
           g += '<rect x="'+pL+'" y="'+(y+8)+'" width="'+Math.max(1, X(pct)-pL)+'" height="'+(rowH-16)+'" rx="3" style="fill:'+col+'"/>';
