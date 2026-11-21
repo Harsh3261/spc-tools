@@ -39,6 +39,7 @@
       tp        #tool-tp         measure     TRUE POSITION
       aql       #tool-aql        sampling    AQL MODEL
       threads   #tool-threads    reference   THREADS
+      ports     #tool-ports      reference   HYDRAULIC PORTS
       convert   #tool-convert    reference   CONVERT (with hardness)
       stack     #tool-stack      reference   STACK-UP
       sigma     #tool-sigma      reference   SIGMA / PPM
@@ -582,6 +583,7 @@
       }
       /* 2026-11-15 thread search */
       .thsearch{margin:4px 0 12px}
+      #ptOut table.grid td:first-child, #ptOut table.grid th:first-child{text-align:left; font-family:var(--sans)}
       .thfind{margin:4px 0 14px; border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; background:var(--panel2)}
       .thfind summary{cursor:pointer; font-weight:600; min-height:32px; display:flex; align-items:center}
       .tfpair{display:flex; gap:6px} .tfpair input{flex:1; min-width:0} .tfpair select{flex:0 0 auto; width:auto}
@@ -729,6 +731,7 @@
         <button type="button" role="tab" id="tabbtn-tp" aria-selected="false" data-tab="tp" data-cluster="measure">True Position</button>
         <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
         <button type="button" role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads" data-cluster="reference">Threads</button>
+        <button type="button" role="tab" id="tabbtn-ports" aria-selected="false" data-tab="ports" data-cluster="reference">Hydraulic ports</button>
         <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Unit converters</button>
         <button type="button" role="tab" id="tabbtn-learn" aria-selected="false" data-tab="learn" data-cluster="reference">Learn</button>
         <button type="button" role="tab" id="tabbtn-stack" aria-selected="false" data-tab="stack" data-cluster="measure">Stack-Up</button>
@@ -1448,6 +1451,37 @@
           </div>
           <div id="thMfg"></div>
           <div id="thGauge" class="hidden"></div>
+        </div>
+      </section>
+
+      <!-- ============ TOOL 7b : HYDRAULIC PORTS ============ -->
+      <section class="tool" id="tool-ports" role="tabpanel" aria-labelledby="tabbtn-ports">
+        <div class="card">
+          <h2>Hydraulic ports — O-ring boss port dimensions</h2>
+          <p class="guru">A port leaks at the seal, not the thread: the chamfer diameter, chamfer depth and angle squeeze the O-ring, and the spotface gives the fitting something square to seat on. Inspect those, not just the thread.</p>
+          <div class="row2">
+            <div>
+              <label class="flabel" for="ptStd">Port standard</label>
+              <select id="ptStd">
+                <option value="j1926" selected>SAE J1926-1 — inch O-ring boss (ORB)</option>
+                <option value="i6149">ISO 6149-1 — metric O-ring port</option>
+              </select>
+            </div>
+            <div>
+              <label class="flabel" for="ptSize">Size</label>
+              <select id="ptSize"></select>
+            </div>
+          </div>
+          <div id="ptOut"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Which port do I have?</summary>
+            <p class="small"><strong>SAE ORB (J1926-1):</strong> UN / UNF thread, 12° or 15° O-ring chamfer at the mouth, flat spotface. Dash size = tube OD in 1/16 in (−8 = 1/2 in tube = 3/4-16).<br>
+            <strong>ISO 6149-1:</strong> metric M thread with a 12° / 15° O-ring chamfer; may carry a raised identification ridge on the spotface.<br>
+            <strong>BSPP (ISO 1179-1):</strong> G thread (55° form), flat spotface, <em>no</em> chamfer — the seal is a bonded washer or O-ring on the fitting face.<br>
+            <strong>NPT / NPTF:</strong> tapered thread, no spotface seal — seals on the thread.<br>
+            Use the thread finder in Threads to identify the thread first, then pick the port here.</p>
+          </details>
+          <p class="cite" id="ptCite"></p>
         </div>
       </section>
 
@@ -7743,6 +7777,128 @@
       thFillSizes();
 
       /* ======================================================================
+         SECTION · HYDRAULIC PORTS (tool ports) — 2026-11-20
+         Data verified two-source (three for J1926-1):
+           SAE J1926-1: Parker O-Ring Handbook Table 4-5 · EPCO / Zero-Leak J1926
+             reference dimensions (2/12/14) · Fluid-Tech Hydraulics J1926-1 chart —
+             all three agree cell-for-cell except Parker's −5 spotface (0.960,
+             an extraction/print outlier; the other two give 0.906 — 0.906 used).
+             900-series O-rings: Parker Table 4-5 + Apple Rubber boss-gasket table.
+             Sizes −40 / −48 are NOT SAE (one source flags them) — excluded.
+           ISO 6149-1: Parker Catalog 4300 Table U17 + Jiayuan reproduction of
+             ISO 6149-1 Table 1 agree on every row; ISO 6149-1:2022 / FDIS
+             previews confirm M12, M14, M16, M48, M60 rows and the M8 / M30 / M60
+             spotface values. The EPCO metric sheet differs on several rows
+             (older edition) and was not used. M20×1.5 (cartridge cavities only)
+             is excluded: the two sources disagree on its spotface.
+         Edit data only via a verified data change.
+         ====================================================================== */
+      /* BEGIN DATA PT_J1926: dash, tube OD, thread, D min passage, J min full thread, K chamfer depth (+.015/-0), O squareness dia (min), P tap drill depth min, S spotface depth max, U chamfer dia (+.005/-0), Y spotface dia min, Z angle (±1°), O-ring, O-ring ID, ID tol, CS, CS tol — inches */
+      var PT_J1926 = [
+        ["−2","1/8","5/16-24 UNF-2B",.062,.390,.074,.438,.468,.062,.358,.672,12,"AS568-902",.239,.005,.064,.003],
+        ["−3","3/16","3/8-24 UNF-2B",.125,.390,.074,.500,.468,.062,.421,.750,12,"AS568-903",.301,.005,.064,.003],
+        ["−4","1/4","7/16-20 UNF-2B",.172,.454,.093,.563,.547,.062,.487,.828,12,"AS568-904",.351,.005,.072,.003],
+        ["−5","5/16","1/2-20 UNF-2B",.234,.454,.093,.625,.547,.062,.550,.906,12,"AS568-905",.414,.005,.072,.003],
+        ["−6","3/8","9/16-18 UNF-2B",.297,.500,.097,.688,.609,.062,.616,.969,12,"AS568-906",.468,.005,.078,.003],
+        ["−8","1/2","3/4-16 UNF-2B",.391,.562,.100,.875,.688,.094,.811,1.188,15,"AS568-908",.644,.009,.087,.003],
+        ["−10","5/8","7/8-14 UNF-2B",.484,.656,.100,1.000,.781,.094,.942,1.344,15,"AS568-910",.755,.009,.097,.003],
+        ["−12","3/4","1-1/16-12 UN-2B",.609,.750,.130,1.250,.906,.094,1.148,1.625,15,"AS568-912",.924,.009,.116,.004],
+        ["−14","7/8","1-3/16-12 UN-2B",.719,.750,.130,1.375,.906,.094,1.273,1.765,15,"AS568-914",1.047,.010,.116,.004],
+        ["−16","1","1-5/16-12 UN-2B",.844,.750,.130,1.500,.906,.125,1.398,1.910,15,"AS568-916",1.171,.010,.116,.004],
+        ["−20","1-1/4","1-5/8-12 UN-2B",1.078,.750,.132,1.875,.906,.125,1.713,2.270,15,"AS568-920",1.475,.014,.118,.004],
+        ["−24","1-1/2","1-7/8-12 UN-2B",1.312,.750,.132,2.125,.906,.125,1.962,2.560,15,"AS568-924",1.720,.014,.118,.004],
+        ["−32","2","2-1/2-12 UN-2B",1.781,.750,.132,2.750,.906,.125,2.587,3.480,15,"AS568-932",2.337,.018,.118,.004]
+      ];
+      /* END DATA PT_J1926 */
+      /* BEGIN DATA PT_6149: thread, d2 spotface min (wide), d2 spotface min (narrow), d3 passage (ref), d5 chamfer dia (+0.1/0), L1 chamfer depth (+0.4/0), L2 tap drill depth min, L3 spotface depth max, L4 full thread min, Z angle (±1°) — mm */
+      var PT_6149 = [
+        ["M8 × 1",17,14,3,9.1,1.6,11.5,1,10,12],
+        ["M10 × 1",20,16,4.5,11.1,1.6,11.5,1,10,12],
+        ["M12 × 1.5",23,19,6,13.8,2.4,14,1.5,11.5,15],
+        ["M14 × 1.5",25,21,7.5,15.8,2.4,14,1.5,11.5,15],
+        ["M16 × 1.5",28,24,9,17.8,2.4,15.5,1.5,13,15],
+        ["M18 × 1.5",30,26,11,19.8,2.4,17,2,14.5,15],
+        ["M22 × 1.5",33,29,14,23.8,2.4,18,2,15.5,15],
+        ["M27 × 2",40,34,18,29.4,3.1,22,2,19,15],
+        ["M30 × 2",44,38,21,32.4,3.1,22,2,19,15],
+        ["M33 × 2",49,43,23,35.4,3.1,22,2.5,19,15],
+        ["M42 × 2",58,52,30,44.4,3.1,22.5,2.5,19.5,15],
+        ["M48 × 2",63,57,36,50.4,3.1,25,2.5,22,15],
+        ["M60 × 2",74,67,44,62.4,3.1,27.5,2.5,24.5,15]
+      ];
+      /* END DATA PT_6149 */
+      function ptFill(){
+        var std = $("ptStd").value, opts = std === "j1926"
+          ? PT_J1926.map(function(r, i){ return [String(i), r[0] + " — " + r[2].replace(/-2B$/, "") + " (" + r[1] + " in tube)"]; })
+          : PT_6149.map(function(r, i){ return [String(i), r[0] + " 6H"]; });
+        thFillSelect($("ptSize"), opts, std === "j1926" ? "5" : "2");
+        ptRender();
+      }
+      function ptThreadLink(std, r){
+        if(std === "j1926"){
+          var base = r[2].replace(/\s*UNF?-2B$/, ""), all = thUAll();
+          for(var i = 0; i < all.length; i++){ if(all[i][0].indexOf(base + " ") === 0) return { fam:"un", size:String(i), lab:all[i][0] }; }
+          return null;
+        }
+        var t = r[0].replace(/\s+/g, " ");
+        for(var j = 0; j < TH_M.length; j++){ if(TH_M[j][0] === t) return { fam:"metric", size:String(j), lab:TH_M[j][0] }; }
+        var mm2 = /^M([\d.]+) × ([\d.]+)$/.exec(t);
+        return mm2 ? { fam:"metric", size:"custom", lab:t + " — calculated (ISO 965-1)", D:mm2[1], P:mm2[2] } : null;
+      }
+      function ptRender(){
+        var std = $("ptStd").value, i = parseInt($("ptSize").value, 10) || 0, rows, title, notes, unit, cite;
+        function mm(v){ return trimNum(v * 25.4, 2); }
+        if(std === "j1926"){
+          var r = PT_J1926[i]; unit = "in";
+          title = "SAE J1926-1 " + r[0] + " port — " + r[2];
+          rows = [
+            ["Full thread depth (J)", fmt(r[4], 3) + " min", mm(r[4]) + " mm", "Minimum length of full-form thread — gauge with the GO plug to this depth."],
+            ["Tap drill depth (P)", fmt(r[7], 3) + " min", mm(r[7]) + " mm", "Assumes a bottoming tap; a standard taper tap needs a deeper drill."],
+            ["O-ring chamfer Ø (U)", fmt(r[9], 3) + " +.005 / −0", mm(r[9]) + " mm", "Concentric with thread PD within .005 TIR; no longitudinal or spiral tool marks."],
+            ["Chamfer depth (K)", fmt(r[5], 3) + " +.015 / −0", mm(r[5]) + " mm", null],
+            ["Chamfer angle (Z)", r[11] + "° ±1°", "", null],
+            ["Spotface Ø (Y)", fmt(r[10], 3) + " min", mm(r[10]) + " mm", "Not required if the boss face is already machined."],
+            ["Spotface depth (S)", fmt(r[8], 3) + " max", mm(r[8]) + " mm", "Maximum — deeper and the wrench can't grip the fitting."],
+            ["Squareness Ø (O)", fmt(r[6], 3) + " min", mm(r[6]) + " mm", "Face square to thread PD within .010 TIR measured at this diameter."],
+            ["Passage Ø (D)", fmt(r[3], 3) + " min", mm(r[3]) + " mm", "Applies only where the tap drill does not pass through the boss."],
+            ["O-ring", r[12] + " (Parker 3-" + r[12].slice(-3) + ")", "ID " + fmt(r[13], 3) + " ±" + fmt(r[14], 3) + " · CS " + fmt(r[15], 3) + " ±" + fmt(r[16], 3) + " in", "90 Shore A nitrile is the hydraulic default."]
+          ];
+          cite = "SAE J1926-1 port dimensions as reproduced by the Parker O-Ring Handbook (Table 4-5), EPCO / Zero-Leak (J1926 reference dimensions) and Fluid-Tech Hydraulics — three agreeing sources. O-rings per AS568 900-series. Reference only — SAE J1926-1 governs for acceptance.";
+        } else {
+          var m = PT_6149[i]; unit = "mm";
+          title = "ISO 6149-1 port — " + m[0] + " 6H";
+          rows = [
+            ["Full thread depth (L4)", trimNum(m[8], 2) + " min", "", "Minimum full-form thread length."],
+            ["Tap drill depth (L2)", trimNum(m[6], 2) + " min", "", "Assumes a bottoming tap; drill deeper for a standard tap."],
+            ["O-ring chamfer Ø (d5)", trimNum(m[4], 2) + " +0.1 / 0", "", null],
+            ["Chamfer depth (L1)", trimNum(m[5], 2) + " +0.4 / 0", "", null],
+            ["Chamfer angle (Z)", m[9] + "° ±1°", "", null],
+            ["Spotface Ø (d2) — wide", trimNum(m[1], 2) + " min", "", "Also the minimum when the optional identification ridge is used."],
+            ["Spotface Ø (d2) — narrow", trimNum(m[2], 2) + " min", "", "Narrow spotface without the ridge: mark the port “metric” or note ISO 6149-1 on the nameplate."],
+            ["Spotface depth (L3)", trimNum(m[7], 2) + " max", "", null],
+            ["Passage Ø (d3)", trimNum(m[3], 2) + " ref.", "", "Reference only — the connecting hole can differ to suit the application."]
+          ];
+          cite = "ISO 6149-1 Table 1 as reproduced by Parker Catalog 4300 (Table U17) and a second published reproduction, agreeing on every row; spot-checked against ISO 6149-1:2022 preview pages. Thread M…6H per ISO 261 / ISO 965-1. Reference only — ISO 6149-1 governs for acceptance.";
+        }
+        var link = ptThreadLink(std, std === "j1926" ? PT_J1926[i] : PT_6149[i]);
+        var h = "<h3>" + esc(title) + "</h3><table class=\"grid\"><thead><tr><th>Feature</th><th>" + (unit === "in" ? "Inch" : "mm") + "</th>" + (unit === "in" ? "<th>mm</th>" : "") + "</tr></thead><tbody>" +
+          rows.map(function(x){ return "<tr><td>" + esc(x[0]) + (x[3] ? '<br><span class="small">' + esc(x[3]) + "</span>" : "") + "</td><td>" + esc(x[1]) + "</td>" + (unit === "in" ? "<td>" + esc(x[2]) + "</td>" : "") + "</tr>"; }).join("") + "</tbody></table>";
+        if(link) h += '<p style="margin-top:10px"><button type="button" class="ghost" id="ptThLink" data-fam="' + link.fam + '" data-size="' + link.size + '"' + (link.D ? ' data-d="' + link.D + '" data-p="' + link.P + '"' : "") + '>Open thread limits — ' + esc(link.lab) + " (internal)</button></p>";
+        $("ptOut").innerHTML = h; $("ptCite").textContent = cite;
+        var b = $("ptThLink");
+        if(b) b.addEventListener("click", function(){
+          showTool("threads");
+          $("thFam").value = b.getAttribute("data-fam"); thFillSizes();
+          $("thSize").value = b.getAttribute("data-size"); thFillSideClass();
+          if(b.getAttribute("data-d")){ $("thCD").value = b.getAttribute("data-d"); $("thCP").value = b.getAttribute("data-p"); thRender(); }
+          if(Array.prototype.some.call($("thSide").options, function(o){ return o.value === "int"; })){ $("thSide").value = "int"; thFillSideClass(); }
+        });
+      }
+      $("ptStd").addEventListener("change", function(){ holdScroll(ptFill); });
+      $("ptSize").addEventListener("change", function(){ holdScroll(ptRender); });
+      ptFill();
+
+      /* ======================================================================
          SECTION · STACK-UP (tool stack)
          Linear chain of up to 10 dimensions: worst-case and RSS. The Example
          shows suDemoBanner, which clears when a row is removed (see suAddRow).
@@ -8412,6 +8568,7 @@
           ["stack","Stack-Up","tolerance stack stack-up worst case RSS assembly gap"],
           ["aql","AQL Lookup","AQL sampling plan Z1.4 lot size sample size accept reject inspection level code letter"],
           ["threads","Threads","thread M10 UNC UNF NPT BSP pitch diameter gauge plug ring go no-go Acme metric class 6g 2A 3B tap"],
+          ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],
           ["learn","Learn","learn explain what does it mean help Cpk meaning control limits vs spec limits normality gauge AQL what to do next"]
         ];

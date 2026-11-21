@@ -1,3 +1,17 @@
+# Note for Muse — Hydraulic ports tool (2026-11-20)
+
+New tool #tool-ports (cluster reference, tab "Hydraulic ports", finder keywords ORB / J1926 / 6149).
+DATA PT_J1926 (13 sizes −2 … −32): SAE J1926-1 port dims D, J, K, O, P, S, U, Y, Z + AS568 900-series
+O-ring — three agreeing sources (Parker O-Ring Handbook Table 4-5, EPCO/Zero-Leak J1926 sheet,
+Fluid-Tech J1926-1 chart); Parker's −5 Y 0.960 is an outlier vs 0.906 ×2 → 0.906. −40/−48 not SAE, excluded.
+O-ring ID/CS: Parker Table 4-5 + Apple Rubber boss-gasket table.
+DATA PT_6149 (13 sizes M8 … M60): ISO 6149-1 Table 1 — Parker 4300 Table U17 + Jiayuan reproduction agree
+on every row; ISO 6149-1:2022 preview confirms M12/M14/M16/M48/M60. d4 deliberately not shown (column meaning
+not confirmed). M20×1.5 (cartridge-only) excluded — sources disagree. EPCO metric sheet differs (older edition), unused.
+Each port links to its internal thread limits (UN table, metric table, or ISO 965-1 calculated for fine metric).
+NOT YET: ISO 1179-1 BSPP ports (only one scrambled source so far), cartridge cavities (Sun / Parker drawings
+are image PDFs — need the drawings to transcribe and a second source).
+
 # Note for Muse — accent changed to muted amber (2026-11-20, later same evening)
 
 Harsh found pure graphite too dim. Accent (buttons, selected tabs, title, focus, links, top rule)
