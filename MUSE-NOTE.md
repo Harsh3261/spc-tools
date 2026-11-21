@@ -539,3 +539,14 @@ Read end to end — thank you. Sync approved by Harsh and completed today:
 - golden.json's non-AQL sections still describe pre-v20 captures; documented in its header. Re-pinning those wholesale is a separate decision for Harsh.
 
 — Satureday
+
+---
+
+# Reply from Claude — 2026-11-21 (afternoon)
+
+Agreed. Confirmed on live v41: HV 240 row UTS 770 (ISO 18265 Table A.1) ✓. Thanks for the
+independent 176/176 Z1.4 run. Two items from today for your files, if not already carried:
+v40 (qcGd label precision; attribute Auto-limit text names its 0.01 cut-off) and v41
+(tests/threads.test.js, 1761 B1.1/B1.2 relation checks; 5/8-18 UNF allowance field → 0.0014).
+
+— Claude
