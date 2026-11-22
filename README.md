@@ -10,6 +10,7 @@ Live: https://Harsh3261.github.io/spc-tools/
 - Gage R&R — crossed ANOVA study per AIAG MSA: EV, AV, PV, GRR, % tolerance, % study, ndc, AIAG verdict
 - AQL Lookup — ANSI/ASQ Z1.4 single sampling, normal inspection (Tables I and II-A, arrow rules resolved)
 - Pareto — sorted defect chart with cumulative % and the vital few
+- Thread masters — ISO 1502 limits for metric GO/NOGO thread plugs and rings, check plugs (TT, TZ, TS, ZT, ZZ, ZS) and setting plugs, with a thread-gauge calibration guide
 
 Methods: AIAG SPC & MSA reference manuals · ANSI/ASQ Z1.4. Published 2026-11-09.
 

@@ -48,6 +48,7 @@
       torque    #tool-torque     reference   FITTING TORQUE
       weld      #tool-weld       reference   WELDING (symbols + D1.1 visual)
       pgauge    #tool-pgauge     measure     PLAIN GO / NO-GO GAUGES (gauge-maker classes)
+      mgauge    #tool-mgauge     measure     METRIC THREAD GAUGES + CHECK PLUGS (ISO 1502) + calibration guide
       A tool is a #tabbtn-<id> button (data-tab, data-cluster) plus a
       section#tool-<id>. showTool() finds both by that naming convention.
 
@@ -596,7 +597,7 @@
       .hitsec{margin:10px 6px 4px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim); font-weight:600}
       .hitlink{display:block; padding:8px 10px; border-radius:8px; color:var(--ink); text-decoration:none}
       .hitlink:hover,.hitlink:focus{background:var(--panel2); outline:none}
-      #thMfg h3,#thGauge h3{text-transform:none; letter-spacing:.01em} /* thread classes are case-sensitive: 6g external, 6G internal */
+      #thMfg h3,#thGauge h3,#mgOut h3{text-transform:none; letter-spacing:.01em} /* thread classes are case-sensitive: 6g external, 6G internal */
       .tscroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
       .dtable.wrap td,.dtable.wrap th{white-space:normal !important}
       .dtable.wrap td.lim{font-family:var(--sans); font-size:12.5px; text-align:left; line-height:1.35}
@@ -763,6 +764,7 @@
         <button type="button" role="tab" id="tabbtn-gdt" aria-selected="false" data-tab="gdt" data-cluster="measure">GD&amp;T &amp; uncertainty</button>
         <button type="button" role="tab" id="tabbtn-tp" aria-selected="false" data-tab="tp" data-cluster="measure">True Position</button>
         <button type="button" role="tab" id="tabbtn-pgauge" aria-selected="false" data-tab="pgauge" data-cluster="measure">GO / NO-GO gauges</button>
+        <button type="button" role="tab" id="tabbtn-mgauge" aria-selected="false" data-tab="mgauge" data-cluster="measure">Thread masters</button>
         <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
         <button type="button" role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads" data-cluster="reference">Threads</button>
         <button type="button" role="tab" id="tabbtn-ports" aria-selected="false" data-tab="ports" data-cluster="reference">Hydraulic ports</button>
@@ -1664,13 +1666,22 @@
             <div id="sfTables"></div>
           </details>
           <details class="thfind" style="margin-top:10px">
+            <summary>Setting up a Mitutoyo Surftest for an accurate reading</summary>
+            <p class="small"><strong>1. Choose the cut-off.</strong> Use the drawing's cut-off if it states one. Otherwise estimate the value, read λc from the result above, measure, and check that the measured value falls in the same row; if it does not, change λc to the row of the measured value and measure again (ISO 4288 procedure).<br>
+            <strong>2. Set the conditions:</strong> λc (cut-off), sampling lengths ×5, λs as shown, Gaussian filter (the ISO 16610-21 filter; use 2CR75 or PC75 only when the drawing or customer asks for them), and the parameter the drawing calls for.<br>
+            <strong>3. Stylus:</strong> the 2 µm, 60° stylus (0.75 mN) for λc up to 0.8 mm; the 5 µm, 90° stylus (4 mN) is acceptable for λc 2.5 mm, or whenever Ra is over 0.5 µm or Rz over 3 µm.<br>
+            <strong>4. Measure across the lay</strong> (at right angles to the feed or grinding marks), on a clean surface, with the detector level to the surface and enough length for the traverse shown. If the surface is too short, reduce the number of sampling lengths and record that on the report (Mitutoyo Bulletin 2229, tip 1).<br>
+            <strong>5. Check the instrument</strong> on its roughness specimen before use, and calibrate the stylus with the supplied specimen when the reading is off its certified value.<br>
+            <strong>6. Judge the result.</strong> Parameters without "max" use the 16 % rule: if the first reading is below 70 % of the limit, the surface complies; otherwise take two more, and if all three are below the limit it complies; otherwise take nine more, and it complies if no more than two of the twelve exceed the limit. Parameters with "max" (e.g. Rz1max): measure at three or more places where the highest values are expected; no reading may exceed the limit.</p>
+          </details>
+          <details class="thfind" style="margin-top:10px">
             <summary>Learn — Ra, Rz and the cut-off</summary>
             <p class="small"><strong>Ra</strong> is the average height of the profile from its mean line. <strong>Rz</strong> is the average peak-to-valley height over the sampling lengths. They measure different things, so <strong>there is no fixed Ra ⇄ Rz conversion</strong> — any ratio you see is a rule of thumb for one kind of surface. If the drawing says Rz, measure Rz.<br>
             <strong>Cut-off λc</strong> is the filter that separates roughness from waviness, and it equals the sampling length. The wrong cut-off gives a different Ra on the same part — so when two people disagree on a finish, check the cut-off first.<br>
             <strong>Turned or ground surfaces with a regular feed mark</strong> are periodic: choose the cut-off from RSm (the mark spacing, roughly the feed). Most other surfaces are aperiodic: choose from Ra or Rz.<br>
             <strong>µin conversion:</strong> 1 µin = 0.0254 µm exactly. The N-grade table pairs each Ra in µm with a rounded µin value (0.8 µm ↔ 32 µin; exactly it is 31.5).</p>
           </details>
-          <p class="cite">N-grades: ISO 1302:1978 Table 1 (preview text), matched by Machinery's Handbook 31st ed. Table 4 and Ceratizit / Xometry tables. Cut-off selection: ISO 4288:1996 rules as reproduced by Carl Zeiss "Surface parameters" (citing ISO 4288) and Machinery's Handbook 31st ed. Table 3 — every row agrees. Status (ISO catalogue): ISO 4288 withdrawn, revised by ISO 21920-3:2021; ISO 1302 replaced by ISO 21920-1:2021, which drops N-grades. Checked 2026-11-21.</p>
+          <p class="cite">N-grades: ISO 1302:1978 Table 1 (preview text), matched by Machinery's Handbook 31st ed. Table 4 and Ceratizit / Xometry tables. Cut-off selection: ISO 4288:1996 rules as reproduced by Carl Zeiss "Surface parameters" (citing ISO 4288) and Machinery's Handbook 31st ed. Table 3 — every row agrees. Status (ISO catalogue): ISO 4288 withdrawn, revised by ISO 21920-3:2021; ISO 1302 replaced by ISO 21920-1:2021, which drops N-grades. Checked 2026-11-21. Traverse length, λs and stylus radius per cut-off, the 16 % and max rules: Mitutoyo Bulletin 2229 "Quick Guide to Surface Roughness Measurement" and the Mitutoyo catalogue "Quick Guide to Precision Measuring Instruments — Surftest" (ISO 3274 / JIS B 0651 table), which agree with each other and with ISO 4288. SJ-210 cut-off, λs and stylus options from the Mitutoyo SJ-210 specification. Checked 2026-11-22.</p>
         </div>
       </section>
 
@@ -1870,6 +1881,66 @@
             <div id="pgTable"></div>
           </details>
           <p class="cite">Class tolerances: gauge-maker charts per ASME B89.1.5 — Meyer Gage and Fox Valley Metrology publish identical inch and metric charts (Judge / Glastonbury Southern, Vermont Gage and others agree on the rows they show). Tolerance direction: plug GO plus, NO-GO minus; ring GO minus, NO-GO plus (Meyer, Fox Valley). 10 % rule: Vermont Gage and Judge Tool. Thread gauges are in Threads → Gauge verification.</p>
+        </div>
+      </section>
+
+      <section class="tool" id="tool-mgauge" role="tabpanel" aria-labelledby="tabbtn-mgauge">
+        <div class="card">
+          <h2>Metric thread gauges and check plugs — ISO 1502 limits</h2>
+          <p class="guru">Enter the metric thread. The tool gives the pitch-diameter limits for the GO and NOGO thread plugs and rings (new and worn), and for the check plugs and setting plugs used to verify ring gauges, calculated by the ISO 1502 method. Use the numbers to check gauges at calibration and to order master gauges.</p>
+          <div class="row3">
+            <div><label class="flabel" for="mgD">Nominal diameter D (mm)</label><input id="mgD" type="number" step="any" inputmode="decimal" value="25"></div>
+            <div><label class="flabel" for="mgP">Pitch P (mm)</label><select id="mgP"></select></div>
+            <div><label class="flabel" for="mgSide">Gauges for</label><select id="mgSide"><option value="both" selected>External and internal thread</option><option value="ext">External thread (ring gauges)</option><option value="int">Internal thread (plug gauges)</option></select></div>
+          </div>
+          <div class="row2">
+            <div><label class="flabel" for="mgExt">External class (ring gauges)</label><select id="mgExt"></select></div>
+            <div><label class="flabel" for="mgInt">Internal class (plug gauges)</label><select id="mgInt"></select></div>
+          </div>
+          <div id="mgOut" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Calibration guide — thread plug, ring and check plug gauges</summary>
+            <div class="small" id="mgGuide">
+              <h3>1. Before measuring</h3>
+              <ul>
+                <li>Measure at the reference temperature of 20 °C (ISO 1). Let gauges and masters soak in the measuring room until they reach room temperature; a steel gauge grows about 11.5 µm per metre per °C.</li>
+                <li>Clean the gauge, then inspect the threads under magnification for burrs, nicks, corrosion and damaged crests. A damaged gauge is withdrawn whatever its size.</li>
+                <li>Confirm the identification (size, pitch, class, GO / NOGO, serial number) against the calibration record.</li>
+              </ul>
+              <h3>2. Thread plug gauges (GO and NOGO) — measured directly</h3>
+              <ul>
+                <li><strong>Major diameter:</strong> measure with a bench micrometer or a length-measuring machine set on gauge blocks, at several positions along the thread.</li>
+                <li><strong>Pitch diameter:</strong> measure over three wires (see the calculator below) and convert to the simple pitch diameter. Compare with the limits in this tool: a new gauge must lie within its new limits; a used GO or NOGO plug is withdrawn when its pitch diameter is below its wear limit.</li>
+                <li><strong>Pitch and flank angles:</strong> checked when a gauge is new or repaired, on an optical or contact thread-measuring machine; routine recalibration normally repeats major and pitch diameter only, plus the visual check.</li>
+                <li>Reference procedure: VDI/VDE/DGQ 2618 Part 4.8 (setting plugs, thread plug gauges and check plugs).</li>
+              </ul>
+              <h3>3. Thread ring gauges — verified with check plugs</h3>
+              <ul>
+                <li>The pitch diameter of a small ring cannot be measured directly. ISO 1502 verifies a solid ring with screw check plugs made to the limits in this tool: a <strong>new GO ring</strong> passes when the GO-GO check plug (TT) screws through and the GO-NOGO check plug (TZ) enters by no more than one turn.</li>
+                <li><strong>In service</strong>, the GO ring is withdrawn when its wear check plug (TS) enters by more than one turn. The NOGO ring works the same way with ZT, ZZ and ZS. The one turn is counted when the check plug is withdrawn (ISO 1502, quoted in IS 2334).</li>
+                <li><strong>Adjustable rings</strong> are set to their setting plug, locked and sealed, then checked with the wear check plug in service.</li>
+                <li>Larger rings can also be measured directly on a thread-measuring machine or scanner; the certificate then reports the pitch diameter itself.</li>
+                <li>Check plugs and setting plugs are calibrated like thread plug gauges (major and pitch diameter by the three-wire method) against their limits in this tool.</li>
+                <li>Reference procedure: VDI/VDE/DGQ 2618 Part 4.9 (setting rings and thread ring gauges).</li>
+              </ul>
+              <h3>4. Records, interval and traceability</h3>
+              <ul>
+                <li>ISO 9001:2015 clause 7.1.5.2: gauges are calibrated against standards traceable to national or international standards, identified with their calibration status, and protected from adjustment and damage. If a gauge is found out of tolerance, review the parts it accepted since the last good calibration.</li>
+                <li>Use a laboratory accredited to ISO/IEC 17025 for the masters (check plugs, setting plugs, wires). The certificate should report measured values and the measurement uncertainty; set the accept / reject decision rule with the uncertainty (ILAC-G8).</li>
+                <li>Set the interval from use and history, not one fixed number; ILAC-G24 describes the methods. Shorten it when a gauge is found worn or damaged, lengthen it when several calibrations show little change.</li>
+                <li>Record for every gauge: identification, values measured, limits used (new and wear), result, date, next due date, who calibrated it and which masters were used.</li>
+              </ul>
+              <h3>5. Three-wire pitch diameter</h3>
+              <p>For a 60° thread: simple pitch diameter E = M − 3w + 0.866025·P, where M is the measurement over the wires and w the wire diameter. The best wire size is w = 0.57735·P. Accredited laboratories also correct for lead angle and wire contact force; this calculator omits those corrections, so use the laboratory's corrected value for acceptance.</p>
+              <div class="row3">
+                <div><label class="flabel" for="mwP">Pitch P (mm)</label><input id="mwP" type="number" step="any" inputmode="decimal" value="1.5"></div>
+                <div><label class="flabel" for="mwW">Wire diameter w (mm)</label><input id="mwW" type="number" step="any" inputmode="decimal" placeholder="best 0.866"></div>
+                <div><label class="flabel" for="mwM">Measurement over wires M (mm)</label><input id="mwM" type="number" step="any" inputmode="decimal"></div>
+              </div>
+              <div id="mwOut" aria-live="polite"></div>
+            </div>
+          </details>
+          <p class="cite">Method: ISO 1502:1996 (identical to GB/T 3934-2003 and to the IS 2334:2001 reprint). Gauge tolerances TR, TPL, TCP, m, ZR, ZPL from Table 4, two sources (GB/T 3934 and IS 2334). Wear allowances from GB/T 3934. Plug limits reproduce the RP-Kalibrierlabor M10×1.5-6G and Stille M45×2-6G calibration certificates exactly; ring, check-plug and wear-check-plug limits reproduce ISO 6698 Table 4 (hub thread 6g, calculated by its authors with the ISO 1502 formulas). Workpiece limits from the ISO 965-1 tables (see Threads). Tested in tests/mgauge.test.js.</p>
         </div>
       </section>
 
@@ -8315,7 +8386,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
             hg += tg.ext ? "<tr><td>GO thread ring (external " + esc(mc) + ")</td><td>" + fmt(tg.pd[1], 3) + " mm</td></tr><tr><td>NOGO thread ring (external " + esc(mc) + ")</td><td>" + fmt(tg.pd[0], 3) + " mm</td></tr>"
                          : "<tr><td>GO thread plug (internal " + esc(mc) + ")</td><td>" + fmt(tg.pd[0], 3) + " mm</td></tr><tr><td>NOGO thread plug (internal " + esc(mc) + ")</td><td>" + fmt(tg.pd[1], 3) + " mm</td></tr>";
             hg += "</table>";
-            hg += '<p class="explain"><strong>What these are:</strong> the product pitch-diameter limits the gauges are built on (computed exactly from the ISO 965-1 tables). ISO 1502 then places each gauge\'s own tolerance and wear allowance relative to these values; those micrometre-level offsets are not included because they could not be confirmed from two clean sources. Order the gauge by class (e.g. "M10×1.5-' + esc(mc) + ' GO / NOGO") and accept it on its certificate.</p>';
+            hg += '<p class="explain"><strong>What these are:</strong> the product pitch-diameter limits the gauges are built on (computed exactly from the ISO 965-1 tables). ISO 1502 then places each gauge\'s own tolerance and wear allowance relative to these values. The full gauge, check-plug and wear limits are in <a href="#tool=mgauge">Thread masters</a>.</p>';
             return hg + calP + '<p class="small">' + esc(TH_MEAS_NOTE) + "</p>";
           }
           var h2 = "<h3>Gauge pitch diameters — " + esc(r[0]) + " (ISO 1502)</h3>";
@@ -8326,7 +8397,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           h2 += "<tr><td>NOGO thread ring (external 6g)</td><td>" + fmt(r[6], 3) + " mm</td></tr>";
           h2 += "</table>";
           h2 += '<p class="explain"><strong>How ISO 1502 works:</strong> ISO 1502 publishes no per-size gauge tables — gauge limits are calculated from tolerance zones (T_PL for plugs, T_R for rings) placed relative to the workpiece limits (displacements Z_PL / Z_R). GO gauges carry a permissible wear W_GO — a GO gauge may wear slightly beyond the product limit, and the wear limit is the retirement line; NOT GO gauges carry a smaller wear W_NGO, and check plugs take an extra displacement m. Ring gauges are verified with GO / NOGO check plugs and wear check plugs. A NOGO gauge may enter ≤ 2 turns.</p>';
-          h2 += '<p class="small">Micrometre-level ISO 1502 gauge limits are not yet included.</p>';
+          h2 += '<p class="small">The micrometre-level ISO 1502 limits (new, wear, check plugs TT / TZ / TS / ZT / ZZ / ZS and setting plugs) are in <a href="#tool=mgauge">Thread masters</a>.</p>';
           h2 += calP + '<p class="small">' + esc(TH_MEAS_NOTE) + "</p>";
           return h2;
         }
@@ -9551,7 +9622,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v51";
+      var APP_BUILD = "v52";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -10371,12 +10442,16 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         ["N7", 1.6, 63], ["N8", 3.2, 125], ["N9", 6.3, 250], ["N10", 12.5, 500], ["N11", 25, 1000], ["N12", 50, 2000]
       ];
       var SF_CUT = [ /* lower-exclusive, upper-inclusive ranges: Ra µm, Rz µm, RSm mm → λc mm, ln mm */
-        { ra:[0.006, 0.02], rz:[0.025, 0.1], rsm:[0.013, 0.04], lc:0.08, ln:0.4 },
-        { ra:[0.02, 0.1],   rz:[0.1, 0.5],   rsm:[0.04, 0.13],  lc:0.25, ln:1.25 },
-        { ra:[0.1, 2],      rz:[0.5, 10],    rsm:[0.13, 0.4],   lc:0.8,  ln:4 },
-        { ra:[2, 10],       rz:[10, 50],     rsm:[0.4, 1.3],    lc:2.5,  ln:12.5 },
-        { ra:[10, 80],      rz:[50, 200],    rsm:[1.3, 4],      lc:8,    ln:40 }
+        { ra:[0.006, 0.02], rz:[0.025, 0.1], rsm:[0.013, 0.04], lc:0.08, ln:0.4,  lt:0.48, ls:2.5, ratio:30, rtip:2 },
+        { ra:[0.02, 0.1],   rz:[0.1, 0.5],   rsm:[0.04, 0.13],  lc:0.25, ln:1.25, lt:1.5,  ls:2.5, ratio:100, rtip:2 },
+        { ra:[0.1, 2],      rz:[0.5, 10],    rsm:[0.13, 0.4],   lc:0.8,  ln:4,    lt:4.8,  ls:2.5, ratio:300, rtip:2 },
+        { ra:[2, 10],       rz:[10, 50],     rsm:[0.4, 1.3],    lc:2.5,  ln:12.5, lt:15,   ls:8,   ratio:300, rtip:5 },
+        { ra:[10, 80],      rz:[50, 200],    rsm:[1.3, 4],      lc:8,    ln:40,   lt:48,   ls:25,  ratio:300, rtip:10 }
       ];
+      /* lt (traverse length incl. run-up and over-travel) and rtip (max stylus tip radius): Mitutoyo Bulletin 2229
+         "Quick Guide to Surface Roughness Measurement" (EN ISO 4288 table). λs and rtip per λc: ISO 3274 / JIS B 0651 table in
+         the Mitutoyo catalogue "Quick Guide — Surftest" (J-26/27). The λc, ln and range columns of both Mitutoyo tables equal
+         the ISO 4288 rows above. Verified 2026-11-22. */
       /* END DATA SF */
       var SF_UM_PER_UIN = 0.0254;
       function sfCutoff(kind, v){ /* kind: "ra" | "rz" | "rsm" */
@@ -10411,7 +10486,11 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           else row("RSm (mark spacing)", "<strong>" + t(v) + " mm</strong>");
           var c = sfCutoff(kind, kind === "ra" ? raUm : v);
           if(c) row("Cut-off λc = sampling length", "<strong>" + c.lc + " mm</strong>");
-          if(c) row("Evaluation length (5 × λc)", "<strong>" + c.ln + " mm</strong>");
+          if(c) row("Evaluation length (5 × λc)", "<strong>" + c.ln + " mm</strong> — set the Surftest to ×5 sampling lengths");
+          if(c) row("Traverse length (with run-up and over-travel)", c.lt + " mm — the surface must be at least this long");
+          if(c) row("Short-wave filter λs", c.ls + " µm (nominal λc/λs ratio " + c.ratio + ")");
+          if(c) row("Stylus tip radius, maximum", c.rtip + " µm" + (c.rtip === 2 && (raUm > 0.5 || (kind === "rz" && v > 3)) ? " (5 µm may be used here: Ra over 0.5 µm or Rz over 3 µm)" : ""));
+          if(c && c.lc === 8) row("Mitutoyo SJ-210", "offers λc up to 2.5 mm only — use a model with an 8 mm cut-off, or agree the setting");
           if(!c) row("Cut-off", "outside the ISO 4288 selection table — agree the setting with the customer");
           h += "</table>";
           if(c && kind !== "rsm") h += '<p class="small">This is the aperiodic-profile rule. For a turned or ground surface with a regular feed mark, choose by RSm instead (Parameter → RSm). If the drawing states a cut-off, use the drawing.</p>';
@@ -10422,8 +10501,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           var h = '<h3 style="margin-top:14px">ISO 1302 roughness grades</h3><table class="dtable"><tr><th style="text-align:left">Grade</th><th>Ra, µm</th><th>Ra, µin</th></tr>' +
             SF_N.slice().reverse().map(function(n){ return '<tr><td style="text-align:left">' + n[0] + "</td><td>" + n[1] + "</td><td>" + n[2] + "</td></tr>"; }).join("") + "</table>";
           var r = function(a){ return "over " + a[0] + " up to " + a[1]; };
-          h += '<h3 style="margin-top:14px">Cut-off selection (ISO 4288)</h3><table class="dtable"><tr><th style="text-align:left">Ra, µm (aperiodic)</th><th style="text-align:left">Rz, µm (aperiodic)</th><th style="text-align:left">RSm, mm (periodic)</th><th>λc, mm</th><th>ln, mm</th></tr>' +
-            SF_CUT.map(function(c){ return '<tr><td style="text-align:left">' + r(c.ra) + '</td><td style="text-align:left">' + r(c.rz) + '</td><td style="text-align:left">' + r(c.rsm) + "</td><td>" + c.lc + "</td><td>" + c.ln + "</td></tr>"; }).join("") + "</table>";
+          h += '<h3 style="margin-top:14px">Cut-off selection (ISO 4288)</h3><table class="dtable"><tr><th style="text-align:left">Ra, µm (aperiodic)</th><th style="text-align:left">Rz, µm (aperiodic)</th><th style="text-align:left">RSm, mm (periodic)</th><th>λc, mm</th><th>ln, mm</th><th>lt, mm</th><th>λs, µm</th><th>tip, µm</th></tr>' +
+            SF_CUT.map(function(c){ return '<tr><td style="text-align:left">' + r(c.ra) + '</td><td style="text-align:left">' + r(c.rz) + '</td><td style="text-align:left">' + r(c.rsm) + "</td><td>" + c.lc + "</td><td>" + c.ln + "</td><td>" + c.lt + "</td><td>" + c.ls + "</td><td>" + c.rtip + "</td></tr>"; }).join("") + "</table>";
           el("sfTables").innerHTML = h;
         }
         el("sfN").addEventListener("change", function(){ var g = SF_N.filter(function(n){ return n[0] === el("sfN").value; })[0]; if(g){ el("sfParam").value = "ra_um"; el("sfVal").value = g[1]; } render(); });
@@ -10887,6 +10966,150 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         ["pgFeat","pgUnit","pgCls","pgMin","pgMax"].forEach(function(id){ el(id).addEventListener("input", render); el(id).addEventListener("change", render); });
         table(); render();
       })();
+      /* ===================== METRIC THREAD GAUGES — ISO 1502 ===================== */
+      /* BEGIN DATA MG: ISO 1502:1996 gauge tolerances, µm, by the workpiece pitch-diameter tolerance (grade 6 value).
+         Row: [over, up to and incl., TR, TPL, TCP, m, ZR, ZPL, W_GO ring, W_NG ring, W_GO plug, W_NG plug].
+         TR..ZPL: ISO 1502 Table 4 — GB/T 3934-2003 (identical adoption) = IS 2334:2001 (ISO 1502 reprint), every cell.
+         Wear: GB/T 3934 table; W is measured from the middle of the new tolerance zone to the wear limit. Plug values for
+         125–200 and 200–315 confirmed by the RP-Kalibrierlabor M10×1.5-6G and Stille M45×2-6G certificates; ring values for
+         80–125 confirmed by ISO 6698:1981 Table 4. The first band starts at 24 µm. Verified 2026-11-22.
+         Edit only via a verified data change. */
+      var MG_BANDS = [
+        [24, 50, 8, 6, 6, 10, -4, 0, 10, 7, 8, 6],
+        [50, 80, 10, 7, 7, 12, -2, 2, 12, 9, 9.5, 7.5],
+        [80, 125, 14, 9, 8, 15, 2, 6, 16, 12, 12.5, 9.5],
+        [125, 200, 18, 11, 9, 18, 8, 12, 21, 15, 17.5, 11.5],
+        [200, 315, 23, 14, 12, 22, 12, 16, 25.5, 19.5, 21, 15],
+        [315, 500, 30, 18, 15, 27, 20, 24, 33, 25, 27, 19],
+        [500, 670, 38, 22, 18, 33, 28, 32, 41, 31, 33, 23]];
+      /* END DATA MG */
+      function mgBand(t6){
+        for(var i = 0; i < MG_BANDS.length; i++){ var b = MG_BANDS[i];
+          if((i === 0 ? t6 >= b[0] : t6 > b[0]) && t6 <= b[1]) return { lo:b[0], hi:b[1], TR:b[2], TPL:b[3], TCP:b[4], m:b[5], ZR:b[6], ZPL:b[7], WGOr:b[8], WNGr:b[9], WGOp:b[10], WNGp:b[11] }; }
+        return null;
+      }
+      function mgR(x){ return Math.round(x * 1e4) / 1e4; }
+      function mgZone(midUm, halfUm, base, wearUm){ /* base mm, offsets µm */
+        var z = { mid:mgR(base + midUm / 1000), lo:mgR(base + (midUm - halfUm) / 1000), hi:mgR(base + (midUm + halfUm) / 1000) };
+        if(wearUm != null) z.wear = mgR(base + (midUm + wearUm) / 1000);
+        return z;
+      }
+      /* Plug gauges for an internal thread: D2 min and TD2 of the workpiece (mm, µm), band b. */
+      function mgPlug(D2min, TD2, b){
+        return { go:mgZone(b.ZPL, b.TPL / 2, D2min, -b.WGOp),
+                 ng:mgZone(TD2 + b.TPL / 2, b.TPL / 2, D2min, -b.WNGp) };
+      }
+      /* Ring gauges and their check / setting plugs for an external thread: d2 max and Td2 (mm, µm), band b. */
+      function mgRing(d2max, Td2, b){
+        var t = { go:mgZone(-b.ZR, b.TR / 2, d2max, b.WGOr), ng:mgZone(-Td2 - b.TR / 2, b.TR / 2, d2max, b.WNGr) }, h = b.TCP / 2;
+        t.TT = mgZone(-b.ZR - b.m, h, d2max);
+        t.TZ = mgZone(-b.ZR + b.TR / 2, h, d2max);
+        t.TS = mgZone(-b.ZR + b.WGOr, h, d2max);
+        t.ZT = mgZone(-Td2 - b.TR / 2 - b.m, h, d2max);
+        t.ZZ = mgZone(-Td2, h, d2max);
+        t.ZS = mgZone(-Td2 - b.TR / 2 + b.WNGr, h, d2max);
+        t.setGo = mgZone(-b.ZR, h, d2max);
+        t.setNg = mgZone(-Td2 - b.TR / 2, h, d2max);
+        return t;
+      }
+      function mgCalc(D, P, cls){
+        var t = th965(D, P, cls); if(t.error) return { error:t.error };
+        var g = t.cls.pdGrade;
+        if(g < 6) return { error:"Pitch-diameter grade " + g + " is finer than grade 6. ISO 1502 then selects the gauge tolerances from the finest grade recommended for that tolerance position, which this tool does not calculate. Ask the gauge maker for the ISO 1502 values, or use a grade 6 class." };
+        var t6;
+        if(t.ext){ var re = th965Range(TH965_TD2E, D, P); t6 = re ? re[6] : null; }
+        else { var ri = th965Range(TH965_TD2, D, P); t6 = ri ? ri[5] : null; }
+        if(t6 == null) return { error:"No grade 6 pitch-diameter tolerance is tabulated for this size, so the ISO 1502 gauge row cannot be chosen." };
+        var b = mgBand(t6); if(!b) return { error:"The grade 6 pitch-diameter tolerance (" + t6 + " µm) is outside ISO 1502 Table 4 (24–670 µm)." };
+        var r = { ext:t.ext, t:t, t6:t6, band:b, cls:cls, D:D, P:P };
+        if(t.ext) r.ring = mgRing(t.pd[1], t.td2, b); else r.plug = mgPlug(t.pd[0], t.TD2, b);
+        return r;
+      }
+      function mgWire(P, w, M){ return { best:Math.round(0.57735 * P * 1e4) / 1e4, E:(w > 0 && M > 0) ? Math.round((M - 3 * w + 0.866025 * P) * 1e4) / 1e4 : null }; }
+      (function(){
+        var el = function(id){ return document.getElementById(id); };
+        if(!el("mgD")) return;
+        var f4 = function(v){ return v.toFixed(4); };
+        Object.keys(TH965_DEV).map(Number).sort(function(a, b){ return a - b; }).forEach(function(p){ var o = document.createElement("option"); o.value = p; o.textContent = p; if(p === 1.5) o.selected = true; el("mgP").appendChild(o); });
+        TH965_CLS_EXT.forEach(function(c){ var o = document.createElement("option"); o.textContent = c; if(c === "6g") o.selected = true; el("mgExt").appendChild(o); });
+        TH965_CLS_INT.forEach(function(c){ var o = document.createElement("option"); o.textContent = c; if(c === "6H") o.selected = true; el("mgInt").appendChild(o); });
+        function row(name, code, z, wearTxt, use){
+          return '<tr><td style="text-align:left">' + name + "</td><td>" + code + "</td><td>" + f4(z.lo) + "</td><td>" + f4(z.hi) + "</td><td>" + (z.wear != null ? f4(z.wear) : "—") + '</td><td style="text-align:left">' + use + "</td></tr>";
+        }
+        var head = '<tr><th style="text-align:left">Gauge</th><th>Code</th><th>PD min</th><th>PD max</th><th>Wear limit</th><th style="text-align:left">Use / acceptance</th></tr>';
+        function basis(r){
+          var b = r.band;
+          return '<p class="small">ISO 1502 row: workpiece grade 6 pitch-diameter tolerance ' + r.t6 + " µm (band " + b.lo + "–" + b.hi + " µm). " +
+            (r.ext ? "TR = " + b.TR + ", TCP = " + b.TCP + ", m = " + b.m + ", ZR = " + b.ZR + ", wear GO ring = " + b.WGOr + ", NOGO ring = " + b.WNGr
+                   : "TPL = " + b.TPL + ", ZPL = " + b.ZPL + ", wear GO plug = " + b.WGOp + ", NOGO plug = " + b.WNGp) + " µm. All values mm, simple pitch diameter at 20 °C.</p>";
+        }
+        function lbl(r){ return "M" + r.D + "×" + r.P + "-" + r.cls; }
+        function extHTML(r){
+          var g = r.ring, t = r.t, h = "<h3>Ring gauges for " + esc(lbl(r)) + " — workpiece d₂ " + f4(t.pd[0]) + " to " + f4(t.pd[1]) + "</h3>";
+          h += '<div class="tscroll"><table class="dtable wrap" aria-label="Ring gauge limits">' + head;
+          h += row("GO thread ring", "T", g.go, null, "Must screw over the whole thread length of a good part. Withdraw the ring when its wear check plug (TS) enters by more than one turn.");
+          h += row("NOGO thread ring", "Z", g.ng, null, "Must not screw on a good part by more than two turns. Withdraw when ZS enters by more than one turn.");
+          h += "</table></div>";
+          h += '<p class="small">Ring wear limits are the largest pitch diameter allowed; they are checked with the wear check plugs below, not measured.</p>';
+          h += "<h3>Check plugs and setting plugs (masters for the rings)</h3>";
+          h += '<div class="tscroll"><table class="dtable wrap" aria-label="Check plug limits">' + head;
+          h += row("GO-GO check plug", "TT", g.TT, null, "For a new GO ring: must screw through.");
+          h += row("GO-NOGO check plug", "TZ", g.TZ, null, "For a new GO ring: must not enter by more than one turn.");
+          h += row("GO wear check plug", "TS", g.TS, null, "For a GO ring in service: must not enter by more than one turn; if it does, the ring is worn out.");
+          h += row("NOGO-GO check plug", "ZT", g.ZT, null, "For a new NOGO ring: must screw through.");
+          h += row("NOGO-NOGO check plug", "ZZ", g.ZZ, null, "For a new NOGO ring: must not enter by more than one turn.");
+          h += row("NOGO wear check plug", "ZS", g.ZS, null, "For a NOGO ring in service: must not enter by more than one turn; if it does, the ring is worn out.");
+          h += row("Setting plug, adjustable GO ring", "—", g.setGo, null, "Set the adjustable GO ring to fit this plug, then lock and seal it.");
+          h += row("Setting plug, adjustable NOGO ring", "—", g.setNg, null, "Set the adjustable NOGO ring to fit this plug, then lock and seal it.");
+          h += "</table></div>";
+          h += '<p class="small">Check plugs and setting plugs are calibrated like thread plug gauges: measure their pitch diameter over three wires and compare with the limits above. A check plug outside its limits cannot be used to accept a ring.</p>';
+          return h + basis(r);
+        }
+        function intHTML(r){
+          var g = r.plug, t = r.t, h = "<h3>Plug gauges for " + esc(lbl(r)) + " — workpiece D₂ " + f4(t.pd[0]) + " to " + f4(t.pd[1]) + "</h3>";
+          h += '<div class="tscroll"><table class="dtable wrap" aria-label="Plug gauge limits">' + head;
+          h += row("GO thread plug", "—", g.go, null, "Must screw into a good part over the whole thread length. Withdraw when its measured pitch diameter is below the wear limit.");
+          h += row("NOGO thread plug", "—", g.ng, null, "Must not enter a good part by more than two turns. Withdraw when its measured pitch diameter is below the wear limit.");
+          h += "</table></div>";
+          h += '<p class="small">Plug gauges are measured directly: pitch diameter over three wires, major diameter with a micrometer. Major-diameter, pitch and flank-angle limits for the gauges are set in other ISO 1502 tables and are not calculated here; take them from the gauge certificate.</p>';
+          return h + basis(r);
+        }
+        function orderText(rs){
+          var L = ["Please quote and supply the following thread gauges to ISO 1502:1996, each with a calibration certificate from an ISO/IEC 17025 accredited laboratory reporting measured pitch diameter, major diameter, pitch and flank angles. Pitch-diameter limits below are simple pitch diameter in mm at 20 °C; please confirm against ISO 1502 before manufacture.", ""];
+          rs.forEach(function(r){
+            if(r.ext){ var g = r.ring; L.push("For external thread " + lbl(r) + ":");
+              [["GO thread ring (T)", g.go], ["NOGO thread ring (Z)", g.ng], ["GO-GO check plug (TT)", g.TT], ["GO-NOGO check plug (TZ)", g.TZ], ["GO wear check plug (TS)", g.TS], ["NOGO-GO check plug (ZT)", g.ZT], ["NOGO-NOGO check plug (ZZ)", g.ZZ], ["NOGO wear check plug (ZS)", g.ZS]]
+                .forEach(function(x){ L.push("- " + x[0] + ": PD " + f4(x[1].lo) + " to " + f4(x[1].hi)); });
+            } else { var p = r.plug; L.push("For internal thread " + lbl(r) + ":");
+              L.push("- GO thread plug: PD " + f4(p.go.lo) + " to " + f4(p.go.hi) + " (wear limit " + f4(p.go.wear) + ")");
+              L.push("- NOGO thread plug: PD " + f4(p.ng.lo) + " to " + f4(p.ng.hi) + " (wear limit " + f4(p.ng.wear) + ")"); }
+            L.push("");
+          });
+          return L.join("\n").trim();
+        }
+        function render(){
+          var D = parseFloat(el("mgD").value), P = parseFloat(el("mgP").value), side = el("mgSide").value, out = el("mgOut");
+          if(!(D > 0)){ out.innerHTML = '<p class="small">Enter the nominal diameter.</p>'; return; }
+          var h = "", ok = [];
+          if(side !== "int"){ var re = mgCalc(D, P, el("mgExt").value); if(re.error) h += '<p class="verdict warn">External ' + esc(el("mgExt").value) + ": " + esc(re.error) + "</p>"; else { h += extHTML(re); ok.push(re); } }
+          if(side !== "ext"){ var ri = mgCalc(D, P, el("mgInt").value); if(ri.error) h += '<p class="verdict warn">Internal ' + esc(el("mgInt").value) + ": " + esc(ri.error) + "</p>"; else { h += intHTML(ri); ok.push(ri); } }
+          if(ok.length){
+            h += '<h3>Text for the gauge maker</h3><textarea id="mgOrder" rows="12" readonly spellcheck="false" style="width:100%;font-family:var(--mono, monospace);font-size:12px">' + esc(orderText(ok)) + '</textarea><p><button type="button" class="ghost" id="mgCopy">Copy text</button></p>';
+          }
+          h += '<p class="small">' + esc(TH_CAL_NOTE) + "</p>";
+          out.innerHTML = h;
+          var cb = el("mgCopy"); if(cb) cb.addEventListener("click", function(){ var ta = el("mgOrder"); ta.select(); try{ navigator.clipboard.writeText(ta.value); }catch(e){ try{ document.execCommand("copy"); }catch(e2){} } cb.textContent = "Copied"; });
+        }
+        function wire(){
+          var P = parseFloat(el("mwP").value), w = parseFloat(el("mwW").value), M = parseFloat(el("mwM").value), o = el("mwOut");
+          if(!(P > 0)){ o.innerHTML = ""; return; }
+          var r = mgWire(P, w, M);
+          o.innerHTML = '<p class="small">Best wire size for P ' + P + " mm: <strong>" + f4(r.best) + " mm</strong>." + (r.E != null ? " Simple pitch diameter E = <strong>" + f4(r.E) + " mm</strong> (no lead-angle or contact-force correction)." : " Enter w and M to get the pitch diameter.") + "</p>";
+        }
+        ["mgD","mgP","mgSide","mgExt","mgInt"].forEach(function(id){ el(id).addEventListener("input", render); el(id).addEventListener("change", render); });
+        ["mwP","mwW","mwM"].forEach(function(id){ el(id).addEventListener("input", wire); });
+        render(); wire();
+      })();
     </script>
 
     <div id="rptHead" class="rpthead" aria-hidden="true"></div>
@@ -10921,10 +11144,11 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           ["msa","More MSA","msa type 1 gage study cg cgk bias linearity attribute agreement kappa fleiss cohen effectiveness miss rate false alarm vda 5 aiag gauge capability"],
           ["fits","Fits (ISO 286)","fit fits tolerance iso 286 hole shaft h7 g6 h8 f7 k6 p6 clearance interference transition it grade limits bore pin bushing press fit"],
           ["gentol","General tolerances (ISO 2768)","general tolerance tolerances iso 2768 2768-m 2768-mk mk fh title block untoleranced dimension default tolerance linear angular chamfer radius broken edge straightness flatness perpendicularity symmetry run-out runout H K L f m c v iso 22081"],
-          ["surf","Surface finish","surface finish roughness Ra Rz RSm N-grade N6 N7 N8 microinch µin micron 63 32 125 cut-off cutoff lambda c sampling length evaluation length profilometer iso 1302 iso 4288 21920 polish hone"],
+          ["surf","Surface finish","surface finish roughness Ra Rz RSm N-grade N6 N7 N8 microinch µin micron 63 32 125 cut-off cutoff lambda c sampling length evaluation length profilometer iso 1302 iso 4288 21920 polish hone mitutoyo surftest SJ-210 SJ-410 lambda s stylus tip traverse length 16% rule"],
           ["torque","Fitting torque","torque fitting hydraulic tighten JIC 37 flare swivel nut ORFS face seal ORB o-ring boss straight thread port J1926 J514 J1453 ISO 6149 metric port flange code 61 code 62 bolt J518 6162 NPTF pipe thread turns finger tight flats FFFT FFWR ft-lb N·m Parker"],
           ["weld","Welding","weld welding symbol symbols fillet groove bevel V J U plug slot spot seam arrow side other side all around field weld tail AWS A2.4 ISO 2553 D1.1 visual inspection acceptance undercut porosity convexity reinforcement undersize leg throat crack crater fusion WPS"],
           ["pgauge","GO / NO-GO gauges","plain plug gauge ring gauge pin gauge go no-go nogo gage class XXX XX X Y Z ZZ gage maker tolerance B89.1.5 10% rule hole pin shaft gauge design depth gauge"],
+          ["mgauge","Thread masters (ISO 1502)","thread gauge master check plug TT TZ TS ZT ZZ ZS gogo gonogo nogogo nogonogo wear check plug setting plug thread ring gauge plug gauge ISO 1502 metric calibration three-wire 3 wire pitch diameter calibrate ring gauge order gauge maker"],
           ["seal","Seal glands","o-ring gland groove seal squeeze stretch gland fill piston rod static dynamic AS568 dash back-up ring extrusion clearance parker groove design"],
           ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 C04-2 C04-3 C09-2 C10-2T C10-3S C12-3L C12-4L C16-3S C20-3S sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],

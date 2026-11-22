@@ -1,3 +1,19 @@
+# Note for Muse — ISO 1502 thread masters + Surftest settings (2026-11-22, v52)
+
+- New tool #tool-mgauge (Measure, "Thread masters"): any metric size/pitch/class → GO/NOGO plug PD (new, wear),
+  GO/NOGO ring PD (new, wear), check plugs TT TZ TS ZT ZZ ZS, setting plugs for adjustable rings, use/acceptance
+  text, copyable order text for the gauge maker, calibration guide (20 °C, plugs 3-wire, rings by check plugs,
+  VDI/VDE/DGQ 2618 Parts 4.8 / 4.9, ISO 9001 7.1.5.2, ISO/IEC 17025, ILAC-G8 / G24), three-wire calculator.
+- Data MG_BANDS: ISO 1502 Table 4 (GB/T 3934 = IS 2334, every cell) + wear (GB/T 3934). Row chosen by the grade 6
+  workpiece PD tolerance; grades finer than 6 are refused (ISO 1502 uses the finest recommended grade — not coded).
+- Checks (tests/mgauge.test.js, 46): RP-Kalibrierlabor M10×1.5-6G and Stille M45×2-6G plug certificates exact;
+  ISO 6698:1981 Table 4 hub 6g ring, TT, TZ, TS, ZT, ZZ, ZS, setting plug exact; Haas ring ±0.009.
+- Not included: gauge major/minor diameter, pitch and flank-angle limits (other ISO 1502 tables).
+- Surface finish: traverse length, λs (nominal λc/λs ratio), max stylus tip per cut-off — Mitutoyo Bulletin 2229 +
+  Mitutoyo Surftest quick guide (ISO 3274 table), both equal to ISO 4288. New "Setting up a Mitutoyo Surftest"
+  section (ISO 4288 cut-off check, ×5 sampling lengths, Gaussian filter, stylus choice, 16 % and max rules).
+  SJ-210 has no 8 mm cut-off. tests/surf.test.js now 41.
+
 # Note for Muse — class 3A/3B thread gauges, class-aware metric gauge view, plain GO/NO-GO gauges (2026-11-22, v51)
 
 - Threads → Gauge verification, UN class 3A/3B: PD limits for GO/NOT GO plugs (3B) and rings (3A) + setting

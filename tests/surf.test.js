@@ -17,6 +17,11 @@ eq("Ra 0.8", sfCutoff("ra", 0.8).lc, 0.8); eq("Ra 2 (upper incl)", sfCutoff("ra"
 eq("Ra 0.1", sfCutoff("ra", 0.1).lc, 0.25); eq("Ra 0.004", sfCutoff("ra", 0.004), null); eq("Ra 81", sfCutoff("ra", 81), null);
 eq("Rz 6.3", sfCutoff("rz", 6.3).lc, 0.8); eq("Rz 10", sfCutoff("rz", 10).lc, 0.8); eq("Rz 12", sfCutoff("rz", 12).lc, 2.5);
 eq("RSm 0.2", sfCutoff("rsm", 0.2).lc, 0.8); eq("RSm 0.13", sfCutoff("rsm", 0.13).lc, 0.25);
+/* Mitutoyo Bulletin 2229 (lt, rtip) and Surftest quick guide J-26/27 (λs, rtip) */
+eq("cut lt", SF_CUT.map(c => c.lt), [0.48, 1.5, 4.8, 15, 48]);
+eq("cut ls", SF_CUT.map(c => c.ls), [2.5, 2.5, 2.5, 8, 25]);
+eq("cut rtip", SF_CUT.map(c => c.rtip), [2, 2, 2, 5, 10]);
+eq("ratio", SF_CUT.map(c => c.ratio), [30, 100, 300, 300, 300]);
 eq("N6 exact", sfNGrade(0.8).exact[0], "N6"); eq("1.0 between", [sfNGrade(1).lo[0], sfNGrade(1).hi[0]], ["N6", "N7"]);
 eq("63 µin → N7 range", sfNGrade(63 * 0.0254).exact, undefined);
 if (fails.length) { console.log("FAIL " + fails.length + " of " + n + "\n" + fails.join("\n")); process.exit(1); }
