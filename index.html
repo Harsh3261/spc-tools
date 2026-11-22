@@ -9637,7 +9637,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v53";
+      var APP_BUILD = "v54";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -11060,7 +11060,19 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         function row(name, code, z, wearTxt, use){
           return '<tr><td style="text-align:left">' + name + "</td><td>" + code + "</td><td>" + f4(z.lo) + "</td><td>" + f4(z.hi) + "</td><td>" + (z.wear != null ? f4(z.wear) : "—") + '</td><td style="text-align:left">' + use + "</td></tr>";
         }
-        var head = '<tr><th style="text-align:left">Gauge</th><th>Code</th><th>PD min</th><th>PD max</th><th>Wear limit</th><th style="text-align:left">Use / acceptance</th></tr>';
+        var head = '<tr><th style="text-align:left">Gauge</th><th>Code</th><th>PD min (new)</th><th>PD max (new)</th><th>Wear limit (PD)</th><th style="text-align:left">Use / acceptance</th></tr>';
+        /* Who-does-what box shown above every result (metric and inch). */
+        function whoBox(inch){
+          return '<div class="tfplain" style="border:1px solid var(--line, #444);border-radius:8px;padding:10px 14px;margin:12px 0">' +
+            '<h3 style="margin-top:0">How to use these limits</h3><ul class="small">' +
+            "<li><strong>All values are pitch diameter (PD)</strong>, not major diameter. The wear limit is a pitch diameter too.</li>" +
+            "<li><strong>Gauge maker:</strong> makes every gauge and master within its PD min–max (new). Send the order text below.</li>" +
+            "<li><strong>Receiving inspection:</strong> each certificate's measured PD must lie between PD min and PD max. Reject the gauge if it does not.</li>" +
+            (inch ? "<li><strong>Calibration:</strong> plugs and setting plugs — measure PD over three wires and compare with the limits. Rings — check the fit on their setting plug.</li>"
+                  : "<li><strong>Calibration:</strong> plugs and check plugs — measure PD over three wires; a used gauge passes while it is inside its wear limit. Rings — try the check plugs as the Use column says.</li>") +
+            "<li><strong>Production inspection</strong> uses the gauges only. Gauge limits are not part limits; the part limits are in Threads.</li>" +
+            "</ul></div>";
+        }
         function basis(r){
           var b = r.band;
           return '<p class="small">ISO 1502 row: workpiece grade 6 pitch-diameter tolerance ' + r.t6 + " µm (band " + b.lo + "–" + b.hi + " µm). " +
@@ -11117,23 +11129,25 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           var u = mgUN(el("mgUSize").value, el("mgUCls").value), out = el("mgOut");
           if(u.error){ out.innerHTML = '<p class="verdict warn">' + esc(u.error) + "</p>"; return; }
           var R = function(n, z, use){ return '<tr><td style="text-align:left">' + n + "</td><td>" + (z ? f4in(z[0]) : "—") + "</td><td>" + (z ? f4in(z[1]) : "—") + '</td><td style="text-align:left">' + use + "</td></tr>"; };
-          var H = '<tr><th style="text-align:left">Gauge</th><th>PD min</th><th>PD max</th><th style="text-align:left">Use / acceptance</th></tr>';
-          var h = "<h3>Plug gauges for " + esc(u.size) + "-" + (u.cls === "3A / 3B" ? "3B" : "2B") + " (internal thread)</h3><div class=\"tscroll\"><table class=\"dtable wrap\">" + H;
+          var H = '<tr><th style="text-align:left">Gauge</th><th>PD min (new)</th><th>PD max (new)</th><th style="text-align:left">Use / acceptance</th></tr>';
+          var h = whoBox(true) + "<h3>Plug gauges for " + esc(u.size) + "-" + (u.cls === "3A / 3B" ? "3B" : "2B") + " (internal thread)</h3><div class=\"tscroll\"><table class=\"dtable wrap\">" + H;
           h += R("GO thread plug", u.goP, "Must screw fully into a good part. Withdraw when its measured pitch diameter is below " + f4in(u.goP[0]) + " (the product minimum).");
           h += R("NOT GO (HI) thread plug", u.ngP, u.ngP ? "Must not enter a good part by more than three turns. Withdraw when worn above " + f4in(u.ngP[1]) + " (the product maximum)." : "Not included for this size.");
           h += "</table></div>";
           h += "<h3>Ring gauges and setting plugs for " + esc(u.size) + "-" + (u.cls === "3A / 3B" ? "3A" : "2A") + " (external thread)</h3><div class=\"tscroll\"><table class=\"dtable wrap\">" + H;
           h += R("GO thread ring", u.goR, "Must screw over the whole thread length of a good part.");
           h += R("NOT GO (LO) thread ring", u.ngR, "Must not screw on a good part by more than three turns.");
-          h += '<tr><td style="text-align:left">GO setting plug (master)</td><td colspan="2">' + f4in(u.setGo) + ' nominal, W tolerance minus</td><td style="text-align:left">The GO ring is set to, and checked on, this plug.</td></tr>';
-          h += '<tr><td style="text-align:left">LO setting plug (master)</td><td colspan="2">' + f4in(u.setLo) + ' nominal, W tolerance plus</td><td style="text-align:left">The LO ring is set to, and checked on, this plug.</td></tr>';
           h += "</table></div>";
-          h += '<p class="small"><strong>How inch gauges differ from metric:</strong> ASME B1.2 has no GO-GO / GO-NOGO / wear check plugs. A ring is verified by fitting it on its setting plug, and the setting plug is the master that is measured (three-wire). Plug and ring limits are X tolerance (' + f4in(u.x) + ', the working-gauge grade); setting plugs are made to the tighter W tolerance, which this tool does not list — state "W tolerance per ASME B1.2" when you order.</p>';
+          h += "<h3>Masters for the rings (inch equivalent of GO-GO / NOGO-NOGO)</h3><div class=\"tscroll\"><table class=\"dtable wrap\"><tr><th style=\"text-align:left\">Master</th><th>PD nominal</th><th>Tolerance</th><th style=\"text-align:left\">Use / acceptance</th><th style=\"text-align:left\">Metric equivalent</th></tr>";
+          h += '<tr><td style="text-align:left">GO setting plug</td><td>' + f4in(u.setGo) + '</td><td>W, minus</td><td style="text-align:left">The GO ring is set to it and must fit it. If a GO ring no longer fits it snugly, reset it (adjustable ring) or replace it (solid ring).</td><td style="text-align:left">Does the job of GO-GO (TT), GO-NOGO (TZ) and GO wear (TS)</td></tr>';
+          h += '<tr><td style="text-align:left">LO setting plug</td><td>' + f4in(u.setLo) + '</td><td>W, plus</td><td style="text-align:left">The LO ring is set to it and must fit it. If a LO ring no longer fits it snugly, reset or replace it.</td><td style="text-align:left">Does the job of NOGO-GO (ZT), NOGO-NOGO (ZZ) and NOGO wear (ZS)</td></tr>';
+          h += "</table></div>";
+          h += '<p class="small"><strong>How inch gauges differ from metric:</strong> ASME B1.2 has no separate GO-GO / GO-NOGO / wear check plugs; the two setting plugs above do that job. The setting plug is the master that is measured (three-wire). Plug and ring limits are X tolerance (' + f4in(u.x) + ', the working-gauge grade); setting plugs are made to the tighter W tolerance, which this tool does not list — state "W tolerance per ASME B1.2" when you order.</p>';
           var txt = "Please quote and supply to ASME B1.2, with ISO/IEC 17025 accredited calibration certificates reporting measured pitch and major diameter:\n" +
             "- " + u.size + " GO / NOT GO thread plug gauge, X tolerance (GO PD " + u.goP[0].toFixed(4) + "–" + u.goP[1].toFixed(4) + " in" + (u.ngP ? "; NOT GO PD " + u.ngP[0].toFixed(4) + "–" + u.ngP[1].toFixed(4) + " in" : "") + ")\n" +
             "- " + u.size + " GO and LO thread ring gauges, X tolerance (GO PD " + u.goR[0].toFixed(4) + "–" + u.goR[1].toFixed(4) + " in; LO PD " + u.ngR[0].toFixed(4) + "–" + u.ngR[1].toFixed(4) + " in)\n" +
             "- " + u.size + " GO setting plug, PD " + u.setGo.toFixed(4) + " in nominal, W tolerance (minus); LO setting plug, PD " + u.setLo.toFixed(4) + " in nominal, W tolerance (plus)";
-          h += '<h3>Text for the gauge maker</h3><textarea id="mgOrder" rows="6" readonly spellcheck="false" style="width:100%;font-family:var(--mono, monospace);font-size:12px">' + esc(txt) + '</textarea><p><button type="button" class="ghost" id="mgCopy">Copy text</button></p>';
+          h += '<h3>Text for the gauge maker (manufacture to these limits)</h3><textarea id="mgOrder" rows="6" readonly spellcheck="false" style="width:100%;font-family:var(--mono, monospace);font-size:12px">' + esc(txt) + '</textarea><p><button type="button" class="ghost" id="mgCopy">Copy text</button></p>';
           h += '<p class="cite">Gauge limits: ASME B1.2 (X tolerance inside the product limits), the same verified data as Threads → Gauge verification; class 3 values match the Westport and Judge Tool gauge charts. NOT GO turns: ASME B1.2 allows up to three turns on inch threads.</p>';
           h += '<p class="small">' + esc(TH_CAL_NOTE) + "</p>";
           out.innerHTML = h;
@@ -11144,11 +11158,11 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(un){ renderUN(); return copyBtn(); }
           var D = parseFloat(el("mgD").value), P = parseFloat(el("mgP").value), side = el("mgSide").value, out = el("mgOut");
           if(!(D > 0)){ out.innerHTML = '<p class="small">Enter the nominal diameter.</p>'; return; }
-          var h = "", ok = [];
+          var h = whoBox(false), ok = [];
           if(side !== "int"){ var re = mgCalc(D, P, el("mgExt").value); if(re.error) h += '<p class="verdict warn">External ' + esc(el("mgExt").value) + ": " + esc(re.error) + "</p>"; else { h += extHTML(re); ok.push(re); } }
           if(side !== "ext"){ var ri = mgCalc(D, P, el("mgInt").value); if(ri.error) h += '<p class="verdict warn">Internal ' + esc(el("mgInt").value) + ": " + esc(ri.error) + "</p>"; else { h += intHTML(ri); ok.push(ri); } }
           if(ok.length){
-            h += '<h3>Text for the gauge maker</h3><textarea id="mgOrder" rows="12" readonly spellcheck="false" style="width:100%;font-family:var(--mono, monospace);font-size:12px">' + esc(orderText(ok)) + '</textarea><p><button type="button" class="ghost" id="mgCopy">Copy text</button></p>';
+            h += '<h3>Text for the gauge maker (manufacture to these limits)</h3><textarea id="mgOrder" rows="12" readonly spellcheck="false" style="width:100%;font-family:var(--mono, monospace);font-size:12px">' + esc(orderText(ok)) + '</textarea><p><button type="button" class="ghost" id="mgCopy">Copy text</button></p>';
           }
           h += '<p class="small">' + esc(TH_CAL_NOTE) + "</p>";
           out.innerHTML = h;

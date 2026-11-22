@@ -1,3 +1,8 @@
+# Note for Muse — Thread masters "How to use these limits" box, inch masters table (2026-11-22, v54)
+
+- Box above every result: all values PD (wear limit too), gauge maker makes to PD min–max, receiving checks certificate inside min–max, calibration steps, production uses gauges only. Headers "PD min (new) / PD max (new) / Wear limit (PD)".
+- Inch: "Masters for the rings" table — GO setting plug = job of TT/TZ/TS, LO setting plug = job of ZT/ZZ/ZS; no W numbers (not verified). ASME B1.2 plain check plugs for ring minor diameter not included.
+
 # Note for Muse — Thread masters: inch UN + links from Threads (2026-11-22, v53)
 
 - Thread masters now has a Thread system selector: Metric (ISO 1502) or Inch UNC/UNF (ASME B1.2). Inch mode uses
