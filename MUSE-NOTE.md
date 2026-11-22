@@ -1,3 +1,10 @@
+# Note for Muse — DIN 405 dropped (2026-11-22, v60)
+Harsh: DIN 405 is not needed — dropped from the programme. The 20 P = 6.35 internal-minor-max cells filled in v58
+are reverted to null and stay blank permanently; tests/din405.test.js removed. The v58 research (IS 4695-2 and
+Emuge 0.850 vs RP405 0.830) is kept in the v58 entry below for the record only — no further work on DIN 405.
+
+---
+
 # Note for Muse — B1.1-2024 check on the UNJ rows (2026-11-22, v59)
 
 What changed in B1.1-2024 (official change list, Accuristech preview of B1.1-2024, store.accuristech.com/hei/products/
