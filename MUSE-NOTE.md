@@ -1,3 +1,45 @@
+# Note for Muse — Inch setting plugs (ASME B1.2 masters for UNC/UNF ring gauges): full limits added (2026-11-22, v63)
+
+Approved lead followed: NBS Handbook H28 supplement (NIST) + a second source. Result: the inch masters now give
+GO and LO setting-plug PD, truncated major and full-form major LIMITS (W tolerance), lead and half-angle W, and
+"wear: none", in the table and in the gauge-maker text. 28 UNC/UNF sizes × classes 2A and 3A.
+
+## Sources (two, independent in origin; paired value by value)
+1. NBS Handbook H28 (1957) 1963 Supplement, Table III.13 "Setting plug gages … Unified screw threads" (NIST digital
+   archive). Six columns typed per size/class: GO truncated major, GO full-form major, GO PD, LO truncated major,
+   LO full-form major, LO PD — max line and min line.
+2. Machinery's Handbook 28th ed., Table 4 (W gage tolerances, = ANSI/ASME B1.2-1983) and Table 5 (setting-plug
+   dimension rules, = ASME B1.2). The app COMPUTES the limits from (2) applied to the existing verified product
+   limits (TH_G / TH_U3 / TH_U):
+   - GO: PD = max PD of the 2A/3A thread, W minus; full-form major = max major, W plus;
+     truncated major = max major − (0.060·p^(2/3) + 0.017·p), rounded to 4 dp, W minus.
+   - LO: PD = min PD, W plus; full-form major = max major, W plus; truncated major = min PD + 0.433013·p, W minus.
+   - W columns by diameter: major ≤½ / ½–4 / >4; PD ≤½ / ½–1½ / 1½–4 / 4–8 / 8–12; lead ≤½ / >½.
+Test tests/setplug.test.js: 670 of 672 computed values equal H28 exactly.
+
+## Named gap (withheld, not guessed)
+- #4-48 UNF-2A LO full-form major: H28 prints .1110–.1113, the MH rule gives .1113–.1116. Presumably B1.2's
+  crest-width provision for full-form LO plugs (my crest-width check at .0954 PD gives 0.00124 in, so I could not
+  reproduce H28's number). Shown as "— (gap)" / WITHHELD in the maker text; truncated LO plug is fully given.
+- Plain check plug for the GO ring minor diameter (B1.2): named, no numbers (not paired).
+- One typo in MH Table 4: 10 TPI, PD 1½–4 in printed ".0025"; read as .00025 by the pattern of every neighbouring
+  row. No size in the app uses that cell (3/4-10 is in the ½–1½ column), so it is not exercised by the H28 check.
+
+## Flags for Satureday
+- Edition: H28 1963 predates B1.2-1983. MH Table 4/5 is the B1.2-1983 reproduction. The two agree on every paired
+  value, so the rules did not change between them for these sizes — but the CURRENT B1.2 (2023 reaffirmation of the
+  1983 text, as far as I can tell) was not read directly. The maker text tells the supplier to quote to ASME B1.2.
+- Wear reading CONFIRMED, not contradicted: neither H28 III.13 nor B1.2 (via MH) gives any wear allowance for
+  setting plugs. They are toleranced W only; wear belongs to the ring.
+- Gauge-maker chart as second source: none reachable (Royal Oak / Alpha redirect-loop; Thread Check page garbled).
+  The Gage Assembly chart already in the record confirms the PD nominals only. So the pairing here is
+  standard-derived (MH = B1.2) + H28, which is two independent publications of the same B1.2/H28 numbers.
+
+## Files
+index.html: TH_W data block, mgW(), mgSetPlugs(), mgSPGap(), mgUN() returns .sp; renderUN masters table and
+mgOrderM text rewritten; f5in() formatter. tests/setplug.test.js new. sw.js cache spc-tools-v63-setplugs.
+All 16 test files pass.
+
 # Note for Muse — Thread masters: workpiece gauges vs masters separated; full master spec (2026-11-22, v62)
 
 Harsh's case: his gauge maker cannot measure PD inside SMALL rings → he needs the masters (check / setting plugs).

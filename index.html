@@ -11160,12 +11160,60 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       }
       /* Inch UN gauges (ASME B1.2): the verified gauge data used in Threads → Gauge verification (TH_G, TH_U3).
          Class 3 rule: X placed inside the class 3 product limits. Returns inches. */
+      /* BEGIN DATA TH_W: ASME B1.2 W gage tolerances (thread-setting gages), inch — Machinery's Handbook 28th ed. Table 4
+         (ANSI/ASME B1.2-1983). Row: [TPI list, lead ≤1/2 in, lead >1/2 in, half-angle ± minutes,
+         major & minor [≤1/2, >1/2–4, >4 in], pitch diameter [≤1/2, >1/2–1 1/2, >1 1/2–4, >4–8, >8–12 in]]; null = not listed.
+         The 10-TPI PD 1½–4 in cell printed ".0025" is read as .00025 (pattern of every neighbouring row; no app size uses it).
+         Cross-check: with the B1.2 setting-plug rules below these values reproduce NBS Handbook H28 (1963 supplement)
+         Table III.13 exactly for all 28 UNC/UNF sizes in classes 2A and 3A (tests/setplug.test.js). Verified 2026-11-22. */
+      var TH_W = [
+        [[8],null,.00025,5,[null,.0007,.0011],[null,.0002,.00025,.0003,.0004]], [[9],null,.00025,6,[null,.0007,.0011],[null,.0002,.00025,.0003,.0004]],
+        [[10],null,.00025,6,[null,.0006,.0009],[null,.0002,.00025,.0003,.0004]],
+        [[11,12,13,14],.0002,.0002,6,[.0006,.0006,.0009],[.00015,.0002,.00025,.0003,.0004]],
+        [[16],.00015,.00015,8,[.0006,.0006,.0009],[.0001,.0002,.00025,.0003,.0004]],
+        [[18,20,24,27,28],.00015,.00015,8,[.0005,.0005,.0007],[.0001,.00015,.0002,.00025,.0003]],
+        [[32],.0001,.00015,12,[.0003,.0005,.0007],[.0001,.00015,.0002,.00025,.0003]],
+        [[36],.0001,.00015,12,[.0003,.0004,null],[.0001,.00015,.0002,null,null]],
+        [[40,44],.0001,.00015,15,[.0003,.0004,null],[.0001,.00015,.0002,null,null]],
+        [[48],.0001,.00015,18,[.0003,.0004,null],[.0001,.00015,.0002,null,null]]
+      ];
+      /* END DATA TH_W */
+      function mgW(D, tpi){
+        for(var i = 0; i < TH_W.length; i++){ var w = TH_W[i]; if(w[0].indexOf(tpi) < 0) continue;
+          var mc = D <= 0.5 ? 0 : D <= 4 ? 1 : 2, pc = D <= 0.5 ? 0 : D <= 1.5 ? 1 : D <= 4 ? 2 : D <= 8 ? 3 : 4;
+          return { lead:D <= 0.5 ? w[1] : w[2], half:w[3], maj:w[4][mc], pd:w[5][pc] }; }
+        return null;
+      }
+      /* ASME B1.2 thread-setting plugs for external-thread ring gauges (Machinery's Handbook Table 5 = B1.2 Table):
+         GO: PD = max PD of the external thread (W minus); full-form major = max major (W plus);
+             truncated major = max major − (0.060·p^(2/3) + 0.017·p) (W minus).
+         LO: PD = min PD (W plus); full-form major = max major (W plus; crest width ≥ 0.001 in);
+             truncated major = min PD + H/2 = min PD + 0.433013·p (W minus).
+         Same numbers as NBS H28 Table III.13 (see TH_W). Inputs inch. */
+      function mgSetPlugs(D, tpi, majMax, pdMax, pdMin){
+        var w = mgW(D, tpi); if(!w || w.pd == null || w.maj == null) return null;
+        var p = 1 / tpi, r4 = function(v){ return Math.round(v * 1e4) / 1e4; }, r5 = function(v){ return Math.round(v * 1e5) / 1e5; };
+        var goT = r4(majMax - (0.060 * Math.pow(p, 2 / 3) + 0.017 * p)), loT = r4(pdMin + 0.433013 * p);
+        return { w:w,
+          go:{ pd:[r5(pdMax - w.pd), pdMax], full:[majMax, r5(majMax + w.maj)], trunc:[r5(goT - w.maj), goT] },
+          lo:{ pd:[pdMin, r5(pdMin + w.pd)], full:[majMax, r5(majMax + w.maj)], trunc:[r5(loT - w.maj), loT] } };
+      }
       function mgUN(size, cls){
         var g = TH_G[size]; if(!g) return { error:"Gauge data is included for the UNC / UNF catalogue sizes only." };
         var r4 = function(v){ return Math.round(v * 1e4) / 1e4; }, X = g.x;
+        var ur = null; thUAll().forEach(function(q){ if(q[0] === size) ur = q; });
         if(cls === "3"){ var t3 = TH_U3[size]; if(!t3) return { error:"Class 3 data is not included for this size." };
-          return { size:size, cls:"3A / 3B", x:X, goP:[t3.i[2], r4(t3.i[2] + X)], ngP:[r4(t3.i[3] - X), t3.i[3]], goR:[r4(t3.e[2] - X), t3.e[2]], ngR:[t3.e[3], r4(t3.e[3] + X)], setGo:t3.e[2], setLo:t3.e[3] }; }
-        return { size:size, cls:"2A / 2B", x:X, goP:g.goP, ngP:g.ngP || null, goR:g.goR, ngR:g.ngR, setGo:g.setGo, setLo:g.setLo };
+          return { size:size, cls:"3A / 3B", x:X, goP:[t3.i[2], r4(t3.i[2] + X)], ngP:[r4(t3.i[3] - X), t3.i[3]], goR:[r4(t3.e[2] - X), t3.e[2]], ngR:[t3.e[3], r4(t3.e[3] + X)], setGo:t3.e[2], setLo:t3.e[3],
+            sp:ur ? mgSetPlugs(ur[1], ur[2], t3.e[0], t3.e[2], t3.e[3]) : null }; }
+        return { size:size, cls:"2A / 2B", x:X, goP:g.goP, ngP:g.ngP || null, goR:g.goR, ngR:g.ngR, setGo:g.setGo, setLo:g.setLo,
+          sp:mgSPGap(size, "2", ur ? mgSetPlugs(ur[1], ur[2], ur[5], g.setGo, g.setLo) : null) };
+      }
+      /* Named gap: #4-48 UNF 2A LO full-form major. H28 Table III.13 prints .1110 / .1113 (W applied minus from .1113);
+         the Machinery's Handbook Table 5 rule (max major, W plus) gives .1113 / .1116. The B1.2 crest-width provision that
+         presumably causes this could not be read in either source, so the cell is withheld rather than guessed. */
+      function mgSPGap(size, cls, sp){
+        if(sp && size === "#4-48 UNF" && cls === "2"){ sp.lo.full = null; sp.gap = "LO full-form major for #4-48 UNF 2A is withheld: NBS H28 prints .1110–.1113 in, the B1.2 rule as reproduced in Machinery's Handbook gives .1113–.1116 in; the crest-width provision behind the difference could not be confirmed from two sources. Use the truncated LO plug, or ask the gauge maker to quote to ASME B1.2 directly."; }
+        return sp;
       }
       function mgWire(P, w, M){ return { best:Math.round(0.57735 * P * 1e4) / 1e4, E:(w > 0 && M > 0) ? Math.round((M - 3 * w + 0.866025 * P) * 1e4) / 1e4 : null }; }
       (function(){
@@ -11289,6 +11337,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         function ta(id, txt, rows, title){ return "<h3>" + title + '</h3><textarea id="' + id + '" rows="' + rows + '" readonly spellcheck="false" style="width:100%;font-family:var(--mono, monospace);font-size:12px">' + esc(txt) + '</textarea><p><button type="button" class="ghost mgcopy" data-for="' + id + '">Copy text</button></p>'; }
         Object.keys(TH_G).forEach(function(k){ var o = document.createElement("option"); o.textContent = k; if(k === "1/2-13 UNC") o.selected = true; el("mgUSize").appendChild(o); });
         function f4in(v){ return v.toFixed(4) + " in"; }
+        function f5in(v){ return (Math.round(v * 1e5) % 10 ? v.toFixed(5) : v.toFixed(4)) + " in"; }
         function renderUN(){
           var u = mgUN(el("mgUSize").value, el("mgUCls").value), out = el("mgOut");
           if(u.error){ out.innerHTML = '<p class="verdict warn">' + esc(u.error) + "</p>"; return; }
@@ -11298,27 +11347,34 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           h += R("GO thread plug", u.goP, "Must screw fully into a good part. Withdraw when its measured pitch diameter is below " + f4in(u.goP[0]) + " (the product minimum).");
           h += R("NOT GO (HI) thread plug", u.ngP, u.ngP ? "Must not enter a good part by more than three turns. Withdraw when worn above " + f4in(u.ngP[1]) + " (the product maximum)." : "Not included for this size.");
           h += "</table></div>";
-          h += "<h3>Ring gauges and setting plugs for " + esc(u.size) + "-" + (u.cls === "3A / 3B" ? "3A" : "2A") + " (external thread)</h3><div class=\"tscroll\"><table class=\"dtable wrap\">" + H;
+          h += "<h3>Ring gauges for " + esc(u.size) + "-" + (u.cls === "3A / 3B" ? "3A" : "2A") + " (external thread)</h3><div class=\"tscroll\"><table class=\"dtable wrap\">" + H;
           h += R("GO thread ring", u.goR, "Must screw over the whole thread length of a good part.");
           h += R("NOT GO (LO) thread ring", u.ngR, "Must not screw on a good part by more than three turns.");
           h += "</table></div>";
-          h += banner("master") + "<h3>Setting plugs — masters for the " + esc(u.size) + "-" + (u.cls === "3A / 3B" ? "3A" : "2A") + " ring gauges (ASME B1.2)</h3><div class=\"tscroll\"><table class=\"dtable wrap\"><tr><th style=\"text-align:left\">Master</th><th>PD nominal</th><th>Tolerance</th><th style=\"text-align:left\">Use / acceptance</th><th style=\"text-align:left\">Metric equivalent</th></tr>";
-          h += '<tr><td style="text-align:left">GO setting plug</td><td>' + f4in(u.setGo) + '</td><td>W, minus</td><td style="text-align:left">The GO ring is set to it and must fit it. If a GO ring no longer fits it snugly, reset it (adjustable ring) or replace it (solid ring).</td><td style="text-align:left">Does the job of GO-GO (TT), GO-NOGO (TZ) and GO wear (TS)</td></tr>';
-          h += '<tr><td style="text-align:left">LO setting plug</td><td>' + f4in(u.setLo) + '</td><td>W, plus</td><td style="text-align:left">The LO ring is set to it and must fit it. If a LO ring no longer fits it snugly, reset or replace it.</td><td style="text-align:left">Does the job of NOGO-GO (ZT), NOGO-NOGO (ZZ) and NOGO wear (ZS)</td></tr>';
-          h += "</table></div>";
-          h += '<p class="small">Setting plugs are ordered full-form or truncated: in a truncated setting plug, the truncated portion controls the ring\'s pitch diameter and the full-form portion checks clearance at the ring\'s major diameter (FED-STD-H28/6, as quoted by gauge makers). ASME B1.2 sets no numeric wear limit for setting plugs; they are judged against their W limits at calibration.</p>';
-          h += '<p class="small"><strong>How inch gauges differ from metric:</strong> ASME B1.2 has no separate GO-GO / GO-NOGO / wear check plugs; the two setting plugs above do that job. The setting plug is the master that is measured (three-wire). Plug and ring limits are X tolerance (' + f4in(u.x) + ', the working-gauge grade); setting plugs are made to the tighter W tolerance, which this tool does not list — state "W tolerance per ASME B1.2" when you order.</p>';
+          var sp = u.sp, cl = u.cls === "3A / 3B" ? "3A" : "2A", rg = function(z){ return z ? f5in(z[0]) + " – " + f5in(z[1]) : "— (gap)"; }, rt = function(z){ return z ? z[0].toFixed(5).replace(/0$/, "") + "–" + z[1].toFixed(5).replace(/0$/, "") + " in" : "WITHHELD — not confirmed from two sources; order the truncated plug or quote to ASME B1.2 directly"; };
+          h += banner("master") + "<h3>Setting plugs — masters for the " + esc(u.size) + "-" + cl + " ring gauges (ASME B1.2, W tolerance)</h3>";
+          if(sp){
+            h += '<div class="tscroll"><table class="dtable wrap"><tr><th style="text-align:left">Master</th><th>Pitch diameter (new)</th><th>Major — truncated portion</th><th>Major — full-form portion / full-form plug</th><th>Wear limit</th><th style="text-align:left">Use / acceptance</th><th style="text-align:left">Metric equivalent</th></tr>';
+            h += '<tr><td style="text-align:left"><strong>GO setting plug</strong> (master — not for parts)</td><td>' + rg(sp.go.pd) + "</td><td>" + rg(sp.go.trunc) + "</td><td>" + rg(sp.go.full) + '</td><td>None — judged against its W limits at calibration</td><td style="text-align:left">The GO ring is set to it and must fit it. If a GO ring no longer fits it snugly, reset it (adjustable ring) or replace it (solid ring).</td><td style="text-align:left">Does the job of GO-GO (TT), GO-NOGO (TZ) and GO wear (TS)</td></tr>';
+            h += '<tr><td style="text-align:left"><strong>LO setting plug</strong> (master — not for parts)</td><td>' + rg(sp.lo.pd) + "</td><td>" + rg(sp.lo.trunc) + "</td><td>" + rg(sp.lo.full) + '</td><td>None — judged against its W limits at calibration</td><td style="text-align:left">The LO ring is set to it and must fit it. If a LO ring no longer fits it snugly, reset or replace it.</td><td style="text-align:left">Does the job of NOGO-GO (ZT), NOGO-NOGO (ZZ) and NOGO wear (ZS)</td></tr>';
+            h += "</table></div>";
+            h += '<p class="small">W tolerances for this size: pitch diameter ' + f5in(sp.w.pd) + " (GO minus, LO plus); major diameter " + f5in(sp.w.maj) + "; lead ±" + f5in(sp.w.lead) + " in; half-angle ±" + sp.w.half + "′. Inches. A truncated setting plug\'s truncated portion sets the ring\'s pitch diameter and its full-form portion checks clearance at the ring\'s major diameter (FED-STD-H28/6, as quoted by gauge makers); order one or the other and say which.</p>";
+            if(sp.gap) h += '<p class="verdict warn">' + esc(sp.gap) + "</p>";
+          } else h += '<p class="verdict warn">Setting-plug limits are not included for this size.</p>';
+          h += '<p class="small"><strong>Named gap:</strong> ASME B1.2 also uses a plain check plug for the minor diameter of the GO ring. Its limits are not given here because they could not be paired from two sources.</p>';
+          h += '<p class="small"><strong>How inch gauges differ from metric:</strong> ASME B1.2 has no separate GO-GO / GO-NOGO / wear check plugs; the two setting plugs above do that job. Masters carry no wear allowance — wear belongs to the ring, and the ring is reset or replaced when it no longer fits its setting plug. Plug and ring limits are X tolerance (' + f4in(u.x) + ", the working-gauge grade); setting plugs are W tolerance.</p>";
           var txt = "Please quote and supply to ASME B1.2, with ISO/IEC 17025 accredited calibration certificates reporting measured pitch and major diameter:\n" +
             "- " + u.size + " GO / NOT GO thread plug gauge, X tolerance (GO PD " + u.goP[0].toFixed(4) + "–" + u.goP[1].toFixed(4) + " in" + (u.ngP ? "; NOT GO PD " + u.ngP[0].toFixed(4) + "–" + u.ngP[1].toFixed(4) + " in" : "") + ")\n" +
             "- " + u.size + " GO and LO thread ring gauges, X tolerance (GO PD " + u.goR[0].toFixed(4) + "–" + u.goR[1].toFixed(4) + " in; LO PD " + u.ngR[0].toFixed(4) + "–" + u.ngR[1].toFixed(4) + " in)\n" +
             "";
           var txtM = "Please quote and supply to ASME B1.2, with ISO/IEC 17025 accredited calibration certificates reporting measured pitch diameter (three-wire), major diameter, lead and half-angle, with uncertainty.\n" +
-            "MASTERS FOR THREAD RING GAUGES " + u.size + "-" + (u.cls === "3A / 3B" ? "3A" : "2A") + " (not used on parts):\n" +
-            "- GO thread setting plug: PD " + u.setGo.toFixed(4) + " in nominal, W tolerance (minus); full-form or truncated per ASME B1.2 (state which)\n" +
-            "- LO (NOT GO) thread setting plug: PD " + u.setLo.toFixed(4) + " in nominal, W tolerance (plus); full-form or truncated per ASME B1.2 (state which)\n" +
-            "W tolerance values, major diameters and the truncation are per ASME B1.2 (not listed in this app).";
-          h += ta("mgOrder", txt.trim(), 4, "Text for the gauge maker — workpiece gauges") + ta("mgOrderM", txtM, 6, "Text for the gauge maker — masters (setting plugs) for the ring gauges");
-          h += '<p class="cite">Gauge limits: ASME B1.2 (X tolerance inside the product limits), the same verified data as Threads → Gauge verification; class 3 values match the Westport and Judge Tool gauge charts. NOT GO turns: ASME B1.2 allows up to three turns on inch threads.</p>';
+            "MASTERS FOR THREAD RING GAUGES " + u.size + "-" + cl + " — SETTING PLUGS, NOT FOR USE ON PARTS:\n" +
+            (sp ? "- GO thread setting plug, W tolerance: PD " + rt(sp.go.pd) + "; truncated major " + rt(sp.go.trunc) + " (or full-form major " + rt(sp.go.full) + " if full-form)\n" +
+              "- LO thread setting plug, W tolerance: PD " + rt(sp.lo.pd) + "; truncated major " + rt(sp.lo.trunc) + " (or full-form major " + rt(sp.lo.full) + " if full-form)\n" +
+              "- Lead ±" + sp.w.lead + " in, half-angle ±" + sp.w.half + "′. Masters: no wear allowance; recalibrate against the W limits above.\n" +
+              "State: truncated or full-form." : "- GO and LO thread setting plugs, W tolerance per ASME B1.2 (limits not included in this app for this size).");
+          h += ta("mgOrder", txt.trim(), 4, "Text for the gauge maker — workpiece gauges") + ta("mgOrderM", txtM, 8, "Text for the gauge maker — MASTERS (setting plugs) for the ring gauges");
+          h += '<p class="cite">Gauge limits: ASME B1.2 (X tolerance inside the product limits), the same verified data as Threads → Gauge verification; class 3 values match the Westport and Judge Tool gauge charts. Setting plugs: ASME B1.2 rules and W tolerances as reproduced in Machinery\'s Handbook 28th ed. Tables 4–5, checked value-for-value against NBS Handbook H28 (1963 supplement) Table III.13 — 670 of 672 values agree; the 2 that do not are withheld above. NOT GO turns: ASME B1.2 allows up to three turns on inch threads.</p>';
           h += '<p class="small">' + esc(TH_CAL_NOTE) + "</p>";
           out.innerHTML = h;
         }
