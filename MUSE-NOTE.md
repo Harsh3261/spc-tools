@@ -1,3 +1,14 @@
+# Note for Muse — Thread masters: inch UN + links from Threads (2026-11-22, v53)
+
+- Thread masters now has a Thread system selector: Metric (ISO 1502) or Inch UNC/UNF (ASME B1.2). Inch mode uses
+  the same verified TH_G / TH_U3 data as Threads → Gauge verification (class 2A/2B and 3A/3B): plug and ring PD
+  limits (X), GO/LO setting plug nominals, retirement lines, order text. ASME B1.2 has no TT/TZ/TS check plugs;
+  rings are checked on setting plugs. W tolerance values NOT listed (only one copy of B1.2 Table 7 found, not
+  readable) — order text says "W tolerance per ASME B1.2". NPT / pipe gauges (L1/L2) not covered.
+- Links: Threads gauge view (metric, UN class 2, UN class 3) → "Open … in Thread masters" with
+  #tool=mgauge&sys=m&d=&p=&ext=&int= or &sys=un&size=&cls=; route() calls window.mgApply. Thread masters links
+  back to Threads. Atlas SPC_TOOLS regenerated (v113).
+
 # Note for Muse — ISO 1502 thread masters + Surftest settings (2026-11-22, v52)
 
 - New tool #tool-mgauge (Measure, "Thread masters"): any metric size/pitch/class → GO/NOGO plug PD (new, wear),
