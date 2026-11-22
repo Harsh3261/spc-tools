@@ -595,6 +595,7 @@
       .hitsec{margin:10px 6px 4px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim); font-weight:600}
       .hitlink{display:block; padding:8px 10px; border-radius:8px; color:var(--ink); text-decoration:none}
       .hitlink:hover,.hitlink:focus{background:var(--panel2); outline:none}
+      #thMfg h3,#thGauge h3{text-transform:none; letter-spacing:.01em} /* thread classes are case-sensitive: 6g external, 6G internal */
       .tscroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
       .dtable.wrap td,.dtable.wrap th{white-space:normal !important}
       .dtable.wrap td.lim{font-family:var(--sans); font-size:12.5px; text-align:left; line-height:1.35}
@@ -7774,6 +7775,77 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           intMinor:[d1B, d1B + TD1 / 1000], intPd:[pdB, pdB + TD2 / 1000], intMajorMin: D
         };
       }
+      /* BEGIN DATA TH965: ISO 965-1 tolerance system tables (µm). Two-source checked 2026-11-21, cell by cell:
+         TH965_DEV (Table 1, fundamental deviations G, H, e, f, g, h), TH965_TD1 (Table 2, grades 4–8) and TH965_TDM (Table 3,
+         Td grades 4, 6, 8): ISO 965-1:2013 preview (iTeh) = fasteners.eu ISO 965-1 page, identical on every cell.
+         TH965_TD2 (Table 4, grades 4–8) and TH965_TD2E (Table 5, Td2 grades 3–9): fasteners.eu = Accu Ltd tables on all 42
+         shared rows (and the ISO preview on the rows it shows). Left out (one source only): the 0.99–1.4 mm range and the
+         8 mm pitch rows. Check: grade 6 g / H values reproduce all 54 ISO 965-2 6g / 6H rows in TH_M exactly.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
+      var TH965_DEV = {"0.2": [17, 0, null, null, -17, 0], "0.25": [18, 0, null, null, -18, 0], "0.3": [18, 0, null, null, -18, 0], "0.35": [19, 0, null, -34, -19, 0], "0.4": [19, 0, null, -34, -19, 0], "0.45": [20, 0, null, -35, -20, 0], "0.5": [20, 0, -50, -36, -20, 0], "0.6": [21, 0, -53, -36, -21, 0], "0.7": [22, 0, -56, -38, -22, 0], "0.75": [22, 0, -56, -38, -22, 0], "0.8": [24, 0, -60, -38, -24, 0], "1": [26, 0, -60, -40, -26, 0], "1.25": [28, 0, -63, -42, -28, 0], "1.5": [32, 0, -67, -45, -32, 0], "1.75": [34, 0, -71, -48, -34, 0], "2": [38, 0, -71, -52, -38, 0], "2.5": [42, 0, -80, -58, -42, 0], "3": [48, 0, -85, -63, -48, 0], "3.5": [53, 0, -90, -70, -53, 0], "4": [60, 0, -95, -75, -60, 0], "4.5": [63, 0, -100, -80, -63, 0], "5": [71, 0, -106, -85, -71, 0], "5.5": [75, 0, -112, -90, -75, 0], "6": [80, 0, -118, -95, -80, 0], "8": [100, 0, -140, -118, -100, 0]}; /* pitch → [G EI, H EI, e es, f es, g es, h es]; null = not defined for that pitch */
+      var TH965_TD1 = {"0.2": [38, null, null, null, null], "0.25": [45, 56, null, null, null], "0.3": [53, 67, 85, null, null], "0.35": [63, 80, 100, null, null], "0.4": [71, 90, 112, null, null], "0.45": [80, 100, 125, null, null], "0.5": [90, 112, 140, 180, null], "0.6": [100, 125, 160, 200, null], "0.7": [112, 140, 180, 224, null], "0.75": [118, 150, 190, 236, null], "0.8": [125, 160, 200, 250, 315], "1": [150, 190, 236, 300, 375], "1.25": [170, 212, 265, 335, 425], "1.5": [190, 236, 300, 375, 475], "1.75": [212, 265, 335, 425, 530], "2": [236, 300, 375, 475, 600], "2.5": [280, 355, 450, 560, 710], "3": [315, 400, 500, 630, 800], "3.5": [355, 450, 560, 710, 900], "4": [375, 475, 600, 750, 950], "4.5": [425, 530, 670, 850, 1060], "5": [450, 560, 710, 900, 1120], "5.5": [475, 600, 750, 950, 1180], "6": [500, 630, 800, 1000, 1250], "8": [630, 800, 1000, 1250, 1600]}; /* pitch → TD1 grades [4,5,6,7,8] */
+      var TH965_TDM = {"0.2": [36, 56, null], "0.25": [42, 67, null], "0.3": [48, 75, null], "0.35": [53, 85, null], "0.4": [60, 95, null], "0.45": [63, 100, null], "0.5": [67, 106, null], "0.6": [80, 125, null], "0.7": [90, 140, null], "0.75": [90, 140, null], "0.8": [95, 150, 236], "1": [112, 180, 280], "1.25": [132, 212, 335], "1.5": [150, 236, 375], "1.75": [170, 265, 425], "2": [180, 280, 450], "2.5": [212, 335, 530], "3": [236, 375, 600], "3.5": [265, 425, 670], "4": [300, 475, 750], "4.5": [315, 500, 800], "5": [335, 530, 850], "5.5": [355, 560, 900], "6": [375, 600, 950], "8": [450, 710, 1180]}; /* pitch → Td (external major) grades [4,6,8] */
+      var TH965_TD2 = [[1.4, 2.8, 0.2, 42, null, null, null, null], [1.4, 2.8, 0.25, 48, 60, null, null, null], [1.4, 2.8, 0.35, 53, 67, 85, null, null], [1.4, 2.8, 0.4, 56, 71, 90, null, null], [1.4, 2.8, 0.45, 60, 75, 95, null, null], [2.8, 5.6, 0.35, 56, 71, 90, null, null], [2.8, 5.6, 0.5, 63, 80, 100, 125, null], [2.8, 5.6, 0.6, 71, 90, 112, 140, null], [2.8, 5.6, 0.7, 75, 95, 118, 150, null], [2.8, 5.6, 0.75, 75, 95, 118, 150, null], [2.8, 5.6, 0.8, 80, 100, 125, 160, 200], [5.6, 11.2, 0.75, 85, 106, 132, 170, null], [5.6, 11.2, 1.0, 95, 118, 150, 190, 236], [5.6, 11.2, 1.25, 100, 125, 160, 200, 250], [5.6, 11.2, 1.5, 112, 140, 180, 224, 280], [11.2, 22.4, 1.0, 100, 125, 160, 200, 250], [11.2, 22.4, 1.25, 112, 140, 180, 224, 280], [11.2, 22.4, 1.5, 118, 150, 190, 236, 300], [11.2, 22.4, 1.75, 125, 160, 200, 250, 315], [11.2, 22.4, 2.0, 132, 170, 212, 265, 335], [11.2, 22.4, 2.5, 140, 180, 224, 280, 355], [22.4, 45.0, 1.0, 106, 132, 170, 212, null], [22.4, 45.0, 1.5, 125, 160, 200, 250, 315], [22.4, 45.0, 2.0, 140, 180, 224, 280, 355], [22.4, 45.0, 3.0, 170, 212, 265, 335, 425], [22.4, 45.0, 3.5, 180, 224, 280, 355, 450], [22.4, 45.0, 4.0, 190, 236, 300, 375, 475], [22.4, 45.0, 4.5, 200, 250, 315, 400, 500], [45.0, 90.0, 1.5, 132, 170, 212, 265, 335], [45.0, 90.0, 2.0, 150, 190, 236, 300, 375], [45.0, 90.0, 3.0, 180, 224, 280, 355, 450], [45.0, 90.0, 4.0, 200, 250, 315, 400, 500], [45.0, 90.0, 5.0, 212, 265, 335, 425, 530], [45.0, 90.0, 5.5, 224, 280, 355, 450, 560], [45.0, 90.0, 6.0, 236, 300, 375, 475, 600], [90.0, 180.0, 2.0, 160, 200, 250, 315, 400], [90.0, 180.0, 3.0, 190, 236, 300, 375, 475], [90.0, 180.0, 4.0, 212, 265, 335, 425, 530], [90.0, 180.0, 6.0, 250, 315, 400, 500, 630], [180.0, 355.0, 3.0, 212, 265, 335, 425, 530], [180.0, 355.0, 4.0, 236, 300, 375, 475, 600], [180.0, 355.0, 6.0, 265, 335, 425, 530, 670]]; /* [D over, D up to and incl., P, TD2 grades 4,5,6,7,8] */
+      var TH965_TD2E = [[1.4, 2.8, 0.2, 25, 32, 40, 50, null, null, null], [1.4, 2.8, 0.25, 28, 36, 45, 56, null, null, null], [1.4, 2.8, 0.35, 32, 40, 50, 63, 80, null, null], [1.4, 2.8, 0.4, 34, 42, 53, 67, 85, null, null], [1.4, 2.8, 0.45, 36, 45, 56, 71, 90, null, null], [2.8, 5.6, 0.35, 34, 42, 53, 67, 85, null, null], [2.8, 5.6, 0.5, 38, 48, 60, 75, 95, null, null], [2.8, 5.6, 0.6, 42, 53, 67, 85, 106, null, null], [2.8, 5.6, 0.7, 45, 56, 71, 90, 112, null, null], [2.8, 5.6, 0.75, 45, 56, 71, 90, 112, null, null], [2.8, 5.6, 0.8, 48, 60, 75, 95, 118, 150, 190], [5.6, 11.2, 0.75, 50, 63, 80, 100, 125, null, null], [5.6, 11.2, 1.0, 56, 71, 90, 112, 140, 180, 224], [5.6, 11.2, 1.25, 60, 75, 95, 118, 150, 190, 236], [5.6, 11.2, 1.5, 67, 85, 106, 132, 170, 212, 265], [11.2, 22.4, 1.0, 60, 75, 95, 118, 150, 190, 236], [11.2, 22.4, 1.25, 67, 85, 106, 132, 170, 212, 265], [11.2, 22.4, 1.5, 71, 90, 112, 140, 180, 224, 280], [11.2, 22.4, 1.75, 75, 95, 118, 150, 190, 236, 300], [11.2, 22.4, 2.0, 80, 100, 125, 160, 200, 250, 315], [11.2, 22.4, 2.5, 85, 106, 132, 170, 212, 265, 335], [22.4, 45.0, 1.0, 63, 80, 100, 125, 160, 200, 250], [22.4, 45.0, 1.5, 75, 95, 118, 150, 190, 236, 300], [22.4, 45.0, 2.0, 85, 106, 132, 170, 212, 265, 335], [22.4, 45.0, 3.0, 100, 125, 160, 200, 250, 315, 400], [22.4, 45.0, 3.5, 106, 132, 170, 212, 265, 335, 425], [22.4, 45.0, 4.0, 112, 140, 180, 224, 280, 355, 450], [22.4, 45.0, 4.5, 118, 150, 190, 236, 300, 375, 475], [45.0, 90.0, 1.5, 80, 100, 125, 160, 200, 250, 315], [45.0, 90.0, 2.0, 90, 112, 140, 180, 224, 280, 355], [45.0, 90.0, 3.0, 106, 132, 170, 212, 265, 335, 425], [45.0, 90.0, 4.0, 118, 150, 190, 236, 300, 375, 475], [45.0, 90.0, 5.0, 125, 160, 200, 250, 315, 400, 500], [45.0, 90.0, 5.5, 132, 170, 212, 265, 335, 425, 530], [45.0, 90.0, 6.0, 140, 180, 224, 280, 355, 450, 560], [90.0, 180.0, 2.0, 95, 118, 150, 190, 236, 300, 375], [90.0, 180.0, 3.0, 112, 140, 180, 224, 280, 355, 450], [90.0, 180.0, 4.0, 125, 160, 200, 250, 315, 400, 500], [90.0, 180.0, 6.0, 150, 190, 236, 300, 375, 475, 600], [180.0, 355.0, 3.0, 125, 160, 200, 250, 315, 400, 500], [180.0, 355.0, 4.0, 140, 180, 224, 280, 355, 450, 560], [180.0, 355.0, 6.0, 160, 200, 250, 315, 400, 500, 630]]; /* [d over, d up to and incl., P, Td2 grades 3,4,5,6,7,8,9] */
+      /* END DATA TH965 */
+      /* ISO 965-1 limits from the tables above (the method ISO 965-2 / -3 values are built with):
+         external: es from the position; d max = d + es, d min = d max − Td; d2 max = d2 + es, d2 min = d2 max − Td2.
+         internal: EI from the position; D1 min = D1 + EI, D1 max = D1 min + TD1; D2 min = D2 + EI, D2 max = D2 min + TD2; D min = D + EI.
+         Results are rounded to 0.001 mm as ISO 965-2 prints them. */
+      /* Classes offered in the Threads tool. Any pitch-diameter grade + crest grade + position the tables support works;
+         the engine reports when a grade or position is not defined for the pitch. */
+      var TH965_CLS_EXT = ["6g","6h","6f","6e","4h","4g","4g6g","5g6g","5h6h","7g6g","7h6h","7e6e","8g","9g8g","3h4h"];
+      var TH965_CLS_INT = ["6H","5H","7H","4H","8H","4H5H","5H6H","6G","5G","7G","8G"];
+      function th965Model(label, D, P, side, cls, custom){ /* manufacturing-limits model from the ISO 965-1 tables */
+        var t = th965(D, P, cls);
+        var title = label + " — " + (side === "int" ? "internal " : "external ") + cls + (custom ? " · computed" : "");
+        if(t.error) return { unit:"mm", title:title, rows:[], custom:true, badge:"Not available", note:t.error,
+          meaning:"Pick another class, or check the drawing — ISO 965-1 does not define this combination.", source:"ISO 965-1 tolerance tables (two-source checked)." };
+        var rows = side === "int"
+          ? [["Minor diameter D₁", t.minor[0], t.minor[1], "TD1 grade " + t.cls.crestGrade + " = " + t.TD1 + " µm"], ["Pitch diameter D₂", t.pd[0], t.pd[1], "TD2 grade " + t.cls.pdGrade + " = " + t.TD2 + " µm; EI (" + t.cls.pos + ") = " + (t.EI > 0 ? "+" : "") + t.EI + " µm"], ["Major diameter D", t.majorMin, null, "The standard gives no max for internal major."]]
+          : [["Major diameter d", t.major[0], t.major[1], "Td grade " + t.cls.crestGrade + " = " + t.td + " µm"], ["Pitch diameter d₂", t.pd[0], t.pd[1], "Td2 grade " + t.cls.pdGrade + " = " + t.td2 + " µm; es (" + t.cls.pos + ") = " + t.es + " µm"], ["Minor diameter d₁ (max)", null, t.minorMax, "Reference, flat-root basis (basic D₁ + es) — ISO 965-2 does not tabulate external minor limits."]];
+        return { unit:"mm", title:title, rows:rows, custom:true, badge:"Computed — ISO 965-1 tables",
+          meaning:"Built the way ISO 965-2 builds its tables: basic size plus the fundamental deviation (position " + t.cls.pos + ") plus the tolerance for grade " + t.cls.pdGrade + (t.cls.crestGrade !== t.cls.pdGrade ? " (pitch) / " + t.cls.crestGrade + " (crest)" : "") + ", rounded to 0.001 mm. This method reproduces every value of the 54 ISO 965-2 6g / 6H rows in this tool exactly. " + (t.cls.crestGrade !== t.cls.pdGrade ? "A two-part class like " + cls + " gives the pitch-diameter tolerance first, then the crest (" + (side === "int" ? "minor" : "major") + ") diameter tolerance. " : "") + "Machine and inspect to these limits.",
+          source:"ISO 965-1 Tables 1–5 (fundamental deviations; TD1, Td, TD2, Td2), checked cell by cell in two sources (ISO 965-1:2013 preview and fasteners.eu for Tables 1–3; fasteners.eu and Accu for Tables 4–5); spot-checked against Machining Doctor's published 6h, 6e, 4g6g, 8g and 5G limits. Gauge certificates govern gauge acceptance." };
+      }
+      function th965Key(P){ return String(+(+P).toFixed(3)); }
+      function th965Parse(cls){
+        var m = /^\s*([3-9])([efghGH])(?:([3-9])([efghGH]))?\s*$/.exec(String(cls || ""));
+        if(!m) return null;
+        var pg = +m[1], pos = m[2], cg = m[3] ? +m[3] : pg, cpos = m[4] || pos;
+        if(cpos !== pos) return null;
+        return { pdGrade:pg, crestGrade:cg, pos:pos, ext:pos === pos.toLowerCase() };
+      }
+      function th965Range(tab, D, P){
+        for(var i = 0; i < tab.length; i++){ var r = tab[i]; if(D > r[0] && D <= r[1] + 1e-9 && Math.abs(r[2] - P) < 1e-9) return r; }
+        return null;
+      }
+      function th965(D, P, cls){
+        var c = th965Parse(cls); if(!c) return { error:"Class not recognised — use e.g. 6g, 4g6g, 6H or 5H6H." };
+        var key = th965Key(P), dv = TH965_DEV[key];
+        if(!dv) return { error:"Pitch " + P + " mm is not in the ISO 965-1 tables." };
+        var r3 = function(x){ return Math.round(x * 1000) / 1000; };
+        var d2b = D - 0.649519 * P, d1b = D - 1.082532 * P;
+        if(c.ext){
+          var es = dv[{ e:2, f:3, g:4, h:5 }[c.pos]];
+          if(es == null) return { error:"Position " + c.pos + " is not defined for pitch " + P + " mm (ISO 965-1 Table 1)." };
+          var row = th965Range(TH965_TD2E, D, P); if(!row) return { error:"No ISO 965-1 Td2 value for M" + D + " × " + P + " (diameter range / pitch combination not tabulated)." };
+          var td2 = row[3 + c.pdGrade - 3];
+          var tdi = { 4:0, 6:1, 8:2 }[c.crestGrade], td = tdi == null ? null : TH965_TDM[key][tdi];
+          if(td2 == null) return { error:"Pitch-diameter grade " + c.pdGrade + " is not tabulated for this pitch (Td2)." };
+          if(td == null) return { error:"Major-diameter grade " + c.crestGrade + " does not exist (Td has grades 4, 6 and 8 only) or is not tabulated for this pitch." };
+          return { ext:true, cls:c, es:es, td2:td2, td:td,
+            major:[r3(D + es / 1000 - td / 1000), r3(D + es / 1000)], pd:[r3(d2b + es / 1000 - td2 / 1000), r3(d2b + es / 1000)],
+            minorMax:r3(d1b + es / 1000) };
+        }
+        var EI = dv[c.pos === "G" ? 0 : 1];
+        var rowI = th965Range(TH965_TD2, D, P); if(!rowI) return { error:"No ISO 965-1 TD2 value for M" + D + " × " + P + " (diameter range / pitch combination not tabulated)." };
+        var TD2 = rowI[3 + c.pdGrade - 4], TD1 = TH965_TD1[key][c.crestGrade - 4];
+        if(c.pdGrade < 4 || c.pdGrade > 8 || TD2 == null) return { error:"Pitch-diameter grade " + c.pdGrade + " is not tabulated for this pitch (TD2 has grades 4–8)." };
+        if(c.crestGrade < 4 || c.crestGrade > 8 || TD1 == null) return { error:"Minor-diameter grade " + c.crestGrade + " is not tabulated for this pitch (TD1 has grades 4–8)." };
+        return { ext:false, cls:c, EI:EI, TD2:TD2, TD1:TD1,
+          minor:[r3(d1b + EI / 1000), r3(d1b + EI / 1000 + TD1 / 1000)], pd:[r3(d2b + EI / 1000), r3(d2b + EI / 1000 + TD2 / 1000)], majorMin:r3(D + EI / 1000) };
+      }
       /* Length-of-engagement basis (ASME B1.1; expansion research §7.2 / D51).
          LE = D for UNC / UNF / UNEF within their standard ranges and for 8-UN
          at every diameter. LE = 9 pitches for 12-UN above 1-1/2 in, 16-UN at
@@ -7850,7 +7922,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         var prevSide = $("thSide").value;
         thFillSelect($("thSide"), sideOpts, sideOpts.some(function(o){ return o[0] === prevSide; }) ? prevSide : sideOpts[0][0]);
         var side = $("thSide").value;
-        if(fam === "metric") clsOpts = side === "int" ? [["6H","6H"]] : [["6g","6g"]];
+        if(fam === "metric") clsOpts = (side === "int" ? TH965_CLS_INT : TH965_CLS_EXT).map(function(c){ return [c, c + (c === "6H" || c === "6g" ? (custom ? "" : " — ISO 965-2 table") : " — from ISO 965-1 tables")]; });
         else if(fam === "un"){ var unRow = custom ? null : thUAll()[parseInt($("thSize").value, 10) || 0]; var un3 = unRow && TH_U3[unRow[0]]; clsOpts = side === "int" ? [["2B","2B"]].concat(un3 ? [["3B","3B"]] : []) : [["2A","2A"]].concat(un3 ? [["3A","3A"]] : []); }
         else if(fam === "bsp") clsOpts = side === "int" ? [["int","Internal — one class (ISO 228-1)"]] : [["A","Class A"],["B","Class B"]];
         else if(fam === "pipe"){ var pr = thPipeAll()[parseInt($("thSize").value, 10) || 0]; clsOpts = [[pr.std, pr.std]]; }
@@ -7884,6 +7956,13 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           var D = Number($("thCD").value), pv = Number($("thCP").value);
           if(!isFinite(D) || D <= 0 || !isFinite(pv) || pv <= 0) return null;
           if(fam === "metric"){
+            var lab965 = "M" + trimNum(D, 3) + " × " + trimNum(pv, 3);
+            var t965 = th965(D, pv, cls);
+            if(!t965.error || (cls !== "6H" && cls !== "6g")){
+              var m965 = th965Model(lab965, D, pv, side, cls, true);
+              var g965 = th261Check(D, pv); if(g965.warn) m965.note = (m965.note ? m965.note + " " : "") + g965.text;
+              return m965;
+            }
             var c = thCustomMetric(D, pv);
             var rowsC = side === "int"
               ? [["Minor diameter D₁", c.intMinor[0], c.intMinor[1]], ["Pitch diameter D₂", c.intPd[0], c.intPd[1]], ["Major diameter D", c.intMajorMin, null, "The standard gives no max for internal major."]]
@@ -7914,6 +7993,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         var idx = parseInt($("thSize").value, 10) || 0;
         if(fam === "metric"){
           var r = TH_M[idx];
+          if(cls !== "6H" && cls !== "6g") return th965Model(r[0], r[1], r[2], side, cls, false);
           var rowsM = side === "int"
             ? [["Minor diameter D₁", r[8], r[9]], ["Pitch diameter D₂", r[10], r[11]], ["Major diameter D", r[12], null, "The standard gives no max for internal major."]]
             : [["Major diameter d", r[4], r[3]], ["Pitch diameter d₂", r[6], r[5]], ["Minor diameter d₁ (max)", null, r[7], "Minor max (tabulated, flat-root basis) — ISO 965-2 does not tabulate external minor limits."]];
@@ -9413,7 +9493,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v49";
+      var APP_BUILD = "v50";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;

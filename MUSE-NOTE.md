@@ -1,3 +1,22 @@
+# Note for Muse — metric thread classes from ISO 965-1 tables (2026-11-21, v50)
+
+Harsh asked for more tolerance classes, calculated precisely.
+- New data block TH965 (ISO 965-1 Tables 1–5, µm): fundamental deviations G/H/e/f/g/h, TD1 (4–8),
+  Td (4/6/8), TD2 (4–8), Td2 (3–9). Tables 1–3: ISO 965-1:2013 iTeh preview = fasteners.eu, identical.
+  Tables 4–5: fasteners.eu = Accu Ltd on all 42 shared rows (ISO preview agrees on the rows it shows).
+  LEFT OUT (one source): 0.99–1.4 mm range and 8 mm pitch rows.
+- th965(D, P, cls): limits = basic ± deviation ± tolerance, rounded 0.001 mm (how ISO 965-2 is built).
+  Reproduces all 486 ISO 965-2 cells of the 54 TH_M rows EXACTLY (the old formula path was up to
+  0.026 mm off). External minor max is a flat-root reference only (differs ≤0.002 from the chart on 3 rows;
+  ISO 965-2 doesn't tabulate it). Independent check: Machining Doctor 6h, 6e, 4g6g, 8g, 5G — all equal.
+- Threads tool, Metric: class list now 6g/6H (table) + 6h 6f 6e 4h 4g 4g6g 5g6g 5h6h 7g6g 7h6h 7e6e 8g
+  9g8g 3h4h / 5H 7H 4H 8H 4H5H 5H6H 6G 5G 7G 8G (computed, badge "Computed — ISO 965-1 tables").
+  Custom sizes now use the tables when the diameter range + pitch is tabulated (exact); otherwise
+  6g/6H fall back to the old formula path (still labelled "calculated").
+- Thread headings no longer uppercase (6g vs 6G matters).
+- Gauge view for metric still shows 6H/6g nominals — ISO 1502 gauge limits are the next step.
+- Test: tests/iso965.test.js (1022 checks).
+
 # Note for Muse — one search across both apps (2026-11-21)
 
 Harsh: "make it easier to access data and search across different types".
