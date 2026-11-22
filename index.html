@@ -592,6 +592,9 @@
       #cyOut table.grid td:first-child, #cyIso table.grid td:first-child, #ftOut table.grid td:first-child, #sgOut table.grid td:first-child{text-align:left;font-family:var(--sans)}
       .ptfig{margin:14px 0 0; border:1px solid var(--line-soft); border-radius:10px; padding:10px; background:var(--panel2)}
       .ptfig svg{display:block; width:100%; max-width:520px; height:auto; margin:0 auto}
+      .hitsec{margin:10px 6px 4px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim); font-weight:600}
+      .hitlink{display:block; padding:8px 10px; border-radius:8px; color:var(--ink); text-decoration:none}
+      .hitlink:hover,.hitlink:focus{background:var(--panel2); outline:none}
       .tscroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
       .dtable.wrap td,.dtable.wrap th{white-space:normal !important}
       .dtable.wrap td.lim{font-family:var(--sans); font-size:12.5px; text-align:left; line-height:1.35}
@@ -736,8 +739,8 @@
            switch inside clusters that hold more than one tool. Every tool keeps
            its original tabbtn-* / tool-* IDs. Not sticky, no bottom bar. -->
       <div class="toolsearch">
-        <label class="flabel" for="toolQ">Find a tool</label>
-        <input type="search" id="toolQ" placeholder="e.g. Cpk, gauge study, M10, torque, hardness, AQL" autocomplete="off" aria-controls="toolHits" />
+        <label class="flabel" for="toolQ">Find a tool or topic</label>
+        <input type="search" id="toolQ" placeholder="e.g. Cpk, M10, torque, weld, 4140, DOM tube" autocomplete="off" aria-controls="toolHits" />
         <div id="toolHits" class="toolhits" role="listbox" hidden></div>
       </div>
       <nav class="clusters" role="tablist" aria-label="Tool groups">
@@ -9410,7 +9413,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v48";
+      var APP_BUILD = "v49";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -10724,19 +10727,42 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],
           ["learn","Learn","learn explain what does it mean help Cpk meaning control limits vs spec limits normality gauge AQL what to do next"]
         ];
+        /* BEGIN DATA ATLASIDX: Materials Atlas card index for cross-search, generated from the Atlas page
+           (card id, title, tab, subtitle, sub-headings) 2026-11-21. Regenerate when Atlas cards change. */
+        var ATLAS_TOPICS = [["lt-rules", "Quick rules", "Learn", "Ten checks that find most cert problems.", "SPEC MIN · No condition, no number · SAE J403 / J404 are chemistry only · Tube: A513 DOM = minimums, A519 seamless = typicals · Match the delivery condition on EN tube · Check the size or thickness band · Know the yield method · Free-machining grades have rules · Judge weldability by carbon equivalent · \"Equivalent\" is not \"interchangeable\""], ["lt-elements", "What the elements do", "Learn", "What each alloying element does, and how strongly.", "Carbon · Manganese · Chromium · Molybdenum · Nickel · Silicon · Vanadium · Copper · Aluminium · alloying · carbon equivalent"], ["lt-heat", "Heat treatment", "Learn", "How the heat-treated condition sets a steel's properties.", "The processes · Anneal +A · annealed · Normalize +N · normalized · Harden (quench) austenitize + quench · Temper +QT · Q&T · Stress relieve +SR · SR · HTSR · Carburize case hardened · Nitride gas / plasma nitrided · Induction harden IH · induction hardened · Age / precipitation harden H900 · H1150 · T6 · Tempering temperature vs hardness — sourced trends, 1-in rounds · Common heat-treatment errors on certs · Example:"], ["lt-glossary", "Conditions glossary", "Learn", "16 condition words from certs and POs — what each means and what to check.", "As-rolled / hot rolled (HR) · HRR · Annealed (+A) · Normalised (+N) · Stress relieved (+SR) · HTSR · Pre-hardened / PH (bar trade) · Quenched & tempered (+QT) · Heat treated (HT) — copper castings · Temper annealed · TQ30 · Aged (e.g. 17-4 PH H900/H1150) · As-cast · Cold worked / cold drawn (CW, CD) · DOM (drawn over mandrel) · HRAP"], ["lt-standards", "Which standard gives a number?", "Learn", "Which documents set strength requirements, and which do not.", "Standard · Controls · Openly readable?"], ["lt-cert", "Reading a cert", "Learn", "The seven checks in order; the full checklist is in Check a Cert.", "Identity & traceability — heat, PO, standard + edition + grade + condition · Cert type — EN 10204 3.1 / MTR with actual results, not a 2.2 or a bare C of C · Chemistry vs the grade's window — every restricted element · Mechanicals vs the condition ordered · Product form & thickness band · Test methods named — and the yield basis · Spec minimum vs typical values"], ["lt-micro", "Inside steel", "Learn", "Phases, the iron–carbon diagram, and why carbon sets hardness.", "Phases and structures · Ferrite (α) BCC · Austenite (γ) FCC · Cementite Fe₃C · Pearlite α + Fe₃C · Martensite BCT · Bainite · Floor checks that come from this · The magnet test · Grain size ASTM E112"], ["lt-testing", "Mechanical testing", "Learn", "What each number on a cert measures.", "Tensile test · Yield strength Rp0.2 · ReH · Tensile strength Rm · UTS · Elongation A · %El · Reduction of area Z · RA · Where the specimen came from ASTM A370 · Hardness · Brinell HBW · ASTM E10 · Rockwell C / B HRC · HRB · ASTM E18 · Vickers / micro HV · ASTM E92 / E384 · Conversions ASTM E140 · ISO 18265 · Impact · Charpy V-notch CVN · ASTM E23"], ["lt-harden", "Hardenability", "Learn", "How deep a steel hardens, which is not the same as how hard.", "Real data: same heat treatment, bigger bar, softer inside · Jominy end-quench test ASTM A255 · H-steels 4140H · SAE J1268 · Ruling section (mass effect) · Why 4140 over 1045 · Brinell HB · grade, treatment · ½ in · 1 in · 2 in · 4 in"], ["lt-weld", "Welding and carbon equivalent", "Learn", "Why some steels crack after welding, and what prevents it.", "Carbon equivalent IIW CE · Hydrogen (cold) cracking · Preheat and interpass · Low-hydrogen consumables E7018 · H4 / H8 · 4140 and other hardenable steels · Don't-weld grades 12L14 · 1144 · 303 · Heat-affected zone HAZ"], ["lt-corr", "Corrosion and coatings", "Learn", "How steel rusts, how stainless resists it, and what coatings add.", "Galvanic corrosion · Why stainless resists rust ≥ 10.5 % Cr · Pitting and chlorides PREN · Hard chrome (piston rod) engineering chrome · Electroplating and hydrogen bake · Zinc plating ASTM B633 · ISO 4042 · Nitriding gas · plasma"], ["lt-fail", "How parts fail", "Learn", "Reading a broken part, and what each failure mode needs.", "Fatigue · Ductile overload · Brittle fracture · Hydrogen embrittlement · Stress corrosion cracking SCC · Wear and galling"], ["lt-ndt", "NDT basics", "Learn", "Which inspection finds which defect.", "Personnel qualification SNT-TC-1A · ISO 9712 · Pick the method for the defect · Method · Finds · Works on · Misses / limits · Typical standards"], ["ct-zn", "Zinc on iron & steel", "Coatings", "ASTM B633-23 · incl. non-hex Types V & VI", "Classification · Service condition · Min thickness · Type · Supplementary finish · Min salt spray"], ["ct-znni", "Zinc-nickel", "Coatings", "ASTM B841-18 (reapproved 2024)", "Class · Nickel content · Grade · Min thickness · Old grade"], ["ct-znco", "Zinc-cobalt", "Coatings", "ASTM B840-22", "Grade · Min thickness · Old grade"], ["ct-en", "Electroless nickel", "Coatings", "ASTM B733-22 (reapproved 2026)", "Service condition · Min thickness · Status · Type · Phosphorus, wt % · Class · Post-plate heat treatment"], ["ct-ni", "Electroplated nickel", "Coatings", "ASTM B689-97 (reapproved 2023) · engineering nickel", "Type · What it is"], ["ct-cr", "Hard chrome (cylinder rods)", "Coatings", "SAE AMS 2460 · replaces QQ-C-320", "Class · Use"], ["ct-cop", "Cobalt-phosphorus (chrome replacement)", "Coatings", "MIL-DTL-32502 · SAE AMS 2428A · nanocrystalline CoP", "Spec · Status · Property (DoD test data) · nCoP · Hard chrome"], ["ct-anod", "Anodize (aluminium)", "Coatings", "MIL-PRF-8625F Amd 2 · free on DLA ASSIST", "Type · Process · Requirement (unsealed) · Type III thickness · Requirement · Type III nominal thickness · Recommended edge & inside-corner radius"], ["ct-meas", "Measuring & testing", "Coatings", "Choosing the right test and avoiding common errors", "1 · Which thickness method for which coating? · 2 · The methods · 3 · Hardness, adhesion, corrosion · 4 · Traps that catch good inspectors · Coating on base metal · Use · Don't use · Method · Destroys part? · What to know"], ["tl-hr", "Hot-rolled rounds", "Tolerances", "ASTM A29/A29M Table A1.1 · carbon & alloy, hot-wrought", "Specified size · Over · Under · Out-of-round"], ["tl-cf", "Cold-finished bar — rounds, hexagons, squares, flats", "Tolerances", "ASTM A108 · cold drawn · turned & polished · ground & polished · hex · square · flat", "Carbon steel hexagons — cold drawn, minus · Carbon steel squares — cold drawn, minus · Carbon steel flats — cold drawn, minus · Size · C max ≤0.28 % · C max over 0.28 to 0.55 % · C max ≤0.55 %, stress relieved or annealed after cold finishing · C max over 0.55 %, or Q&T / N&T before or after cold finishing · C max ≤0.55 %, annealed or stress relieved after cold finishing · C max over 0.55 %, or Q&T / N&T before cold "], ["tl-dom", "DOM tube (cylinder tube stock)", "Tolerances", "ASTM A513 Type 5 · drawn over mandrel · OD, ID & wall", "Wall thickness — plus / minus, in · Outside diameter · OD over · OD under · ID over · ID under · Wall under 6 % of OD — OD & ID · Wall 6 % of OD and over — OD & ID · Wall · BWG · OD 3/8 to 7/8 · OD over 7/8 to 1-7/8 · OD over 1-7/8 to 3-3/4 · OD over 3-3/4 to 15"], ["tl-smls", "Hot-finished seamless tube", "Tolerances", "ASTM A519 · mechanical tubing · OD & wall", "Wall thickness — percent over and under nominal · Outside diameter · OD over · OD under · Wall as % of OD · OD 2.999 and smaller · OD 3.000–5.999 · OD 6.000–10.750"], ["tl-cast", "Castings — porosity & soundness by X-ray", "Tolerances", "ASTM E446 · E186 · E280 reference radiographs (steel)", "Standard (current) · Steel section thickness · Graded — severity levels 1 to 5 · Ungraded — one example each"], ["tl-forge", "Forgings — what governs acceptance", "Tolerances", "ASTM A668 · A788 · A388 ultrasonic", "Standard (current) · What it does · What you check"], ["tl-ht", "Heat treat & hardness — case depth and valid readings", "Tolerances", "SAE J423 · ISO 18203 · ASTM E18", "Effective case depth — the hardness it is measured to (SAE J423) · Is the hardness reading valid? (ASTM E18 Rockwell) · Carbon content of the steel · Effective case depth is measured to · Check · Requirement"]];
+        /* END DATA ATLASIDX */
         var q = $("toolQ"), hits = $("toolHits");
         function score(t, words){
           var hay = (t[1] + " " + t[2]).toLowerCase(), n = 0;
           for(var i=0;i<words.length;i++){ if(hay.indexOf(words[i]) < 0) return 0; n += t[1].toLowerCase().indexOf(words[i]) >= 0 ? 3 : 1; }
           return n;
         }
+        var secText = {};
+        function toolText(id){ /* visible text of a tool, read once, so sizes and terms inside a tool are findable */
+          if(secText[id] === undefined){ var s = $("tool-" + id); secText[id] = s ? s.textContent.toLowerCase() : ""; }
+          return secText[id];
+        }
+        function atlasHits(words){
+          return ATLAS_TOPICS.map(function(t){ var hay = (t[1] + " " + t[2] + " " + t[3] + " " + t[4]).toLowerCase(), n = 0;
+            for(var i = 0; i < words.length; i++){ if(hay.indexOf(words[i]) < 0) return [0, t]; n += t[1].toLowerCase().indexOf(words[i]) >= 0 ? 3 : 1; }
+            return [n, t]; }).filter(function(x){ return x[0] > 0; }).sort(function(a, b){ return b[0] - a[0]; }).slice(0, 3);
+        }
+        var ATLAS_URL = "../materials-atlas/";
         function drawHits(){
-          var words = q.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+          var raw = q.value.trim(), words = raw.toLowerCase().split(/\s+/).filter(Boolean);
           if(!words.length){ hits.hidden = true; hits.innerHTML = ""; return; }
-          var list = TOOLS.map(function(t){ return [score(t, words), t]; }).filter(function(x){ return x[0] > 0; })
-                          .sort(function(a,b){ return b[0]-a[0]; }).slice(0,5);
-          hits.innerHTML = list.length ? list.map(function(x){ return '<button type="button" role="option" data-tab="'+x[1][0]+'">'+H(x[1][1])+'</button>'; }).join("")
-                                       : '<p class="small" style="margin:6px 4px">No tool matches. Try a shorter word.</p>';
+          var list = TOOLS.map(function(t){ return [score(t, words), t]; }).filter(function(x){ return x[0] > 0; });
+          TOOLS.forEach(function(t){ /* fall back to the text inside each tool, ranked below keyword matches */
+            if(list.some(function(x){ return x[1][0] === t[0]; })) return;
+            var txt = toolText(t[0]); if(txt && words.every(function(w){ return txt.indexOf(w) >= 0; })) list.push([0.5, t]);
+          });
+          list = list.sort(function(a,b){ return b[0]-a[0]; }).slice(0,5);
+          var h = list.length ? list.map(function(x){ return '<button type="button" role="option" data-tab="'+x[1][0]+'">'+H(x[1][1])+(x[0] < 1 ? ' <span class="small">· mentioned inside</span>' : '')+'</button>'; }).join("")
+                              : '<p class="small" style="margin:6px 4px">No tool in SPC Tools matches.</p>';
+          var at = raw.length >= 2 ? atlasHits(words) : [];
+          h += '<p class="hitsec">In Materials Atlas</p>' + at.map(function(x){ var t = x[1]; return '<a class="hitlink" href="' + ATLAS_URL + '#open=' + encodeURIComponent(t[0]) + '">' + H(t[1]) + ' <span class="small">· ' + H(t[2]) + '</span></a>'; }).join("") +
+               '<a class="hitlink" href="' + ATLAS_URL + '#q=' + encodeURIComponent(raw) + '">Search Materials Atlas for “' + H(raw) + '” <span class="small">· grades, tolerances, coatings, learn</span></a>';
+          hits.innerHTML = h;
           hits.hidden = false;
         }
         function go(tab){
@@ -10751,6 +10777,15 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(e.key === "Escape"){ hits.hidden = true; }
         });
         hits.addEventListener("click", function(e){ var b = e.target.closest("button[data-tab]"); if(b) go(b.getAttribute("data-tab")); });
+        /* Links: #tool=<id> opens a tool, #q=<text> fills the finder (used by Materials Atlas and shareable). */
+        function route(){
+          var hsh = location.hash.slice(1); if(!hsh || /^import=/.test(hsh)) return;
+          var p = new URLSearchParams(hsh), t = p.get("tool"), qq = p.get("q");
+          if(t && $("tool-" + t)) go(t);
+          else if(qq != null){ q.value = qq; drawHits(); q.focus(); }
+        }
+        window.addEventListener("hashchange", route);
+        setTimeout(route, 0);
 
         /* ---- saved SPC studies ---- */
         function readForm(){ return { name:$("spcName").value.trim(), data:$("spcData").value, lsl:$("spcLSL").value, usl:$("spcUSL").value }; }

@@ -1,0 +1,38 @@
+/* Cross-app search and links between SPC Tools and Materials Atlas. Needs both repos side by side, served over HTTP:
+   (cd .. && python3 -m http.server 8765) then NODE_PATH=... node tests/cross.e2e.js */
+const { chromium } = require("playwright-core");
+(async () => { const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome", args: ["--no-sandbox"] });
+const pg = await b.newPage({ viewport: { width: 390, height: 844 } }); const errs = []; pg.on("pageerror", e => errs.push(String(e)));
+let fail = 0; const chk = (c, m) => { if (!c) { fail++; console.log("FAIL", m); } };
+const SPC = "http://localhost:8765/spc-tools/", ATL = "http://localhost:8765/materials-atlas/";
+await pg.goto(SPC); await pg.waitForTimeout(600);
+const hits = async (q) => { await pg.fill("#toolQ", q); await pg.waitForTimeout(120); return pg.$eval("#toolHits", e => e.innerText.replace(/\s+/g, " ")); };
+let t = await hits("weld"); console.log("SPC weld:", t); chk(/Welding/.test(t) && /Welding and carbon equivalent/.test(t), "weld hits");
+t = await hits("4140"); console.log("SPC 4140:", t); chk(/Search Materials Atlas for “4140”/.test(t), "4140 atlas link");
+t = await hits("3/4-16"); console.log("SPC 3/4-16:", t); chk(/mentioned inside/.test(t), "content search");
+t = await hits("DOM tube"); console.log("SPC DOM tube:", t); chk(/DOM tube/.test(t), "dom topic");
+t = await hits("zinc nickel"); console.log("SPC zinc nickel:", t);
+await pg.fill("#toolQ", "weld"); await pg.waitForTimeout(120);
+await pg.click('#toolHits a.hitlink[href*="lt-weld"]'); await pg.waitForTimeout(900);
+const st = await pg.evaluate(() => { const d = document.getElementById("lt-weld"); return { url: location.href.slice(-30), open: d && d.open, view: d && !d.closest(".view").hidden }; });
+console.log("followed:", st); chk(st.open, "atlas card opened from SPC link");
+await pg.click("#tab-browse"); await pg.fill("#q", "torque"); await pg.waitForTimeout(200);
+t = await pg.$eval("#spcHint", e => e.hidden ? "(hidden)" : e.innerText); console.log("Atlas torque:", t); chk(/Fitting torque/.test(t), "atlas→spc hint");
+await pg.fill("#q", "hardness"); await pg.waitForTimeout(200); console.log("Atlas hardness:", await pg.$eval("#spcHint", e => e.hidden ? "(hidden)" : e.innerText));
+await pg.fill("#q", "4140"); await pg.waitForTimeout(200); console.log("Atlas 4140 spcHint:", await pg.$eval("#spcHint", e => e.hidden ? "(hidden)" : e.innerText));
+await pg.fill("#q", "torque"); await pg.waitForTimeout(200);
+await pg.click('#spcHint a[href*="tool=torque"]'); await pg.waitForTimeout(900);
+const s2 = await pg.evaluate(() => ({ active: document.querySelector("section.tool.active") && document.querySelector("section.tool.active").id }));
+console.log("followed to SPC:", s2); chk(s2.active === "tool-torque", "spc torque opened from atlas link");
+await pg.goto(ATL + "#q=4140"); await pg.waitForTimeout(900);
+const s3 = await pg.evaluate(() => ({ q: document.getElementById("q").value, rows: document.querySelectorAll("#view-browse .card, #view-browse tr").length }));
+console.log("atlas #q:", s3); chk(s3.q === "4140" && s3.rows > 0, "atlas #q");
+await pg.goto(ATL + "#open=tl-dom"); await pg.waitForTimeout(900);
+const s4 = await pg.evaluate(() => ({ open: document.getElementById("tl-dom").open, vis: !document.getElementById("view-tol").hidden }));
+console.log("atlas #open:", s4); chk(s4.open && s4.vis, "atlas #open");
+await pg.goto(SPC + "#tool=weld"); await pg.waitForTimeout(900);
+chk(await pg.evaluate(() => document.querySelector("section.tool.active").id === "tool-weld"), "spc #tool");
+await pg.goto(SPC + "#q=torque"); await pg.waitForTimeout(900);
+chk(/Fitting torque/.test(await pg.$eval("#toolHits", e => e.innerText)), "spc #q");
+await pg.fill("#toolQ", "weld"); await pg.waitForTimeout(150); 
+console.log("fails", fail, "errors", errs); await b.close(); })();
