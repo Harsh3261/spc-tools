@@ -45,6 +45,8 @@
       sigma     #tool-sigma      reference   SIGMA / PPM
       gentol    #tool-gentol     reference   GENERAL TOLERANCES (ISO 2768)
       surf      #tool-surf       reference   SURFACE FINISH
+      torque    #tool-torque     reference   FITTING TORQUE
+      weld      #tool-weld       reference   WELDING (symbols + D1.1 visual)
       A tool is a #tabbtn-<id> button (data-tab, data-cluster) plus a
       section#tool-<id>. showTool() finds both by that naming convention.
 
@@ -590,6 +592,20 @@
       #cyOut table.grid td:first-child, #cyIso table.grid td:first-child, #ftOut table.grid td:first-child, #sgOut table.grid td:first-child{text-align:left;font-family:var(--sans)}
       .ptfig{margin:14px 0 0; border:1px solid var(--line-soft); border-radius:10px; padding:10px; background:var(--panel2)}
       .ptfig svg{display:block; width:100%; max-width:520px; height:auto; margin:0 auto}
+      .tscroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
+      .dtable.wrap td,.dtable.wrap th{white-space:normal !important}
+      .dtable.wrap td.lim{font-family:var(--sans); font-size:12.5px; text-align:left; line-height:1.35}
+      .dtable.wrap .pill{padding:3px 8px; font-size:11.5px; margin-top:0; letter-spacing:.02em}
+      .wsfig{margin:14px 0 0; border:1px solid var(--line-soft); border-radius:10px; padding:10px; background:var(--panel2); color:var(--ink)}
+      .wssvg{display:block; height:auto; margin:0 auto; color:var(--ink); overflow:visible}
+      .wssvg line,.wssvg polyline,.wssvg path,.wssvg rect,.wssvg circle,.wssvg polygon{stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+      .wssvg .nofill{fill:none} .wssvg .fill{fill:currentColor}
+      .wssvg text{fill:currentColor; stroke:none; font-family:var(--mono); font-size:15px}
+      .wssvg text.small{font-size:12px}
+      .wssvg text.halo{paint-order:stroke; stroke:var(--panel2); stroke-width:5px; stroke-linejoin:round}
+      .wschart{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-top:10px}
+      .wscell{margin:0; border:1px solid var(--line-soft); border-radius:8px; padding:6px; background:var(--panel2); color:var(--ink)}
+      .wscell figcaption{font-size:12px; color:var(--ink-dim); text-align:center; margin-top:2px}
       .ptfig figcaption{font-size:12px; color:var(--ink-dim); margin-top:6px; text-align:center}
       .thfind summary{cursor:pointer; font-weight:600; min-height:32px; display:flex; align-items:center}
       .tfpair{display:flex; gap:6px} .tfpair input{flex:1; min-width:0} .tfpair select{flex:0 0 auto; width:auto}
@@ -748,6 +764,8 @@
         <button type="button" role="tab" id="tabbtn-fits" aria-selected="false" data-tab="fits" data-cluster="reference">Fits (ISO 286)</button>
         <button type="button" role="tab" id="tabbtn-gentol" aria-selected="false" data-tab="gentol" data-cluster="reference">General tol. (ISO 2768)</button>
         <button type="button" role="tab" id="tabbtn-surf" aria-selected="false" data-tab="surf" data-cluster="reference">Surface finish</button>
+        <button type="button" role="tab" id="tabbtn-torque" aria-selected="false" data-tab="torque" data-cluster="reference">Fitting torque</button>
+        <button type="button" role="tab" id="tabbtn-weld" aria-selected="false" data-tab="weld" data-cluster="reference">Welding</button>
         <button type="button" role="tab" id="tabbtn-cyl" aria-selected="false" data-tab="cyl" data-cluster="reference">Cylinder &amp; oil</button>
         <button type="button" role="tab" id="tabbtn-convert" aria-selected="false" data-tab="convert" data-cluster="reference">Unit converters</button>
         <button type="button" role="tab" id="tabbtn-learn" aria-selected="false" data-tab="learn" data-cluster="reference">Learn</button>
@@ -1647,6 +1665,182 @@
             <strong>µin conversion:</strong> 1 µin = 0.0254 µm exactly. The N-grade table pairs each Ra in µm with a rounded µin value (0.8 µm ↔ 32 µin; exactly it is 31.5).</p>
           </details>
           <p class="cite">N-grades: ISO 1302:1978 Table 1 (preview text), matched by Machinery's Handbook 31st ed. Table 4 and Ceratizit / Xometry tables. Cut-off selection: ISO 4288:1996 rules as reproduced by Carl Zeiss "Surface parameters" (citing ISO 4288) and Machinery's Handbook 31st ed. Table 3 — every row agrees. Status (ISO catalogue): ISO 4288 withdrawn, revised by ISO 21920-3:2021; ISO 1302 replaced by ISO 21920-1:2021, which drops N-grades. Checked 2026-11-21.</p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL : FITTING TORQUE ============ -->
+      <section class="tool" id="tool-torque" role="tabpanel" aria-labelledby="tabbtn-torque">
+        <div class="card">
+          <h2>Fitting torque — JIC, ORFS, O-ring boss, ISO 6149, flanges, NPTF</h2>
+          <p class="guru">Pick the connection and size to get the tightening torque (or flats / turns), what it means, and where the number comes from. Fitting makers publish different values for the same size, so <strong>the fitting maker's own table always governs</strong>. Use these when you don't have it.</p>
+          <div class="row3">
+            <div><label class="flabel" for="tqConn">Connection</label>
+              <select id="tqConn">
+                <option value="jic" selected>37° JIC flare — swivel / tube nut (SAE J514)</option>
+                <option value="orfs">O-ring face seal (ORFS) nut — SAE J1453</option>
+                <option value="orb">SAE O-ring boss port, straight thread — SAE J1926</option>
+                <option value="6149">Metric O-ring port — ISO 6149</option>
+                <option value="flg">4-bolt flange bolts — SAE J518 / ISO 6162</option>
+                <option value="nptf">NPTF dryseal pipe thread (tapered)</option>
+              </select></div>
+            <div><label class="flabel" for="tqSize">Size</label><select id="tqSize"></select></div>
+            <div><label class="flabel" for="tqMat">Fitting / port material</label>
+              <select id="tqMat">
+                <option value="steel" selected>Steel (zinc-plated) — the baseline</option>
+                <option value="ss">Stainless steel</option>
+                <option value="brass">Brass</option>
+                <option value="al">Aluminium port / body</option>
+              </select></div>
+          </div>
+          <div class="row3" id="tqOpts">
+            <div id="tqSerW"><label class="flabel" for="tqSer">Stud end</label>
+              <select id="tqSer"></select></div>
+            <div id="tqCodeW"><label class="flabel" for="tqCode">Flange</label>
+              <select id="tqCode"><option value="c61" selected>Code 61 (standard pressure)</option><option value="c62">Code 62 (high pressure)</option></select></div>
+            <div id="tqBoltW"><label class="flabel" for="tqBolt">Bolts</label>
+              <select id="tqBolt"><option value="inch" selected>Inch (SAE J518)</option><option value="metric">Metric (ISO 6162)</option></select></div>
+          </div>
+          <div id="tqOut" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Full tables — every size</summary>
+            <div id="tqTables"></div>
+          </details>
+          <details class="thfind" style="margin-top:10px">
+            <summary>Learn — why the numbers differ, flats vs torque, +10 % / −0</summary>
+            <p class="small"><strong>Why makers disagree:</strong> SAE J514 and J1453 set the joint geometry. Where SAE and ISO give a torque, it is a <em>qualification test</em> torque, the torque at which the joint must pass its tests. Each fitting maker then publishes its own assembly torques for its plating, lubrication and design. For example, Parker's ORFS assembly torques are higher than the SAE J1453 test torques. So when the fitting maker's table is available, use it.<br>
+            <strong>Flats from finger tight:</strong> tighten the nut by hand until it stops, then turn it the stated number of hex flats with a wrench (one flat = 1/6 turn). For flare fittings Parker recommends this over torque, because plating and lubrication change how much clamp a given torque produces.<br>
+            <strong>+10 % / −0:</strong> the value shown is the minimum. Tighten to at least that value, and no more than 10 % above it.<br>
+            <strong>Two wrenches:</strong> hold the fitting body with a backup wrench while you tighten the nut, so the torque goes into the joint and doesn't twist the hose, tube or port.</p>
+          </details>
+          <p class="cite" id="tqCite"></p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL : WELDING — SYMBOLS & INSPECTION ============ -->
+      <section class="tool" id="tool-weld" role="tabpanel" aria-labelledby="tabbtn-weld">
+        <div class="card">
+          <h2>Welding symbols — read one, build one</h2>
+          <p class="guru">Set the parts of the symbol from the drawing. The tool draws it the AWS A2.4 way and says in plain words what the welder has to do.</p>
+          <div class="row3">
+            <div><label class="flabel" for="wsType">Weld</label>
+              <select id="wsType">
+                <option value="fillet" selected>Fillet</option><option value="sq">Square groove</option><option value="v">V-groove</option>
+                <option value="bevel">Bevel groove</option><option value="u">U-groove</option><option value="j">J-groove</option>
+                <option value="plug">Plug or slot</option><option value="spot">Spot</option><option value="seam">Seam</option>
+              </select></div>
+            <div><label class="flabel" for="wsSide">Side</label>
+              <select id="wsSide"><option value="arrow" selected>Arrow side (symbol below the line)</option><option value="other">Other side (symbol above the line)</option><option value="both">Both sides</option></select></div>
+            <div><label class="flabel" for="wsSize">Size (left of symbol)</label><input id="wsSize" type="text" autocomplete="off" placeholder="e.g. 1/4 or 3/8"></div>
+          </div>
+          <div class="row3">
+            <div><label class="flabel" for="wsLen">Length</label><input id="wsLen" type="text" autocomplete="off" placeholder="e.g. 2"></div>
+            <div><label class="flabel" for="wsPitch">Pitch (intermittent)</label><input id="wsPitch" type="text" autocomplete="off" placeholder="e.g. 6"></div>
+            <div><label class="flabel" for="wsTail">Tail (process / WPS)</label><input id="wsTail" type="text" autocomplete="off" placeholder="e.g. GMAW or WPS-101"></div>
+          </div>
+          <div class="row3" id="wsGrooveRow">
+            <div><label class="flabel" for="wsThroat">Effective throat (groove)</label><input id="wsThroat" type="text" autocomplete="off" placeholder="e.g. 3/8"></div>
+            <div><label class="flabel" for="wsAngle">Groove angle (°)</label><input id="wsAngle" type="text" autocomplete="off" placeholder="e.g. 60"></div>
+            <div><label class="flabel" for="wsRoot">Root opening</label><input id="wsRoot" type="text" autocomplete="off" placeholder="e.g. 1/8"></div>
+          </div>
+          <div class="row3">
+            <div><label class="flabel" for="wsContour">Contour</label>
+              <select id="wsContour"><option value="" selected>None</option><option value="flush">Flush / flat</option><option value="convex">Convex</option><option value="concave">Concave</option></select></div>
+            <div><label class="flabel" for="wsFinish">Finish method</label>
+              <select id="wsFinish"><option value="" selected>None</option><option value="C">C — chipping</option><option value="G">G — grinding</option><option value="H">H — hammering</option><option value="M">M — machining</option><option value="R">R — rolling</option></select></div>
+            <div><span class="flabel">Extras</span>
+              <label class="small"><input type="checkbox" id="wsAll"> Weld all around</label><br>
+              <label class="small"><input type="checkbox" id="wsField"> Field weld</label></div>
+          </div>
+          <figure id="wsFig" class="wsfig" aria-label="Welding symbol drawing"></figure>
+          <div id="wsRead" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Symbol chart — the basic weld symbols</summary>
+            <div id="wsChart" class="wschart"></div>
+          </details>
+          <details class="thfind" style="margin-top:10px">
+            <summary>AWS A2.4 vs ISO 2553 — read a European drawing correctly</summary>
+            <div class="tscroll"><table class="dtable wrap">
+              <tr><th style="text-align:left">Item</th><th style="text-align:left">AWS A2.4 (North America)</th><th style="text-align:left">ISO 2553 system A</th></tr>
+              <tr><td style="text-align:left">Arrow side / other side</td><td style="text-align:left">One solid line. Below = arrow side, above = other side</td><td style="text-align:left">A solid line plus a dashed line. On the solid line = arrow side, on the dashed line = other side. The dashed line can be above or below</td></tr>
+              <tr><td style="text-align:left">Fillet size</td><td style="text-align:left">Bare number = leg size</td><td style="text-align:left">Letter in front: <strong>a</strong> = throat, <strong>z</strong> = leg (a5 ≈ z7)</td></tr>
+              <tr><td style="text-align:left">Units</td><td style="text-align:left">Inch or metric</td><td style="text-align:left">mm</td></tr>
+            </table></div>
+            <p class="small">ISO 2553 <strong>system B</strong> uses one line like AWS (below = arrow side). The title block or notes should say which system the drawing uses. The costly mistake: reading an ISO "a6" fillet (6 mm throat, about 8.5 mm leg) as a 6 mm leg gives an undersized weld.</p>
+          </details>
+        </div>
+
+        <div class="card">
+          <h2>Visual weld inspection — AWS D1.1 accept / reject</h2>
+          <p class="guru">Enter what you measured. Each check shows the D1.1 Table 8.1 limit (nontubular connections) and passes or rejects. Leave a check blank to skip it. <strong>Check that D1.1 is the right code first</strong> — see "Which code applies?" below.</p>
+          <div class="row3">
+            <div><label class="flabel" for="wiUnit">Units</label><select id="wiUnit"><option value="in" selected>inch (fractions OK, e.g. 1/16)</option><option value="mm">mm (the code's SI values)</option></select></div>
+            <div><label class="flabel" for="wiLoad">Loading</label><select id="wiLoad"><option value="static" selected>Statically loaded, nontubular</option><option value="cyclic">Cyclically loaded (fatigue), nontubular</option></select></div>
+            <div><label class="flabel" for="wiT">Base metal thickness</label><input id="wiT" type="text" autocomplete="off" placeholder="e.g. 1/2"></div>
+          </div>
+          <h3 style="margin-top:12px">Always</h3>
+          <div class="row3">
+            <div><label class="flabel" for="wiCrack">Any crack?</label><select id="wiCrack"><option value="">—</option><option value="no">No crack</option><option value="yes">Crack seen</option></select></div>
+            <div><label class="flabel" for="wiFusion">Fusion</label><select id="wiFusion"><option value="">—</option><option value="ok">Complete fusion</option><option value="lack">Lack of fusion seen</option></select></div>
+            <div><label class="flabel" for="wiCrater">Craters</label><select id="wiCrater"><option value="">—</option><option value="filled">All filled to full size</option><option value="iend">Unfilled only at intermittent-fillet ends, outside the effective length</option><option value="no">Unfilled crater in the weld</option></select></div>
+          </div>
+          <h3 style="margin-top:12px">Fillet size and profile</h3>
+          <div class="row3">
+            <div><label class="flabel" for="wiL">Nominal fillet size (drawing)</label><input id="wiL" type="text" autocomplete="off" placeholder="e.g. 1/4"></div>
+            <div><label class="flabel" for="wiLm">Smallest size measured</label><input id="wiLm" type="text" autocomplete="off" placeholder="e.g. 3/16"></div>
+            <div><label class="flabel" for="wiLp">Undersized portion, % of weld length</label><input id="wiLp" type="number" step="any" inputmode="decimal" placeholder="e.g. 5"></div>
+          </div>
+          <div class="row3">
+            <div><label class="flabel" for="wiW">Fillet face width W</label><input id="wiW" type="text" autocomplete="off" placeholder="e.g. 3/8"></div>
+            <div><label class="flabel" for="wiC">Convexity measured</label><input id="wiC" type="text" autocomplete="off" placeholder="e.g. 1/16"></div>
+            <div><label class="flabel" for="wiR">Butt-groove reinforcement</label><input id="wiR" type="text" autocomplete="off" placeholder="e.g. 3/32"></div>
+          </div>
+          <h3 style="margin-top:12px">Undercut</h3>
+          <div class="row3">
+            <div><label class="flabel" for="wiU">Deepest undercut</label><input id="wiU" type="text" autocomplete="off" placeholder="e.g. 1/32"></div>
+            <div id="wiUlenW"><label class="flabel" for="wiUlen">Total length deeper than 1/32 in any 12 in</label><input id="wiUlen" type="text" autocomplete="off" placeholder="e.g. 1-1/2"></div>
+            <div id="wiTransW"><label class="flabel" for="wiTrans">Primary member, weld transverse to tensile stress?</label><select id="wiTrans"><option value="no" selected>No</option><option value="yes">Yes</option></select></div>
+          </div>
+          <h3 style="margin-top:12px">Piping porosity</h3>
+          <div class="row3">
+            <div><label class="flabel" for="wiPj">Weld</label><select id="wiPj"><option value="other" selected>Fillet or other groove weld</option><option value="cjp">CJP butt weld transverse to tensile stress</option></select></div>
+            <div id="wiPvisW"><label class="flabel" for="wiPvis">Visible piping porosity?</label><select id="wiPvis"><option value="">—</option><option value="no">None</option><option value="yes">Some seen</option></select></div>
+            <div id="wiP1W"><label class="flabel" for="wiP1">Sum of pore diameters ≥1/32 in any 1 in</label><input id="wiP1" type="text" autocomplete="off" placeholder="e.g. 1/8"></div>
+            <div id="wiP12W"><label class="flabel" for="wiP12">Same sum in any 12 in</label><input id="wiP12" type="text" autocomplete="off" placeholder="e.g. 1/2"></div>
+            <div id="wiPnW"><label class="flabel" for="wiPn">Pores in any 4 in of weld</label><input id="wiPn" type="number" step="1" min="0" inputmode="numeric" placeholder="e.g. 1"></div>
+            <div id="wiPdW"><label class="flabel" for="wiPd">Largest pore diameter</label><input id="wiPd" type="text" autocomplete="off" placeholder="e.g. 1/16"></div>
+          </div>
+          <div id="wiOut" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>How to inspect a weld visually — step by step</summary>
+            <p class="small"><strong>1. Before welding:</strong> check the fit-up against the drawing and WPS: joint type, root opening, bevel angle, alignment, and clean metal (no mill scale, oil, paint or moisture in the joint). A bad fit-up can't be fixed by welding over it.<br>
+            <strong>2. When to inspect:</strong> D1.1 lets visual inspection start once the weld has cooled to ambient temperature. For ASTM A514, A517 and A709 HPS 100W steels it must wait at least 48 hours after welding, because delayed (hydrogen) cracks can appear late.<br>
+            <strong>3. Light and access:</strong> good light, clean weld (slag and spatter removed), a magnifier for suspected cracks.<br>
+            <strong>4. Look first:</strong> cracks (any crack rejects), lack of fusion at the toes, unfilled craters, overlap (weld metal rolled over the base metal without fusing), arc strikes, porosity.<br>
+            <strong>5. Then measure:</strong>
+            <em>fillet size</em> with a fillet gauge (on a convex fillet the gauge checks the leg; on a concave fillet it checks the throat, which is what governs a concave weld);
+            <em>undercut depth</em> with an undercut or bridge cam gauge;
+            <em>convexity and reinforcement</em> with a bridge cam gauge or a straight edge and feeler;
+            <em>length and spacing</em> of intermittent welds with a rule.<br>
+            <strong>6. Record</strong> what you found, where, and the result. A reject is repaired (by the WPS) and re-inspected.</p>
+          </details>
+          <details class="thfind" style="margin-top:10px">
+            <summary>What each discontinuity is</summary>
+            <p class="small"><strong>Crack</strong> — a fracture in the weld or heat-affected zone, the most serious defect.<br>
+            <strong>Incomplete fusion</strong> — weld metal not melted into the base metal or the previous pass.<br>
+            <strong>Incomplete joint penetration</strong> — the weld doesn't reach through the joint where full penetration was asked for.<br>
+            <strong>Undercut</strong> — a groove melted into the base metal along the toe and left unfilled.<br>
+            <strong>Overlap</strong> — weld metal lying on the base metal past the toe without fusing to it.<br>
+            <strong>Porosity</strong> — gas pores; "piping" porosity is elongated and runs into the weld.<br>
+            <strong>Crater</strong> — the dip left where the arc stopped; an unfilled crater often has a crack.<br>
+            <strong>Undersized weld</strong> — leg or throat smaller than the drawing.<br>
+            <strong>Excess convexity / reinforcement</strong> — too much weld metal built up on the face, which concentrates stress at the toes.</p>
+          </details>
+          <details class="thfind" style="margin-top:10px">
+            <summary>Which code applies?</summary>
+            <p class="small">The drawing, PO or customer specification decides — this tool uses <strong>AWS D1.1</strong> (structural steel) because it is the most widely used North American code. Others you may meet: <strong>AWS D14.4</strong> (welded joints in machinery and equipment), <strong>ASME Section IX</strong> (welder and procedure qualification for pressure equipment), and <strong>ISO 5817</strong> quality levels B / C / D on European drawings. If the drawing names no code, ask before you accept or reject, and record what you used.<br>
+            <strong>Edition matters:</strong> D1.1:2025 clarified the undercut and porosity rows. It added pro-rated limits for welds shorter than 12 in, which this tool does not apply. Check the edition named in your contract.</p>
+          </details>
+          <p class="cite">Symbols: AWS A2.4 conventions as given by several independent references that agree (Draftsperson, clause5.io, Welders Supply, Weld Fab World); ISO 2553 differences per TWI, Welding Australia (AS 1101.3) and others. Acceptance: AWS D1.1/D1.1M Table 8.1, from a reproduction of the 2020 table and summaries of the 2020 and 2025 tables that agree on every value used. Convexity: Table 7.9 Schedule C (clause5.io, PDHonline M381, ESAB). Butt reinforcement: only the base-metal ≤ 1 in row (1/8 in). Tubular connections are not covered.</p>
         </div>
       </section>
 
@@ -9216,7 +9410,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v46";
+      var APP_BUILD = "v47";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -10095,6 +10289,399 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         ["sfVal","sfParam"].forEach(function(id){ el(id).addEventListener("input", function(){ el("sfN").value = ""; render(); }); el(id).addEventListener("change", render); });
         tables(); render();
       })();
+      /* ===================== FITTING TORQUE ===================== */
+      /* BEGIN DATA TQ: hydraulic fitting assembly torques. Every table confirmed in two copies:
+         JIC  — Parker Hose Products Division catalogue p. G-12, zinc-yellow plated carbon steel, no lubrication
+                (billavista.com copy + slideshare 11977279). -5 and -6 left out: found in one copy only.
+         ORFS — SAE J1453 face seal nut qualification test torque, +10 %/-0 (SAE J1453-1:2019 / J1453-2:2015
+                sample pages, World Wide Fittings catalogue, Air-Way ORFS assembly instructions).
+         ORB  — Parker Table R1 / T1, SAE J1926 straight-thread port, NON-adjustable stud ends, +10 %/-0,
+                threads lubricated, steel in steel (Parker Port End Assembly Guide, Parker catalogue 4300,
+                L3Harris supplier spec copy). Printed units kept: in-lb to -8, ft-lb from -10.
+         6149 — ISO 6149-2 (S) / -3 (L) stud end qualification torques, +10 %/-0 (World Wide Fittings, Parker
+                Table R4, Gates ISO 6149 sheet, SAE J2244-4 / J1453-1 samples). M30x2 S series disputed:
+                215 N·m (SAE J2244-4, World Wide) vs 235 N·m (SAE J1453-1:2019, Parker) — both kept.
+         FLG  — Parker Tables R6 / R7, Code 61 / 62 bolt torque, +10 %/-0 (Parker Port End Assembly Guide + mfcp.com).
+         NPTF — turns from finger tight (Parker Table R5 + World Wide Fittings).
+         Verified 2026-11-21. Edit only by a verified data change. */
+      var TQ_JIC = [ /* dash, thread, N·m [min,max], in-lb [min,max], flats from finger tight */
+        ["-4","7/16-20",[15,17],[130,150],2], ["-8","3/4-16",[59,65],[525,575],1], ["-10","7/8-14",[68,79],[600,700],1],
+        ["-12","1-1/16-12",[107,119],[950,1050],1], ["-16","1-5/16-12",[158,170],[1400,1500],1], ["-20","1-5/8-12",[215,237],[1900,2100],1],
+        ["-24","1-7/8-12",[254,288],[2250,2550],1], ["-32","2-1/2-12",[339,384],[3000,3400],1]
+      ];
+      var TQ_ORFS = [ /* dash, face seal thread, qualification torque N·m (+10 %/-0) */
+        ["-4","9/16-18",25], ["-5","5/8-18",30], ["-6","11/16-16",40], ["-8","13/16-16",55], ["-10","1-14",60],
+        ["-12","1-3/16-12",90], ["-14","1-5/16-12",115], ["-16","1-7/16-12",125], ["-20","1-11/16-12",170], ["-24","2-12",200]
+      ];
+      var TQ_ORB = [ /* dash, thread, heavy-duty S stud (SAE J1926-2), light-duty L stud (SAE J1926-3) — [value, unit] as printed */
+        ["-2","5/16-24",null,[85,"in-lb"]], ["-3","3/8-24",null,[155,"in-lb"]],
+        ["-4","7/16-20",[310,"in-lb"],[260,"in-lb"]], ["-5","1/2-20",[360,"in-lb"],[280,"in-lb"]],
+        ["-6","9/16-18",[420,"in-lb"],[350,"in-lb"]], ["-8","3/4-16",[720,"in-lb"],[620,"in-lb"]],
+        ["-10","7/8-14",[100,"ft-lb"],[85,"ft-lb"]], ["-12","1-1/16-12",[135,"ft-lb"],[135,"ft-lb"]],
+        ["-14","1-3/16-12",[175,"ft-lb"],[175,"ft-lb"]], ["-16","1-5/16-12",[200,"ft-lb"],[200,"ft-lb"]],
+        ["-20","1-5/8-12",[250,"ft-lb"],[250,"ft-lb"]], ["-24","1-7/8-12",[305,"ft-lb"],[305,"ft-lb"]],
+        ["-32","2-1/2-12",[375,"ft-lb"],[375,"ft-lb"]]
+      ];
+      var TQ_6149 = [ /* thread, S series ISO 6149-2 N·m, L series ISO 6149-3 N·m (+10 %/-0); [a,b] = sources differ */
+        ["M8x1",10,8], ["M10x1",20,15], ["M12x1.5",35,25], ["M14x1.5",45,35], ["M16x1.5",55,40], ["M18x1.5",70,45],
+        ["M20x1.5",80,null], ["M22x1.5",100,60], ["M27x2",170,100], ["M30x2",[215,235],130], ["M33x2",310,160],
+        ["M42x2",330,210], ["M48x2",420,260], ["M60x2",500,315]
+      ];
+      var TQ_FLG = { /* dash, flange size (in), inch bolt, ft-lb, metric bolt, N·m, metric bolt meets ISO 6162 (+10 %/-0) */
+        c61:[["-8","1/2","5/16-18",17,"M8",24,true], ["-12","3/4","3/8-16",31,"M10",50,true], ["-16","1","3/8-16",31,"M10",50,true],
+             ["-20","1-1/4","7/16-14",52,"M10",50,true], ["-24","1-1/2","1/2-13",77,"M12",92,true], ["-32","2","1/2-13",77,"M12",92,false],
+             ["-40","2-1/2","1/2-13",77,"M12",92,true], ["-48","3","5/8-11",155,"M16",210,true], ["-56","3-1/2","5/8-11",155,"M16",210,true],
+             ["-64","4","5/8-11",155,"M16",210,true], ["-80","5","5/8-11",155,"M16",210,true]],
+        c62:[["-8","1/2","5/16-18",17,"M8",24,true], ["-12","3/4","3/8-16",31,"M10",50,true], ["-16","1","7/16-14",52,"M12",92,true],
+             ["-20","1-1/4","1/2-13",77,"M14",130,false], ["-24","1-1/2","5/8-11",155,"M16",210,true], ["-32","2","3/4-10",265,"M20",400,true]]
+      };
+      var TQ_NPTF = [ /* NPTF size, turns from finger tight [min,max] */
+        ["1/8-27",[2,3]], ["1/4-18",[2,3]], ["3/8-18",[2,3]], ["1/2-14",[2,3]], ["3/4-14",[2,3]],
+        ["1-11-1/2",[1.5,2.5]], ["1-1/4-11-1/2",[1.5,2.5]], ["1-1/2-11-1/2",[1.5,2.5]], ["2-11-1/2",[1.5,2.5]]
+      ];
+      /* END DATA TQ */
+      var TQ_NM_PER_FTLB = 1.3558179483314, TQ_NM_PER_INLB = 0.1129848290276;
+      function tqToNm(v, unit){ return unit === "ft-lb" ? v * TQ_NM_PER_FTLB : unit === "in-lb" ? v * TQ_NM_PER_INLB : v; }
+      function tqRow(t, key){ for(var i = 0; i < t.length; i++) if(t[i][0] === key) return t[i]; return null; }
+      function tqLookup(conn, key, o){ /* base (steel) values. nm = [min, max] in N·m. */
+        o = o || {}; var r;
+        if(conn === "jic"){ r = tqRow(TQ_JIC, key); if(!r) return null;
+          return { thread:r[1], nm:r[2].slice(), inlb:r[3].slice(), flats:r[4], basis:"range" }; }
+        if(conn === "orfs"){ r = tqRow(TQ_ORFS, key); if(!r) return null;
+          return { thread:r[1], nominal:[r[2], "N·m"], nm:[r[2], r[2] * 1.1], basis:"+10/-0" }; }
+        if(conn === "orb"){ r = tqRow(TQ_ORB, key); if(!r) return null;
+          var p = o.series === "L" ? r[3] : r[2]; if(!p) return { thread:r[1], none:true };
+          var n = tqToNm(p[0], p[1]); return { thread:r[1], nominal:p.slice(), nm:[n, n * 1.1], basis:"+10/-0" }; }
+        if(conn === "6149"){ r = tqRow(TQ_6149, key); if(!r) return null;
+          var v = o.series === "L" ? r[2] : r[1]; if(v == null) return { thread:r[0], none:true };
+          if(Array.isArray(v)) return { thread:r[0], disputed:v.slice(), nominal:[v[0], "N·m"], nm:[v[0], v[1] * 1.1], basis:"disputed" };
+          return { thread:r[0], nominal:[v, "N·m"], nm:[v, v * 1.1], basis:"+10/-0" }; }
+        if(conn === "flg"){ r = tqRow(TQ_FLG[o.code || "c61"], key); if(!r) return null;
+          if(o.bolt === "metric") return { thread:r[4], flange:r[1], nominal:[r[5], "N·m"], nm:[r[5], r[5] * 1.1], basis:"+10/-0", iso:r[6] };
+          var f = tqToNm(r[3], "ft-lb"); return { thread:r[2], flange:r[1], nominal:[r[3], "ft-lb"], nm:[f, f * 1.1], basis:"+10/-0", iso:true }; }
+        if(conn === "nptf"){ r = tqRow(TQ_NPTF, key); if(!r) return null; return { thread:r[0], turns:r[1].slice(), basis:"turns" }; }
+        return null;
+      }
+      function tqAdjust(conn, b, mat){ /* material rules exactly as the verified sources state them */
+        if(!b || b.none || b.turns) return b && b.turns ? { nm:null, note: mat === "steel" ? "" : "World Wide Fittings gives the same turns for steel, stainless steel and brass pipe fittings.", covered:true } : null;
+        var nm = b.nm.slice(), note = "", covered = true;
+        if(mat === "ss"){
+          if(conn === "jic"){ nm = [b.nm[1], b.nm[1]]; note = "Stainless steel: use the top of the steel range and lubricate the threads (Parker)."; }
+          else if(conn === "orb" || conn === "6149"){ nm = [b.nm[1], b.nm[1]]; note = "Stainless steel: use the upper limit of the torque range (Parker)."; }
+          else { covered = false; note = "The verified sources give no stainless-steel value for this connection — use the fitting maker's figure."; }
+        } else if(mat === "brass"){
+          if(conn === "jic"){ nm = [b.nm[0] * 0.65, b.nm[1] * 0.65]; note = "Brass: 65 % of the steel value (Parker)."; }
+          else if(conn === "orb" || conn === "6149"){ nm = [b.nm[0] * 0.65, b.nm[1] * 0.65]; note = "Brass: decrease the torque by 35 % (Parker)."; }
+          else { covered = false; note = "The verified sources give no brass value for this connection — use the fitting maker's figure."; }
+        } else if(mat === "al"){
+          if(conn === "orb" || conn === "6149"){ nm = [b.nm[0] * 0.65, b.nm[1] * 0.65]; note = "Aluminium: decrease the torque by 35 % (Parker)."; }
+          else if(conn === "flg"){ nm = [b.nm[0] * 0.66, b.nm[1] * 0.66]; note = "Soft-metal port or manifold (e.g. aluminium block): about 66 % of the steel value (Parker)."; }
+          else { covered = false; note = "The verified sources give no aluminium value for this connection — use the fitting maker's figure."; }
+        }
+        return { nm:nm, note:note, covered:covered };
+      }
+      (function(){
+        var el = function(id){ return document.getElementById(id); };
+        if(!el("tqConn")) return;
+        var fmt = function(v){ return v >= 100 ? String(Math.round(v)) : (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, ""); };
+        var tube = function(d){ var n = Math.abs(parseInt(d, 10)); var w = Math.floor(n / 16), f = n % 16, g = 16; while(f && f % 2 === 0 && g > 1){ f /= 2; g /= 2; } return (w ? w + (f ? "-" : "") : "") + (f ? f + "/" + g : "") + '"'; };
+        function sizes(){
+          var c = el("tqConn").value, s = el("tqSize"), keep = s.value, o = [];
+          if(c === "jic") o = TQ_JIC.map(function(r){ return [r[0], r[0] + " — " + r[1] + " (" + tube(r[0]) + " tube)"]; });
+          if(c === "orfs") o = TQ_ORFS.map(function(r){ return [r[0], r[0] + " — " + r[1] + " (" + tube(r[0]) + " tube)"]; });
+          if(c === "orb") o = TQ_ORB.map(function(r){ return [r[0], r[0] + " — " + r[1]]; });
+          if(c === "6149") o = TQ_6149.map(function(r){ return [r[0], r[0]]; });
+          if(c === "flg") o = TQ_FLG[el("tqCode").value].map(function(r){ return [r[0], r[0] + " — " + r[1] + '" flange'] ; });
+          if(c === "nptf") o = TQ_NPTF.map(function(r){ return [r[0], r[0] + " NPTF"]; });
+          s.innerHTML = o.map(function(x){ return '<option value="' + x[0] + '">' + x[1] + "</option>"; }).join("");
+          if(o.some(function(x){ return x[0] === keep; })) s.value = keep; else if(c === "jic" || c === "orb" || c === "orfs") s.value = "-8"; else if(c === "6149") s.value = "M18x1.5";
+          var ser = el("tqSer");
+          ser.innerHTML = c === "orb" ? '<option value="S">Heavy-duty S — ORFS stud ends (SAE J1926-2)</option><option value="L">Light-duty L — 37° JIC / flareless stud ends (SAE J1926-3)</option>'
+                                     : '<option value="S">S series — heavy duty (ISO 6149-2)</option><option value="L">L series — light duty (ISO 6149-3)</option>';
+          el("tqSerW").classList.toggle("hidden", !(c === "orb" || c === "6149"));
+          el("tqCodeW").classList.toggle("hidden", c !== "flg"); el("tqBoltW").classList.toggle("hidden", c !== "flg");
+          el("tqOpts").classList.toggle("hidden", !(c === "orb" || c === "6149" || c === "flg"));
+        }
+        function render(){
+          var c = el("tqConn").value, k = el("tqSize").value, mat = el("tqMat").value;
+          var b = tqLookup(c, k, { series:el("tqSer").value, code:el("tqCode").value, bolt:el("tqBolt").value }), out = el("tqOut");
+          if(!b){ out.innerHTML = ""; return; }
+          if(b.none){ out.innerHTML = '<p class="small">No value for this size in this stud series in the verified table' + (c === "orb" ? " (Parker lists no heavy-duty S stud below -4)." : " (ISO 6149-3 has no M20x1.5 — that size is for cartridge-valve cavity plugs, S series only).") + "</p>"; return; }
+          var a = tqAdjust(c, b, mat), h = '<table class="dtable wrap" aria-label="Fitting torque result"><tr><th style="text-align:left">Item</th><th>Value</th></tr>';
+          var row = function(x, y){ h += '<tr><td style="text-align:left">' + x + "</td><td>" + y + "</td></tr>"; };
+          var plain = [];
+          row(c === "flg" ? "Bolt" : "Thread", "<strong>" + b.thread + "</strong>" + (c === "flg" ? " — " + b.flange + '" ' + (el("tqCode").value === "c62" ? "Code 62" : "Code 61") + " flange" : ""));
+          if(c === "nptf"){
+            row("Turns from finger tight", "<strong>" + b.turns[0] + " to " + b.turns[1] + "</strong>");
+            plain.push("Screw it in by hand until it stops, then turn it a further <strong>" + b.turns[0] + " to " + b.turns[1] + " turns</strong> with a wrench. A tapered thread seals on the thread itself, so the turns matter, not a torque value. Parker states no torque for tapered threads.");
+            if(a && a.note) plain.push(a.note);
+          } else {
+            var nm = a.nm, rng = function(f){ return Math.abs(nm[0] - nm[1]) < 1e-9 ? fmt(nm[0] * f) : fmt(nm[0] * f) + " to " + fmt(nm[1] * f); };
+            if(c === "jic" && mat === "steel") row("Flats from finger tight", "<strong>" + b.flats + " flat" + (b.flats > 1 ? "s" : "") + "</strong> (" + (b.flats === 2 ? "1/3" : "1/6") + " turn)");
+            if(b.basis === "disputed") row("Torque (sources differ)", "<strong>" + b.disputed[0] + " N·m</strong> (SAE J2244-4, World Wide) <em>or</em> <strong>" + b.disputed[1] + " N·m</strong> (SAE J1453-1:2019, Parker), each +10 % / −0");
+            else {
+              row("Torque, N·m", "<strong>" + rng(1) + "</strong>");
+              row("Torque, ft-lb", rng(1 / TQ_NM_PER_FTLB));
+              row("Torque, in-lb", rng(1 / TQ_NM_PER_INLB));
+            }
+            if(b.nominal && mat === "steel" && b.basis !== "disputed") row("As printed", b.nominal[0] + " " + b.nominal[1] + " +10 % / −0");
+            if(c === "jic" && mat === "steel") row("As printed", b.inlb[0] + " to " + b.inlb[1] + " in-lb (" + b.nm[0] + " to " + b.nm[1] + " N·m)");
+            if(c === "flg" && !b.iso) row("Note", "this metric bolt does not meet ISO 6162");
+            if(c === "jic"){ plain.push("<strong>Preferred method (Parker): flats from finger tight.</strong> Run the nut down by hand until it stops, then turn it " + b.flats + " hex flat" + (b.flats > 1 ? "s" : "") + " with a wrench while holding the fitting body with a second wrench.");
+              plain.push("If you use a torque wrench instead: <strong>" + rng(1) + " N·m</strong>. Parker's values are for zinc-yellow plated carbon steel, <em>dry</em> (no lubrication); lubricated threads clamp harder at the same torque."); }
+            if(c === "orfs"){ plain.push("This is the SAE J1453 <strong>qualification test torque</strong>: tighten to at least " + fmt(nm[0]) + " N·m and no more than " + fmt(nm[1]) + " N·m. SAE notes that makers' recommended assembly torques may differ. Parker's, for example, are higher.");
+              plain.push("ORFS seals on the O-ring, so check the O-ring is seated in its groove and undamaged first — too little torque lets it extrude under pressure, and more torque won't fix a cut O-ring."); }
+            if(c === "orb"){ plain.push("For a <strong>straight (non-adjustable)</strong> fitting: tighten the fitting body hex to " + rng(1) + " N·m (" + rng(1 / TQ_NM_PER_FTLB) + " ft-lb). Lubricate the threads and O-ring first. Values are for steel fittings in steel ports.");
+              plain.push("<strong>Adjustable</strong> fittings (elbows and tees with a locknut) and port plugs have their own, often lower, values in Parker's table — not included here.");
+              plain.push("Heavy-duty S = the stud end on ORFS (Seal-Lok) fittings; light-duty L = the stud end on 37° JIC (Triple-Lok) and flareless fittings. Look at the other end of the fitting to tell which you have."); }
+            if(c === "6149"){ if(b.basis === "disputed") plain.push("The sources disagree on M30x2 S series: <strong>215 N·m</strong> (SAE J2244-4 and World Wide Fittings) vs <strong>235 N·m</strong> (SAE J1453-1:2019 and Parker). The only torque inside both bands (+10 % / −0) is 235 to 236.5 N·m. Use the fitting maker's figure.");
+              else plain.push("ISO 6149 qualification torque: tighten to at least " + fmt(nm[0]) + " N·m and no more than " + fmt(nm[1]) + " N·m. Lubricate the O-ring. " + (el("tqSer").value === "L" ? "L series = light duty (37° and flareless stud ends)." : "S series = heavy duty (ORFS / 24° stud ends)."));
+              if(k === "M20x1.5") plain.push("M20x1.5 is for cartridge-valve cavity plugs only."); }
+            if(c === "flg"){ plain.push("Fit the O-ring, position the flange and clamp halves, put lock washers on the bolts, and run all four bolts in by hand. Then tighten in a <strong>diagonal (criss-cross) pattern in small steps</strong> up to " + rng(1) + " N·m (" + rng(1 / TQ_NM_PER_FTLB) + " ft-lb).");
+              plain.push("Code 62 uses bigger bolts than Code 61 for the same size — never use the Code 61 value on a Code 62 flange."); }
+            if(b.basis === "+10/-0" && c !== "orfs" && c !== "6149") plain.push("<strong>+10 % / −0</strong> means the printed value is the minimum. Tighten to at least that value, and no more than 10 % above it.");
+            if(a.note) plain.push((a.covered ? "" : "<strong>Not covered:</strong> ") + a.note);
+          }
+          plain.push("<strong>The fitting maker's own table governs.</strong> Published values for the same size differ between makers because plating, lubrication and design differ. Use these numbers when you don't have the maker's table, and record which table you used.");
+          h += "</table>";
+          h += '<div class="tfplain"><h3 style="margin-top:12px">What this means</h3><ul class="small">' + plain.map(function(x){ return "<li>" + x + "</li>"; }).join("") + "</ul></div>";
+          out.innerHTML = h;
+          var cites = { jic:"Parker Hose Products Division catalogue p. G-12 (37° / 45° flare swivel nut torque, zinc-yellow plated carbon steel, no lubrication), checked in two copies. Sizes -5 and -6 were found in only one copy and are not shown.",
+            orfs:"SAE J1453-1 / J1453-2 face seal nut qualification test torque, confirmed by the SAE sample pages, World Wide Fittings and Air-Way.",
+            orb:"Parker Table R1 / T1 — SAE J1926 straight-thread port assembly torques, non-adjustable stud ends (Parker Port End Assembly Guide, Parker catalogue 4300, and an L3Harris supplier-spec copy agree).",
+            "6149":"ISO 6149-2 / -3 stud end qualification torques — World Wide Fittings, Parker Table R4, Gates and SAE J2244-4 / J1453-1 agree on every value except M30x2 S series (flagged).",
+            flg:"Parker Tables R6 / R7 — Code 61 / 62 recommended bolt torque (Parker Port End Assembly Guide, matched by mfcp.com's copy).",
+            nptf:"Turns from finger tight: Parker Table R5 and World Wide Fittings agree." };
+          el("tqCite").textContent = "Source: " + cites[c];
+        }
+        function tables(){
+          var T = function(head, rows){ return '<div class="tscroll"><table class="dtable"><tr>' + head.map(function(x, i){ return "<th" + (i ? "" : ' style="text-align:left"') + ">" + x + "</th>"; }).join("") + "</tr>" + rows.map(function(r){ return "<tr>" + r.map(function(x, i){ return "<td" + (i ? "" : ' style="text-align:left"') + ">" + (x == null ? "—" : x) + "</td>"; }).join("") + "</tr>"; }).join("") + "</table></div>"; };
+          var h = '<h3 style="margin-top:12px">37° JIC flare swivel nut — Parker G-12 (steel, dry)</h3>' + T(["Dash","Thread","N·m","in-lb","Flats from finger tight"], TQ_JIC.map(function(r){ return [r[0], r[1], r[2].join("–"), r[3].join("–"), r[4]]; }));
+          h += '<h3 style="margin-top:12px">ORFS face seal nut — SAE J1453 qualification torque (+10 % / −0)</h3>' + T(["Dash","Thread","N·m","ft-lb"], TQ_ORFS.map(function(r){ return [r[0], r[1], r[2], fmt(r[2] / TQ_NM_PER_FTLB)]; }));
+          h += '<h3 style="margin-top:12px">SAE J1926 O-ring boss, non-adjustable — Parker R1 (+10 % / −0, lubricated)</h3>' + T(["Dash","Thread","Heavy S (J1926-2)","Light L (J1926-3)"], TQ_ORB.map(function(r){ var p = function(x){ return x ? x[0] + " " + x[1] : null; }; return [r[0], r[1], p(r[2]), p(r[3])]; }));
+          h += '<h3 style="margin-top:12px">ISO 6149 stud ends — qualification torque, N·m (+10 % / −0)</h3>' + T(["Thread","S series (6149-2)","L series (6149-3)"], TQ_6149.map(function(r){ return [r[0], Array.isArray(r[1]) ? r[1][0] + " or " + r[1][1] + " *" : r[1], r[2]]; }));
+          h += '<p class="small">* sources disagree — see the result above. M20x1.5: cartridge-valve plugs only.</p>';
+          ["c61","c62"].forEach(function(cd){ h += '<h3 style="margin-top:12px">' + (cd === "c61" ? "Code 61" : "Code 62") + " flange bolts — Parker (+10 % / −0)</h3>" + T(["Dash","Flange","Inch bolt","ft-lb","Metric bolt","N·m"], TQ_FLG[cd].map(function(r){ return [r[0], r[1] + '"', r[2], r[3], r[4] + (r[6] ? "" : " †"), r[5]]; })); });
+          h += '<p class="small">† does not meet ISO 6162.</p>';
+          h += '<h3 style="margin-top:12px">NPTF — turns from finger tight</h3>' + T(["Size","Turns"], TQ_NPTF.map(function(r){ return [r[0], r[1].join(" to ")]; }));
+          el("tqTables").innerHTML = h;
+        }
+        el("tqConn").addEventListener("change", function(){ sizes(); render(); });
+        el("tqCode").addEventListener("change", function(){ sizes(); render(); });
+        ["tqSize","tqMat","tqSer","tqBolt"].forEach(function(id){ el(id).addEventListener("change", render); });
+        sizes(); tables(); render();
+      })();
+
+      /* ===================== WELDING — SYMBOLS & VISUAL INSPECTION ===================== */
+      /* BEGIN DATA WD: AWS D1.1/D1.1M Table 8.1 visual acceptance (nontubular) and Table 7.9 Schedule C convexity.
+         Each limit is [inch, mm] — the mm value is the code's own SI figure (its bracket value), not a conversion.
+         Provenance: D1.1:2020 Table 8.1 reproduction (studylib) + atlantisndt.com (2020) + qualitypros.com.au (2025
+         summary) agree on every value; Schedule C: clause5.io (D1.1:2025), PDHonline M381, ESAB guide.
+         Verified 2026-11-21. */
+      var WD_UNDERSIZE = [ /* nominal fillet size band → allowable decrease U: [from, to) in inch; U [in, mm] */
+        { from:0.125, to:0.25, u:[1/16, 2], tab:"1/8 to 3/16 in [3 to 5 mm]" },
+        { from:0.25, to:0.3125, u:[3/32, 2.5], tab:"1/4 in [6 mm]" },
+        { from:0.3125, to:Infinity, u:[1/8, 3], tab:"5/16 in [8 mm] and over" }
+      ];
+      var WD_CONVEX = [ /* Schedule C: face width W → max convexity [in, mm] */
+        { upTo:[5/16, 8], incl:true, c:[1/16, 2] }, { upTo:[1, 25], incl:false, c:[1/8, 3] }, { upTo:[Infinity, Infinity], incl:true, c:[3/16, 5] }
+      ];
+      var WD_LIM = { /* [in, mm] */
+        uc_thin:[1/32, 1], uc_exc:[1/16, 2], uc_exc_len:[2, 50], uc_win:[12, 300], uc_thick:[1/16, 2], uc_cyc_trans:[0.01, 0.25], uc_cyc:[1/32, 1],
+        t_split:[1, 25], por_1:[3/8, 10], por_12:[3/4, 20], por_min:[1/32, 1], por_cyc_dia:[3/32, 2.5], por_cyc_len:[4, 100], reinf:[1/8, 3], fil_len_pct:10
+      };
+      /* END DATA WD */
+      function wdIdx(unit){ return unit === "mm" ? 1 : 0; }
+      function wdFmt(v, unit){ /* inch values as fractions to 1/64 (e.g. 5/32, 1-1/2); others as decimals */
+        if(unit === "mm") return String(+v.toFixed(2)) + " mm";
+        var n64 = v * 64, r = Math.round(n64);
+        if(Math.abs(n64 - r) > 1e-6 || r === 0) return String(+v.toFixed(4)) + " in";
+        var w = Math.floor(r / 64), num = r % 64, den = 64; while(num && num % 2 === 0){ num /= 2; den /= 2; }
+        return (w ? String(w) : "") + (w && num ? "-" : "") + (num ? num + "/" + den : "") + " in";
+      }
+      function wdParse(s){ /* "1/4", "1-1/4", "1 1/4", "0.25", "6" → number; "" → null; bad → NaN */
+        s = String(s == null ? "" : s).trim().replace(/["”]|in\.?$|mm$/gi, "").trim(); if(!s) return null;
+        var m = s.match(/^(\d+)[\s-]+(\d+)\/(\d+)$/); if(m) return +m[1] + m[2] / m[3];
+        m = s.match(/^(\d+)\/(\d+)$/); if(m) return m[1] / m[2];
+        return /^\d*\.?\d+$/.test(s) ? parseFloat(s) : NaN;
+      }
+      function wdUndersize(L, unit){ /* L in the chosen unit → {u, row, between} or null if below the table */
+        var Lin = unit === "mm" ? null : L, i = wdIdx(unit);
+        if(unit === "mm"){ /* the code's SI bands: 3–5 mm, 6 mm, 8 mm and over */
+          if(L < 3 - 1e-9) return null;
+          if(L < 6 - 1e-9) return { u:2, row:WD_UNDERSIZE[0], between: L > 5 + 1e-9 };
+          if(L < 8 - 1e-9) return { u:2.5, row:WD_UNDERSIZE[1], between: L > 6 + 1e-9 };
+          return { u:3, row:WD_UNDERSIZE[2], between:false };
+        }
+        if(Lin < 0.125 - 1e-9) return null;
+        for(var k = 0; k < WD_UNDERSIZE.length; k++){ var r = WD_UNDERSIZE[k];
+          if(Lin >= r.from - 1e-9 && Lin < r.to - 1e-9) return { u:r.u[i], row:r, between: (k === 0 && Lin > 0.1875 + 1e-9) || (k === 1 && Lin > 0.25 + 1e-9) }; }
+        return null;
+      }
+      function wdConvexMax(W, unit){ var i = wdIdx(unit);
+        for(var k = 0; k < WD_CONVEX.length; k++){ var r = WD_CONVEX[k], lim = r.upTo[i]; if(r.incl ? W <= lim + 1e-9 : W < lim - 1e-9) return r.c[i]; }
+        return WD_CONVEX[2].c[i];
+      }
+      function wdCheck(o){ /* o: unit, load, t, crack, fusion, crater, L, Lm, Lp, W, C, R, U, Ulen, trans, pj, pvis, p1, p12, pn, pd → rows */
+        var i = wdIdx(o.unit), u = o.unit === "mm" ? " mm" : " in", L = WD_LIM, rows = [];
+        var f = function(v){ return wdFmt(v, o.unit); };
+        var add = function(check, limit, got, pass, note){ rows.push({ check:check, limit:limit, got:got, pass:pass, note:note || "" }); };
+        var cyc = o.load === "cyclic", tThick = o.t != null && o.t >= L.t_split[i] - 1e-9;
+        if(o.crack) add("Cracks", "none allowed, any size or place", o.crack === "yes" ? "crack seen" : "none", o.crack !== "yes");
+        if(o.fusion) add("Fusion", "complete fusion, weld to base metal and between passes", o.fusion === "lack" ? "lack of fusion" : "complete", o.fusion !== "lack");
+        if(o.crater) add("Craters", cyc ? "all craters filled to the full weld size" : "filled to full size (except intermittent-fillet ends outside the effective length)",
+          o.crater === "filled" ? "filled" : o.crater === "iend" ? "unfilled at intermittent ends" : "unfilled", o.crater === "filled" || (o.crater === "iend" && !cyc));
+        if(o.L != null && o.Lm != null){
+          var us = wdUndersize(o.L, o.unit);
+          if(!us) add("Fillet size", "the table starts at 1/8 in [3 mm]", f(o.Lm), null, "Nominal size is below the D1.1 undersize table — use the drawing.");
+          else { var min = o.L - us.u, okSize = o.Lm >= min - 1e-9, under = o.Lm < o.L - 1e-9;
+            var okLen = !under || (o.Lp != null && o.Lp <= L.fil_len_pct + 1e-9);
+            add("Fillet size", "≥ " + f(min) + " (nominal " + f(o.L) + " − " + f(us.u) + "), and the undersized part ≤ 10 % of the weld length", f(o.Lm) + (under ? ", " + (o.Lp == null ? "length % not entered" : o.Lp + " % of length") : ""),
+              okSize && (under ? (o.Lp == null ? null : okLen) : true),
+              (us.between ? "Nominal size falls between the code's listed sizes; the smaller allowance of the two rows is used. " : "") + (under && o.Lp == null ? "Enter the undersized % of length to finish this check. " : "") + "Girder web-to-flange welds: no undersize at the ends for twice the flange width."); } }
+        if(o.W != null && o.C != null){ var cm = wdConvexMax(o.W, o.unit); add("Fillet convexity", "≤ " + f(cm) + " for face width " + f(o.W), f(o.C), o.C <= cm + 1e-9); }
+        if(o.R != null){
+          if(o.t == null) add("Butt-groove reinforcement", "needs base metal thickness", f(o.R), null, "Enter the thickness.");
+          else if(tThick) add("Butt-groove reinforcement", "base metal over 1 in [25 mm]: see D1.1 Table 7.9 Schedule A", f(o.R), null, "Only the ≤ 1 in [25 mm] row (1/8 in [3 mm]) is included.");
+          else add("Butt-groove reinforcement", "≤ " + f(L.reinf[i]) + " (base metal ≤ 1 in [25 mm])", f(o.R), o.R <= L.reinf[i] + 1e-9); }
+        if(o.U != null){
+          if(cyc){ var lim = o.trans === "yes" ? L.uc_cyc_trans[i] : L.uc_cyc[i];
+            add("Undercut (cyclic)", "≤ " + f(lim) + (o.trans === "yes" ? " — primary member, transverse to tensile stress" : " — all other cases"), f(o.U), o.U <= lim + 1e-9); }
+          else if(o.t == null) add("Undercut", "needs base metal thickness", f(o.U), null, "Enter the thickness — the limit depends on it.");
+          else if(tThick) add("Undercut", "≤ " + f(L.uc_thick[i]) + " (base metal 1 in [25 mm] or thicker)", f(o.U), o.U <= L.uc_thick[i] + 1e-9);
+          else { var okU = o.U <= L.uc_thin[i] + 1e-9, exc = !okU && o.U <= L.uc_exc[i] + 1e-9;
+            var res = okU ? true : exc ? (o.Ulen == null ? null : o.Ulen <= L.uc_exc_len[i] + 1e-9) : false;
+            add("Undercut", "≤ " + f(L.uc_thin[i]) + "; up to " + f(L.uc_exc[i]) + " allowed for a total of " + f(L.uc_exc_len[i]) + " in any " + f(L.uc_win[i]) + " of weld (base metal under 1 in [25 mm])",
+              f(o.U) + (exc ? (o.Ulen == null ? ", length not entered" : ", " + f(o.Ulen) + " deeper than " + f(L.uc_thin[i])) : ""), res,
+              exc && o.Ulen == null ? "Enter the total length deeper than " + f(L.uc_thin[i]) + " in any " + f(L.uc_win[i]) + "." : ""); } }
+        if(o.pj === "cjp" && o.pvis) add("Piping porosity (CJP butt, transverse to tension)", "no visible piping porosity", o.pvis === "yes" ? "porosity seen" : "none", o.pvis !== "yes");
+        if(o.pj !== "cjp"){
+          if(!cyc && (o.p1 != null || o.p12 != null)){
+            var ok1 = o.p1 == null || o.p1 <= L.por_1[i] + 1e-9, ok12 = o.p12 == null || o.p12 <= L.por_12[i] + 1e-9;
+            add("Piping porosity", "sum of pore diameters ≥ " + f(L.por_min[i]) + ": ≤ " + f(L.por_1[i]) + " in any 1 in [25 mm] and ≤ " + f(L.por_12[i]) + " in any 12 in [300 mm]",
+              (o.p1 != null ? f(o.p1) + " per 1 in" : "") + (o.p1 != null && o.p12 != null ? ", " : "") + (o.p12 != null ? f(o.p12) + " per 12 in" : ""), ok1 && ok12); }
+          if(cyc && (o.pn != null || o.pd != null)){
+            var okn = o.pn == null || o.pn <= 1, okd = o.pd == null || o.pd <= L.por_cyc_dia[i] + 1e-9;
+            add("Piping porosity (cyclic)", "≤ 1 pore in any " + f(L.por_cyc_len[i]) + " of weld, largest diameter ≤ " + f(L.por_cyc_dia[i]),
+              (o.pn != null ? o.pn + " per 4 in [100 mm]" : "") + (o.pn != null && o.pd != null ? ", " : "") + (o.pd != null ? "largest " + f(o.pd) : ""), okn && okd); } }
+        return rows;
+      }
+      function wdSymbolSVG(o, mini){ /* AWS A2.4 layout: arrow at the left end of the reference line, tail at the right */
+        var W = mini ? 230 : 440, H = mini ? 150 : 230, y = mini ? 74 : 112, x0 = mini ? 60 : 96, x1 = mini ? 200 : 360, cx = mini ? 125 : 215;
+        var S = "", esc = function(t){ return String(t).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); };
+        var line = function(a, b, c, d){ S += '<line x1="' + a + '" y1="' + b + '" x2="' + c + '" y2="' + d + '"/>'; };
+        var txt = function(x, yy, t, anc, cls){ S += '<text x="' + x + '" y="' + yy + '" text-anchor="' + (anc || "middle") + '"' + (cls ? ' class="' + cls + '"' : "") + ">" + esc(t) + "</text>"; };
+        line(x0, y, x1, y);
+        var ax = x0 - (mini ? 40 : 62), ay = y + (mini ? 46 : 74); line(x0, y, ax, ay);
+        S += '<polygon class="fill" points="' + ax + "," + ay + " " + (ax + 4) + "," + (ay - 13) + " " + (ax + 12) + "," + (ay - 6) + '"/>';
+        if(o.tail){ line(x1, y, x1 + 18, y - 16); line(x1, y, x1 + 18, y + 16); txt(x1 + 22, y + 5, o.tail, "start"); }
+        if(o.all) S += '<circle cx="' + x0 + '" cy="' + y + '" r="7" class="nofill"/>';
+        if(o.field){ line(x0, y, x0, y - 30); S += '<polygon class="fill" points="' + x0 + "," + (y - 30) + " " + (x0 + 20) + "," + (y - 23) + " " + x0 + "," + (y - 16) + '"/>'; }
+        var sides = o.side === "both" ? [1, -1] : [o.side === "other" ? -1 : 1];
+        sides.forEach(function(s){ /* s = +1 below the line (arrow side), -1 above (other side) */
+          var Y = function(d){ return y + s * d; }, h = mini ? 20 : 26, hw = mini ? 11 : 15, top = h;
+          if(o.type === "fillet") S += '<polygon class="nofill" points="' + (cx - hw) + "," + y + " " + (cx - hw) + "," + Y(h) + " " + (cx + hw) + "," + y + '"/>';
+          if(o.type === "sq"){ line(cx - 6, y, cx - 6, Y(h)); line(cx + 6, y, cx + 6, Y(h)); }
+          if(o.type === "v") S += '<polyline class="nofill" points="' + (cx - hw) + "," + Y(h) + " " + cx + "," + y + " " + (cx + hw) + "," + Y(h) + '"/>';
+          if(o.type === "bevel"){ line(cx - hw, y, cx - hw, Y(h)); line(cx - hw, y, cx + hw, Y(h)); }
+          if(o.type === "u"){ line(cx, y, cx, Y(h * 0.35)); S += '<path class="nofill" d="M' + (cx - hw) + " " + Y(h) + " A" + hw + " " + hw + " 0 0 " + (s > 0 ? 1 : 0) + " " + (cx + hw) + " " + Y(h) + '"/>'; }
+          if(o.type === "j"){ line(cx - hw, y, cx - hw, Y(h)); S += '<path class="nofill" d="M' + (cx - hw) + " " + Y(h * 0.3) + " Q" + (cx + hw) + " " + Y(h * 0.3) + " " + (cx + hw) + " " + Y(h) + '"/>'; }
+          if(o.type === "plug"){ top = 12; S += '<rect class="nofill" x="' + (cx - hw) + '" y="' + (s > 0 ? y : y - top) + '" width="' + (2 * hw) + '" height="' + top + '"/>'; }
+          if(o.type === "spot" || o.type === "seam"){ var rr = hw - 3; top = 2 * rr; S += '<circle class="nofill" cx="' + cx + '" cy="' + Y(rr) + '" r="' + rr + '"/>';
+            if(o.type === "seam"){ line(cx - rr - 5, Y(rr * 0.6), cx + rr + 5, Y(rr * 0.6)); line(cx - rr - 5, Y(rr * 1.4), cx + rr + 5, Y(rr * 1.4)); } }
+          var mid = Y(top / 2) + 5; /* text baseline level with the middle of the symbol */
+          var sizeTxt = (o.size || "") + (o.throat ? "(" + o.throat + ")" : "");
+          if(sizeTxt) txt(cx - hw - 8, mid, sizeTxt, "end");
+          var lp = (o.len || "") + (o.pitch ? "-" + o.pitch : "");
+          if(lp) txt(cx + hw + 8, mid, lp, "start");
+          var grooved = ["sq","v","bevel","u","j"].indexOf(o.type) >= 0, d = top + 6;
+          if(grooved && o.root) txt(o.type === "bevel" || o.type === "j" ? cx + 4 : cx, s > 0 ? Y(top) - 3 : Y(top) + 12, o.root, "middle", "small halo");
+          if(o.contour){ var cy = Y(d + 3);
+            if(o.contour === "flush") line(cx - hw, cy, cx + hw, cy);
+            else { var bulge = (o.contour === "convex" ? 1 : -1) * s * 7; S += '<path class="nofill" d="M' + (cx - hw) + " " + cy + " Q" + cx + " " + (cy + bulge) + " " + (cx + hw) + " " + cy + '"/>'; }
+            d += 12; }
+          if(o.finish){ txt(cx, s > 0 ? Y(d) + 14 : Y(d) - 2, o.finish); d += 16; }
+          if(grooved && o.angle) txt(cx, s > 0 ? Y(d) + 14 : Y(d) - 2, o.angle + "°", "middle", "small");
+        });
+        return '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" style="max-width:' + W + 'px" role="img" aria-label="' + esc(o.label || "welding symbol") + '" class="wssvg">' + S + "</svg>";
+      }
+      var WD_NAMES = { fillet:"Fillet", sq:"Square-groove", v:"V-groove", bevel:"Bevel-groove", u:"U-groove", j:"J-groove", plug:"Plug or slot", spot:"Spot", seam:"Seam" };
+      function wdRead(o){ /* plain-language reading of the symbol */
+        var p = [], grooved = ["sq","v","bevel","u","j"].indexOf(o.type) >= 0, name = WD_NAMES[o.type];
+        if(o.side === "both") name = o.type === "v" ? "Double V-groove" : o.type === "bevel" ? "Double bevel-groove" : o.type === "u" ? "Double U-groove" : o.type === "j" ? "Double J-groove" : name;
+        var side = o.side === "arrow" ? "on the <strong>arrow side</strong> — the side of the joint the arrow touches" : o.side === "other" ? "on the <strong>other side</strong> — the side of the joint opposite the arrow" : "on <strong>both sides</strong> of the joint";
+        p.push("<strong>" + name + " weld</strong> " + side + ".");
+        if(o.type === "fillet") p.push(o.size ? "Leg size <strong>" + o.size + "</strong>." : "No size shown — the size must come from a drawing note or the general notes.");
+        else if(grooved){ if(o.size || o.throat) p.push((o.size ? "Groove preparation depth <strong>" + o.size + "</strong>" : "") + (o.size && o.throat ? ", " : "") + (o.throat ? "effective throat (weld size) <strong>" + o.throat + "</strong>" : "") + ".");
+          else p.push("No depth or throat shown — under AWS A2.4 a groove symbol without them calls for <strong>complete joint penetration (CJP)</strong>. Confirm against the drawing notes."); }
+        else if(o.size) p.push("Size <strong>" + o.size + "</strong>" + (o.type === "spot" ? " (spot diameter or strength, as the drawing defines)" : o.type === "plug" ? " (hole diameter or slot width at the faying surface)" : "") + ".");
+        if(o.len && o.pitch) p.push("<strong>Intermittent:</strong> " + o.len + " long segments spaced " + o.pitch + " centre to centre (pitch).");
+        else if(o.len) p.push("Weld length <strong>" + o.len + "</strong>.");
+        else if(o.pitch) p.push("A pitch with no length is incomplete — ask for the segment length.");
+        else if(o.type !== "spot" && o.type !== "plug") p.push("No length shown — weld the full length of the joint.");
+        if(grooved && o.angle) p.push("Groove angle <strong>" + o.angle + "°</strong> (the included angle of the joint preparation).");
+        if(grooved && o.root) p.push("Root opening <strong>" + o.root + "</strong> (the gap between the parts at the root).");
+        if(o.type === "bevel" || o.type === "j") p.push("A bevel or J is cut on <strong>one member only</strong>. A break (kink) in the arrow points to the member that gets the preparation; with no break, the welder may choose.");
+        if(o.contour){ var cn = { flush:"flush (flat)", convex:"convex", concave:"concave" }[o.contour];
+          p.push("Finished " + cn + (o.finish ? " by <strong>" + { C:"chipping", G:"grinding", H:"hammering", M:"machining", R:"rolling" }[o.finish] + "</strong>" : ", as welded (no finishing method given)") + "."); }
+        else if(o.finish) p.push("Finish method " + o.finish + " is given without a contour symbol — ask what final contour is wanted.");
+        if(o.all) p.push("<strong>Weld all around</strong> — continue the weld right around the joint.");
+        if(o.field) p.push("<strong>Field weld</strong> — made on site or at installation, not in the shop.");
+        if(o.tail) p.push("Tail: <strong>" + o.tail + "</strong> — process, WPS or other reference the welder must follow.");
+        return p;
+      }
+      (function(){
+        var el = function(id){ return document.getElementById(id); };
+        if(!el("wsType")) return;
+        var clean = function(id){ return String(el(id).value || "").trim().slice(0, 24); };
+        function sym(){
+          var o = { type:el("wsType").value, side:el("wsSide").value, size:clean("wsSize"), len:clean("wsLen"), pitch:clean("wsPitch"), tail:clean("wsTail"),
+            throat:clean("wsThroat"), angle:clean("wsAngle"), root:clean("wsRoot"), contour:el("wsContour").value, finish:el("wsFinish").value, all:el("wsAll").checked, field:el("wsField").checked };
+          var grooved = ["sq","v","bevel","u","j"].indexOf(o.type) >= 0;
+          el("wsGrooveRow").classList.toggle("hidden", !grooved);
+          if(!grooved){ o.throat = ""; o.angle = ""; o.root = ""; }
+          o.label = WD_NAMES[o.type] + " welding symbol";
+          el("wsFig").innerHTML = wdSymbolSVG(o);
+          el("wsRead").innerHTML = '<div class="tfplain"><h3 style="margin-top:10px">What it says</h3><ul class="small">' + wdRead(o).map(function(x){ return "<li>" + x + "</li>"; }).join("") + "</ul></div>";
+        }
+        function chart(){
+          el("wsChart").innerHTML = ["fillet","sq","v","bevel","u","j","plug","spot","seam"].map(function(t){
+            return '<figure class="wscell">' + wdSymbolSVG({ type:t, side:"arrow", label:WD_NAMES[t] }, true) + "<figcaption>" + WD_NAMES[t] + "</figcaption></figure>"; }).join("") +
+            '<figure class="wscell">' + wdSymbolSVG({ type:"fillet", side:"arrow", all:true, field:true, label:"all around and field weld" }, true) + "<figcaption>Circle = all around · flag = field weld</figcaption></figure>";
+        }
+        function insp(){
+          var unit = el("wiUnit").value, cyc = el("wiLoad").value === "cyclic", P = function(id){ var v = wdParse(el(id).value); return v === null || isNaN(v) ? null : v; };
+          var bad = ["wiT","wiL","wiLm","wiW","wiC","wiR","wiU","wiUlen","wiP1","wiP12","wiPd"].filter(function(id){ return isNaN(wdParse(el(id).value)); });
+          var mm = unit === "mm";
+          el("wiUlenW").querySelector("label").textContent = mm ? "Total length deeper than 1 mm in any 300 mm" : "Total length deeper than 1/32 in any 12 in";
+          el("wiP1W").querySelector("label").textContent = mm ? "Sum of pore diameters ≥1 mm in any 25 mm" : "Sum of pore diameters ≥1/32 in any 1 in";
+          el("wiP12W").querySelector("label").textContent = mm ? "Same sum in any 300 mm" : "Same sum in any 12 in";
+          el("wiPnW").querySelector("label").textContent = mm ? "Pores in any 100 mm of weld" : "Pores in any 4 in of weld";
+          var cjp = el("wiPj").value === "cjp";
+          el("wiUlenW").classList.toggle("hidden", cyc); el("wiTransW").classList.toggle("hidden", !cyc);
+          el("wiPvisW").classList.toggle("hidden", !cjp);
+          el("wiP1W").classList.toggle("hidden", cjp || cyc); el("wiP12W").classList.toggle("hidden", cjp || cyc);
+          el("wiPnW").classList.toggle("hidden", cjp || !cyc); el("wiPdW").classList.toggle("hidden", cjp || !cyc);
+          var pn = el("wiPn").value === "" ? null : Number(el("wiPn").value), lp = el("wiLp").value === "" ? null : Number(el("wiLp").value);
+          var rows = wdCheck({ unit:unit, load:el("wiLoad").value, t:P("wiT"), crack:el("wiCrack").value, fusion:el("wiFusion").value, crater:el("wiCrater").value,
+            L:P("wiL"), Lm:P("wiLm"), Lp:lp, W:P("wiW"), C:P("wiC"), R:P("wiR"), U:P("wiU"), Ulen:cyc ? null : P("wiUlen"), trans:el("wiTrans").value,
+            pj:el("wiPj").value, pvis:el("wiPvis").value, p1:cjp || cyc ? null : P("wiP1"), p12:cjp || cyc ? null : P("wiP12"), pn:cjp || !cyc ? null : pn, pd:cjp || !cyc ? null : P("wiPd") });
+          var out = el("wiOut");
+          if(bad.length){ out.innerHTML = '<p class="small">Some values could not be read — use numbers or fractions like 1/16 or 1-1/4.</p>'; return; }
+          if(!rows.length){ out.innerHTML = '<p class="small">Enter a measurement or pick an answer above to check it.</p>'; return; }
+          var lab = function(p){ return p === true ? '<span class="pill good">ACCEPT</span>' : p === false ? '<span class="pill bad">REJECT</span>' : '<span class="small">incomplete</span>'; };
+          var h = '<div class="tscroll"><table class="dtable wrap" aria-label="Visual inspection result"><tr><th style="text-align:left">Check</th><th style="text-align:left">D1.1 limit</th><th>Found</th><th>Result</th></tr>' +
+            rows.map(function(r){ return '<tr><td style="text-align:left">' + r.check + '</td><td class="lim">' + r.limit + (r.note ? '<br><span class="small">' + r.note + "</span>" : "") + "</td><td>" + r.got + "</td><td>" + lab(r.pass) + "</td></tr>"; }).join("") + "</table></div>";
+          var anyBad = rows.some(function(r){ return r.pass === false; }), anyOpen = rows.some(function(r){ return r.pass === null; });
+          h += '<p class="verdict ' + (anyBad ? "bad" : anyOpen ? "warn" : "good") + '">' + (anyBad ? "REJECT — at least one check fails. Mark it, repair to the WPS, and inspect it again." : anyOpen ? "Not finished — complete the checks marked incomplete." : "ACCEPT for the checks entered. A weld is acceptable only when every required check has been made.") + "</p>";
+          h += '<p class="small">Limits from AWS D1.1 Table 8.1 for nontubular connections' + (cyc ? " (cyclically loaded)" : " (statically loaded)") + ". In mm mode the code's own SI values are used. If the drawing or contract names another code or edition, that governs.</p>";
+          out.innerHTML = h;
+        }
+        ["wsType","wsSide","wsSize","wsLen","wsPitch","wsTail","wsThroat","wsAngle","wsRoot","wsContour","wsFinish","wsAll","wsField"].forEach(function(id){ el(id).addEventListener("input", sym); el(id).addEventListener("change", sym); });
+        ["wiUnit","wiLoad","wiT","wiCrack","wiFusion","wiCrater","wiL","wiLm","wiLp","wiW","wiC","wiR","wiU","wiUlen","wiTrans","wiPj","wiPvis","wiP1","wiP12","wiPn","wiPd"].forEach(function(id){ el(id).addEventListener("input", insp); el(id).addEventListener("change", insp); });
+        el("wsSize").value = "1/4"; el("wsLen").value = "2"; el("wsPitch").value = "6"; el("wsTail").value = "GMAW";
+        sym(); chart(); insp();
+      })();
     </script>
 
     <div id="rptHead" class="rpthead" aria-hidden="true"></div>
@@ -10130,6 +10717,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           ["fits","Fits (ISO 286)","fit fits tolerance iso 286 hole shaft h7 g6 h8 f7 k6 p6 clearance interference transition it grade limits bore pin bushing press fit"],
           ["gentol","General tolerances (ISO 2768)","general tolerance tolerances iso 2768 2768-m 2768-mk mk fh title block untoleranced dimension default tolerance linear angular chamfer radius broken edge straightness flatness perpendicularity symmetry run-out runout H K L f m c v iso 22081"],
           ["surf","Surface finish","surface finish roughness Ra Rz RSm N-grade N6 N7 N8 microinch µin micron 63 32 125 cut-off cutoff lambda c sampling length evaluation length profilometer iso 1302 iso 4288 21920 polish hone"],
+          ["torque","Fitting torque","torque fitting hydraulic tighten JIC 37 flare swivel nut ORFS face seal ORB o-ring boss straight thread port J1926 J514 J1453 ISO 6149 metric port flange code 61 code 62 bolt J518 6162 NPTF pipe thread turns finger tight flats FFFT FFWR ft-lb N·m Parker"],
+          ["weld","Welding","weld welding symbol symbols fillet groove bevel V J U plug slot spot seam arrow side other side all around field weld tail AWS A2.4 ISO 2553 D1.1 visual inspection acceptance undercut porosity convexity reinforcement undersize leg throat crack crater fusion WPS"],
           ["seal","Seal glands","o-ring gland groove seal squeeze stretch gland fill piston rod static dynamic AS568 dash back-up ring extrusion clearance parker groove design"],
           ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 C04-2 C04-3 C09-2 C10-2T C10-3S C12-3L C12-4L C16-3S C20-3S sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],

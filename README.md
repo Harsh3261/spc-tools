@@ -44,3 +44,8 @@ Methods: AIAG SPC & MSA reference manuals · ANSI/ASQ Z1.4. Published 2026-11-09
 - Stores nothing and makes no network request. Records left by the old tracker are kept and can be downloaded from Basics.
 - Tests: `tests/command.e2e.js` (37 checks).
 - 2026-11-20 (v3): New graphite and teal colour scheme, with brass-coloured shop example boxes. Interview and Drill merged into one Practice tab (old #interview / #drill links still work). Every clause now has an "In a cylinder shop" example. New Basics section on where cylinder shops get written up. Drill has 24 questions, including test stand and welding. Trails are cylinder-specific (saw → weld → hone → assembly → pressure test). Worked finding changed to a test stand gauge. Nav moves to the top on desktop. Print-friendly. 38 checks.
+
+## Update — 2026-11-21 (v47): Fitting torque and Welding
+- **Fitting torque** (Reference): JIC 37° (Parker G-12, with flats from finger tight), ORFS (SAE J1453 qualification torque), SAE O-ring boss ports (Parker, non-adjustable heavy / light), ISO 6149 (S / L series), Code 61 / 62 flange bolts, NPTF turns. Each table checked in two copies. Where sources disagree (ISO 6149 M30x2) both values are shown. Material rules only where the source gives them. The tool says plainly that the fitting maker's own table governs.
+- **Welding** (Reference): AWS A2.4 symbol builder that draws the symbol and reads it in plain words, a symbol chart, and an AWS vs ISO 2553 guide. AWS D1.1 Table 8.1 visual accept / reject checks (cracks, fusion, craters, fillet undersize, convexity, reinforcement, undercut, porosity), plus how to inspect and which code applies.
+- Tests: `tests/torque.test.js` (58 checks), `tests/weld.test.js` (73 checks).

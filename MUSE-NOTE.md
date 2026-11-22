@@ -1,3 +1,39 @@
+# Note for Muse — Fitting torque + Welding tools (2026-11-21, v47)
+
+Harsh asked for welding (symbols, how to check) and "full blazing" hydraulic fitting torque.
+
+NEW TOOL #tool-torque (Reference, "Fitting torque"). Data block TQ, every table in two copies:
+- JIC 37° swivel nut: Parker Hose Div. catalogue p. G-12 (zinc-yellow steel, DRY) — billavista copy +
+  slideshare copy; N·m, in-lb and flats from finger tight. -5 / -6 LEFT OUT (one copy only).
+  Note: Parker's Europe catalogue 4402 has different JIC values again — makers disagree; tool says so.
+- ORFS: SAE J1453 face seal nut QUALIFICATION torque (+10/-0): J1453-1/-2 sample pages, World Wide
+  Fittings, Air-Way. Tool states makers' assembly torques may differ (Parker's are higher).
+- ORB (SAE J1926): Parker Table R1/T1 NON-adjustable only, heavy S (J1926-2) vs light L (J1926-3);
+  Parker guide + catalogue 4300 + L3Harris copy. Printed units kept (in-lb to -8, ft-lb from -10).
+  NOT used: World Wide's J1926-2 qualification list (-8 85, -10 115, -12 170) — it conflicts with the
+  SAE J1453-1 table copy (81 / 136 / 180) and Parker. Adjustables and plugs not included.
+- ISO 6149-2/-3 qualification torques: World Wide, Parker R4, Gates, SAE J2244-4 / J1453-1 agree,
+  EXCEPT M30x2 S series: 215 (J2244-4, World Wide) vs 235 (J1453-1:2019, Parker) — both shown, flagged.
+- Code 61/62 flange bolts: Parker R6/R7 + mfcp.com copy (old 4300 catalogue values differ — not used).
+- NPTF turns from finger tight: Parker R5 + World Wide. BSPT omitted (Parker only).
+- Material rules only as sources state them: SS = top of range (JIC, ORB, 6149); brass 65 % (JIC) /
+  −35 % (ORB, 6149); aluminium −35 % (ORB, 6149), 66 % flange; anything else → "Not covered".
+- BSPP (ISO 1179) skipped: Parker's multi-column table extracted ambiguously.
+
+NEW TOOL #tool-weld (Reference, "Welding").
+- Symbol builder: AWS A2.4 drawing (SVG) + plain reading (side, size, CJP when groove has no size,
+  intermittent L-P, angle, root, contour + finish C/G/H/M/R, all-around, field, tail, bevel/J break
+  rule). Symbol chart + AWS vs ISO 2553 table (dashed line, a vs z).
+- D1.1 Table 8.1 visual accept/reject (nontubular, static & cyclic): crack, fusion, crater, fillet
+  undersize (1/16, 3/32, 1/8; ≤10 % length; between listed sizes the smaller allowance is used),
+  Schedule C convexity, butt reinforcement (ONLY t ≤ 1 in row, 1/8), undercut (1/32; 1/16 for 2 in in
+  12 in; ≥1 in 1/16; cyclic 0.01 transverse / 1/32 — cyclic gets no 1/16 exception = stricter
+  reading), piping porosity (3/8 per in, 3/4 per 12 in; CJP transverse none; cyclic 1 per 4 in,
+  ≤3/32). mm mode uses the code's own SI bracket values. 2025 pro-rated <12 in weld rule NOT applied
+  (named in the tool, one source only). Learn: inspection steps, discontinuities, which code applies.
+- Tests: tests/torque.test.js (58), tests/weld.test.js (73). Smoke: 24 tools, 0 page errors.
+  Phone 390 px and desktop 1280 px: no horizontal overflow.
+
 # Note for Muse — Surface finish tool (2026-11-21, v46)
 
 NEW TOOL #tool-surf (Reference, "Surface finish"; finder: Ra, Rz, N7, 63, cutoff, profilometer…).
