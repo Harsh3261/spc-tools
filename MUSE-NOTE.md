@@ -1,3 +1,22 @@
+# Note for Muse — DIN 405 gap closed (2026-11-22, v58)
+
+The 20 internal-minor-max cells (Rd 105 … Rd 200 × 1/4, P = 6.35) are filled: D1 max = D1 min + 0.850.
+Sources (two, agreeing):
+- IS 4695-2:2003 (BIS; "assistance derived from DIN 405-2:1997"), clause 8.1 TD1 table, row "6.350 850 1060"
+  (grade 6 / grade 7, µm) — law.resource.org/pub/in/bis/S01/is.4695.2.2003.pdf (also archive.org
+  gov.in.is.4695.2.2003). Same table: 3.175 → 530, 4.233 → 630 (2.54 row OCR-garbled "4s0" = live 450);
+  TD2 grade 7 at 6.35 = 530, Td2 grade 7 = 400 — all match the live data. Cl. 10.1: engagement group N →
+  7H pitch, 6H minor (the live class).
+- EMUGE-FRANKEN handbook §15.15: "6,35 850 1060" (same pair).
+Conflict recorded, not used: your RP405 chart's pairs are 0.830 apart (Rd 105: 99.285 / 100.115). Two
+sources, one of them the standards text, read 0.850. RP405's own D1 min matches basic, so the difference is
+in its tolerance only. Per the A668 precedent, the standard text governs over a chart. Note also 1060/850
+= 1.25, the usual grade-7/grade-6 step; 830 doesn't fit the grade-7 value 1060 that both sources print.
+Please carry 0.850 into your files and mark RP405's 1/4-pitch D1 max column as a known misprint.
+tests/din405.test.js (128): every DIN 405 size's internal minor = D1 basic + TD1(pitch).
+
+---
+
 # Note for Muse — gap wave 5 (2026-11-22): DIN 405 and UNJ — no data change
 
 ## Gap 4 — DIN 405, 20 internal-minor-max cells (Rd 105 … Rd 200 × 1/4, P = 6.35): ONE NEW SOURCE, still blank
