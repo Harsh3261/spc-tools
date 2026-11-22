@@ -1508,6 +1508,7 @@
               <select id="ptStd">
                 <option value="j1926" selected>SAE J1926-1 — inch O-ring boss (ORB)</option>
                 <option value="i6149">ISO 6149-1 — metric O-ring port</option>
+                <option value="i1179">ISO 1179-1 — BSPP (G thread) port</option>
                 <option value="f61">SAE J518 / ISO 6162-1 — Code 61 4-bolt flange</option>
                 <option value="f62">SAE J518 / ISO 6162-2 — Code 62 4-bolt flange</option>
                 <option value="cav">Cartridge valve cavity (manufacturer spec)</option>
@@ -1699,6 +1700,8 @@
                 <option value="6149">Metric O-ring port — ISO 6149</option>
                 <option value="flg">4-bolt flange bolts — SAE J518 / ISO 6162</option>
                 <option value="nptf">NPTF dryseal pipe thread (tapered)</option>
+                <option value="bspp">BSPP male stud, G thread — ISO 1179-2 / DIN 3852-2</option>
+                <option value="bspt">BSPT tapered pipe thread (R / Rc, ISO 7-1)</option>
               </select></div>
             <div><label class="flabel" for="tqSize">Size</label><select id="tqSize"></select></div>
             <div><label class="flabel" for="tqMat">Fitting / port material</label>
@@ -8681,6 +8684,24 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         ["M60 × 2",74,67,44,62.4,3.1,27.5,2.5,24.5,15]
       ];
       /* END DATA PT_6149 */
+      /* BEGIN DATA PT_1179: ISO 1179-1:2013 Table 1 — thread, TPI, d2 passage (ref), d3 recess Ø (nom), d3 tol (or null = see standard), d4 spot face min Type N, d4 spot face min Type W, L1 recess depth max, L2 full thread min, L3 tap drill depth min — mm.
+         Provenance: ISO 1179-1:2013 standard text (iTeh preview) × Yuyao Jiayuan's published ISO 1179-1 table — agree on every value G 1/8 … G 1 1/2;
+         164580.com's ISO 1179-1:2013 reproduction also gives G 1/2 and G 3/4 incl. d3 max (21.2, 26.7). G 2 d4 is null: the 2013 text reads N 76 / W none,
+         the 2007 edition and Jiayuan read N 69 / W 73.28–73.53 — one source each. The W column is not loaded (its meaning is not defined in the readable text).
+         Parker Catalog 4300 Table U20 is an OLDER revision (e.g. G 1/2 wide 34.0 vs 29.6, d3 +0.1 to +0.2 larger) — not used. Verified 2026-11-22.
+         Edit data only via a verified data change, never by hand-tuning numbers. */
+      var PT_1179 = [
+        ["G 1/8",28,4.5,9.8,null,15,17.2,1,8.5,10.5],
+        ["G 1/4",19,7.5,13.2,null,20,20.7,1.5,12.5,15.5],
+        ["G 3/8",19,9,16.7,null,23,24.5,2,12.5,15.5],
+        ["G 1/2",14,14,21,0.2,28,29.6,2.5,15,19],
+        ["G 3/4",14,18,26.5,0.2,33,36.9,2.5,16.5,20.5],
+        ["G 1",11,23,33.3,null,41,46.1,2.5,19,24],
+        ["G 1 1/4",11,30,42,null,51,54,2.5,21.5,26.5],
+        ["G 1 1/2",11,36,47.9,null,56,60.5,2.5,22.5,27.5],
+        ["G 2",11,47,59.7,null,null,null,3,26,31]
+      ];
+      /* END DATA PT_1179 */
       /* BEGIN DATA PT_FLANGE: nominal size, bolt spacing long A (in), short B (in), UNC bolt, metric bolt (null = not verified), max working pressure psi — SAE J518 / ISO 6162 */
       var PT_F61 = [
         ["1/2",1.500,.688,"5/16-18","M8",5000],
@@ -8830,6 +8851,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         var std = $("ptStd").value, opts, def = "0";
         if(std === "j1926"){ opts = PT_J1926.map(function(r, i){ return [String(i), r[0] + " — " + r[2].replace(/-2B$/, "") + " (" + r[1] + " in tube)"]; }); def = "5"; }
         else if(std === "i6149"){ opts = PT_6149.map(function(r, i){ return [String(i), r[0] + " 6H"]; }); def = "2"; }
+        else if(std === "i1179"){ opts = PT_1179.map(function(r, i){ return [String(i), r[0] + " (" + r[1] + " TPI)"]; }); def = "1"; }
         else if(std === "f61" || std === "f62"){ opts = (std === "f61" ? PT_F61 : PT_F62).map(function(r, i){ return [String(i), r[0] + " in flange"]; }); def = "2"; }
         else opts = PT_PK.map(function(r, i){ return ["p" + i, "Parker " + r.id + " — " + r.w + "-way, " + r.thr.replace(/-2B$/, "") + (r.ok ? " ✓" : "")]; }).concat(PT_SUN.map(function(r, i){ return ["s" + i, "Sun " + r.id + " — series " + r.ser + ", " + r.np + "-port, " + r.thr.replace(/-\d?[A-Z]+$/, "").replace(/-2B$/, "")]; }));
         thFillSelect($("ptSize"), opts, std === "cav" ? "p6" : def);
@@ -8839,6 +8861,11 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         if(std === "j1926"){
           var base = r[2].replace(/\s*UNF?-2B$/, ""), all = thUAll();
           for(var i = 0; i < all.length; i++){ if(all[i][0].indexOf(base + " ") === 0) return { fam:"un", size:String(i), lab:all[i][0] }; }
+          return null;
+        }
+        if(std === "i1179"){
+          var g = r[0].replace(/\s+/g, "").replace(/^G1(\d\/\d)$/, "G1-$1");
+          for(var bi = 0; bi < TH_BSP2.length; bi++){ var lb0 = TH_BSP2[bi][0].split(" ")[0]; if(lb0 === g || lb0 === r[0].replace(/^G /, "G").replace(" ", "-")) return { fam:"bsp", size:String(bi), lab:TH_BSP2[bi][0].replace(/\u2014/g, "—") }; }
           return null;
         }
         var t = r[0].replace(/\s+/g, " ");
@@ -9014,6 +9041,22 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(m[5] === 1.6) rows[3][3] = "Parker 4300 and two other published tables give 1.6; one reproduction of the 2022 edition shows 2.2. Check your edition of ISO 6149-1 and match the fitting maker's O-ring.";
           fig = ptSvgBoss({ sfD:"d2 " + trimNum(m[1], 2) + " min", chD:"d5 " + trimNum(m[4], 2), sfH:"L3 " + trimNum(m[7], 2) + " max", chH:"L1 " + trimNum(m[5], 2), thH:"L4 " + trimNum(m[8], 2), drH:"L2 " + trimNum(m[6], 2), thr:m[0] + " 6H", ang:"Z " + m[9] + "°", ps:"d3 " + trimNum(m[3], 2) });
           cite = "ISO 6149-1 Table 1 as reproduced by Parker Catalog 4300 (Table U17) and a second published reproduction, agreeing on every row; spot-checked against ISO 6149-1:2022 preview pages. Thread M…6H per ISO 261 / ISO 965-1. Reference only — ISO 6149-1 governs for acceptance.";
+        } else if(std === "i1179"){
+          var b = PT_1179[i]; unit = "mm";
+          title = "ISO 1179-1 port — " + b[0] + " (ISO 228-1, " + b[1] + " TPI)";
+          rows = [
+            ["Full thread length (L2)", trimNum(b[8], 2) + " min", "", "Minimum full-form thread length."],
+            ["Tap drill depth (L3)", trimNum(b[9], 2) + " min", "", "Applies when the tap drill can't pass through the boss. Assumes a bottoming tap — drill deeper for a standard tap."],
+            ["Recess Ø at the port mouth (d3)", trimNum(b[3], 2) + (b[4] != null ? " +" + trimNum(b[4], 2) + " / 0" : " nom."), "", b[4] != null ? null : "Tolerance: read it from your copy of ISO 1179-1 (not legible in the free text)."],
+            ["Recess depth (L1)", trimNum(b[7], 2) + " max", "", null],
+            ["Spot face Ø (d4) — Type N, narrow", b[5] != null ? trimNum(b[5], 2) + " min" : "not loaded", "", b[5] != null ? "For stud ends type B (metal-to-metal) and E (elastomeric seal) — ISO 1179-2 / -4." : "Editions disagree for G 2 (2013 text: 76; 2007 edition: 69) — check your copy."],
+            ["Spot face Ø (d4) — Type W, wide", b[6] != null ? trimNum(b[6], 2) + " min" : "not loaded", "", b[6] != null ? "For stud ends type G and H (O-ring with retaining ring) — ISO 1179-3." : "ISO 1179-3 has no G 2 stud end; the 2007 edition printed 73.28–73.53."],
+            ["Passage Ø (d2)", trimNum(b[2], 2) + " ref.", "", "Reference only."],
+            ["Sealing", "flat face — no O-ring chamfer", "", "The seal is on the stud end (bonded washer, ED ring, O-ring + retaining ring) against the spot face."]
+          ];
+          if(b[0] === "G 2") rows.push(["Note", "accumulator port", "", "ISO 1179-1: the G 2 port is used mainly in accumulators; ISO 1179-2/-3/-4 specify no stud ends for it."]);
+          fig = ""; figcap = "";
+          cite = "ISO 1179-1:2013 Table 1 (standard text, free preview) and Yuyao Jiayuan's published ISO 1179-1 table — agreeing on every value shown; G 1/2 and G 3/4 also match a third reproduction. Older Parker Catalog 4300 tables (Table U20) predate this edition and differ in several cells. Thread G per ISO 228-1. Reference only — ISO 1179-1 governs for acceptance.";
         } else if(std === "f61" || std === "f62"){
           var f = (std === "f61" ? PT_F61 : PT_F62)[i], c61 = std === "f61"; unit = "in";
           title = "SAE J518 " + (c61 ? "Code 61" : "Code 62") + " — " + f[0] + " in flange port";
@@ -9077,7 +9120,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           figcap = "Parker " + q.id + " — drawn to scale from the numbers (lead-ins and radii omitted). Depths from datum A on the left, diameters on the right.";
           cite = "Parker catalog HY15-3502/US, Bodies and Cavities (2012 edition) — Parker's drawing is the governing spec. " + q.chk + " Check against Parker's current catalog before machining.";
         }
-        var link = std === "j1926" || std === "i6149" ? ptThreadLink(std, std === "j1926" ? PT_J1926[i] : PT_6149[i])
+        var link = std === "i1179" ? ptThreadLink(std, PT_1179[i]) : std === "j1926" || std === "i6149" ? ptThreadLink(std, std === "j1926" ? PT_J1926[i] : PT_6149[i])
           : std === "cav" ? ptThreadFor(sv.charAt(0) === "s" ? PT_SUN[parseInt(sv.slice(1), 10) || 0].thr : PT_PK[parseInt(sv.slice(1), 10) || 0].thr)
           : ptThreadFor((std === "f61" ? PT_F61 : PT_F62)[i][3]);
         var link2 = (std === "f61" || std === "f62") && (std === "f61" ? PT_F61 : PT_F62)[i][4] ? ptThreadFor((std === "f61" ? PT_F61 : PT_F62)[i][4]) : null;
@@ -10541,6 +10584,12 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
                 215 N·m (SAE J2244-4, World Wide) vs 235 N·m (SAE J1453-1:2019, Parker) — both kept.
          FLG  — Parker Tables R6 / R7, Code 61 / 62 bolt torque, +10 %/-0 (Parker Port End Assembly Guide + mfcp.com).
          NPTF — turns from finger tight (Parker Table R5 + World Wide Fittings).
+         BSPP — ISO 1179-2 / DIN 3852-2 G-thread male stud assembly torque, N·m +10 %/-0, threads lubricated, steel in steel:
+                Parker Port End Assembly Guide Table R2 × Conexa "Installation torques" (ISO 1179-2 / DIN 3852-2/11) — every
+                Form A, Form B, Form E and banjo WH/TH cell agrees (added 2026-11-22). NOT loaded: VSTI-ED plug column
+                (4 of 10 L rows differ, e.g. L 12 mm 60 vs 50), Parker-only columns (RHV/RHZ, SWVE, O-ring + retaining ring).
+                ISO 1179-2 Table 5 qualification torques: not in any free preview — not loaded.
+         BSPT — turns from finger tight (Parker Table R5 × JLG service manuals Table 5-2), added 2026-11-22.
          Verified 2026-11-21. Edit only by a verified data change. */
       var TQ_JIC = [ /* dash, thread, N·m [min,max], in-lb [min,max], flats from finger tight */
         ["-4","7/16-20",[15,17],[130,150],2], ["-8","3/4-16",[59,65],[525,575],1], ["-10","7/8-14",[68,79],[600,700],1],
@@ -10577,6 +10626,18 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         ["1/8-27",[2,3]], ["1/4-18",[2,3]], ["3/8-18",[2,3]], ["1/2-14",[2,3]], ["3/4-14",[2,3]],
         ["1-11-1/2",[1.5,2.5]], ["1-1/4-11-1/2",[1.5,2.5]], ["1-1/2-11-1/2",[1.5,2.5]], ["2-11-1/2",[1.5,2.5]]
       ];
+      var TQ_BSPP = [ /* key, series, tube OD mm, G thread, Form A (sealing washer), Form B (cutting face), Form E (ED seal), banjo WH/TH — N·m +10 %/-0 */
+        ["L6","L",6,"G 1/8",9,18,18,18], ["L8","L",8,"G 1/4",35,35,35,45], ["L10","L",10,"G 1/4",35,35,35,45], ["L12","L",12,"G 3/8",45,70,70,70],
+        ["L15","L",15,"G 1/2",65,140,90,120], ["L18","L",18,"G 1/2",65,100,90,120], ["L22","L",22,"G 3/4",90,180,180,230], ["L28","L",28,"G 1",150,330,310,320],
+        ["L35","L",35,"G 1 1/4",240,540,450,540], ["L42","L",42,"G 1 1/2",290,630,540,700],
+        ["S6","S",6,"G 1/4",35,55,40,45], ["S8","S",8,"G 1/4",35,55,40,45], ["S10","S",10,"G 3/8",45,90,80,70], ["S12","S",12,"G 3/8",45,90,80,70],
+        ["S14","S",14,"G 1/2",65,150,115,120], ["S16","S",16,"G 1/2",65,130,115,120], ["S20","S",20,"G 3/4",90,270,180,230], ["S25","S",25,"G 1",150,340,310,320],
+        ["S30","S",30,"G 1 1/4",240,540,450,540], ["S38","S",38,"G 1 1/2",290,700,540,700]
+      ];
+      var TQ_BSPT = [ /* BSPT size, turns from finger tight [min,max] */
+        ["1/8-28",[2,3]], ["1/4-19",[2,3]], ["3/8-19",[2,3]], ["1/2-14",[2,3]], ["3/4-14",[2,3]],
+        ["1-11",[1.5,2.5]], ["1-1/4-11",[1.5,2.5]], ["1-1/2-11",[1.5,2.5]], ["2-11",[1.5,2.5]]
+      ];
       /* END DATA TQ */
       var TQ_NM_PER_FTLB = 1.3558179483314, TQ_NM_PER_INLB = 0.1129848290276;
       function tqToNm(v, unit){ return unit === "ft-lb" ? v * TQ_NM_PER_FTLB : unit === "in-lb" ? v * TQ_NM_PER_INLB : v; }
@@ -10598,21 +10659,25 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(o.bolt === "metric") return { thread:r[4], flange:r[1], nominal:[r[5], "N·m"], nm:[r[5], r[5] * 1.1], basis:"+10/-0", iso:r[6] };
           var f = tqToNm(r[3], "ft-lb"); return { thread:r[2], flange:r[1], nominal:[r[3], "ft-lb"], nm:[f, f * 1.1], basis:"+10/-0", iso:true }; }
         if(conn === "nptf"){ r = tqRow(TQ_NPTF, key); if(!r) return null; return { thread:r[0], turns:r[1].slice(), basis:"turns" }; }
+        if(conn === "bspt"){ r = tqRow(TQ_BSPT, key); if(!r) return null; return { thread:r[0], turns:r[1].slice(), basis:"turns" }; }
+        if(conn === "bspp"){ r = tqRow(TQ_BSPP, key); if(!r) return null;
+          var col = { A:4, B:5, E:6, banjo:7 }[o.series || "E"]; if(col == null) col = 6; var v2 = r[col];
+          return { thread:r[3], series:r[1], od:r[2], form:o.series || "E", nominal:[v2, "N·m"], nm:[v2, v2 * 1.1], basis:"+10/-0" }; }
         return null;
       }
       function tqAdjust(conn, b, mat){ /* material rules exactly as the verified sources state them */
-        if(!b || b.none || b.turns) return b && b.turns ? { nm:null, note: mat === "steel" ? "" : "World Wide Fittings gives the same turns for steel, stainless steel and brass pipe fittings.", covered:true } : null;
+        if(!b || b.none || b.turns) return b && b.turns ? { nm:null, note: mat === "steel" ? "" : conn === "bspt" ? "JLG's BSPT table applies the same turns to steel, aluminium and brass fittings and ports." : "World Wide Fittings gives the same turns for steel, stainless steel and brass pipe fittings.", covered:true } : null;
         var nm = b.nm.slice(), note = "", covered = true;
         if(mat === "ss"){
           if(conn === "jic"){ nm = [b.nm[1], b.nm[1]]; note = "Stainless steel: use the top of the steel range and lubricate the threads (Parker)."; }
-          else if(conn === "orb" || conn === "6149"){ nm = [b.nm[1], b.nm[1]]; note = "Stainless steel: use the upper limit of the torque range (Parker)."; }
+          else if(conn === "orb" || conn === "6149" || conn === "bspp"){ nm = [b.nm[1], b.nm[1]]; note = "Stainless steel: use the upper limit of the torque range (Parker" + (conn === "bspp" ? "; Conexa says the same" : "") + ")."; }
           else { covered = false; note = "The verified sources give no stainless-steel value for this connection — use the fitting maker's figure."; }
         } else if(mat === "brass"){
           if(conn === "jic"){ nm = [b.nm[0] * 0.65, b.nm[1] * 0.65]; note = "Brass: 65 % of the steel value (Parker)."; }
-          else if(conn === "orb" || conn === "6149"){ nm = [b.nm[0] * 0.65, b.nm[1] * 0.65]; note = "Brass: decrease the torque by 35 % (Parker)."; }
+          else if(conn === "orb" || conn === "6149" || conn === "bspp"){ nm = [b.nm[0] * 0.65, b.nm[1] * 0.65]; note = "Brass: decrease the torque by 35 % (Parker)."; }
           else { covered = false; note = "The verified sources give no brass value for this connection — use the fitting maker's figure."; }
         } else if(mat === "al"){
-          if(conn === "orb" || conn === "6149"){ nm = [b.nm[0] * 0.65, b.nm[1] * 0.65]; note = "Aluminium: decrease the torque by 35 % (Parker)."; }
+          if(conn === "orb" || conn === "6149" || conn === "bspp"){ nm = [b.nm[0] * 0.65, b.nm[1] * 0.65]; note = "Aluminium: decrease the torque by 35 % (Parker)."; }
           else if(conn === "flg"){ nm = [b.nm[0] * 0.66, b.nm[1] * 0.66]; note = "Soft-metal port or manifold (e.g. aluminium block): about 66 % of the steel value (Parker)."; }
           else { covered = false; note = "The verified sources give no aluminium value for this connection — use the fitting maker's figure."; }
         }
@@ -10631,14 +10696,17 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(c === "6149") o = TQ_6149.map(function(r){ return [r[0], r[0]]; });
           if(c === "flg") o = TQ_FLG[el("tqCode").value].map(function(r){ return [r[0], r[0] + " — " + r[1] + '" flange'] ; });
           if(c === "nptf") o = TQ_NPTF.map(function(r){ return [r[0], r[0] + " NPTF"]; });
+          if(c === "bspt") o = TQ_BSPT.map(function(r){ return [r[0], r[0] + " BSPT"]; });
+          if(c === "bspp") o = TQ_BSPP.map(function(r){ return [r[0], r[1] + " series · " + r[2] + " mm tube — " + r[3]]; });
           s.innerHTML = o.map(function(x){ return '<option value="' + x[0] + '">' + x[1] + "</option>"; }).join("");
-          if(o.some(function(x){ return x[0] === keep; })) s.value = keep; else if(c === "jic" || c === "orb" || c === "orfs") s.value = "-8"; else if(c === "6149") s.value = "M18x1.5";
+          if(o.some(function(x){ return x[0] === keep; })) s.value = keep; else if(c === "jic" || c === "orb" || c === "orfs") s.value = "-8"; else if(c === "6149") s.value = "M18x1.5"; else if(c === "bspp") s.value = "L12";
           var ser = el("tqSer");
-          ser.innerHTML = c === "orb" ? '<option value="S">Heavy-duty S — ORFS stud ends (SAE J1926-2)</option><option value="L">Light-duty L — 37° JIC / flareless stud ends (SAE J1926-3)</option>'
+          ser.innerHTML = c === "bspp" ? '<option value="E" selected>Form E — ED elastomer seal (ISO 1179-2)</option><option value="B">Form B — cutting face, metal-to-metal (ISO 1179-4)</option><option value="A">Form A — sealing washer</option><option value="banjo">Banjo fitting WH / TH</option>'
+                       : c === "orb" ? '<option value="S">Heavy-duty S — ORFS stud ends (SAE J1926-2)</option><option value="L">Light-duty L — 37° JIC / flareless stud ends (SAE J1926-3)</option>'
                                      : '<option value="S">S series — heavy duty (ISO 6149-2)</option><option value="L">L series — light duty (ISO 6149-3)</option>';
-          el("tqSerW").classList.toggle("hidden", !(c === "orb" || c === "6149"));
+          el("tqSerW").classList.toggle("hidden", !(c === "orb" || c === "6149" || c === "bspp"));
           el("tqCodeW").classList.toggle("hidden", c !== "flg"); el("tqBoltW").classList.toggle("hidden", c !== "flg");
-          el("tqOpts").classList.toggle("hidden", !(c === "orb" || c === "6149" || c === "flg"));
+          el("tqOpts").classList.toggle("hidden", !(c === "orb" || c === "6149" || c === "flg" || c === "bspp"));
         }
         function render(){
           var c = el("tqConn").value, k = el("tqSize").value, mat = el("tqMat").value;
@@ -10649,9 +10717,9 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           var row = function(x, y){ h += '<tr><td style="text-align:left">' + x + "</td><td>" + y + "</td></tr>"; };
           var plain = [];
           row(c === "flg" ? "Bolt" : "Thread", "<strong>" + b.thread + "</strong>" + (c === "flg" ? " — " + b.flange + '" ' + (el("tqCode").value === "c62" ? "Code 62" : "Code 61") + " flange" : ""));
-          if(c === "nptf"){
+          if(c === "nptf" || c === "bspt"){
             row("Turns from finger tight", "<strong>" + b.turns[0] + " to " + b.turns[1] + "</strong>");
-            plain.push("Screw it in by hand until it stops, then turn it a further <strong>" + b.turns[0] + " to " + b.turns[1] + " turns</strong> with a wrench. A tapered thread seals on the thread itself, so the turns matter, not a torque value. Parker states no torque for tapered threads.");
+            plain.push("Screw it in by hand until it stops, then turn it a further <strong>" + b.turns[0] + " to " + b.turns[1] + " turns</strong> with a wrench. A tapered thread seals on the thread itself, so the turns matter, not a torque value. Parker states no torque for tapered threads." + (c === "bspt" ? " Use a thread sealant. Never back off to align — use the last turn for alignment (JLG)." : ""));
             if(a && a.note) plain.push(a.note);
           } else {
             var nm = a.nm, rng = function(f){ return Math.abs(nm[0] - nm[1]) < 1e-9 ? fmt(nm[0] * f) : fmt(nm[0] * f) + " to " + fmt(nm[1] * f); };
@@ -10675,6 +10743,9 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
             if(c === "6149"){ if(b.basis === "disputed") plain.push("The sources disagree on M30x2 S series: <strong>215 N·m</strong> (SAE J2244-4 and World Wide Fittings) vs <strong>235 N·m</strong> (SAE J1453-1:2019 and Parker). The only torque inside both bands (+10 % / −0) is 235 to 236.5 N·m. Use the fitting maker's figure.");
               else plain.push("ISO 6149 qualification torque: tighten to at least " + fmt(nm[0]) + " N·m and no more than " + fmt(nm[1]) + " N·m. Lubricate the O-ring. " + (el("tqSer").value === "L" ? "L series = light duty (37° and flareless stud ends)." : "S series = heavy duty (ORFS / 24° stud ends)."));
               if(k === "M20x1.5") plain.push("M20x1.5 is for cartridge-valve cavity plugs only."); }
+            if(c === "bspp"){ plain.push("Maker assembly torque for a G-thread male stud in an ISO 1179-1 port: <strong>" + rng(1) + " N·m</strong> (" + rng(1 / TQ_NM_PER_FTLB) + " ft-lb), threads lubricated, steel fitting in a steel part. The value depends on the series and tube size as well as the thread — an S-series stud on the same thread usually takes more.");
+              plain.push(b.form === "E" ? "Form E: the ED ring seals on the port's spot face — check the spot face is clean, flat and undamaged, and replace the ED ring if it has been used." : b.form === "B" ? "Form B: the cutting edge bites into the spot face (metal-to-metal) — use it only once per port position, and never with a soft or coated spot face." : b.form === "A" ? "Form A: the seal is a separate sealing (bonded) washer — use a new washer each time." : "Banjo: torque the banjo bolt; use new sealing rings on both faces.");
+              plain.push("ISO 1179-2's own qualification torques (Table 5) are not in this tool: no free copy of that table could be read."); }
             if(c === "flg"){ plain.push("Fit the O-ring, position the flange and clamp halves, put lock washers on the bolts, and run all four bolts in by hand. Then tighten in a <strong>diagonal (criss-cross) pattern in small steps</strong> up to " + rng(1) + " N·m (" + rng(1 / TQ_NM_PER_FTLB) + " ft-lb).");
               plain.push("Code 62 uses bigger bolts than Code 61 for the same size — never use the Code 61 value on a Code 62 flange."); }
             if(b.basis === "+10/-0" && c !== "orfs" && c !== "6149") plain.push("<strong>+10 % / −0</strong> means the printed value is the minimum. Tighten to at least that value, and no more than 10 % above it.");
@@ -10689,7 +10760,9 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
             orb:"Parker Table R1 / T1 — SAE J1926 straight-thread port assembly torques, non-adjustable stud ends (Parker Port End Assembly Guide, Parker catalogue 4300, and an L3Harris supplier-spec copy agree).",
             "6149":"ISO 6149-2 / -3 stud end qualification torques — World Wide Fittings, Parker Table R4, Gates and SAE J2244-4 / J1453-1 agree on every value except M30x2 S series (flagged).",
             flg:"Parker Tables R6 / R7 — Code 61 / 62 recommended bolt torque (Parker Port End Assembly Guide, matched by mfcp.com's copy).",
-            nptf:"Turns from finger tight: Parker Table R5 and World Wide Fittings agree." };
+            nptf:"Turns from finger tight: Parker Table R5 and World Wide Fittings agree.",
+            bspp:"Parker Port End Assembly Guide Table R2 (ISO 1179 / DIN 3852-2) and Conexa's ISO 1179-2 / DIN 3852-2 installation torques agree on every Form A, B, E and banjo value. Plug (VSTI) values differ between the two and are not shown.",
+            bspt:"Turns from finger tight: Parker Table R5 and JLG service-manual Table 5-2 (BSPT pipe thread) agree." };
           el("tqCite").textContent = "Source: " + cites[c];
         }
         function tables(){
@@ -10702,6 +10775,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           ["c61","c62"].forEach(function(cd){ h += '<h3 style="margin-top:12px">' + (cd === "c61" ? "Code 61" : "Code 62") + " flange bolts — Parker (+10 % / −0)</h3>" + T(["Dash","Flange","Inch bolt","ft-lb","Metric bolt","N·m"], TQ_FLG[cd].map(function(r){ return [r[0], r[1] + '"', r[2], r[3], r[4] + (r[6] ? "" : " †"), r[5]]; })); });
           h += '<p class="small">† does not meet ISO 6162.</p>';
           h += '<h3 style="margin-top:12px">NPTF — turns from finger tight</h3>' + T(["Size","Turns"], TQ_NPTF.map(function(r){ return [r[0], r[1].join(" to ")]; }));
+          h += '<h3 style="margin-top:12px">BSPP male studs — ISO 1179-2 / DIN 3852-2, N·m (+10 % / −0, lubricated, steel)</h3>' + T(["Series","Tube OD","Thread","Form A","Form B","Form E","Banjo"], TQ_BSPP.map(function(r){ return [r[1], r[2] + " mm", r[3], r[4], r[5], r[6], r[7]]; }));
+          h += '<h3 style="margin-top:12px">BSPT — turns from finger tight</h3>' + T(["Size","Turns"], TQ_BSPT.map(function(r){ return [r[0], r[1].join(" to ")]; }));
           el("tqTables").innerHTML = h;
         }
         el("tqConn").addEventListener("change", function(){ sizes(); render(); });

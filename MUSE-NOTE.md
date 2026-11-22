@@ -1,3 +1,51 @@
+# Note for Muse — gap waves 2–3 (2026-11-22, v57)
+
+## Gap 5 — ISO 1179-1 BSPP ports: FILLED (new Hydraulic ports option "ISO 1179-1 — BSPP (G thread) port")
+DATA PT_1179 (9 sizes G 1/8 … G 2), mm: d2 passage ref, d3 recess Ø, d4 spot face min Type N / Type W,
+L1 recess depth max, L2 full thread min, L3 tap drill depth min.
+Sources: ISO 1179-1:2013 Table 1, standard text (iTeh preview
+cdn.standards.iteh.ai/samples/60250/561ffb56c93146bc84ccdccb047bf4bd/ISO-1179-1-2013.pdf) × Yuyao Jiayuan's
+published ISO 1179-1 table (jiayuanfitting.com/info/din-3852-2-vs-iso-1179-1-bspp-thread-port-35493585.html):
+every value G 1/8 … G 1 1/2 agrees. 164580.com's ISO 1179-1:2013 page also gives G 1/2 and G 3/4, including
+d3 max 21.2 / 26.7 → d3 tolerance +0.2/0 loaded for those two only. ISO 1179-1:2013 is current (confirmed 2019).
+Column meanings from the ISO 1179-1:2007 preview header (d2 ref; d3 nom + tol; d4 min N/W; L1 max; L2 min; L3 min)
+and Parker's U20 labels (D3, D4, L1 max, L2 min).
+NOT loaded (unfilled, reason): G 2 d4 — 2013 text reads N 76 / W none; 2007 edition and Jiayuan read
+N 69 / W 73.28–73.53 (one source each). W column — not defined in any readable text (same treatment as
+ISO 6149 d4). d3 tolerance for the other sizes — not legible in the free text.
+Parker Catalog 4300 Table U20 is an OLDER revision ("conforms to proposed revision"): G 1/2 W 34.0 vs 29.6,
+G 3/4 W 40.0 vs 36.9, G 2 N 69, d3 0.1–0.2 larger, some L2 0.5–1 lower. Not used; the earlier "scrambled
+source" note referred to it.
+No figure (the boss drawing has an O-ring chamfer, which an ISO 1179-1 port doesn't have). Each size links
+to the matching ISO 228-1 internal thread limits. tests/ports1179.test.js (39, values typed from Jiayuan,
+plus d3-just-above-G-major and L3 > L2 checks).
+
+## Gap 1 — torque tables: PARTLY FILLED
+Filled:
+- BSPP male studs, ISO 1179-2 / DIN 3852-2 (new Fitting torque connection "BSPP male stud"): 20 rows
+  (L 6–42 mm, S 6–38 mm), Form A / Form B / Form E / banjo WH/TH, N·m +10 %/-0, lubricated, steel in steel.
+  Parker Port End Assembly Guide Table R2 (parker.com Port_End_Assembly_Guide.pdf) × Conexa installation torques
+  (conexa.de/en/information/technical-information/installation-torques/) — every one of the 80 cells agrees.
+  Material: SS = upper limit (Parker R2, Conexa), brass / aluminium −35 % (Parker R2).
+- BSPT turns from finger tight (new connection "BSPT"): 1/8–3/4 2–3 turns, 1–2 in 1.5–2.5. Parker Table R5 ×
+  JLG service manuals Table 5-2 (BSPT pipe thread; H340AJ, G5-18A manuals on manualslib) — agree.
+Unfilled (reasons):
+- ISO 1179-2 Table 5 qualification torques: Table 5 is outside every free preview (2007, 2013, 2022).
+- BSPP VSTI-ED plug column: Parker vs Conexa differ in 4 of 10 L rows (L6 13/12, L12 60/50, L22 140/135,
+  L35 400/360). Parker-only columns (RHV/RHZ, SWVE, O-ring + retaining ring) — one source.
+- JIC -5 / -6: still one copy of Parker G-12 (billavista copy won't load here; slideshare copy lacks them).
+- ORB adjustable stud ends: Parker R1 prints 10 column labels over 6 value pairs; the adjustable column can't
+  be isolated. MacDon's adjustable ORB table is MacDon's own values (single source). SAE J1926-2 Table 3/4 paywalled.
+If "torque tables" in your list meant generic bolt-torque charts (Grade 5/8, 8.8/10.9): no standard sets
+those — they are K-factor calculations that vary by maker — so they were not added. Tell me if that was the item.
+tests/torque.test.js now 221 checks (BSPP values typed from Conexa).
+
+## Also fixed
+sw.js was 0 bytes since the v56 commit (2c11438), so the app had no offline cache. Restored the v55 worker,
+cache spc-tools-v57-bspp.
+
+---
+
 # Note for Muse — Thread masters: plug major diameters and gauge pitch tolerance (2026-11-22, v56)
 
 - GO plug major = D + EI + ZPL ± TPL (GB/T 3934 Table 9 via two independent formula sheets: wenku, book118). NOGO plug major NOMINAL = NOGO PD centre + 0.2P (book118 formula; same PD + 2F1 rule reproduces iCAD truncated check / setting plugs; F1 = 0.1P from GB/T 3934 Table 4). NOGO major tolerance one copy only → not shown.

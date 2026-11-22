@@ -66,5 +66,17 @@ eq("ORFS SS not covered", tqAdjust("orfs", o8, "ss").covered, false);
 eq("Steel unchanged", tqAdjust("orfs", o8, "steel").nm, o8.nm);
 near("ft-lb factor", TQ_NM_PER_FTLB, 1.3558179483314); near("in-lb factor", TQ_NM_PER_INLB * 12, TQ_NM_PER_FTLB, 1e-9);
 
+
+/* BSPP — ISO 1179-2 / DIN 3852-2 male studs. Expected values typed from Conexa's table (Parker R2 agrees). */
+const cx = { L:[[6,"G 1/8",9,18,18,18],[8,"G 1/4",35,35,35,45],[10,"G 1/4",35,35,35,45],[12,"G 3/8",45,70,70,70],[15,"G 1/2",65,140,90,120],[18,"G 1/2",65,100,90,120],
+  [22,"G 3/4",90,180,180,230],[28,"G 1",150,330,310,320],[35,"G 1 1/4",240,540,450,540],[42,"G 1 1/2",290,630,540,700]],
+  S:[[6,"G 1/4",35,55,40,45],[8,"G 1/4",35,55,40,45],[10,"G 3/8",45,90,80,70],[12,"G 3/8",45,90,80,70],[14,"G 1/2",65,150,115,120],[16,"G 1/2",65,130,115,120],
+  [20,"G 3/4",90,270,180,230],[25,"G 1",150,340,310,320],[30,"G 1 1/4",240,540,450,540],[38,"G 1 1/2",290,700,540,700]] };
+["L","S"].forEach(se => cx[se].forEach(r => { const k = se + r[0];
+  ["A","B","E","banjo"].forEach((f, j) => { const b = tqLookup("bspp", k, { series:f }); eq("BSPP " + k + " " + f, [b.thread, b.nm[0]], [r[1], r[2 + j]]); near("BSPP " + k + " " + f + " +10%", b.nm[1], r[2 + j] * 1.1, 1e-9); }); }));
+eq("BSPP rows", TQ_BSPP.length, 20);
+/* BSPT — turns from finger tight (Parker R5 = JLG Table 5-2) */
+eq("BSPT", TQ_BSPT.map(r => r[0] + " " + r[1].join("-")), ["1/8-28 2-3","1/4-19 2-3","3/8-19 2-3","1/2-14 2-3","3/4-14 2-3","1-11 1.5-2.5","1-1/4-11 1.5-2.5","1-1/2-11 1.5-2.5","2-11 1.5-2.5"]);
+eq("BSPT lookup", tqLookup("bspt", "1-11").turns, [1.5, 2.5]);
 if (fails.length) { console.log("FAIL " + fails.length + " of " + n + "\n" + fails.join("\n")); process.exit(1); }
 console.log("OK " + n + " fitting-torque checks passed");
