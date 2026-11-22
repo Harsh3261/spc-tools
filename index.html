@@ -47,6 +47,7 @@
       surf      #tool-surf       reference   SURFACE FINISH
       torque    #tool-torque     reference   FITTING TORQUE
       weld      #tool-weld       reference   WELDING (symbols + D1.1 visual)
+      pgauge    #tool-pgauge     measure     PLAIN GO / NO-GO GAUGES (gauge-maker classes)
       A tool is a #tabbtn-<id> button (data-tab, data-cluster) plus a
       section#tool-<id>. showTool() finds both by that naming convention.
 
@@ -761,6 +762,7 @@
         <button type="button" role="tab" id="tabbtn-msa" aria-selected="false" data-tab="msa" data-cluster="measure">More MSA</button>
         <button type="button" role="tab" id="tabbtn-gdt" aria-selected="false" data-tab="gdt" data-cluster="measure">GD&amp;T &amp; uncertainty</button>
         <button type="button" role="tab" id="tabbtn-tp" aria-selected="false" data-tab="tp" data-cluster="measure">True Position</button>
+        <button type="button" role="tab" id="tabbtn-pgauge" aria-selected="false" data-tab="pgauge" data-cluster="measure">GO / NO-GO gauges</button>
         <button type="button" role="tab" id="tabbtn-aql" aria-selected="false" data-tab="aql" data-cluster="sampling">AQL Lookup</button>
         <button type="button" role="tab" id="tabbtn-threads" aria-selected="false" data-tab="threads" data-cluster="reference">Threads</button>
         <button type="button" role="tab" id="tabbtn-ports" aria-selected="false" data-tab="ports" data-cluster="reference">Hydraulic ports</button>
@@ -1845,6 +1847,29 @@
             <strong>Edition matters:</strong> D1.1:2025 clarified the undercut and porosity rows. It added pro-rated limits for welds shorter than 12 in, which this tool does not apply. Check the edition named in your contract.</p>
           </details>
           <p class="cite">Symbols: AWS A2.4 conventions as given by several independent references that agree (Draftsperson, clause5.io, Welders Supply, Weld Fab World); ISO 2553 differences per TWI, Welding Australia (AS 1101.3) and others. Acceptance: AWS D1.1/D1.1M Table 8.1, from a reproduction of the 2020 table and summaries of the 2020 and 2025 tables that agree on every value used. Convexity: Table 7.9 Schedule C (clause5.io, PDHonline M381, ESAB). Butt reinforcement: only the base-metal ≤ 1 in row (1/8 in). Tubular connections are not covered.</p>
+        </div>
+      </section>
+
+      <!-- ============ TOOL : PLAIN GO / NO-GO GAUGES ============ -->
+      <section class="tool" id="tool-pgauge" role="tabpanel" aria-labelledby="tabbtn-pgauge">
+        <div class="card">
+          <h2>Plain GO / NO-GO gauges — sizes and class</h2>
+          <p class="guru">Enter the hole or pin limits from the drawing. The tool gives the GO and NO-GO gauge sizes, which way the gauge tolerance goes, and a gauge-maker class that keeps the gauges within about 10 % of the part tolerance.</p>
+          <div class="row3">
+            <div><label class="flabel" for="pgFeat">Feature</label><select id="pgFeat"><option value="hole" selected>Hole — check with plug gauges</option><option value="shaft">Pin / shaft — check with ring gauges</option></select></div>
+            <div><label class="flabel" for="pgUnit">Units</label><select id="pgUnit"><option value="in" selected>inch</option><option value="mm">mm</option></select></div>
+            <div><label class="flabel" for="pgCls">Gauge class</label><select id="pgCls"><option value="auto" selected>Suggest (10 % rule)</option><option>XXX</option><option>XX</option><option>X</option><option>Y</option><option>Z</option><option>ZZ</option></select></div>
+          </div>
+          <div class="row2">
+            <div><label class="flabel" for="pgMin">Feature minimum</label><input id="pgMin" type="number" step="any" inputmode="decimal" placeholder="e.g. 0.7498"></div>
+            <div><label class="flabel" for="pgMax">Feature maximum</label><input id="pgMax" type="number" step="any" inputmode="decimal" placeholder="e.g. 0.7502"></div>
+          </div>
+          <div id="pgOut" aria-live="polite"></div>
+          <details class="thfind" style="margin-top:14px">
+            <summary>Gauge-maker tolerance chart (ASME B89.1.5 basis)</summary>
+            <div id="pgTable"></div>
+          </details>
+          <p class="cite">Class tolerances: gauge-maker charts per ASME B89.1.5 — Meyer Gage and Fox Valley Metrology publish identical inch and metric charts (Judge / Glastonbury Southern, Vermont Gage and others agree on the rows they show). Tolerance direction: plug GO plus, NO-GO minus; ring GO minus, NO-GO plus (Meyer, Fox Valley). 10 % rule: Vermont Gage and Judge Tool. Thread gauges are in Threads → Gauge verification.</p>
         </div>
       </section>
 
@@ -8228,7 +8253,29 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         if(fam === "un"){
           var u = thUAll()[idx], g = TH_G[u[0]];
           var gc = $("thClass").value;
-          if(gc === "3A" || gc === "3B") return "<h3>Gauge verification</h3><p>Class " + esc(gc) + " gauge limits are not included yet — the ASME B1.2 gauge values in this app are for classes 2A / 2B. Switch the class to 2A / 2B to see them.</p>" + calP;
+          if((gc === "3A" || gc === "3B") && g && TH_U3[u[0]]){
+            /* Class 3 gauges: ASME B1.2 places X inside the product PD limits (GO plug +X from 3B min, NOT GO plug −X from 3B max,
+               GO ring −X from 3A max, NOT GO ring +X from 3A min). The same rule reproduces 111 of 112 2A/2B values in TH_G (the 112th
+               is the documented 3/8-24 B1.2 basis point), and every class-3 nominal below equals the Westport and Judge Tool
+               gauge charts for all 28 sizes, which also list the same X for class 2 and 3. */
+            var t3 = TH_U3[u[0]], X3 = g.x, r4 = function(v){ return Math.round(v * 1e4) / 1e4; };
+            var gRow3 = function(label, mn, mx, note){ return "<tr><td>" + esc(label) + (note ? '<br><span class="small">' + esc(note) + "</span>" : "") + "</td><td>" + fmt(mn, 4) + " in</td><td>" + (mx === null ? "—" : fmt(mx, 4) + " in") + "</td></tr>"; };
+            var x3Note = "X tolerance " + fmt(X3, 4) + " in (working gauge)";
+            var h3 = "<h3>Gauge limits — " + esc(u[0]) + " class 3A / 3B (ASME B1.2)</h3>";
+            h3 += '<table class="dtable" aria-label="Class 3 gauge limits"><tr><th>Gauge</th><th>Min</th><th>Max</th></tr>';
+            h3 += gRow3("GO thread plug PD (internal 3B)", t3.i[2], r4(t3.i[2] + X3), x3Note + " — same GO plug as 2B");
+            h3 += gRow3("NOT GO (HI) thread plug PD (internal 3B)", r4(t3.i[3] - X3), t3.i[3], x3Note);
+            h3 += gRow3("GO thread ring PD (external 3A)", r4(t3.e[2] - X3), t3.e[2], x3Note + " — 3A max PD is basic (no allowance)");
+            h3 += gRow3("NOT GO (LO) thread ring PD (external 3A)", t3.e[3], r4(t3.e[3] + X3), x3Note);
+            h3 += gRow3("GO setting plug PD — nominal", t3.e[2], null, "Nominal — W tolerance applied minus");
+            h3 += gRow3("LO setting plug PD — nominal", t3.e[3], null, "Nominal — W tolerance applied plus");
+            h3 += "</table>";
+            h3 += '<p class="explain"><strong>How these are set:</strong> each gauge sits inside the product limits by the X tolerance, so a gauge can never accept a part outside the class 3 limits. The 3B GO plug is the same gauge as for 2B (both start at basic PD). Class 3 thread plug and ring major / minor diameters are not included.</p>';
+            h3 += '<p class="cite">Gauge PD nominals agree with the Westport and Judge Tool thread gauge charts for all 28 sizes; product limits ASME B1.1 Table 3 (class 3A / 3B).</p>';
+            h3 += calP + '<p class="small">' + esc(TH_MEAS_NOTE) + "</p>";
+            return h3;
+          }
+          if(gc === "3A" || gc === "3B") return "<h3>Gauge verification</h3><p>Class " + esc(gc) + " gauge limits are not included for this size.</p>" + calP;
           if(!g) return "<h3>Gauge verification</h3><p>Gauge data not included for this size — the ASME B1.2 gauge tables in this app cover the UNC / UNF catalogue sizes.</p>" + calP;
           function gRow(label, mn, mx, note){
             return "<tr><td>" + esc(label) + (note ? '<br><span class="small">' + esc(note) + "</span>" : "") + "</td><td>" +
@@ -8259,7 +8306,18 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           return h;
         }
         if(fam === "metric"){
-          var r = TH_M[idx];
+          var r = TH_M[idx], mc = $("thClass").value;
+          if(mc !== "6H" && mc !== "6g"){
+            var tg = th965(r[1], r[2], mc);
+            if(tg.error) return "<h3>Gauge verification</h3><p>" + esc(tg.error) + "</p>" + calP;
+            var hg = "<h3>Gauge pitch diameters — " + esc(r[0]) + " " + esc(mc) + " (ISO 1502 basis)</h3>";
+            hg += '<table class="dtable" aria-label="Gauge pitch diameters"><tr><th>Gauge</th><th>Nominal PD</th></tr>';
+            hg += tg.ext ? "<tr><td>GO thread ring (external " + esc(mc) + ")</td><td>" + fmt(tg.pd[1], 3) + " mm</td></tr><tr><td>NOGO thread ring (external " + esc(mc) + ")</td><td>" + fmt(tg.pd[0], 3) + " mm</td></tr>"
+                         : "<tr><td>GO thread plug (internal " + esc(mc) + ")</td><td>" + fmt(tg.pd[0], 3) + " mm</td></tr><tr><td>NOGO thread plug (internal " + esc(mc) + ")</td><td>" + fmt(tg.pd[1], 3) + " mm</td></tr>";
+            hg += "</table>";
+            hg += '<p class="explain"><strong>What these are:</strong> the product pitch-diameter limits the gauges are built on (computed exactly from the ISO 965-1 tables). ISO 1502 then places each gauge\'s own tolerance and wear allowance relative to these values; those micrometre-level offsets are not included because they could not be confirmed from two clean sources. Order the gauge by class (e.g. "M10×1.5-' + esc(mc) + ' GO / NOGO") and accept it on its certificate.</p>';
+            return hg + calP + '<p class="small">' + esc(TH_MEAS_NOTE) + "</p>";
+          }
           var h2 = "<h3>Gauge pitch diameters — " + esc(r[0]) + " (ISO 1502)</h3>";
           h2 += '<table class="dtable" aria-label="Gauge pitch diameters"><tr><th>Gauge</th><th>Nominal PD</th></tr>';
           h2 += "<tr><td>GO thread plug (internal 6H)</td><td>" + fmt(r[10], 3) + " mm</td></tr>";
@@ -9493,7 +9551,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v50";
+      var APP_BUILD = "v51";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -10765,6 +10823,70 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         el("wsSize").value = "1/4"; el("wsLen").value = "2"; el("wsPitch").value = "6"; el("wsTail").value = "GMAW";
         sym(); chart(); insp();
       })();
+
+      /* ===================== PLAIN GO / NO-GO GAUGES ===================== */
+      /* BEGIN DATA PG: gauge-maker tolerance classes (ASME B89.1.5 basis). Meyer Gage and Fox Valley Metrology charts,
+         identical on every cell (inch and metric); verified 2026-11-21. Ranges are "above – including". */
+      var PG_CLS = ["XXX","XX","X","Y","Z","ZZ"];
+      var PG_IN = [[0.010,0.825,[0.000010,0.000020,0.000040,0.000070,0.0001,0.0002]],[0.825,1.510,[0.000015,0.000030,0.000060,0.000090,0.00012,0.00024]],
+        [1.510,2.510,[0.000020,0.000040,0.000080,0.00012,0.00016,0.00032]],[2.510,4.510,[0.000025,0.000050,0.0001,0.00015,0.0002,0.0004]],
+        [4.510,6.510,[0.000033,0.000065,0.00013,0.00019,0.00025,0.0005]],[6.510,9.010,[0.000040,0.000080,0.00016,0.00024,0.00032,0.00064]],
+        [9.010,12.010,[0.000050,0.0001,0.0002,0.0003,0.0004,0.0008]]];
+      var PG_MM = [[0.254,20.96,[0.00025,0.00051,0.00102,0.00178,0.00254,0.00508]],[20.96,38.35,[0.00038,0.00076,0.00152,0.00229,0.00305,0.00610]],
+        [38.35,63.75,[0.00051,0.00102,0.00203,0.00305,0.00406,0.00813]],[63.75,114.55,[0.00064,0.00127,0.00254,0.00381,0.00508,0.01016]],
+        [114.55,165.35,[0.00084,0.00165,0.00330,0.00483,0.00635,0.01270]],[165.35,228.85,[0.00102,0.00203,0.00406,0.00610,0.00813,0.01626]],
+        [228.85,305.05,[0.00127,0.00254,0.00508,0.00762,0.01016,0.02032]]];
+      /* END DATA PG */
+      function pgTol(size, unit, cls){
+        var t = unit === "mm" ? PG_MM : PG_IN, k = PG_CLS.indexOf(cls);
+        for(var i = 0; i < t.length; i++){ if((i === 0 ? size >= t[i][0] - 1e-9 : size > t[i][0] + 1e-9) && size <= t[i][1] + 1e-9) return t[i][2][k]; }
+        return null;
+      }
+      function pgDesign(feat, mn, mx, unit, cls){
+        if(!(mx > mn)) return { error:"The maximum must be larger than the minimum." };
+        var partTol = mx - mn, goSize = feat === "hole" ? mn : mx, ngSize = feat === "hole" ? mx : mn, chosen = cls, auto = cls === "auto";
+        if(auto){ chosen = null;
+          for(var k = PG_CLS.length - 1; k >= 0; k--){ var tg = pgTol(goSize, unit, PG_CLS[k]), tn = pgTol(ngSize, unit, PG_CLS[k]);
+            if(tg != null && tn != null && tg <= 0.1 * partTol + 1e-12 && tn <= 0.1 * partTol + 1e-12){ chosen = PG_CLS[k]; break; } }
+          if(!chosen) return { error:"Even class XXX is more than 10 % of this part tolerance — the part tolerance is too tight for fixed-limit gauges; measure it (CMM, air gauge, comparator) instead.", partTol:partTol };
+        }
+        var tG = pgTol(goSize, unit, chosen), tN = pgTol(ngSize, unit, chosen);
+        if(tG == null || tN == null) return { error:"Size outside the gauge-maker chart (" + (unit === "mm" ? "0.254–305.05 mm" : "0.010–12.010 in") + ")." };
+        var go = feat === "hole" ? [goSize, goSize + tG] : [goSize - tG, goSize], ng = feat === "hole" ? [ngSize - tN, ngSize] : [ngSize, ngSize + tN];
+        return { feat:feat, cls:chosen, auto:auto, partTol:partTol, go:go, ng:ng, tG:tG, tN:tN, share:(tG + tN) / partTol };
+      }
+      (function(){
+        var el = function(id){ return document.getElementById(id); };
+        if(!el("pgFeat")) return;
+        function f(v){ return el("pgUnit").value === "mm" ? v.toFixed(5).replace(/0+$/, "").replace(/\.$/, "") + " mm" : v.toFixed(6).replace(/0+$/, "").replace(/\.$/, "") + '"'; }
+        function render(){
+          var u = el("pgUnit").value, mn = parseFloat(el("pgMin").value), mx = parseFloat(el("pgMax").value), out = el("pgOut");
+          if(!(mn > 0) || !(mx > 0)){ out.innerHTML = '<p class="small">Enter the feature minimum and maximum.</p>'; return; }
+          var r = pgDesign(el("pgFeat").value, mn, mx, u, el("pgCls").value);
+          if(r.error){ out.innerHTML = '<p class="verdict warn">' + r.error + "</p>"; return; }
+          var hole = r.feat === "hole", kind = hole ? "plug" : "ring";
+          var h = '<table class="dtable wrap" aria-label="Gauge sizes"><tr><th style="text-align:left">Gauge</th><th>Size</th><th>Made between</th></tr>';
+          h += '<tr><td style="text-align:left">GO ' + kind + " (" + (hole ? "hole minimum, tolerance plus" : "pin maximum, tolerance minus") + ")</td><td>" + f(hole ? r.go[0] : r.go[1]) + "</td><td>" + f(r.go[0]) + " to " + f(r.go[1]) + "</td></tr>";
+          h += '<tr><td style="text-align:left">NO-GO ' + kind + " (" + (hole ? "hole maximum, tolerance minus" : "pin minimum, tolerance plus") + ")</td><td>" + f(hole ? r.ng[1] : r.ng[0]) + "</td><td>" + f(r.ng[0]) + " to " + f(r.ng[1]) + "</td></tr></table>";
+          var pct = Math.round(r.share * 100);
+          h += '<div class="tfplain"><h3 style="margin-top:12px">What this means</h3><ul class="small">';
+          h += "<li>Class <strong>" + r.cls + "</strong>" + (r.auto ? " — the widest (cheapest) class whose tolerance is within 10 % of the part tolerance (" + f(r.partTol) + ")" : "") + ". Gauge tolerance: GO " + f(r.tG) + ", NO-GO " + f(r.tN) + " — together " + pct + " % of the part tolerance.</li>";
+          h += "<li>Each gauge's tolerance is placed <strong>inside</strong> the part limits, so a gauge can never accept a bad part; the cost is that a few good parts right at the limit may be rejected.</li>";
+          h += "<li>" + (hole ? "The GO plug must enter the hole along its full length; the NO-GO plug must not enter." : "The GO ring must pass over the pin along its full length; the NO-GO ring must not pass.") + " A part that fails GO is undersize " + (hole ? "(hole too small)" : "(pin too large)") + ".</li>";
+          if(!r.auto && r.share > 0.2) h += '<li class="warn"><strong>Note:</strong> the gauges use ' + pct + " % of the part tolerance — a tighter class would reject fewer good parts.</li>";
+          h += "<li>Order by class and size, e.g. \u201c" + (hole ? "plug" : "ring") + " gauge " + f(hole ? r.go[0] : r.go[1]) + " GO class " + r.cls + "\u201d, and accept each gauge on its calibration certificate.</li></ul></div>";
+          out.innerHTML = h;
+        }
+        function table(){
+          var row = function(r, u){ return "<tr><td style=\"text-align:left\">" + r[0] + " – " + r[1] + " " + u + "</td>" + r[2].map(function(v){ return "<td>" + v + "</td>"; }).join("") + "</tr>"; };
+          var head = '<tr><th style="text-align:left">Size (above – incl.)</th>' + PG_CLS.map(function(c){ return "<th>" + c + "</th>"; }).join("") + "</tr>";
+          el("pgTable").innerHTML = '<h3 style="margin-top:12px">Inch</h3><div class="tscroll"><table class="dtable">' + head + PG_IN.map(function(r){ return row(r, "in"); }).join("") + "</table></div>" +
+            '<h3 style="margin-top:12px">Metric (mm)</h3><div class="tscroll"><table class="dtable">' + head + PG_MM.map(function(r){ return row(r, "mm"); }).join("") + "</table></div>" +
+            '<p class="small">Plug gauges: GO tolerance plus, NO-GO minus. Ring gauges: GO minus, NO-GO plus. Masters: split 50/50.</p>';
+        }
+        ["pgFeat","pgUnit","pgCls","pgMin","pgMax"].forEach(function(id){ el(id).addEventListener("input", render); el(id).addEventListener("change", render); });
+        table(); render();
+      })();
     </script>
 
     <div id="rptHead" class="rpthead" aria-hidden="true"></div>
@@ -10802,6 +10924,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           ["surf","Surface finish","surface finish roughness Ra Rz RSm N-grade N6 N7 N8 microinch µin micron 63 32 125 cut-off cutoff lambda c sampling length evaluation length profilometer iso 1302 iso 4288 21920 polish hone"],
           ["torque","Fitting torque","torque fitting hydraulic tighten JIC 37 flare swivel nut ORFS face seal ORB o-ring boss straight thread port J1926 J514 J1453 ISO 6149 metric port flange code 61 code 62 bolt J518 6162 NPTF pipe thread turns finger tight flats FFFT FFWR ft-lb N·m Parker"],
           ["weld","Welding","weld welding symbol symbols fillet groove bevel V J U plug slot spot seam arrow side other side all around field weld tail AWS A2.4 ISO 2553 D1.1 visual inspection acceptance undercut porosity convexity reinforcement undersize leg throat crack crater fusion WPS"],
+          ["pgauge","GO / NO-GO gauges","plain plug gauge ring gauge pin gauge go no-go nogo gage class XXX XX X Y Z ZZ gage maker tolerance B89.1.5 10% rule hole pin shaft gauge design depth gauge"],
           ["seal","Seal glands","o-ring gland groove seal squeeze stretch gland fill piston rod static dynamic AS568 dash back-up ring extrusion clearance parker groove design"],
           ["ports","Hydraulic ports","port ORB O-ring boss SAE J1926 ISO 6149 metric port spotface chamfer thread depth tap drill depth hydraulic fitting dash size 904 boss seal flange code 61 code 62 parker C08-2 C08-3 C08-4 C10-2 C10-3 C10-4 C12-2 C12-3 C12-4 C16-2 C16-3 C16-4 C20-2 C04-2 C04-3 C09-2 C10-2T C10-3S C12-3L C12-4L C16-3S C20-3S sun T-11A T-10A T-13A T-21A T-31A T-2A T-22A T-32A J518 ISO 6162 four bolt 4-bolt split flange cartridge cavity C10-2 VC10-2 SDC10-2 drawing"],
           ["convert","Unit converters","convert units inch mm fraction psi MPa ksi bar torque Nm lbft force kN lbf mass kg lb flow temperature °F °C angle taper Ra roughness hardness HRC HB HV HRB tensile"],

@@ -1,3 +1,20 @@
+# Note for Muse — class 3A/3B thread gauges, class-aware metric gauge view, plain GO/NO-GO gauges (2026-11-22, v51)
+
+- Threads → Gauge verification, UN class 3A/3B: PD limits for GO/NOT GO plugs (3B) and rings (3A) + setting
+  plug nominals. Rule: ASME B1.2 X placed inside product limits (GO plug +X from min, NOGO plug −X from max,
+  GO ring −X from max, NOGO ring +X from min). Rule reproduces 111/112 verified 2A/2B TH_G values (112th =
+  documented 3/8-24 B1.2 basis point). Class-3 nominals = Westport AND Judge Tool gauge charts on all 28
+  sizes; Westport X = TH_G x on all 28 and lists one X for class 2 and 3. Class 3 plug/ring MAJOR/MINOR
+  diameters not included. tests/gauge3.test.js (305).
+- Metric gauge view follows the selected class (e.g. 6e rings): shows the product PD limits the gauges are
+  built on. ISO 1502 gauge offsets (TPL, TR, ZPL, ZR, WGO, WNG) NOT included: IS 2334 (=ISO 1502) OCR is
+  garbled, ISO preview omits Tables 4/5/10–13, the f-m-s.dk sheet is internally inconsistent. Revisit with a
+  clean copy of ISO 1502:1996 Tables 4 and 5.
+- New tool #tool-pgauge (Measure, "GO / NO-GO gauges"): plug or ring GO/NO-GO sizes from feature limits,
+  class XXX–ZZ (Meyer Gage = Fox Valley charts, inch + metric, identical), direction (plug GO +, NO-GO −;
+  ring GO −, NO-GO +), "Suggest" = widest class with each gauge ≤ 10 % of part tolerance (Vermont, Judge).
+  Judge worked example reproduced (0.7500 ±0.0002 hole, class XX). tests/pgauge.test.js (33).
+
 # Note for Muse — metric thread classes from ISO 965-1 tables (2026-11-21, v50)
 
 Harsh asked for more tolerance classes, calculated precisely.

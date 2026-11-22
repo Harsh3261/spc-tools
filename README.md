@@ -49,3 +49,9 @@ Methods: AIAG SPC & MSA reference manuals · ANSI/ASQ Z1.4. Published 2026-11-09
 - **Fitting torque** (Reference): JIC 37° (Parker G-12, with flats from finger tight), ORFS (SAE J1453 qualification torque), SAE O-ring boss ports (Parker, non-adjustable heavy / light), ISO 6149 (S / L series), Code 61 / 62 flange bolts, NPTF turns. Each table checked in two copies. Where sources disagree (ISO 6149 M30x2) both values are shown. Material rules only where the source gives them. The tool says plainly that the fitting maker's own table governs.
 - **Welding** (Reference): AWS A2.4 symbol builder that draws the symbol and reads it in plain words, a symbol chart, and an AWS vs ISO 2553 guide. AWS D1.1 Table 8.1 visual accept / reject checks (cracks, fusion, craters, fillet undersize, convexity, reinforcement, undercut, porosity), plus how to inspect and which code applies.
 - Tests: `tests/torque.test.js` (58 checks), `tests/weld.test.js` (73 checks).
+
+## Update — 2026-11-22 (v50–v51): thread classes and gauges
+- **Metric thread classes:** every ISO class (6h, 6f, 6e, 4h, 4g6g, 5g6g, 7g6g, 8g, 5H, 7H, 6G and others) computed from the ISO 965-1 tables. The method reproduces all 486 published ISO 965-2 6g / 6H values in the app exactly and matches independently published 6h, 6e, 4g6g, 8g and 5G limits. Custom metric sizes are now exact wherever the standard tabulates the diameter / pitch.
+- **Class 3A / 3B thread gauges:** GO / NOT GO plug and ring pitch-diameter limits for all 28 UNC / UNF gauge sizes, matching two gauge-maker charts.
+- **GO / NO-GO gauges** (Measure): plain plug and ring gauge sizes, tolerance direction and a suggested gauge-maker class (XXX–ZZ, 10 % rule).
+- Tests: `tests/iso965.test.js` (1022), `tests/gauge3.test.js` (305), `tests/pgauge.test.js` (33).
