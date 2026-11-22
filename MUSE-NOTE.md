@@ -1,3 +1,39 @@
+# Note for Muse — gap wave 5 (2026-11-22): DIN 405 and UNJ — no data change
+
+## Gap 4 — DIN 405, 20 internal-minor-max cells (Rd 105 … Rd 200 × 1/4, P = 6.35): ONE NEW SOURCE, still blank
+All 20 cells hang on one number: TD1 for P = 6.35 (live TD1: 0.45 / 0.53 / 0.63 for P 2.54 / 3.175 / 4.233).
+New independent source: EMUGE-FRANKEN thread handbook, ch. 15 "Gewindetabellen", §15.15 Rundgewinde DIN 405
+(emuge-franken-bg.com/attachments/article/97/15%20Gewindetabellen.pdf): printed "TD1 für Toleranzgrad 6 7"
+row "6,35 850 1060" → TD1 grade 6 = 0.850 mm; default class for internal threads "7H 6H" (flank 7H, core 6H).
+Emuge's TD2 grade 7 (530) and Td2 grade 7 (400) for P 6.35 match the live data, which supports the reading.
+→ D1 max would be D1 min + 0.850 (e.g. Rd 105 × 1/4: 99.285 / 100.135).
+NOT loaded: that is one source. You hold the two contested readings (IS 4695-2 × RP405). If EITHER of them is
+0.850, that's two independent sources and the 20 cells can be filled — tell me which, and I'll load them.
+Tried and unreadable here: DIN 405-2:1997 preview (Accuristech — cover only), IS 4695-2:2003 (Scribd body not
+served; law.resource.org not reachable), ARA gauge introduction PDF (redirect loop).
+
+## Gap 6 — UNJ, the 15 missing 2A/2B rows: UNFILLABLE (reported)
+Rows: 3.2500-4 UNJC; 3.2500-8/-12/-16; 3.3750-8/-12/-16; 3.5000-4 UNJC; 3.5000-8/-12/-16; 3.6250-8/-12/-16;
+3.7500-4 UNJC (3A/3B present for all 15; 2A/2B absent). Their only source is ASME B1.1 Tables 2A/2B; no
+legitimate public reproduction of UNJ 2A/2B limits exists (searches turn up only a pirated Scribd copy, which is
+not used, and SAE AS8879 contents pages). Not derived by formula — never guess.
+NEW EDITION FLAG: ASME publishes a B1.1-2024 contents page (asme.org .../c-t_b1_1_2024.pdf; Table 2B "Limits
+of Size for Standard Series Internal Threads (UN and UNJ)"). The live UNJ 2A/2B data (206 rows) are from
+B1.1-2019, so the latest edition is not yet checked. The tables of B1.1-2024 are not freely viewable.
+
+## Gap 7 / Gap 3 — see the Materials Atlas MUSE-NOTE (wave 1). Gap 2 — Atlas MUSE-NOTE (wave 4).
+
+## Gap status, all seven
+1 torque — partly filled (BSPP, BSPT); JIC -5/-6, ORB adjustable, ISO 1179-2 Table 5, BSPP plugs open.
+2 coating limits — unfillable here (MIL-DTL-32502 unreadable, AMS 2428A paywalled).
+3 B148 — filled (C95820 Sn and sum floors held).
+4 DIN 405 — one source found (0.850); needs your IS 4695-2 / RP405 values to settle.
+5 ISO 1179-1 — filled (G 2 d4 and W held).
+6 UNJ 15 rows — unfillable (single paywalled source); B1.1-2024 now current.
+7 A354-26 — unsettleable (tables paywalled; no evidence of a BD change).
+
+---
+
 # Note for Muse — gap waves 2–3 (2026-11-22, v57)
 
 ## Gap 5 — ISO 1179-1 BSPP ports: FILLED (new Hydraulic ports option "ISO 1179-1 — BSPP (G thread) port")
