@@ -1,3 +1,12 @@
+# Note for Muse — wording pass (2026-11-21)
+
+Harsh: "the Atlas rule" wording felt catchy — make all text professional but understandable.
+Atlas: "per the Atlas rule" → "the stricter value(s) … shown"; "trap(s)" → "common errors" / "example" /
+"note"; "Red flags:" → "Watch for:"; "workhorse" → "most common"; "discipline", "bite", "honestly",
+"fake passes", "classic", "hugely" reworded. Meaning unchanged; no data values touched.
+SPC Tools: one phrase ("The costly mistake") → "A common error". Keep new text in this register:
+plain, specific, no slogans or nicknames for rules.
+
 # Note for Muse — Fitting torque + Welding tools (2026-11-21, v47)
 
 Harsh asked for welding (symbols, how to check) and "full blazing" hydraulic fitting torque.

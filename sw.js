@@ -1,4 +1,4 @@
-const CACHE = "spc-tools-v47-torque-weld";
+const CACHE = "spc-tools-v48-wording";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
