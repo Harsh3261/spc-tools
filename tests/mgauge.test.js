@@ -43,6 +43,10 @@ near("iCAD GO wear", ic.go.wear, 9.007); near("iCAD NG wear", ic.ng.wear, 8.868)
 /* coarser grade uses the grade 6 row but its own limits; finer grade refused */
 r = mgCalc(10, 1.5, "8g"); eq("8g uses grade-6 band", r.band.lo, 125); near("8g NOGO ring upper = d2 min", r.ring.ng.hi, r.t.pd[0]);
 eq("4h refused", /finer than grade 6/.test(mgCalc(10, 1.5, "4h").error), true);
+/* Plug major diameters: GO = D + EI + ZPL ± TPL (two formula sheets from GB/T 3934 Table 9); NOGO nominal = PD centre + 0.2P */
+r = mgCalc(10, 1.5, "6G").plug; near("6G GO major lo", r.goMaj.lo, 10.033); near("6G GO major hi", r.goMaj.hi, 10.055); near("6G NOGO major nom", r.ngMajNom, 9.5435);
+r = mgCalc(10, 1.5, "6H").plug; near("6H GO major lo", r.goMaj.lo, 10.001); near("6H GO major hi", r.goMaj.hi, 10.023);
+eq("pitch tolerance table", MG_TP, [[14,4],[32,5],[50,6],[80,7]]);
 /* Sweep: every catalogue size in Threads (TH_M) × every class of grade 6 or coarser — the ISO 1502 layout holds */
 const tm = s.slice(s.indexOf("var TH_M = ["), s.indexOf("];", s.indexOf("var TH_M = [")) + 2);
 eval(tm.replace("var TH_M", "global.TH_M"));

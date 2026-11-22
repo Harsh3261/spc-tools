@@ -1,3 +1,9 @@
+# Note for Muse — Thread masters: plug major diameters and gauge pitch tolerance (2026-11-22, v56)
+
+- GO plug major = D + EI + ZPL ± TPL (GB/T 3934 Table 9 via two independent formula sheets: wenku, book118). NOGO plug major NOMINAL = NOGO PD centre + 0.2P (book118 formula; same PD + 2F1 rule reproduces iCAD truncated check / setting plugs; F1 = 0.1P from GB/T 3934 Table 4). NOGO major tolerance one copy only → not shown.
+- Gauge pitch tolerance by thread length ±4/5/6/7 µm (≤14/32/50/80 mm): GB/T 3934-2003 and -2025 Table 8.
+- Still missing (no two clean sources): NOGO major tolerance, flank-angle tolerances, ring minor diameters, check-plug majors, inch W tolerance, grades finer than 6, NPT gauges.
+
 # Note for Muse — Thread masters size list + full sweep (2026-11-22, v55)
 
 - Metric mode: scrollable Thread size list (the 54 Threads catalogue sizes, default M25×1.5) plus "Custom size" that shows the diameter and pitch inputs. Links from Threads select the matching catalogue size.

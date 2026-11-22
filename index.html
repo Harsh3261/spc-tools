@@ -1922,7 +1922,7 @@
               </ul>
               <h3>2. Thread plug gauges (GO and NOGO) — measured directly</h3>
               <ul>
-                <li><strong>Major diameter:</strong> measure with a bench micrometer or a length-measuring machine set on gauge blocks, at several positions along the thread.</li>
+                <li><strong>Major diameter:</strong> measure with a bench micrometer or a length-measuring machine set on gauge blocks, at several positions along the thread, and compare with the major-diameter limits in this tool (GO plug: min–max; NOGO plug: nominal, tolerance from the certificate).</li>
                 <li><strong>Pitch diameter:</strong> measure over three wires (see the calculator below) and convert to the simple pitch diameter. Compare with the limits in this tool: a new gauge must lie within its new limits; a used GO or NOGO plug is withdrawn when its pitch diameter is below its wear limit.</li>
                 <li><strong>Pitch and flank angles:</strong> checked when a gauge is new or repaired, on an optical or contact thread-measuring machine; routine recalibration normally repeats major and pitch diameter only, plus the visual check.</li>
                 <li>Reference procedure: VDI/VDE/DGQ 2618 Part 4.8 (setting plugs, thread plug gauges and check plugs).</li>
@@ -9640,7 +9640,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v55";
+      var APP_BUILD = "v56";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -11013,10 +11013,18 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         return z;
       }
       /* Plug gauges for an internal thread: D2 min and TD2 of the workpiece (mm, µm), band b. */
-      function mgPlug(D2min, TD2, b){
-        return { go:mgZone(b.ZPL, b.TPL / 2, D2min, -b.WGOp),
-                 ng:mgZone(TD2 + b.TPL / 2, b.TPL / 2, D2min, -b.WNGp) };
+      /* Major diameters (GB/T 3934 Table 9 = ISO 1502): GO plug (full form) D + EI + ZPL ± TPL — formula sheets on wenku
+         and book118 agree; NOGO plug (truncated form) nominal = its PD centre + 2·F1, F1 = 0.1P (GB/T 3934 Table 4; the
+         same PD + 2F1 rule gives the iCAD M10-6g truncated check and setting plugs exactly). NOGO major tolerance was
+         found in one copy only, so only the nominal is given. Dmin = D + EI (mm), P mm. */
+      function mgPlug(D2min, TD2, b, Dmin, P){
+        var r = { go:mgZone(b.ZPL, b.TPL / 2, D2min, -b.WGOp),
+                  ng:mgZone(TD2 + b.TPL / 2, b.TPL / 2, D2min, -b.WNGp) };
+        if(Dmin != null){ r.goMaj = mgZone(b.ZPL, b.TPL, Dmin); r.ngMajNom = mgR(r.ng.mid + 0.2 * P); }
+        return r;
       }
+      /* Pitch tolerance of thread gauges by gauge thread length (GB/T 3934-2003 and -2025 Table 8, identical). */
+      var MG_TP = [[14, 4], [32, 5], [50, 6], [80, 7]];
       /* Ring gauges and their check / setting plugs for an external thread: d2 max and Td2 (mm, µm), band b. */
       function mgRing(d2max, Td2, b){
         var t = { go:mgZone(-b.ZR, b.TR / 2, d2max, b.WGOr), ng:mgZone(-Td2 - b.TR / 2, b.TR / 2, d2max, b.WNGr) }, h = b.TCP / 2;
@@ -11040,7 +11048,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         if(t6 == null) return { error:"No grade 6 pitch-diameter tolerance is tabulated for this size, so the ISO 1502 gauge row cannot be chosen." };
         var b = mgBand(t6); if(!b) return { error:"The grade 6 pitch-diameter tolerance (" + t6 + " µm) is outside ISO 1502 Table 4 (24–670 µm)." };
         var r = { ext:t.ext, t:t, t6:t6, band:b, cls:cls, D:D, P:P };
-        if(t.ext) r.ring = mgRing(t.pd[1], t.td2, b); else r.plug = mgPlug(t.pd[0], t.TD2, b);
+        if(t.ext) r.ring = mgRing(t.pd[1], t.td2, b); else r.plug = mgPlug(t.pd[0], t.TD2, b, t.majorMin, P);
         return r;
       }
       /* Inch UN gauges (ASME B1.2): the verified gauge data used in Threads → Gauge verification (TH_G, TH_U3).
@@ -11117,7 +11125,11 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           h += row("GO thread plug", "—", g.go, null, "Must screw into a good part over the whole thread length. Withdraw when its measured pitch diameter is below the wear limit.");
           h += row("NOGO thread plug", "—", g.ng, null, "Must not enter a good part by more than two turns. Withdraw when its measured pitch diameter is below the wear limit.");
           h += "</table></div>";
-          h += '<p class="small">Plug gauges are measured directly: pitch diameter over three wires, major diameter with a micrometer. Major-diameter, pitch and flank-angle limits for the gauges are set in other ISO 1502 tables and are not calculated here; take them from the gauge certificate.</p>';
+          h += "<h3>Major diameter of the plug gauges (measure with a micrometer)</h3><div class=\"tscroll\"><table class=\"dtable wrap\"><tr><th style=\"text-align:left\">Gauge</th><th>Major min</th><th>Major max</th><th style=\"text-align:left\">Note</th></tr>";
+          h += '<tr><td style="text-align:left">GO thread plug (full form)</td><td>' + f4(g.goMaj.lo) + "</td><td>" + f4(g.goMaj.hi) + '</td><td style="text-align:left">D + EI + ZPL ± TPL. A new gauge must be inside these limits.</td></tr>';
+          h += '<tr><td style="text-align:left">NOGO thread plug (truncated form)</td><td colspan="2">' + f4(g.ngMajNom) + ' nominal</td><td style="text-align:left">NOGO PD centre + 0.2 × P. Take the tolerance from the certificate.</td></tr>';
+          h += "</table></div>";
+          h += '<p class="small"><strong>Pitch (lead) tolerance</strong> of a thread gauge, over its thread length: ±4 µm up to 14 mm, ±5 µm over 14 to 32 mm, ±6 µm over 32 to 50 mm, ±7 µm over 50 to 80 mm. Flank-angle limits are not included; take them from the certificate.</p>';
           return h + basis(r);
         }
         function orderText(rs){
@@ -11128,7 +11140,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
                 .forEach(function(x){ L.push("- " + x[0] + ": PD " + f4(x[1].lo) + " to " + f4(x[1].hi)); });
             } else { var p = r.plug; L.push("For internal thread " + lbl(r) + ":");
               L.push("- GO thread plug: PD " + f4(p.go.lo) + " to " + f4(p.go.hi) + " (wear limit " + f4(p.go.wear) + ")");
-              L.push("- NOGO thread plug: PD " + f4(p.ng.lo) + " to " + f4(p.ng.hi) + " (wear limit " + f4(p.ng.wear) + ")"); }
+              L.push("- NOGO thread plug: PD " + f4(p.ng.lo) + " to " + f4(p.ng.hi) + " (wear limit " + f4(p.ng.wear) + "); major diameter " + f4(p.ngMajNom) + " nominal");
+              L.push("- GO thread plug major diameter: " + f4(p.goMaj.lo) + " to " + f4(p.goMaj.hi)); }
             L.push("");
           });
           return L.join("\n").trim();
