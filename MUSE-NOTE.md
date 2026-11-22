@@ -1,3 +1,8 @@
+# Note for Muse — Thread masters size list + full sweep (2026-11-22, v55)
+
+- Metric mode: scrollable Thread size list (the 54 Threads catalogue sizes, default M25×1.5) plus "Custom size" that shows the diameter and pitch inputs. Links from Threads select the matching catalogue size.
+- tests/mgauge.test.js now sweeps every catalogue size × every class of grade 6 or coarser (5946 checks): TT below GO ring, TZ centre = GO ring max, TS = GO wear, ZT below NOGO ring, ZZ = part d2 min, ZS = NOGO wear, setting-plug top = ring centre, widths = TCP / TPL, wear direction. External calculator re-check (iCAD) only possible for its published M10-6g example (form posts).
+
 # Note for Muse — Thread masters "How to use these limits" box, inch masters table (2026-11-22, v54)
 
 - Box above every result: all values PD (wear limit too), gauge maker makes to PD min–max, receiving checks certificate inside min–max, calibration steps, production uses gauges only. Headers "PD min (new) / PD max (new) / Wear limit (PD)".

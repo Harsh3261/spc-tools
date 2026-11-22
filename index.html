@@ -1897,10 +1897,13 @@
             <div><label class="flabel" for="mgUCls">Class</label><select id="mgUCls"><option value="2" selected>2A / 2B</option><option value="3">3A / 3B</option></select></div>
           </div></div>
           <div id="mgMet">
-          <div class="row3">
+          <div class="row2">
+            <div><label class="flabel" for="mgSize">Thread size</label><select id="mgSize"></select></div>
+            <div><label class="flabel" for="mgSide">Gauges for</label><select id="mgSide"><option value="both" selected>External and internal thread</option><option value="ext">External thread (ring gauges)</option><option value="int">Internal thread (plug gauges)</option></select></div>
+          </div>
+          <div id="mgCustom" class="row2 hidden">
             <div><label class="flabel" for="mgD">Nominal diameter D (mm)</label><input id="mgD" type="number" step="any" inputmode="decimal" value="25"></div>
             <div><label class="flabel" for="mgP">Pitch P (mm)</label><select id="mgP"></select></div>
-            <div><label class="flabel" for="mgSide">Gauges for</label><select id="mgSide"><option value="both" selected>External and internal thread</option><option value="ext">External thread (ring gauges)</option><option value="int">Internal thread (plug gauges)</option></select></div>
           </div>
           <div class="row2">
             <div><label class="flabel" for="mgExt">External class (ring gauges)</label><select id="mgExt"></select></div>
@@ -9637,7 +9640,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* ======================================================================
          SUGGEST A CHANGE — one button per tool. Copies a ready-to-paste note (tool, every input value, view)
          so a change request never has to describe where the user was. Nothing is sent anywhere. */
-      var APP_BUILD = "v54";
+      var APP_BUILD = "v55";
       (function(){
         function lab(el){
           var id = el.id, l = id ? document.querySelector('label[for="' + id + '"]') : null;
@@ -11055,6 +11058,13 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         if(!el("mgD")) return;
         var f4 = function(v){ return v.toFixed(4); };
         Object.keys(TH965_DEV).map(Number).sort(function(a, b){ return a - b; }).forEach(function(p){ var o = document.createElement("option"); o.value = p; o.textContent = p; if(p === 1.5) o.selected = true; el("mgP").appendChild(o); });
+        TH_M.forEach(function(r, i){ var o = document.createElement("option"); o.value = i; o.textContent = r[0].replace(" × ", "×"); if(r[0] === "M25 × 1.5") o.selected = true; el("mgSize").appendChild(o); });
+        (function(){ var o = document.createElement("option"); o.value = "custom"; o.textContent = "Custom size — type diameter and pitch"; el("mgSize").appendChild(o); })();
+        function syncSize(){ /* catalogue size → D and P; custom shows the two inputs */
+          var v = el("mgSize").value, cu = v === "custom";
+          el("mgCustom").classList.toggle("hidden", !cu);
+          if(!cu){ var r = TH_M[+v]; el("mgD").value = r[1]; el("mgP").value = String(r[2]); }
+        }
         TH965_CLS_EXT.forEach(function(c){ var o = document.createElement("option"); o.textContent = c; if(c === "6g") o.selected = true; el("mgExt").appendChild(o); });
         TH965_CLS_INT.forEach(function(c){ var o = document.createElement("option"); o.textContent = c; if(c === "6H") o.selected = true; el("mgInt").appendChild(o); });
         function row(name, code, z, wearTxt, use){
@@ -11172,8 +11182,12 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         /* Links from Threads: #tool=mgauge&sys=m&d=10&p=1.5&ext=6g or &int=6H, or &sys=un&size=1/2-13 UNC&cls=2 */
         window.mgApply = function(q){
           if(q.get("sys")) el("mgSys").value = q.get("sys") === "un" ? "un" : "m";
-          if(q.get("d")) el("mgD").value = q.get("d");
-          if(q.get("p")) el("mgP").value = String(+q.get("p"));
+          if(q.get("d") && q.get("p")){
+            var dd = +q.get("d"), pp = +q.get("p"), hit = -1;
+            TH_M.forEach(function(r, i){ if(r[1] === dd && r[2] === pp) hit = i; });
+            el("mgSize").value = hit >= 0 ? String(hit) : "custom"; syncSize();
+            if(hit < 0){ el("mgD").value = dd; el("mgP").value = String(pp); }
+          }
           if(q.get("ext")){ el("mgExt").value = q.get("ext"); el("mgSide").value = q.get("int") ? "both" : "ext"; }
           if(q.get("int")){ el("mgInt").value = q.get("int"); el("mgSide").value = q.get("ext") ? "both" : "int"; }
           if(q.get("size")) el("mgUSize").value = q.get("size");
@@ -11186,6 +11200,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           var r = mgWire(P, w, M);
           o.innerHTML = '<p class="small">Best wire size for P ' + P + " mm: <strong>" + f4(r.best) + " mm</strong>." + (r.E != null ? " Simple pitch diameter E = <strong>" + f4(r.E) + " mm</strong> (no lead-angle or contact-force correction)." : " Enter w and M to get the pitch diameter.") + "</p>";
         }
+        el("mgSize").addEventListener("change", function(){ syncSize(); render(); });
+        syncSize();
         ["mgD","mgP","mgSide","mgExt","mgInt","mgSys","mgUSize","mgUCls"].forEach(function(id){ el(id).addEventListener("input", render); el(id).addEventListener("change", render); });
         ["mwP","mwW","mwM"].forEach(function(id){ el(id).addEventListener("input", wire); });
         render(); wire();

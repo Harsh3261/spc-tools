@@ -43,6 +43,36 @@ near("iCAD GO wear", ic.go.wear, 9.007); near("iCAD NG wear", ic.ng.wear, 8.868)
 /* coarser grade uses the grade 6 row but its own limits; finer grade refused */
 r = mgCalc(10, 1.5, "8g"); eq("8g uses grade-6 band", r.band.lo, 125); near("8g NOGO ring upper = d2 min", r.ring.ng.hi, r.t.pd[0]);
 eq("4h refused", /finer than grade 6/.test(mgCalc(10, 1.5, "4h").error), true);
+/* Sweep: every catalogue size in Threads (TH_M) × every class of grade 6 or coarser — the ISO 1502 layout holds */
+const tm = s.slice(s.indexOf("var TH_M = ["), s.indexOf("];", s.indexOf("var TH_M = [")) + 2);
+eval(tm.replace("var TH_M", "global.TH_M"));
+const um = x => Math.round(x * 1e4);
+let swept = 0;
+TH_M.forEach(row => {
+  TH965_CLS_EXT.concat(TH965_CLS_INT).forEach(cls => {
+    const c = th965Parse(cls); if (c.pdGrade < 6) return;
+    const r = mgCalc(row[1], row[2], cls); if (r.error) return; swept++;
+    const L = row[0] + " " + cls, b = r.band;
+    if (r.ext) { const g = r.ring;
+      eq(L + " TT below GO ring", um(g.TT.hi) <= um(g.go.lo), true);
+      eq(L + " TZ centre = GO ring max", um(g.TZ.mid), um(g.go.hi));
+      eq(L + " TS centre = GO wear", um(g.TS.mid), um(g.go.wear));
+      eq(L + " ZT below NOGO ring", um(g.ZT.hi) <= um(g.ng.lo), true);
+      eq(L + " ZZ centre = part d2 min", um(g.ZZ.mid), um(r.t.pd[0]));
+      eq(L + " NOGO ring max = part d2 min", um(g.ng.hi), um(r.t.pd[0]));
+      eq(L + " ZS centre = NOGO wear", um(g.ZS.mid), um(g.ng.wear));
+      eq(L + " GO setting plug top = ring centre", um(g.setGo.hi), um(g.go.mid));
+      eq(L + " check plug width = TCP", um(g.TT.hi - g.TT.lo), b.TCP * 10);
+      eq(L + " GO wears larger", g.go.wear > g.go.hi, true);
+    } else { const g = r.plug;
+      eq(L + " NOGO plug min = part D2 max", um(g.ng.lo), um(r.t.pd[1]));
+      eq(L + " GO plug width = TPL", um(g.go.hi - g.go.lo), b.TPL * 10);
+      eq(L + " GO plug wears smaller", g.go.wear < g.go.lo, true);
+      eq(L + " NOGO plug wears smaller", g.ng.wear < g.ng.hi, true);
+    }
+  });
+});
+eq("sweep covered", swept > 300, true);
 /* three-wire */
 near("best wire 1.5", mgWire(1.5).best, 0.866); near("E", mgWire(1.5, 0.866, 10.0).E, 10 - 2.598 + 1.2990);
 if (fails.length) { console.log("FAIL " + fails.length + " of " + n + "\n" + fails.join("\n")); process.exit(1); }

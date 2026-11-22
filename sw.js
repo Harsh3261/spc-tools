@@ -1,4 +1,4 @@
-const CACHE = "spc-tools-v54-masters-howto";
+const CACHE = "spc-tools-v55-masters-list";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
