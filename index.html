@@ -1940,7 +1940,7 @@
               <div id="mwOut" aria-live="polite"></div>
             </div>
           </details>
-          <p class="cite">Method: ISO 1502:1996 (identical to GB/T 3934-2003 and to the IS 2334:2001 reprint). Gauge tolerances TR, TPL, TCP, m, ZR, ZPL from Table 4, two sources (GB/T 3934 and IS 2334). Wear allowances from GB/T 3934. Plug limits reproduce the RP-Kalibrierlabor M10×1.5-6G and Stille M45×2-6G calibration certificates exactly; ring, check-plug and wear-check-plug limits reproduce ISO 6698 Table 4 (hub thread 6g, calculated by its authors with the ISO 1502 formulas). Workpiece limits from the ISO 965-1 tables (see Threads). Tested in tests/mgauge.test.js.</p>
+          <p class="cite">Method: ISO 1502:1996 (identical to GB/T 3934-2003 and to the IS 2334:2001 reprint). Gauge tolerances TR, TPL, TCP, m, ZR, ZPL from Table 4, two sources (GB/T 3934 and IS 2334). Wear allowances from GB/T 3934. Plug limits reproduce the RP-Kalibrierlabor M10×1.5-6G and Stille M45×2-6G calibration certificates exactly; ring, check-plug, wear-check-plug and setting-plug limits reproduce ISO 6698 Table 4 (hub thread 6g, calculated by its authors with the ISO 1502 formulas) and the iCAD ISO 1502 calculator example for M10-6g, every value. Workpiece limits from the ISO 965-1 tables (see Threads). Tested in tests/mgauge.test.js.</p>
         </div>
       </section>
 
@@ -10972,7 +10972,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
          TR..ZPL: ISO 1502 Table 4 — GB/T 3934-2003 (identical adoption) = IS 2334:2001 (ISO 1502 reprint), every cell.
          Wear: GB/T 3934 table; W is measured from the middle of the new tolerance zone to the wear limit. Plug values for
          125–200 and 200–315 confirmed by the RP-Kalibrierlabor M10×1.5-6G and Stille M45×2-6G certificates; ring values for
-         80–125 confirmed by ISO 6698:1981 Table 4. The first band starts at 24 µm. Verified 2026-11-22.
+         80–125 confirmed by ISO 6698:1981 Table 4 and for 125–200 by the iCAD ISO 1502 M10-6g example. The first band starts at 24 µm. Verified 2026-11-22.
          Edit only via a verified data change. */
       var MG_BANDS = [
         [24, 50, 8, 6, 6, 10, -4, 0, 10, 7, 8, 6],
@@ -11008,8 +11008,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         t.ZT = mgZone(-Td2 - b.TR / 2 - b.m, h, d2max);
         t.ZZ = mgZone(-Td2, h, d2max);
         t.ZS = mgZone(-Td2 - b.TR / 2 + b.WNGr, h, d2max);
-        t.setGo = mgZone(-b.ZR, h, d2max);
-        t.setNg = mgZone(-Td2 - b.TR / 2, h, d2max);
+        t.setGo = mgZone(-b.ZR - h, h, d2max);            /* setting plugs sit in the lower half: centre = ring centre − TCP/2 */
+        t.setNg = mgZone(-Td2 - b.TR / 2 - h, h, d2max);
         return t;
       }
       function mgCalc(D, P, cls){

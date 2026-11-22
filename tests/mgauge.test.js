@@ -27,7 +27,7 @@ near("hub GO ring hi", h.go.hi, 34.217); near("hub GO ring lo", h.go.lo, 34.203)
 near("hub TT hi", h.TT.hi, 34.199); near("hub TT lo", h.TT.lo, 34.191);
 near("hub TZ lo", h.TZ.lo, 34.213); near("hub TZ hi", h.TZ.hi, 34.221);
 near("hub TS lo", h.TS.lo, 34.222); near("hub TS hi", h.TS.hi, 34.230);
-near("hub setting GO mid", h.setGo.mid, 34.210);
+near("hub setting GO lo", h.setGo.lo, 34.202); near("hub setting GO hi", h.setGo.hi, 34.210);
 near("hub ZT lo", h.ZT.lo, 34.061); near("hub ZZ lo", h.ZZ.lo, 34.083); near("hub ZS lo", h.ZS.lo, 34.088);
 /* M10×1.5-6g full set, hand-calculated */
 r = mgCalc(10, 1.5, "6g").ring;
@@ -35,6 +35,11 @@ near("GO ring", r.go.lo, 8.977); near("GO ring hi", r.go.hi, 8.995); near("GO ri
 near("NG ring", r.ng.lo, 8.844); near("NG ring hi", r.ng.hi, 8.862); near("NG ring wear", r.ng.wear, 8.868);
 near("TT", r.TT.mid, 8.968); near("TZ", r.TZ.mid, 8.995); near("TS", r.TS.mid, 9.007);
 near("ZT", r.ZT.mid, 8.835); near("ZZ", r.ZZ.mid, 8.862); near("ZS", r.ZS.mid, 8.868);
+/* iCAD ISO 1502 calculator, M10-6g example (third source): every PD range */
+const ic = mgCalc(10, 1.5, "6g").ring;
+[["go",8.977,8.995],["ng",8.844,8.862],["TT",8.9635,8.9725],["TZ",8.9905,8.9995],["TS",9.0025,9.0115],["ZT",8.8305,8.8395],["ZZ",8.8575,8.8665],["ZS",8.8635,8.8725],["setGo",8.977,8.986],["setNg",8.844,8.853]]
+  .forEach(x => { near("iCAD " + x[0] + " lo", ic[x[0]].lo, x[1]); near("iCAD " + x[0] + " hi", ic[x[0]].hi, x[2]); });
+near("iCAD GO wear", ic.go.wear, 9.007); near("iCAD NG wear", ic.ng.wear, 8.868);
 /* coarser grade uses the grade 6 row but its own limits; finer grade refused */
 r = mgCalc(10, 1.5, "8g"); eq("8g uses grade-6 band", r.band.lo, 125); near("8g NOGO ring upper = d2 min", r.ring.ng.hi, r.t.pd[0]);
 eq("4h refused", /finer than grade 6/.test(mgCalc(10, 1.5, "4h").error), true);

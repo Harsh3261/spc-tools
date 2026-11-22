@@ -7,7 +7,7 @@
 - Data MG_BANDS: ISO 1502 Table 4 (GB/T 3934 = IS 2334, every cell) + wear (GB/T 3934). Row chosen by the grade 6
   workpiece PD tolerance; grades finer than 6 are refused (ISO 1502 uses the finest recommended grade — not coded).
 - Checks (tests/mgauge.test.js, 46): RP-Kalibrierlabor M10×1.5-6G and Stille M45×2-6G plug certificates exact;
-  ISO 6698:1981 Table 4 hub 6g ring, TT, TZ, TS, ZT, ZZ, ZS, setting plug exact; Haas ring ±0.009.
+  ISO 6698:1981 Table 4 hub 6g ring, TT, TZ, TS, ZT, ZZ, ZS, setting plug exact; Haas ring ±0.009. Third source: iCAD ISO 1502 calculator M10-6g example — every ring, check, wear and setting plug PD exact (setting plugs sit in the lower half of the ring zone: centre = ring centre − TCP/2; fixed after this check). 69 checks.
 - Not included: gauge major/minor diameter, pitch and flank-angle limits (other ISO 1502 tables).
 - Surface finish: traverse length, λs (nominal λc/λs ratio), max stylus tip per cut-off — Mitutoyo Bulletin 2229 +
   Mitutoyo Surftest quick guide (ISO 3274 table), both equal to ISO 4288. New "Setting up a Mitutoyo Surftest"
