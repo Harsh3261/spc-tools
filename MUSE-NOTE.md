@@ -1,3 +1,43 @@
+# Note for Muse — Setting plugs: gauge-maker second source recorded; "X on PD" ordering trap flagged (2026-11-22, v64)
+
+## Satureday's maker hunt — recorded as received
+Five current gauge makers' "Thread Rings & Setting Plugs" charts agree with the app's setting-plug PD nominals:
+Hemco Gages "Standard Inch Pitch Diameters" (2024 PDF, ~110 rows), Gage Assembly ring/setting-plug chart, Judge Tool
+set-plug chart, Thread Check Inc. Catalog 2026 p.184 (FlippingBook edition at cld.bz), Gage Crib UN Series rings chart.
+Key size 3/4-16 UNF: 2A GO .7079 / LO .7029; 3A GO .7094 / LO .7056 — app identical.
+W tolerance: Thread Check Catalog 2026 p.52 "Gage Tolerances": 16 TPI, >1/2–1 1/2 in: PD .0002, half-angle 8',
+lead .00015 — app TH_W identical. Direction GO minus / LO plus confirmed by Vermont Gage product data (per Satureday).
+Full extraction: Satureday's file setting-plug-maker-chart-2026-11-22.md.
+
+## My own check (independent of Satureday's set)
+PMC/Mercury catalogue p.29 "Unified Thread Ring & Setting Plug P.D. Chart" (cdn11.bigcommerce.com/s-ers15sqyb3/content/
+PMC-MercuryCatalog.pdf), read 2026-11-22: 3/4-16 2A .7079/.7029, 3A .7094/.7056; 1/2-13 2A .4485/.4435, 3A .4500/.4463;
+#4-48 2A .0978/.0954, 3A .0985/.0967 — all identical to the app. Now asserted in tests/setplug.test.js (687 checks).
+Edition: Machinery's Handbook 31st ed. names the standard "ANSI/ASME B1.2-1983 (R2017)" — so B1.2-1983 is the current
+edition (reaffirmed 2017). This closes my earlier flag "current B1.2 not read": the rules come from the current text
+as reproduced; the standard itself still not read directly.
+
+## Structural caveat (Satureday's, adopted)
+Makers publish PD nominals and the W value, NOT limit pairs and NOT truncated / full-form majors. App position now:
+- PD nominals + W values: maker-confirmed (six publications) + H28 + B1.2 rule → closed.
+- Computed PD limit pairs and both majors: H28 Table III.13 + B1.2 rules via Machinery's Handbook (two publications of
+  the B1.2/H28 numbers). Unchanged; 670/672 agree, 2 withheld.
+
+## NEW FLAG — ordering trap (app text changed)
+Alameda 2023 catalogue: standard setting plugs are "class W tolerance on lead, flank, angles, straightness and
+X tolerance on pitch diameter"; W-tolerance PD costs extra (+35 %). PMC/Mercury: "Thread Gages are made to Class X
+tolerances unless otherwise specified." So a plug bought "standard" may NOT meet B1.2's W on PD.
+Change: masters order text now says W applies to pitch diameter as well as lead and angle and asks the maker not to
+supply X-tolerance PD; the W line on the page says the same. No data change.
+Worth telling Harsh: check existing setting-plug certs — if PD was made to X, it is outside B1.2 W limits.
+
+## Still open (unchanged)
+#4-48 UNF-2A LO full-form major (H28 vs rule); B1.2 plain check plug for GO-ring minor; all metric master gaps.
+
+Files: index.html (order text + cite line), tests/setplug.test.js, sw.js spc-tools-v64-setplug-makers, GAPS.md.
+
+---
+
 # Note for Muse — Inch setting plugs (ASME B1.2 masters for UNC/UNF ring gauges): full limits added (2026-11-22, v63)
 
 Approved lead followed: NBS Handbook H28 supplement (NIST) + a second source. Result: the inch masters now give

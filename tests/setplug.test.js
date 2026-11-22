@@ -50,5 +50,13 @@ Object.keys(H).forEach(size => ["2", "3"].forEach(cls => {
   for (let k = 0; k < 6; k++) for (let m = 0; m < 2; m++) { if (k === 4 && !l.full) continue; n++; const e = H[size][cls][m][k], a = app[k][m];
     if (Math.abs(a - e) > 5e-6) fails.push(size + " " + cls + "A " + lab[k] + (m ? " min-line" : " max-line") + ": app " + a + " vs H28 " + e); }
 }));
+/* Gauge-maker charts (setting-plug PD nominals): PMC/Mercury catalogue p.29 "Unified Thread Ring & Setting Plug P.D. Chart"
+   (read 2026-11-22); 3/4-16 also in Hemco 2024, Gage Assembly, Judge Tool, Thread Check Catalog 2026 p.184, Gage Crib (via Satureday). */
+const MK = [["3/4-16 UNF","3",.7094,.7056],["3/4-16 UNF","2",.7079,.7029],["1/2-13 UNC","3",.4500,.4463],["1/2-13 UNC","2",.4485,.4435],["#4-48 UNF","3",.0985,.0967],["#4-48 UNF","2",.0978,.0954]];
+MK.forEach(([sz, c, go, lo]) => { const u = mgUN(sz, c); n += 2;
+  if (Math.abs(u.setGo - go) > 5e-6) fails.push(sz + " " + c + "A maker GO " + go + " vs app " + u.setGo);
+  if (Math.abs(u.setLo - lo) > 5e-6) fails.push(sz + " " + c + "A maker LO " + lo + " vs app " + u.setLo); });
+/* W PD .0002 / half-angle 8' / lead .00015 for 16 TPI, 1/2–1 1/2 in: Thread Check Catalog 2026 p.52 (via Satureday). */
+{ const w = mgW(0.75, 16); n += 3; if (w.pd !== .0002 || w.half !== 8 || w.lead !== .00015) fails.push("W 16 TPI 3/4 in vs Thread Check p.52"); }
 if (fails.length) { console.log("FAIL " + fails.length + "/" + n + "\n" + fails.join("\n")); process.exit(1); }
-console.log("OK " + n + " thread-setting-plug values match NBS H28 Table III.13 (28 sizes, classes 2A and 3A)");
+console.log("OK " + n + " thread-setting-plug checks: H28 Table III.13 (28 sizes, 2A and 3A) + gauge-maker nominals and W");
