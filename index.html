@@ -1890,7 +1890,7 @@
       <section class="tool" id="tool-mgauge" role="tabpanel" aria-labelledby="tabbtn-mgauge">
         <div class="card">
           <h2>Thread gauges and their masters — metric (ISO 1502) and inch (ASME B1.2)</h2>
-          <p class="guru">Choose the thread. The tool gives the pitch-diameter limits for the GO and NOGO thread plugs and rings (new and worn), and for the check plugs and setting plugs used to verify ring gauges, calculated by ISO 1502 for metric threads and taken from ASME B1.2 for inch threads. Use the numbers to check gauges at calibration and to order master gauges.</p>
+          <p class="guru"><strong>Workpiece gauges</strong> (thread plugs and rings) inspect parts. <strong>Masters</strong> (check plugs and setting plugs) calibrate the ring gauges — they are what a gauge maker needs when the pitch diameter inside a small ring cannot be measured. Choose what you need below. Choose the thread. The tool gives the pitch-diameter limits for the GO and NOGO thread plugs and rings (new and worn), and for the check plugs and setting plugs used to verify ring gauges, calculated by ISO 1502 for metric threads and taken from ASME B1.2 for inch threads. Use the numbers to check gauges at calibration and to order master gauges.</p>
           <div class="row2">
             <div><label class="flabel" for="mgSys">Thread system</label><select id="mgSys"><option value="m" selected>Metric M — ISO 1502</option><option value="un">Inch UNC / UNF — ASME B1.2</option></select></div>
             <div><p class="small" style="margin-top:22px">Full thread dimensions (major, minor, tap drill) are in <a href="#tool=threads">Threads</a>.</p></div>
@@ -1902,7 +1902,7 @@
           <div id="mgMet">
           <div class="row2">
             <div><label class="flabel" for="mgSize">Thread size</label><select id="mgSize"></select></div>
-            <div><label class="flabel" for="mgSide">Gauges for</label><select id="mgSide"><option value="both" selected>External and internal thread</option><option value="ext">External thread (ring gauges)</option><option value="int">Internal thread (plug gauges)</option></select></div>
+            <div><label class="flabel" for="mgSide">What do you need?</label><select id="mgSide"><option value="mst">Masters to calibrate thread RING gauges — check plugs and setting plugs</option><option value="ext">Inspect parts: external thread (bolt, e.g. 6g) — GO / NOGO thread RING gauges</option><option value="int">Inspect parts: internal thread (tapped hole, e.g. 6H) — GO / NOGO thread PLUG gauges</option><option value="both" selected>Everything for this size — plugs, rings and their masters</option></select></div>
           </div>
           <div id="mgCustom" class="row2 hidden">
             <div><label class="flabel" for="mgD">Nominal diameter D (mm)</label><input id="mgD" type="number" step="any" inputmode="decimal" value="25"></div>
@@ -11120,6 +11120,31 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         t.setNg = mgZone(-Td2 - b.TR / 2 - h, h, d2max);
         return t;
       }
+      /* Major and minor diameters of the check plugs for ring gauges (ISO 1502 Table 10 = GB/T 3934 Table 11).
+         Read from GB/T 3934-2003 (164580.com) and GB/T 3934-2025 (gb-gbt.com) — both garbled differently, same formulas:
+         TT  major d+es ±TPL (a)            minor ≤ D1+es−ZR−m          full form
+         TZ  major PDc+2F1 ±TPL/2           minor ≤ D1+es−TR/2          truncated
+         TS  major PDc+2F1 (tolerance not legible)                       truncated
+         ZT  major d+es ±TPL (a)            minor ≤ D1+es−Td2−TR/2−m    full form
+         ZZ  major d+es−Td2 ±TPL            minor ≤ D1+es−Td2           full form
+         ZS  major d+es−Td2−TR/2+WNG (tolerance not legible)             full form
+         (a) a sharp crest may be slightly flattened, so the major may then be below the lower limit.
+         PDc = the check plug's PD centre, F1 = 0.1P, D1 = D − 1.082532·P. Forms: GB/T 3934-2003/-2025 Table 2 and IS 2334
+         (= ISO 1502:1996) §10.1/10.2 agree. Setting plugs: GO = full-form + truncated portion, NOGO = truncated portion;
+         their major / minor diameters are not included (not legible). No wear allowance exists for check or setting plugs
+         (ISO 1502 Table 4 gives wear only for working gauges). Units mm; t = th965 result, b = band. */
+      function mgMasterDims(D, P, t, b, g){
+        var es = t.es / 1000, Td2 = t.td2 / 1000, d1 = D - 1.082532 * P, F1 = 0.1 * P, tpl = b.TPL / 1000;
+        var z = function(nom, tol){ return { nom:mgR(nom), lo:tol != null ? mgR(nom - tol) : null, hi:tol != null ? mgR(nom + tol) : null }; };
+        return {
+          TT:{ form:"full", maj:z(D + es, tpl), majA:true, minMax:mgR(d1 + es - (b.ZR + b.m) / 1000) },
+          TZ:{ form:"truncated", maj:z(g.TZ.mid + 2 * F1, tpl / 2), minMax:mgR(d1 + es - b.TR / 2000) },
+          TS:{ form:"truncated", maj:z(g.TS.mid + 2 * F1, null), minMax:null },
+          ZT:{ form:"full", maj:z(D + es, tpl), majA:true, minMax:mgR(d1 + es - Td2 - (b.TR / 2 + b.m) / 1000) },
+          ZZ:{ form:"full", maj:z(D + es - Td2, tpl), minMax:mgR(d1 + es - Td2) },
+          ZS:{ form:"full", maj:z(D + es - Td2 + (b.WNGr - b.TR / 2) / 1000, null), minMax:null },
+          es:mgR(es), F1:F1, d1:mgR(d1) };
+      }
       function mgCalc(D, P, cls){
         var t = th965(D, P, cls); if(t.error) return { error:t.error };
         var g = t.cls.pdGrade;
@@ -11130,7 +11155,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         if(t6 == null) return { error:"No grade 6 pitch-diameter tolerance is tabulated for this size, so the ISO 1502 gauge row cannot be chosen." };
         var b = mgBand(t6); if(!b) return { error:"The grade 6 pitch-diameter tolerance (" + t6 + " µm) is outside ISO 1502 Table 4 (24–670 µm)." };
         var r = { ext:t.ext, t:t, t6:t6, band:b, cls:cls, D:D, P:P };
-        if(t.ext) r.ring = mgRing(t.pd[1], t.td2, b); else r.plug = mgPlug(t.pd[0], t.TD2, b, t.majorMin, P);
+        if(t.ext){ r.ring = mgRing(t.pd[1], t.td2, b); r.mdim = mgMasterDims(D, P, t, b, r.ring); } else r.plug = mgPlug(t.pd[0], t.TD2, b, t.majorMin, P);
         return r;
       }
       /* Inch UN gauges (ASME B1.2): the verified gauge data used in Threads → Gauge verification (TH_G, TH_U3).
@@ -11165,11 +11190,11 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         function whoBox(inch){
           return '<div class="tfplain" style="border:1px solid var(--line, #444);border-radius:8px;padding:10px 14px;margin:12px 0">' +
             '<h3 style="margin-top:0">How to use these limits</h3><ul class="small">' +
-            "<li><strong>All values are pitch diameter (PD)</strong>, not major diameter. The wear limit is a pitch diameter too.</li>" +
+            "<li><strong>PD columns are pitch diameter</strong>, not major diameter; the wear limit is a pitch diameter too. Major and minor diameters have their own columns or tables where they are given.</li>" +
             "<li><strong>Gauge maker:</strong> makes every gauge and master within its PD min–max (new). Send the order text below.</li>" +
             "<li><strong>Receiving inspection:</strong> each certificate's measured PD must lie between PD min and PD max. Reject the gauge if it does not.</li>" +
             (inch ? "<li><strong>Calibration:</strong> plugs and setting plugs — measure PD over three wires and compare with the limits. Rings — check the fit on their setting plug.</li>"
-                  : "<li><strong>Calibration:</strong> plugs and check plugs — measure PD over three wires; a used gauge passes while it is inside its wear limit. Rings — try the check plugs as the Use column says.</li>") +
+                  : "<li><strong>Calibration:</strong> working thread plugs — measure PD over three wires; a used plug passes while it is inside its wear limit. Check plugs and setting plugs (masters) — measure PD over three wires; they have no wear allowance and must stay inside their new limits. Rings — try the check plugs as the masters table says.</li>") +
             "<li><strong>Production inspection</strong> uses the gauges only. Gauge limits are not part limits; the part limits are in Threads.</li>" +
             "</ul></div>";
         }
@@ -11180,29 +11205,49 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
                    : "TPL = " + b.TPL + ", ZPL = " + b.ZPL + ", wear GO plug = " + b.WGOp + ", NOGO plug = " + b.WNGp) + " µm. All values mm, simple pitch diameter at 20 °C.</p>";
         }
         function lbl(r){ return "M" + r.D + "×" + r.P + "-" + r.cls; }
-        function extHTML(r){
-          var g = r.ring, t = r.t, h = "<h3>Ring gauges for " + esc(lbl(r)) + " — workpiece d₂ " + f4(t.pd[0]) + " to " + f4(t.pd[1]) + "</h3>";
+        function banner(kind){
+          return kind === "work"
+            ? '<p class="verdict" style="margin:14px 0 6px;border-left:4px solid var(--accent, #c9a227);padding-left:10px"><strong>WORKPIECE GAUGES — used on parts in production.</strong> These inspect the threads you make. They are not masters.</p>'
+            : '<p class="verdict" style="margin:14px 0 6px;border-left:4px solid var(--ok, #3fa66b);padding-left:10px"><strong>MASTERS — used only to calibrate the thread ring gauges.</strong> Never used on parts. Order these when your gauge maker or lab cannot measure the pitch diameter inside a small ring.</p>';
+        }
+        function ringsHTML(r){
+          var g = r.ring, t = r.t, h = banner("work") + "<h3>Thread ring gauges — inspect external thread " + esc(lbl(r)) + " (part d₂ " + f4(t.pd[0]) + " to " + f4(t.pd[1]) + ")</h3>";
           h += '<div class="tscroll"><table class="dtable wrap" aria-label="Ring gauge limits">' + head;
           h += row("GO thread ring", "T", g.go, null, "Must screw over the whole thread length of a good part. Withdraw the ring when its wear check plug (TS) enters by more than one turn.");
           h += row("NOGO thread ring", "Z", g.ng, null, "Must not screw on a good part by more than two turns. Withdraw when ZS enters by more than one turn.");
           h += "</table></div>";
-          h += '<p class="small">Ring wear limits are the largest pitch diameter allowed; they are checked with the wear check plugs below, not measured.</p>';
-          h += "<h3>Check plugs and setting plugs (masters for the rings)</h3>";
-          h += '<div class="tscroll"><table class="dtable wrap" aria-label="Check plug limits">' + head;
-          h += row("GO-GO check plug", "TT", g.TT, null, "For a new GO ring: must screw through.");
-          h += row("GO-NOGO check plug", "TZ", g.TZ, null, "For a new GO ring: must not enter by more than one turn.");
-          h += row("GO wear check plug", "TS", g.TS, null, "For a GO ring in service: must not enter by more than one turn; if it does, the ring is worn out.");
-          h += row("NOGO-GO check plug", "ZT", g.ZT, null, "For a new NOGO ring: must screw through.");
-          h += row("NOGO-NOGO check plug", "ZZ", g.ZZ, null, "For a new NOGO ring: must not enter by more than one turn.");
-          h += row("NOGO wear check plug", "ZS", g.ZS, null, "For a NOGO ring in service: must not enter by more than one turn; if it does, the ring is worn out.");
-          h += row("Setting plug, adjustable GO ring", "—", g.setGo, null, "Set the adjustable GO ring to fit this plug, then lock and seal it.");
-          h += row("Setting plug, adjustable NOGO ring", "—", g.setNg, null, "Set the adjustable NOGO ring to fit this plug, then lock and seal it.");
-          h += "</table></div>";
-          h += '<p class="small">Check plugs and setting plugs are calibrated like thread plug gauges: measure their pitch diameter over three wires and compare with the limits above. A check plug outside its limits cannot be used to accept a ring.</p>';
+          h += '<p class="small">A ring\'s pitch diameter is not measured directly on small sizes: the PD limits above are the target for the maker, and the ring is accepted and re-calibrated with the check plugs (masters) for this class. Ring wear limits are the largest PD allowed; the wear check plugs TS and ZS embody them.</p>';
           return h + basis(r);
         }
+        function mastersHTML(r){
+          var g = r.ring, m = r.mdim, t = r.t, b = r.band;
+          var H = '<tr><th style="text-align:left">Master</th><th>Code</th><th>Thread form</th><th>PD min (new)</th><th>PD max (new)</th><th>Wear limit</th><th>Major diameter</th><th>Minor diameter</th><th style="text-align:left">How it is used on the ring</th></tr>';
+          var maj = function(d){ return d.maj.lo != null ? f4(d.maj.lo) + " to " + f4(d.maj.hi) + (d.majA ? " ᵃ" : "") : f4(d.maj.nom) + " nominal ᵇ"; };
+          var R = function(name, code, z, d, use){ return '<tr><td style="text-align:left">' + name + "</td><td>" + code + "</td><td>" + (d ? (d.form === "full" ? "Full form" : "Truncated") : "—") + "</td><td>" + f4(z.lo) + "</td><td>" + f4(z.hi) + "</td><td>none ᶜ</td><td>" + (d ? maj(d) : "not included ᵈ") + "</td><td>" + (d && d.minMax != null ? "≤ " + f4(d.minMax) : (d ? "not specified" : "not included ᵈ")) + '</td><td style="text-align:left">' + use + "</td></tr>"; };
+          var h = banner("master") + "<h3>Check plugs and setting plugs — masters for the " + esc(lbl(r)) + " ring gauges</h3>";
+          h += '<div class="tscroll"><table class="dtable wrap" aria-label="Master gauge limits">' + H;
+          h += R("GO-GO check plug", "TT", g.TT, m.TT, "New GO ring: must screw through it.");
+          h += R("GO-NOGO check plug", "TZ", g.TZ, m.TZ, "New GO ring: may enter each end by no more than one turn.");
+          h += R("GO wear check plug", "TS", g.TS, m.TS, "GO ring in service: if it enters by more than one turn, the ring is worn out.");
+          h += R("NOGO-GO check plug", "ZT", g.ZT, m.ZT, "New NOGO ring: must screw through it.");
+          h += R("NOGO-NOGO check plug", "ZZ", g.ZZ, m.ZZ, "New NOGO ring: may enter each end by no more than one turn.");
+          h += R("NOGO wear check plug", "ZS", g.ZS, m.ZS, "NOGO ring in service: if it enters by more than one turn, the ring is worn out.");
+          h += R("Setting plug for an adjustable GO ring", "—", g.setGo, null, "Set the adjustable GO ring to it, lock and seal. GO setting plugs have a full-form and a truncated portion.");
+          h += R("Setting plug for an adjustable NOGO ring", "—", g.setNg, null, "Set the adjustable NOGO ring to it, lock and seal. NOGO setting plugs have a truncated portion.");
+          h += "</table></div>";
+          h += '<ul class="small">' +
+            "<li><strong>PD min / max (new)</strong>: the simple pitch diameter the maker must hit and the lab must measure (three wires, 20 °C). This is what accepts or rejects the master itself.</li>" +
+            "<li><strong>ᶜ Wear limit — none:</strong> ISO 1502 gives wear allowances only for the working plugs and rings, not for check or setting plugs. A master is judged against its new PD limits at every calibration.</li>" +
+            "<li><strong>Full form</strong> = complete thread flanks and crest, it checks the whole profile of the ring. <strong>Truncated</strong> = crest cut back so only the flanks near the pitch line touch; it checks pitch diameter only. Truncated major = the plug's PD centre + 2 × F1, F1 = 0.1 × P = " + f4(m.F1) + ".</li>" +
+            "<li><strong>ᵃ</strong> If the crest of a full-form check plug is sharp it may be slightly flattened, so its major may then be below the lower limit (ISO 1502 note). <strong>ᵇ</strong> Tolerance not legible in the copies read — take it from the gauge maker's ISO 1502 copy. <strong>ᵈ</strong> Setting-plug major and minor diameters are not included.</li>" +
+            "<li><strong>Minor diameter</strong> is a maximum (clearance), so the plug never touches the ring's crest. Formulas use D₁ = D − 1.082532 × P = " + f4(m.d1) + " and es = " + (m.es * 1000).toFixed(0) + " µm.</li>" +
+            "<li><strong>Pitch (lead)</strong> of every master: ±4 µm over its thread length up to 14 mm, ±5 µm to 32 mm, ±6 µm to 50 mm, ±7 µm to 80 mm. Flank-angle limits are not included — the certificate must report them against ISO 1502.</li>" +
+            "</ul>";
+          h += '<p class="small">ISO 1502 row for these masters: external grade 6 d₂ tolerance ' + r.t6 + " µm (band " + b.lo + "–" + b.hi + " µm). TR = " + b.TR + ", TPL = " + b.TPL + ", TCP = " + b.TCP + ", m = " + b.m + ", ZR = " + b.ZR + ", wear GO ring = " + b.WGOr + ", NOGO ring = " + b.WNGr + " µm. All values mm at 20 °C.</p>";
+          return h;
+        }
         function intHTML(r){
-          var g = r.plug, t = r.t, h = "<h3>Plug gauges for " + esc(lbl(r)) + " — workpiece D₂ " + f4(t.pd[0]) + " to " + f4(t.pd[1]) + "</h3>";
+          var g = r.plug, t = r.t, h = banner("work") + "<h3>Thread plug gauges — inspect internal thread " + esc(lbl(r)) + " (part D₂ " + f4(t.pd[0]) + " to " + f4(t.pd[1]) + ")</h3>";
           h += '<div class="tscroll"><table class="dtable wrap" aria-label="Plug gauge limits">' + head;
           h += row("GO thread plug", "—", g.go, null, "Must screw into a good part over the whole thread length. Withdraw when its measured pitch diameter is below the wear limit.");
           h += row("NOGO thread plug", "—", g.ng, null, "Must not enter a good part by more than two turns. Withdraw when its measured pitch diameter is below the wear limit.");
@@ -11214,20 +11259,34 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           h += '<p class="small"><strong>Pitch (lead) tolerance</strong> of a thread gauge, over its thread length: ±4 µm up to 14 mm, ±5 µm over 14 to 32 mm, ±6 µm over 32 to 50 mm, ±7 µm over 50 to 80 mm. Flank-angle limits are not included; take them from the certificate.</p>';
           return h + basis(r);
         }
-        function orderText(rs){
-          var L = ["Please quote and supply the following thread gauges to ISO 1502:1996, each with a calibration certificate from an ISO/IEC 17025 accredited laboratory reporting measured pitch diameter, major diameter, pitch and flank angles. Pitch-diameter limits below are simple pitch diameter in mm at 20 °C; please confirm against ISO 1502 before manufacture.", ""];
+        var ORD_HEAD = "Please quote and supply the following to ISO 1502:1996, each with a calibration certificate from an ISO/IEC 17025 accredited laboratory reporting the measured simple pitch diameter (three-wire, with wire size and corrections stated), major diameter, pitch and flank angles, at 20 °C, with measurement uncertainty. Limits below are in mm; please confirm them against ISO 1502 before manufacture.";
+        function orderWork(rs){
+          var L = [ORD_HEAD, "", "WORKPIECE GAUGES (used on parts)"];
           rs.forEach(function(r){
-            if(r.ext){ var g = r.ring; L.push("For external thread " + lbl(r) + ":");
-              [["GO thread ring (T)", g.go], ["NOGO thread ring (Z)", g.ng], ["GO-GO check plug (TT)", g.TT], ["GO-NOGO check plug (TZ)", g.TZ], ["GO wear check plug (TS)", g.TS], ["NOGO-GO check plug (ZT)", g.ZT], ["NOGO-NOGO check plug (ZZ)", g.ZZ], ["NOGO wear check plug (ZS)", g.ZS]]
-                .forEach(function(x){ L.push("- " + x[0] + ": PD " + f4(x[1].lo) + " to " + f4(x[1].hi)); });
-            } else { var p = r.plug; L.push("For internal thread " + lbl(r) + ":");
-              L.push("- GO thread plug: PD " + f4(p.go.lo) + " to " + f4(p.go.hi) + " (wear limit " + f4(p.go.wear) + ")");
-              L.push("- NOGO thread plug: PD " + f4(p.ng.lo) + " to " + f4(p.ng.hi) + " (wear limit " + f4(p.ng.wear) + "); major diameter " + f4(p.ngMajNom) + " nominal");
-              L.push("- GO thread plug major diameter: " + f4(p.goMaj.lo) + " to " + f4(p.goMaj.hi)); }
+            if(r.ext){ var g = r.ring; L.push("Thread ring gauges for external thread " + lbl(r) + ":");
+              L.push("- GO thread ring (T), full form: PD " + f4(g.go.lo) + " to " + f4(g.go.hi));
+              L.push("- NOGO thread ring (Z), truncated form: PD " + f4(g.ng.lo) + " to " + f4(g.ng.hi));
+              L.push("  (Rings to be accepted with the ISO 1502 check plugs TT / TZ for GO and ZT / ZZ for NOGO.)");
+            } else { var p = r.plug; L.push("Thread plug gauges for internal thread " + lbl(r) + ":");
+              L.push("- GO thread plug, full form: PD " + f4(p.go.lo) + " to " + f4(p.go.hi) + " (wear limit " + f4(p.go.wear) + "); major " + f4(p.goMaj.lo) + " to " + f4(p.goMaj.hi));
+              L.push("- NOGO thread plug, truncated form: PD " + f4(p.ng.lo) + " to " + f4(p.ng.hi) + " (wear limit " + f4(p.ng.wear) + "); major " + f4(p.ngMajNom) + " nominal"); }
             L.push("");
           });
           return L.join("\n").trim();
         }
+        function orderMasters(r){
+          var g = r.ring, m = r.mdim, L = [ORD_HEAD, "", "MASTERS FOR THREAD RING GAUGES " + lbl(r) + " (check plugs and setting plugs; not used on parts)", "These masters are needed because the pitch diameter inside the ring cannot be measured directly. Each master is itself calibrated by three-wire pitch diameter. Check and setting plugs have no wear allowance: each must stay within its new PD limits.", ""];
+          var line = function(name, z, d){ return "- " + name + (d ? ", " + (d.form === "full" ? "full form" : "truncated form") : "") + ": PD " + f4(z.lo) + " to " + f4(z.hi) +
+            (d ? "; major " + (d.maj.lo != null ? f4(d.maj.lo) + " to " + f4(d.maj.hi) : f4(d.maj.nom) + " nominal (tolerance per ISO 1502)") + (d.minMax != null ? "; minor max " + f4(d.minMax) : "") : "; major / minor per ISO 1502"); };
+          L.push(line("GO-GO check plug TT", g.TT, m.TT)); L.push(line("GO-NOGO check plug TZ", g.TZ, m.TZ)); L.push(line("GO wear check plug TS", g.TS, m.TS));
+          L.push(line("NOGO-GO check plug ZT", g.ZT, m.ZT)); L.push(line("NOGO-NOGO check plug ZZ", g.ZZ, m.ZZ)); L.push(line("NOGO wear check plug ZS", g.ZS, m.ZS));
+          L.push("- Setting plug for adjustable GO ring (full-form and truncated portions): PD " + f4(g.setGo.lo) + " to " + f4(g.setGo.hi) + "; major / minor per ISO 1502   [only if the rings are adjustable]");
+          L.push("- Setting plug for adjustable NOGO ring (truncated portion): PD " + f4(g.setNg.lo) + " to " + f4(g.setNg.hi) + "; major / minor per ISO 1502   [only if the rings are adjustable]");
+          L.push(""); L.push("Pitch: ±4 µm over thread length up to 14 mm (±5 to 32 mm, ±6 to 50 mm, ±7 to 80 mm). Flank angles: per ISO 1502, to be reported on the certificate.");
+          L.push("Ring acceptance with these masters (ISO 1502): new GO ring — TT screws through, TZ enters no more than one turn at each end; GO ring in service — TS enters no more than one turn. NOGO ring — ZT through, ZZ and ZS no more than one turn. The turn is counted when withdrawing the check plug.");
+          return L.join("\n");
+        }
+        function ta(id, txt, rows, title){ return "<h3>" + title + '</h3><textarea id="' + id + '" rows="' + rows + '" readonly spellcheck="false" style="width:100%;font-family:var(--mono, monospace);font-size:12px">' + esc(txt) + '</textarea><p><button type="button" class="ghost mgcopy" data-for="' + id + '">Copy text</button></p>'; }
         Object.keys(TH_G).forEach(function(k){ var o = document.createElement("option"); o.textContent = k; if(k === "1/2-13 UNC") o.selected = true; el("mgUSize").appendChild(o); });
         function f4in(v){ return v.toFixed(4) + " in"; }
         function renderUN(){
@@ -11235,7 +11294,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(u.error){ out.innerHTML = '<p class="verdict warn">' + esc(u.error) + "</p>"; return; }
           var R = function(n, z, use){ return '<tr><td style="text-align:left">' + n + "</td><td>" + (z ? f4in(z[0]) : "—") + "</td><td>" + (z ? f4in(z[1]) : "—") + '</td><td style="text-align:left">' + use + "</td></tr>"; };
           var H = '<tr><th style="text-align:left">Gauge</th><th>PD min (new)</th><th>PD max (new)</th><th style="text-align:left">Use / acceptance</th></tr>';
-          var h = whoBox(true) + "<h3>Plug gauges for " + esc(u.size) + "-" + (u.cls === "3A / 3B" ? "3B" : "2B") + " (internal thread)</h3><div class=\"tscroll\"><table class=\"dtable wrap\">" + H;
+          var h = whoBox(true) + banner("work") + "<h3>Plug gauges for " + esc(u.size) + "-" + (u.cls === "3A / 3B" ? "3B" : "2B") + " (internal thread)</h3><div class=\"tscroll\"><table class=\"dtable wrap\">" + H;
           h += R("GO thread plug", u.goP, "Must screw fully into a good part. Withdraw when its measured pitch diameter is below " + f4in(u.goP[0]) + " (the product minimum).");
           h += R("NOT GO (HI) thread plug", u.ngP, u.ngP ? "Must not enter a good part by more than three turns. Withdraw when worn above " + f4in(u.ngP[1]) + " (the product maximum)." : "Not included for this size.");
           h += "</table></div>";
@@ -11243,16 +11302,22 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           h += R("GO thread ring", u.goR, "Must screw over the whole thread length of a good part.");
           h += R("NOT GO (LO) thread ring", u.ngR, "Must not screw on a good part by more than three turns.");
           h += "</table></div>";
-          h += "<h3>Masters for the rings (inch equivalent of GO-GO / NOGO-NOGO)</h3><div class=\"tscroll\"><table class=\"dtable wrap\"><tr><th style=\"text-align:left\">Master</th><th>PD nominal</th><th>Tolerance</th><th style=\"text-align:left\">Use / acceptance</th><th style=\"text-align:left\">Metric equivalent</th></tr>";
+          h += banner("master") + "<h3>Setting plugs — masters for the " + esc(u.size) + "-" + (u.cls === "3A / 3B" ? "3A" : "2A") + " ring gauges (ASME B1.2)</h3><div class=\"tscroll\"><table class=\"dtable wrap\"><tr><th style=\"text-align:left\">Master</th><th>PD nominal</th><th>Tolerance</th><th style=\"text-align:left\">Use / acceptance</th><th style=\"text-align:left\">Metric equivalent</th></tr>";
           h += '<tr><td style="text-align:left">GO setting plug</td><td>' + f4in(u.setGo) + '</td><td>W, minus</td><td style="text-align:left">The GO ring is set to it and must fit it. If a GO ring no longer fits it snugly, reset it (adjustable ring) or replace it (solid ring).</td><td style="text-align:left">Does the job of GO-GO (TT), GO-NOGO (TZ) and GO wear (TS)</td></tr>';
           h += '<tr><td style="text-align:left">LO setting plug</td><td>' + f4in(u.setLo) + '</td><td>W, plus</td><td style="text-align:left">The LO ring is set to it and must fit it. If a LO ring no longer fits it snugly, reset or replace it.</td><td style="text-align:left">Does the job of NOGO-GO (ZT), NOGO-NOGO (ZZ) and NOGO wear (ZS)</td></tr>';
           h += "</table></div>";
+          h += '<p class="small">Setting plugs are ordered full-form or truncated: in a truncated setting plug, the truncated portion controls the ring\'s pitch diameter and the full-form portion checks clearance at the ring\'s major diameter (FED-STD-H28/6, as quoted by gauge makers). ASME B1.2 sets no numeric wear limit for setting plugs; they are judged against their W limits at calibration.</p>';
           h += '<p class="small"><strong>How inch gauges differ from metric:</strong> ASME B1.2 has no separate GO-GO / GO-NOGO / wear check plugs; the two setting plugs above do that job. The setting plug is the master that is measured (three-wire). Plug and ring limits are X tolerance (' + f4in(u.x) + ', the working-gauge grade); setting plugs are made to the tighter W tolerance, which this tool does not list — state "W tolerance per ASME B1.2" when you order.</p>';
           var txt = "Please quote and supply to ASME B1.2, with ISO/IEC 17025 accredited calibration certificates reporting measured pitch and major diameter:\n" +
             "- " + u.size + " GO / NOT GO thread plug gauge, X tolerance (GO PD " + u.goP[0].toFixed(4) + "–" + u.goP[1].toFixed(4) + " in" + (u.ngP ? "; NOT GO PD " + u.ngP[0].toFixed(4) + "–" + u.ngP[1].toFixed(4) + " in" : "") + ")\n" +
             "- " + u.size + " GO and LO thread ring gauges, X tolerance (GO PD " + u.goR[0].toFixed(4) + "–" + u.goR[1].toFixed(4) + " in; LO PD " + u.ngR[0].toFixed(4) + "–" + u.ngR[1].toFixed(4) + " in)\n" +
-            "- " + u.size + " GO setting plug, PD " + u.setGo.toFixed(4) + " in nominal, W tolerance (minus); LO setting plug, PD " + u.setLo.toFixed(4) + " in nominal, W tolerance (plus)";
-          h += '<h3>Text for the gauge maker (manufacture to these limits)</h3><textarea id="mgOrder" rows="6" readonly spellcheck="false" style="width:100%;font-family:var(--mono, monospace);font-size:12px">' + esc(txt) + '</textarea><p><button type="button" class="ghost" id="mgCopy">Copy text</button></p>';
+            "";
+          var txtM = "Please quote and supply to ASME B1.2, with ISO/IEC 17025 accredited calibration certificates reporting measured pitch diameter (three-wire), major diameter, lead and half-angle, with uncertainty.\n" +
+            "MASTERS FOR THREAD RING GAUGES " + u.size + "-" + (u.cls === "3A / 3B" ? "3A" : "2A") + " (not used on parts):\n" +
+            "- GO thread setting plug: PD " + u.setGo.toFixed(4) + " in nominal, W tolerance (minus); full-form or truncated per ASME B1.2 (state which)\n" +
+            "- LO (NOT GO) thread setting plug: PD " + u.setLo.toFixed(4) + " in nominal, W tolerance (plus); full-form or truncated per ASME B1.2 (state which)\n" +
+            "W tolerance values, major diameters and the truncation are per ASME B1.2 (not listed in this app).";
+          h += ta("mgOrder", txt.trim(), 4, "Text for the gauge maker — workpiece gauges") + ta("mgOrderM", txtM, 6, "Text for the gauge maker — masters (setting plugs) for the ring gauges");
           h += '<p class="cite">Gauge limits: ASME B1.2 (X tolerance inside the product limits), the same verified data as Threads → Gauge verification; class 3 values match the Westport and Judge Tool gauge charts. NOT GO turns: ASME B1.2 allows up to three turns on inch threads.</p>';
           h += '<p class="small">' + esc(TH_CAL_NOTE) + "</p>";
           out.innerHTML = h;
@@ -11263,17 +11328,23 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(un){ renderUN(); return copyBtn(); }
           var D = parseFloat(el("mgD").value), P = parseFloat(el("mgP").value), side = el("mgSide").value, out = el("mgOut");
           if(!(D > 0)){ out.innerHTML = '<p class="small">Enter the nominal diameter.</p>'; return; }
-          var h = whoBox(false), ok = [];
-          if(side !== "int"){ var re = mgCalc(D, P, el("mgExt").value); if(re.error) h += '<p class="verdict warn">External ' + esc(el("mgExt").value) + ": " + esc(re.error) + "</p>"; else { h += extHTML(re); ok.push(re); } }
-          if(side !== "ext"){ var ri = mgCalc(D, P, el("mgInt").value); if(ri.error) h += '<p class="verdict warn">Internal ' + esc(el("mgInt").value) + ": " + esc(ri.error) + "</p>"; else { h += intHTML(ri); ok.push(ri); } }
-          if(ok.length){
-            h += '<h3>Text for the gauge maker (manufacture to these limits)</h3><textarea id="mgOrder" rows="12" readonly spellcheck="false" style="width:100%;font-family:var(--mono, monospace);font-size:12px">' + esc(orderText(ok)) + '</textarea><p><button type="button" class="ghost" id="mgCopy">Copy text</button></p>';
-          }
+          var h = whoBox(false), work = [], mst = null;
+          if(side !== "int"){ var re = mgCalc(D, P, el("mgExt").value);
+            if(re.error) h += '<p class="verdict warn">External ' + esc(el("mgExt").value) + ": " + esc(re.error) + "</p>";
+            else { if(side === "mst" || side === "both") mst = re; if(side === "ext" || side === "both") { h += ringsHTML(re); work.push(re); } } }
+          if(side === "mst" && mst) h += mastersHTML(mst);
+          if(side === "both" && mst) h += mastersHTML(mst);
+          if(side === "int" || side === "both"){ var ri = mgCalc(D, P, el("mgInt").value); if(ri.error) h += '<p class="verdict warn">Internal ' + esc(el("mgInt").value) + ": " + esc(ri.error) + "</p>"; else { h += intHTML(ri); work.push(ri); } }
+          if(side === "ext") h += '<p class="small"><strong>Masters for these rings:</strong> the check plugs and setting plugs that accept and re-calibrate these rings are listed under "Masters to calibrate thread RING gauges". <button type="button" class="ghost" id="mgToMst">Show the masters for these rings</button></p>';
+          if(side === "int") h += '<p class="small"><strong>Looking for the masters that calibrate a ring gauge?</strong> Plug gauges (above) inspect internal threads. Ring gauges inspect external threads, and their masters are made for the external class (e.g. 6g): choose "Masters to calibrate thread RING gauges" above. <button type="button" class="ghost" id="mgToMst">Show the ring-gauge masters</button></p>';
+          if(mst) h += ta("mgOrderM", orderMasters(mst), 18, "Text for the gauge maker — MASTERS for the " + esc(lbl(mst)) + " ring gauges");
+          if(work.length) h += ta("mgOrder", orderWork(work), 10, "Text for the gauge maker — workpiece gauges");
           h += '<p class="small">' + esc(TH_CAL_NOTE) + "</p>";
           out.innerHTML = h;
           copyBtn();
+          var tm = el("mgToMst"); if(tm) tm.addEventListener("click", function(){ el("mgSide").value = "mst"; render(); });
         }
-        function copyBtn(){ var cb = el("mgCopy"); if(cb) cb.addEventListener("click", function(){ var ta = el("mgOrder"); ta.select(); try{ navigator.clipboard.writeText(ta.value); }catch(e){ try{ document.execCommand("copy"); }catch(e2){} } cb.textContent = "Copied"; }); }
+        function copyBtn(){ Array.prototype.forEach.call(document.querySelectorAll("#mgOut .mgcopy"), function(cb){ cb.addEventListener("click", function(){ var t = el(cb.getAttribute("data-for")); t.select(); try{ navigator.clipboard.writeText(t.value); }catch(e){ try{ document.execCommand("copy"); }catch(e2){} } cb.textContent = "Copied"; }); }); }
         /* Links from Threads: #tool=mgauge&sys=m&d=10&p=1.5&ext=6g or &int=6H, or &sys=un&size=1/2-13 UNC&cls=2 */
         window.mgApply = function(q){
           if(q.get("sys")) el("mgSys").value = q.get("sys") === "un" ? "un" : "m";

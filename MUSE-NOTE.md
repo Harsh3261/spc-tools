@@ -1,3 +1,62 @@
+# Note for Muse — Thread masters: workpiece gauges vs masters separated; full master spec (2026-11-22, v62)
+
+Harsh's case: his gauge maker cannot measure PD inside SMALL rings → he needs the masters (check / setting plugs).
+
+## M8×1.25-6H screenshot values — CONFIRMED (ISO 1502)
+D2 7.1880–7.3480, TD2 160 µm → Table 4 row 125–200 (TPL 11, ZPL 12, WGO 17.5, WNG 11.5). GO PD 7.1880+0.012±0.0055 =
+7.1945–7.2055, wear 7.1825; NOGO 7.3480–7.3590, wear 7.3420; GO major 8+0.012±0.011 = 8.0010–8.0230. These are WORKPIECE
+plug gauges (inspect tapped holes). The masters were already in the tool, but only when an external class was in scope,
+under a vague "Gauges for" select, and the maker text gave them PD only.
+
+## Gauge calculators in SPC Tools (breakdown)
+1. Measure → Thread masters (#tool-mgauge), metric ISO 1502: workpiece GO/NOGO thread PLUGS (internal, H/G: PD new,
+   wear, GO major D+EI+ZPL±TPL, NOGO major nominal PD+0.2P); workpiece GO/NOGO thread RINGS (external, e/f/g/h: PD new,
+   wear via TS/ZS); MASTERS: check plugs TT TZ TS ZT ZZ ZS + setting plugs for adjustable rings. Band chosen by the
+   grade 6 PD tolerance (MG_BANDS, ISO 1502 Table 4). Grades finer than 6 refused.
+2. Same tool, inch UNC/UNF ASME B1.2: GO / NOT GO plugs and GO / LO rings (X tolerance inside product limits, TH_G /
+   TH_U3), GO and LO setting plugs (nominal PD; W tolerance not listed).
+3. Threads → Gauge verification (inside the Threads tool): UN class 2 / 3 gauge PD limits and the product limits the
+   metric gauges are built on; links into Thread masters.
+4. Measure → GO / NO-GO gauges (#tool-pgauge): PLAIN (unthreaded) plug / ring gauges, ASME B89.1.5 class XXX–ZZ,
+   direction (plug GO +, NO-GO −; ring GO −, NO-GO +), 10 % rule. Not thread gauges.
+
+## Changes (Thread masters)
+- Selector "What do you need?": Masters to calibrate thread RING gauges | Inspect parts: external (RING gauges) |
+  Inspect parts: internal (PLUG gauges) | Everything. Default unchanged ("Everything"); masters listed first.
+- Every section carries a banner: "WORKPIECE GAUGES — used on parts" or "MASTERS — used only to calibrate the ring
+  gauges; never used on parts". Plug-only and ring-only views get a one-click jump to the ring masters.
+- Masters table: form (full / truncated), PD min/max new, wear "none", major diameter, minor max, use on the ring.
+  NEW values (function mgMasterDims), ISO 1502 Table 10 = GB/T 3934 Table 11, read from GB/T 3934-2003
+  (164580.com/data/detail_201.html) and GB/T 3934-2025 (gb-gbt.com/PDF/Chinese.aspx/GBT3934-2025) — both garbled
+  differently, the same formula fragments in both:
+    TT major d+es ±TPL ᵃ, minor ≤ D1+es−ZR−m          | full form
+    TZ major PDc+2F1 ±TPL/2, minor ≤ D1+es−TR/2        | truncated
+    TS major PDc+2F1 (tolerance not legible)           | truncated
+    ZT major d+es ±TPL ᵃ, minor ≤ D1+es−Td2−TR/2−m     | full form
+    ZZ major d+es−Td2 ±TPL, minor ≤ D1+es−Td2           | full form
+    ZS major d+es−Td2−TR/2+WNG (tolerance not legible) | full form
+    ᵃ sharp crest may be slightly flattened → major may then be below the lower limit (standard's footnote).
+  Forms: GB/T 3934-2003/-2025 Table 2 AND IS 2334:2001 (= ISO 1502:1996) §10.1/10.2 — three agree. Setting plugs:
+  GO = full-form + truncated portion, NOGO = truncated portion (IS 2334 §10); their majors / minors NOT included.
+  PLEASE VERIFY: the TZ minor reads "D1+es−TR/2" in both editions; by the pattern of the other rows one might expect
+  D1+es−ZR+TR/2. Loaded as printed (it is the smaller, i.e. safer, maximum). The 164580 row mapping of the 4 major
+  tolerances (TT ±TPL, TZ ±TPL/2, ZT ±TPL, ZZ ±TPL) is the only legible one; TS / ZS major tolerances shown "per ISO 1502".
+- Wear: check and setting plugs have none (ISO 1502 Table 4 lists wear only for working plugs and rings).
+- Separate maker texts: "MASTERS for the …-6g ring gauges" (each master with form, PD, major, minor, pitch ±4/5/6/7 µm,
+  flank angles to be reported, acceptance rules TT/TZ/TS/ZT/ZZ/ZS incl. "turn counted on withdrawal", certificate:
+  three-wire simple PD with wire size and corrections, major, pitch, flank angles, uncertainty, 20 °C, ISO/IEC 17025)
+  and "workpiece gauges". Inch: separate setting-plug text (PD nominal, W minus / plus, full-form or truncated per B1.2).
+- Inch note: truncated setting plug — truncated portion controls ring PD, full-form portion checks major clearance
+  (FED-STD-H28/6A 4.3.1.2 as quoted on Elsmar; HILO setting-plug sheet "truncated per ASME B1.2"). W values, inch
+  setting-plug majors: still not included (no readable B1.2 Table 7 / H28/6 copy found; Machinery's Handbook Table 4
+  page not readable).
+- "How to use" box: wear-limit wording split (working plugs vs masters); PD vs major/minor columns explained.
+tests/mgauge.test.js 6020 (adds Satureday's M8 6H values, hand-computed M8 6g master majors/minors, 2F1 and
+major > PD > minor sweeps). Worked example for your check: M8×1.25-6g → TT PD 7.1390–7.1470, major 7.9630–7.9810,
+minor ≤ 6.6018; TZ PD 7.1610–7.1690, major 7.4105–7.4195; ZZ PD 7.0380–7.0460, major 7.8450–7.8630.
+
+---
+
 # Note for Muse — ORB adjustable torque added (2026-11-22, v61)
 
 Fitting torque → SAE O-ring boss now has "Adjustable (elbow / tee with locknut)" S and L options. TQ_ORB rows gain

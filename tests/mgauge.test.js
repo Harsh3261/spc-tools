@@ -79,5 +79,24 @@ TH_M.forEach(row => {
 eq("sweep covered", swept > 300, true);
 /* three-wire */
 near("best wire 1.5", mgWire(1.5).best, 0.866); near("E", mgWire(1.5, 0.866, 10.0).E, 10 - 2.598 + 1.2990);
+
+/* M8×1.25 — Satureday's screenshot values (6H plugs) and hand-computed 6g masters (ISO 1502 Table 10 formulas,
+   GB/T 3934-2003 / -2025 Table 11): d = 8, es = −28 µm, Td2 = 118, TR 14, TPL 9, ZR 2, m 15, WNG 12, F1 = 0.125, D1 = 6.646835 */
+r = mgCalc(8, 1.25, "6H");
+near("M8 GO lo", r.plug.go.lo, 7.1945); near("M8 GO hi", r.plug.go.hi, 7.2055); near("M8 GO wear", r.plug.go.wear, 7.1825);
+near("M8 NG lo", r.plug.ng.lo, 7.348); near("M8 NG hi", r.plug.ng.hi, 7.359); near("M8 NG wear", r.plug.ng.wear, 7.342);
+near("M8 GO maj lo", r.plug.goMaj.lo, 8.001); near("M8 GO maj hi", r.plug.goMaj.hi, 8.023);
+r = mgCalc(8, 1.25, "6g"); const md = r.mdim;
+eq("M8 forms", ["TT","TZ","TS","ZT","ZZ","ZS"].map(k => md[k].form), ["full","truncated","truncated","full","full","full"]);
+near("TT maj lo", md.TT.maj.lo, 7.963); near("TT maj hi", md.TT.maj.hi, 7.981); near("TT minor", md.TT.minMax, 6.6018);
+near("TZ maj lo", md.TZ.maj.lo, 7.4105); near("TZ maj hi", md.TZ.maj.hi, 7.4195); near("TZ minor", md.TZ.minMax, 6.6118);
+near("TS maj nom", md.TS.maj.nom, 7.424); eq("TS maj tol", md.TS.maj.lo, null);
+near("ZT maj lo", md.ZT.maj.lo, 7.963); near("ZT minor", md.ZT.minMax, 6.4788);
+near("ZZ maj lo", md.ZZ.maj.lo, 7.845); near("ZZ maj hi", md.ZZ.maj.hi, 7.863); near("ZZ minor", md.ZZ.minMax, 6.5008);
+near("ZS maj nom", md.ZS.maj.nom, 7.859);
+/* every catalogue-style size: truncated majors sit 0.2P above their PD centre; full-form majors above PD; minors below PD */
+[[3,0.5],[4,0.7],[5,0.8],[6,1],[8,1],[10,1.5],[12,1.75],[16,2],[24,3]].forEach(([D,P]) => { const q = mgCalc(D, P, "6g"); if(q.error) return; const m = q.mdim, gg = q.ring;
+  near("TZ +2F1 M" + D, m.TZ.maj.nom - gg.TZ.mid, 0.2 * P, 1e-4); near("TS +2F1 M" + D, m.TS.maj.nom - gg.TS.mid, 0.2 * P, 1e-4);
+  ["TT","ZT","ZZ"].forEach(k => { n++; if(!(m[k].maj.lo > gg[k].hi && m[k].minMax < gg[k].lo)) fails.push(k + " order M" + D); }); });
 if (fails.length) { console.log("FAIL " + fails.length + " of " + n + "\n" + fails.join("\n")); process.exit(1); }
 console.log("OK " + n + " ISO 1502 gauge checks passed");
