@@ -1,3 +1,30 @@
+# Note for Muse — B1.1-2024 check on the UNJ rows (2026-11-22, v59)
+
+What changed in B1.1-2024 (official change list, Accuristech preview of B1.1-2024, store.accuristech.com/hei/products/
+preview/2909753; issued 28 Jun 2024, effective 28 Jun 2025): (a) TD2→Td2 typo in 4 places; (b) SIX minimum PD values
+in Table 2A corrected by 0.0001 — sizes NOT named; (c)/(j) UNR max minor (Table 2A col. 13) and UNR hs/2hs constants;
+(d) area-at-minor formula text in Tables 6–16 (values were right); (e)(g) figure notes; (f) LE wording for 1A/1B
+4-/6-/8-UN; (h) Table 18A example fixes; (i) H references removed from §10. Nothing touches Table 2B or UNJ-only columns.
+Result for the 206 live UNJ 2A/2B rows:
+- 2B (internal) halves: unchanged by B1.1-2024 → stand.
+- 2A UNJ minor / root columns: no listed change → stand.
+- 2A PD min: up to SIX cells across all of Table 2A (UN/UNR/UNJ share one PD column) may be 0.0001 off in our
+  2019-based data. Unidentifiable: the change list doesn't name them and the 2024 tables aren't public. OPEN.
+  (A closed-form re-computation can't pick them out — B1.1's rounding path isn't reproducible to 0.0001.)
+Cross-check run while doing this (UNJ 2A/2B vs the separately sourced UN rows, 158 shared sizes, 6 cells each):
+two mismatches, both settled by two outside sources and FIXED:
+1. 0.6250-11 UNJC 2A: major 0.6112–0.6233 → 0.6113–0.6234, PD 0.5588–0.5643 → 0.5589–0.5644 (American Fastener
+   class 2A table + Engineers Edge both print 0.6234 / 0.6113 / 0.5644 / 0.5589 = the UN row). Its 2A MINOR limits
+   (0.5074–0.5184) keep the same 0.0001 offset pattern (PD − minor is constant across the 11-TPI rows) — likely also
+   0.0001 low, but NOT changed: no second source. Please check your B1.1-2019 Table 2A extraction for that row.
+2. 3/8-24 UNF 2B PD max (TH_U, UN row): 0.3529 → 0.3528 (your own B1.1-2019 Table 2B UNJ extraction, American Fastener
+   2B table, and a B1.1-2008 nut-table reproduction all read 0.3528). The Thread masters 3/8-24 basis note said the
+   B1.1 product table reads 0.0001 higher than the B1.2 NOT GO max — that premise was this slip; note reworded.
+   The B1.2 gauge values (NOT GO PD 0.3525 / 0.3528) are unchanged.
+After the fixes the cross-check reports 0 differences on 158 sizes. threads / gauge3 / mgauge tests pass.
+
+---
+
 # Note for Muse — DIN 405 gap closed (2026-11-22, v58)
 
 The 20 internal-minor-max cells (Rd 105 … Rd 200 × 1/4, P = 6.35) are filled: D1 max = D1 min + 0.850.

@@ -6010,7 +6010,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* END DATA TH_M */
       /* BEGIN DATA TH_U: UNC/UNF limits, classes 2A / 2B.
          Provenance: ASME B1.1 Table 3 via verified research file limits.md (see the THREADS section note above); verified 2026-11.
-         Edit data only via a verified data change, never by hand-tuning numbers. */
+         Edit data only via a verified data change, never by hand-tuning numbers. 2026-11-22: 3/8-24 UNF 2B PD max 0.3529 → 0.3528 (B1.1-2019 Table 2B as re-extracted for UNJ × American Fastener 2B table × B1.1-2008 nut-table reproduction).
+         */
       /* TH_U row: label, D, TPI, series, allowance2A, extMajMax, extMajMin, extPdMax, extPdMin, extMinorMax, intMajMin, intPdMin, intPdMax, intMinorMin, intMinorMax */
       var TH_U = [
         ["#4-40 UNC",0.112,40,"UNC",0.0008,0.1112,0.1061,0.095,0.0925,0.0814,0.112,0.0958,0.0991,0.0849,0.0939],
@@ -6026,7 +6027,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         ["5/16-18 UNC",0.3125,18,"UNC",0.0012,0.3113,0.3026,0.2752,0.2712,0.2452,0.3125,0.2764,0.2817,0.252,0.265],
         ["5/16-24 UNF",0.3125,24,"UNF",0.0011,0.3114,0.3042,0.2843,0.2806,0.2618,0.3125,0.2854,0.2902,0.267,0.277],
         ["3/8-16 UNC",0.375,16,"UNC",0.0013,0.3737,0.3643,0.3331,0.3287,0.2992,0.375,0.3344,0.3401,0.307,0.321],
-        ["3/8-24 UNF",0.375,24,"UNF",0.0011,0.3739,0.3667,0.3468,0.343,0.3243,0.375,0.3479,0.3529,0.33,0.34],
+        ["3/8-24 UNF",0.375,24,"UNF",0.0011,0.3739,0.3667,0.3468,0.343,0.3243,0.375,0.3479,0.3528,0.33,0.34],
         ["7/16-14 UNC",0.4375,14,"UNC",0.0014,0.4361,0.4258,0.3897,0.385,0.3511,0.4375,0.3911,0.3972,0.36,0.376],
         ["7/16-20 UNF",0.4375,20,"UNF",0.0013,0.4362,0.4281,0.4037,0.3995,0.3767,0.4375,0.405,0.4104,0.383,0.395],
         ["1/2-13 UNC",0.5,13,"UNC",0.0015,0.4985,0.4876,0.4485,0.4435,0.4069,0.5,0.45,0.4565,0.417,0.434],
@@ -6730,7 +6731,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       ];
       /* END DATA TH_NPS */
       /* BEGIN DATA TH_UNJ: UNJ limits, classes 2A/2B and 3A/3B, inches: entries {label, ext, int, cls?}; rows [name, min, max]. Entries without a cls field are 3A/3B; entries with "cls": "2A2B" are 2A/2B.
-         Provenance: 125 rows from unj-research.md §4 (ASME B1.15-1995 Table 5) with the three held cells settled by unj-completion-hunt.md §6 (0.5000-28 ext minor min 0.4538; 1.7500-16 int minor max 1.6977; 4.0000-12 int pitch min 3.9459); plus 302 rows from unj-reextract-staging.md (B1.15 Table 5 and ASME B1.1-2019 Tables 2A/2B re-extracted 2026-11-15; checksums reproduced, Claude-pass clean). Still out: the 15 corrupted-page 2A/2B halves (B1.1 single-source). Verified 2026-11-15.
+         Provenance: 125 rows from unj-research.md §4 (ASME B1.15-1995 Table 5) with the three held cells settled by unj-completion-hunt.md §6 (0.5000-28 ext minor min 0.4538; 1.7500-16 int minor max 1.6977; 4.0000-12 int pitch min 3.9459); plus 302 rows from unj-reextract-staging.md (B1.15 Table 5 and ASME B1.1-2019 Tables 2A/2B re-extracted 2026-11-15; checksums reproduced, Claude-pass clean). Still out: the 15 corrupted-page 2A/2B halves (B1.1 single-source). 2026-11-22: 0.6250-11 UNJC 2A major and PD limits +0.0001 (were 0.0001 below the UN 2A row; American Fastener and Engineers Edge 2A tables give 0.6234/0.6113/0.5644/0.5589); its 2A minor limits not changed — no second source. Verified 2026-11-15.
          Edit data only via a verified data change, never by hand-tuning numbers. */
       var TH_UNJ = [
         {"label": "0.0600-80 UNJF", "ext": [["Major diameter", 0.0563, 0.0595], ["Pitch diameter", 0.0496, 0.0514], ["Minor diameter", 0.0425, 0.0451], ["Root radius", 0.0019, 0.0023]], "int": [["Minor diameter", 0.0479, 0.0511], ["Pitch diameter", 0.0519, 0.0542], ["Major diameter", 0.06, null]], "cls": "2A2B"},
@@ -6815,7 +6816,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         {"label": "0.5625-18 UNJF", "ext": [["Major diameter", 0.5538, 0.5625], ["Pitch diameter", 0.523, 0.5264], ["Minor diameter", 0.4916, 0.4983], ["Root radius", 0.0083, 0.01]], "int": [["Minor diameter", 0.5084, 0.5166], ["Pitch diameter", 0.5264, 0.5308], ["Major diameter", 0.5625, null]]},
         {"label": "0.5625-24 UNJEF", "ext": [["Major diameter", 0.5541, 0.5613], ["Pitch diameter", 0.5303, 0.5342], ["Minor diameter", 0.5067, 0.5131], ["Root radius", 0.0063, 0.0075]], "int": [["Minor diameter", 0.5219, 0.5281], ["Pitch diameter", 0.5354, 0.5405], ["Major diameter", 0.5625, null]], "cls": "2A2B"},
         {"label": "0.5625-24 UNJEF", "ext": [["Major diameter", 0.5553, 0.5625], ["Pitch diameter", 0.5325, 0.5354], ["Minor diameter", 0.5089, 0.5143], ["Root radius", 0.0063, 0.0075]], "int": [["Minor diameter", 0.5219, 0.5281], ["Pitch diameter", 0.5354, 0.5392], ["Major diameter", 0.5625, null]]},
-        {"label": "0.6250-11 UNJC", "ext": [["Major diameter", 0.6112, 0.6233], ["Pitch diameter", 0.5588, 0.5643], ["Minor diameter", 0.5074, 0.5184], ["Root radius", 0.0136, 0.0164]], "int": [["Minor diameter", 0.5365, 0.5474], ["Pitch diameter", 0.566, 0.5732], ["Major diameter", 0.625, null]], "cls": "2A2B"},
+        {"label": "0.6250-11 UNJC", "ext": [["Major diameter", 0.6113, 0.6234], ["Pitch diameter", 0.5589, 0.5644], ["Minor diameter", 0.5074, 0.5184], ["Root radius", 0.0136, 0.0164]], "int": [["Minor diameter", 0.5365, 0.5474], ["Pitch diameter", 0.566, 0.5732], ["Major diameter", 0.625, null]], "cls": "2A2B"},
         {"label": "0.6250-11 UNJC", "ext": [["Major diameter", 0.6129, 0.625], ["Pitch diameter", 0.5619, 0.566], ["Minor diameter", 0.5105, 0.5201], ["Root radius", 0.0136, 0.0164]], "int": [["Minor diameter", 0.5365, 0.5474], ["Pitch diameter", 0.566, 0.5714], ["Major diameter", 0.625, null]]},
         {"label": "0.6250-12 UNJ", "ext": [["Major diameter", 0.612, 0.6234], ["Pitch diameter", 0.5639, 0.5693], ["Minor diameter", 0.5167, 0.5272], ["Root radius", 0.0125, 0.015]], "int": [["Minor diameter", 0.5439, 0.5539], ["Pitch diameter", 0.5709, 0.578], ["Major diameter", 0.625, null]], "cls": "2A2B"},
         {"label": "0.6250-12 UNJ", "ext": [["Major diameter", 0.6136, 0.625], ["Pitch diameter", 0.5668, 0.5709], ["Minor diameter", 0.5196, 0.5288], ["Root radius", 0.0125, 0.015]], "int": [["Minor diameter", 0.5439, 0.5539], ["Pitch diameter", 0.5709, 0.5762], ["Major diameter", 0.625, null]]},
@@ -8388,7 +8389,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           h += gRow("Plain plug for minor dia — GO / NOGO", u[13], u[14], "GO = internal minor min; NOGO = internal minor max");
           h += gRow("Plain ring for major dia — GO / NOGO", u[6], u[5], "GO = external major max; NOGO = external major min");
           h += "</table>";
-          if(u[0] === "3/8-24 UNF") h += '<p class="explain"><strong>Basis note — 3/8-24 UNF:</strong> the NOT GO plug PD (0.3525 / 0.3528 in) and major diameter (0.3703 / 0.3708 in) above follow the ASME B1.2 gage basis — the B1.2 chart values as published by gage makers. The ASME B1.1 product table reads 0.0001 in higher on the PD max, but B1.2 — not B1.1 — governs the gauge, so this entry is never shown on a mixed basis.</p>';
+          if(u[0] === "3/8-24 UNF") h += '<p class="explain"><strong>Basis note — 3/8-24 UNF:</strong> the NOT GO plug PD (0.3525 / 0.3528 in) and major diameter (0.3703 / 0.3708 in) above follow the ASME B1.2 gage basis — the B1.2 chart values as published by gage makers. The NOT GO PD max equals the ASME B1.1 class 2B product PD max, 0.3528 in (an earlier copy of this app read 0.3529 for the product value — corrected 2026-11-22).</p>';
           h += '<p class="explain"><strong>Wear / retirement:</strong> a GO plug worn below the product PD min (' + fmt(u[11], 4) + ' in), or a NOT GO plug worn above the product PD max (' + fmt(u[12], 4) + ' in), is withdrawn — the wear lines are the product limits themselves. Ring gauges are verified on their setting plugs.</p>';
           h += '<p class="explain"><strong>X vs W:</strong> the plug and ring limit pairs above are X tolerance (ASME B1.2 Table 6) — the working-gauge grade, for the gauges that contact the product. W tolerance is the tighter grade, reserved for setting gauges (setting plugs and master rings): it applies minus on the GO setting plug and plus on the LO setting plug, from the nominals shown. The shop shorthand “W = wear” is wrong: wear is handled by the retirement lines above, not by the W grade.</p>';
           h += '<p><a href="#tool=mgauge&sys=un&cls=2&size=' + encodeURIComponent(u[0]) + '">Open these gauges, the setting plugs and ordering text in Thread masters →</a></p>';
