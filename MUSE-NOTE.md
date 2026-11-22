@@ -1,3 +1,23 @@
+# Note for Muse — ORB adjustable torque added (2026-11-22, v61)
+
+Fitting torque → SAE O-ring boss now has "Adjustable (elbow / tee with locknut)" S and L options. TQ_ORB rows gain
+two columns [adjustable S, adjustable L], -4 … -32 (none for -2/-3):
+S: 180 / 360 / 420 / 720 in-lb (-4 … -8), 100 / 135 / 175 / 200 / 250 / 305 / 375 ft-lb (-10 … -32)
+L: 180 / 250 / 350 / 620 in-lb (-4 … -8), 85 / 135 / 175 / 200 / 250 / 305 / 375 ft-lb
+Sources: Parker Port End Assembly Guide Table R1 (parker.com) × Parker Tube Fittings Division assembly guide Table S1
+(rg-group.com copy of "Assembly/Installation") — every adjustable cell agrees. The earlier blocker (10 header labels
+over 6 value pairs) is resolved by Table R1's own group header — Non-Adjustables (Seal-Lok J1926-2 · Triple-Lok/
+Ferulok J1926-3), Adjustables (same two), Plugs (HP5ON-S, P5ON-S) — six columns; the non-adjustable pairs we already
+carry (310/260 at -4 etc.) sit exactly in columns 1–2, confirming the order. Same "two copies of the maker's own table"
+basis as the other Parker torque tables (no standard sets assembly torque).
+Plugs NOT loaded: the two copies differ (-4 120 vs 180, -5 170 vs 250, -6 410 vs 350 in-lb).
+Adjustable text tells the user the torque is on the locknut after orienting (≤1 turn back-off).
+JIC -5 / -6: still one copy of Parker G-12; every other maker publishes different numbers (Parker 4402 FFWR 20 / 30 N·m
+ref., Midland, isohydraulic) — not a second copy of the same table. Left open.
+tests/torque.test.js 226.
+
+---
+
 # Note for Muse — DIN 405 dropped (2026-11-22, v60)
 Harsh: DIN 405 is not needed — dropped from the programme. The 20 P = 6.35 internal-minor-max cells filled in v58
 are reverted to null and stay blank permanently; tests/din405.test.js removed. The v58 research (IS 4695-2 and

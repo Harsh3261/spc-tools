@@ -78,5 +78,14 @@ eq("BSPP rows", TQ_BSPP.length, 20);
 /* BSPT — turns from finger tight (Parker R5 = JLG Table 5-2) */
 eq("BSPT", TQ_BSPT.map(r => r[0] + " " + r[1].join("-")), ["1/8-28 2-3","1/4-19 2-3","3/8-19 2-3","1/2-14 2-3","3/4-14 2-3","1-11 1.5-2.5","1-1/4-11 1.5-2.5","1-1/2-11 1.5-2.5","2-11 1.5-2.5"]);
 eq("BSPT lookup", tqLookup("bspt", "1-11").turns, [1.5, 2.5]);
+
+/* ORB adjustable — Parker R1 = TFD Table S1 (adjustable S, adjustable L) */
+const orbAS = [null,null,"180 in-lb","360 in-lb","420 in-lb","720 in-lb","100 ft-lb","135 ft-lb","175 ft-lb","200 ft-lb","250 ft-lb","305 ft-lb","375 ft-lb"];
+const orbAL = [null,null,"180 in-lb","250 in-lb","350 in-lb","620 in-lb","85 ft-lb","135 ft-lb","175 ft-lb","200 ft-lb","250 ft-lb","305 ft-lb","375 ft-lb"];
+eq("ORB adj S", TQ_ORB.map(r => r[4] ? r[4].join(" ") : null), orbAS);
+eq("ORB adj L", TQ_ORB.map(r => r[5] ? r[5].join(" ") : null), orbAL);
+near("ORB -5 adj L 250 in-lb", tqLookup("orb", "-5", { series:"AL" }).nm[0], 250 * 0.1129848290276, 1e-9);
+eq("ORB -2 adj none", tqLookup("orb", "-2", { series:"AS" }).none, true);
+eq("ORB straight unchanged", tqLookup("orb", "-5", { series:"S" }).nominal, [360, "in-lb"]);
 if (fails.length) { console.log("FAIL " + fails.length + " of " + n + "\n" + fails.join("\n")); process.exit(1); }
 console.log("OK " + n + " fitting-torque checks passed");

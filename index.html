@@ -10577,9 +10577,13 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
                 (billavista.com copy + slideshare 11977279). -5 and -6 left out: found in one copy only.
          ORFS — SAE J1453 face seal nut qualification test torque, +10 %/-0 (SAE J1453-1:2019 / J1453-2:2015
                 sample pages, World Wide Fittings catalogue, Air-Way ORFS assembly instructions).
-         ORB  — Parker Table R1 / T1, SAE J1926 straight-thread port, NON-adjustable stud ends, +10 %/-0,
+         ORB  — Parker Table R1 / T1, SAE J1926 straight-thread port, non-adjustable and (from 2026-11-22) ADJUSTABLE stud ends, +10 %/-0,
                 threads lubricated, steel in steel (Parker Port End Assembly Guide, Parker catalogue 4300,
                 L3Harris supplier spec copy). Printed units kept: in-lb to -8, ft-lb from -10.
+                Adjustable columns: Parker Port End Assembly Guide Table R1 × Parker Tube Fittings Division assembly guide
+                Table S1 (rg-group.com copy) — agree on every adjustable S / L cell -4 … -32; column order per Table R1's
+                header (Non-Adjustables S, L · Adjustables S, L · Plugs HP5ON-S, P5ON-S). Plug columns NOT loaded: the two
+                copies differ (-4 120 vs 180, -5 170 vs 250, -6 410 vs 350 in-lb).
          6149 — ISO 6149-2 (S) / -3 (L) stud end qualification torques, +10 %/-0 (World Wide Fittings, Parker
                 Table R4, Gates ISO 6149 sheet, SAE J2244-4 / J1453-1 samples). M30x2 S series disputed:
                 215 N·m (SAE J2244-4, World Wide) vs 235 N·m (SAE J1453-1:2019, Parker) — both kept.
@@ -10601,14 +10605,14 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         ["-4","9/16-18",25], ["-5","5/8-18",30], ["-6","11/16-16",40], ["-8","13/16-16",55], ["-10","1-14",60],
         ["-12","1-3/16-12",90], ["-14","1-5/16-12",115], ["-16","1-7/16-12",125], ["-20","1-11/16-12",170], ["-24","2-12",200]
       ];
-      var TQ_ORB = [ /* dash, thread, heavy-duty S stud (SAE J1926-2), light-duty L stud (SAE J1926-3) — [value, unit] as printed */
-        ["-2","5/16-24",null,[85,"in-lb"]], ["-3","3/8-24",null,[155,"in-lb"]],
-        ["-4","7/16-20",[310,"in-lb"],[260,"in-lb"]], ["-5","1/2-20",[360,"in-lb"],[280,"in-lb"]],
-        ["-6","9/16-18",[420,"in-lb"],[350,"in-lb"]], ["-8","3/4-16",[720,"in-lb"],[620,"in-lb"]],
-        ["-10","7/8-14",[100,"ft-lb"],[85,"ft-lb"]], ["-12","1-1/16-12",[135,"ft-lb"],[135,"ft-lb"]],
-        ["-14","1-3/16-12",[175,"ft-lb"],[175,"ft-lb"]], ["-16","1-5/16-12",[200,"ft-lb"],[200,"ft-lb"]],
-        ["-20","1-5/8-12",[250,"ft-lb"],[250,"ft-lb"]], ["-24","1-7/8-12",[305,"ft-lb"],[305,"ft-lb"]],
-        ["-32","2-1/2-12",[375,"ft-lb"],[375,"ft-lb"]]
+      var TQ_ORB = [ /* dash, thread, non-adjustable heavy-duty S stud (SAE J1926-2), non-adjustable light-duty L stud (SAE J1926-3), adjustable S, adjustable L — [value, unit] as printed */
+        ["-2","5/16-24",null,[85,"in-lb"], null, null], ["-3","3/8-24",null,[155,"in-lb"], null, null],
+        ["-4","7/16-20",[310,"in-lb"],[260,"in-lb"], [180,"in-lb"], [180,"in-lb"]], ["-5","1/2-20",[360,"in-lb"],[280,"in-lb"], [360,"in-lb"], [250,"in-lb"]],
+        ["-6","9/16-18",[420,"in-lb"],[350,"in-lb"], [420,"in-lb"], [350,"in-lb"]], ["-8","3/4-16",[720,"in-lb"],[620,"in-lb"], [720,"in-lb"], [620,"in-lb"]],
+        ["-10","7/8-14",[100,"ft-lb"],[85,"ft-lb"], [100,"ft-lb"], [85,"ft-lb"]], ["-12","1-1/16-12",[135,"ft-lb"],[135,"ft-lb"], [135,"ft-lb"], [135,"ft-lb"]],
+        ["-14","1-3/16-12",[175,"ft-lb"],[175,"ft-lb"], [175,"ft-lb"], [175,"ft-lb"]], ["-16","1-5/16-12",[200,"ft-lb"],[200,"ft-lb"], [200,"ft-lb"], [200,"ft-lb"]],
+        ["-20","1-5/8-12",[250,"ft-lb"],[250,"ft-lb"], [250,"ft-lb"], [250,"ft-lb"]], ["-24","1-7/8-12",[305,"ft-lb"],[305,"ft-lb"], [305,"ft-lb"], [305,"ft-lb"]],
+        ["-32","2-1/2-12",[375,"ft-lb"],[375,"ft-lb"], [375,"ft-lb"], [375,"ft-lb"]]
       ];
       var TQ_6149 = [ /* thread, S series ISO 6149-2 N·m, L series ISO 6149-3 N·m (+10 %/-0); [a,b] = sources differ */
         ["M8x1",10,8], ["M10x1",20,15], ["M12x1.5",35,25], ["M14x1.5",45,35], ["M16x1.5",55,40], ["M18x1.5",70,45],
@@ -10650,7 +10654,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         if(conn === "orfs"){ r = tqRow(TQ_ORFS, key); if(!r) return null;
           return { thread:r[1], nominal:[r[2], "N·m"], nm:[r[2], r[2] * 1.1], basis:"+10/-0" }; }
         if(conn === "orb"){ r = tqRow(TQ_ORB, key); if(!r) return null;
-          var p = o.series === "L" ? r[3] : r[2]; if(!p) return { thread:r[1], none:true };
+          var p = o.series === "L" ? r[3] : o.series === "AS" ? r[4] : o.series === "AL" ? r[5] : r[2]; if(!p) return { thread:r[1], none:true };
           var n = tqToNm(p[0], p[1]); return { thread:r[1], nominal:p.slice(), nm:[n, n * 1.1], basis:"+10/-0" }; }
         if(conn === "6149"){ r = tqRow(TQ_6149, key); if(!r) return null;
           var v = o.series === "L" ? r[2] : r[1]; if(v == null) return { thread:r[0], none:true };
@@ -10703,7 +10707,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(o.some(function(x){ return x[0] === keep; })) s.value = keep; else if(c === "jic" || c === "orb" || c === "orfs") s.value = "-8"; else if(c === "6149") s.value = "M18x1.5"; else if(c === "bspp") s.value = "L12";
           var ser = el("tqSer");
           ser.innerHTML = c === "bspp" ? '<option value="E" selected>Form E — ED elastomer seal (ISO 1179-2)</option><option value="B">Form B — cutting face, metal-to-metal (ISO 1179-4)</option><option value="A">Form A — sealing washer</option><option value="banjo">Banjo fitting WH / TH</option>'
-                       : c === "orb" ? '<option value="S">Heavy-duty S — ORFS stud ends (SAE J1926-2)</option><option value="L">Light-duty L — 37° JIC / flareless stud ends (SAE J1926-3)</option>'
+                       : c === "orb" ? '<option value="S">Straight, heavy-duty S — ORFS stud ends (SAE J1926-2)</option><option value="L">Straight, light-duty L — 37° JIC / flareless stud ends (SAE J1926-3)</option><option value="AS">Adjustable (elbow / tee with locknut), heavy-duty S</option><option value="AL">Adjustable (elbow / tee with locknut), light-duty L</option>'
                                      : '<option value="S">S series — heavy duty (ISO 6149-2)</option><option value="L">L series — light duty (ISO 6149-3)</option>';
           el("tqSerW").classList.toggle("hidden", !(c === "orb" || c === "6149" || c === "bspp"));
           el("tqCodeW").classList.toggle("hidden", c !== "flg"); el("tqBoltW").classList.toggle("hidden", c !== "flg");
@@ -10713,7 +10717,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           var c = el("tqConn").value, k = el("tqSize").value, mat = el("tqMat").value;
           var b = tqLookup(c, k, { series:el("tqSer").value, code:el("tqCode").value, bolt:el("tqBolt").value }), out = el("tqOut");
           if(!b){ out.innerHTML = ""; return; }
-          if(b.none){ out.innerHTML = '<p class="small">No value for this size in this stud series in the verified table' + (c === "orb" ? " (Parker lists no heavy-duty S stud below -4)." : " (ISO 6149-3 has no M20x1.5 — that size is for cartridge-valve cavity plugs, S series only).") + "</p>"; return; }
+          if(b.none){ out.innerHTML = '<p class="small">No value for this size in this stud series in the verified table' + (c === "orb" ? (/^A/.test(el("tqSer").value) ? " (Parker lists no adjustable stud ends below -4)." : " (Parker lists no heavy-duty S stud below -4).") : " (ISO 6149-3 has no M20x1.5 — that size is for cartridge-valve cavity plugs, S series only).") + "</p>"; return; }
           var a = tqAdjust(c, b, mat), h = '<table class="dtable wrap" aria-label="Fitting torque result"><tr><th style="text-align:left">Item</th><th>Value</th></tr>';
           var row = function(x, y){ h += '<tr><td style="text-align:left">' + x + "</td><td>" + y + "</td></tr>"; };
           var plain = [];
@@ -10738,8 +10742,10 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
               plain.push("If you use a torque wrench instead: <strong>" + rng(1) + " N·m</strong>. Parker's values are for zinc-yellow plated carbon steel, <em>dry</em> (no lubrication); lubricated threads clamp harder at the same torque."); }
             if(c === "orfs"){ plain.push("This is the SAE J1453 <strong>qualification test torque</strong>: tighten to at least " + fmt(nm[0]) + " N·m and no more than " + fmt(nm[1]) + " N·m. SAE notes that makers' recommended assembly torques may differ. Parker's, for example, are higher.");
               plain.push("ORFS seals on the O-ring, so check the O-ring is seated in its groove and undamaged first — too little torque lets it extrude under pressure, and more torque won't fix a cut O-ring."); }
-            if(c === "orb"){ plain.push("For a <strong>straight (non-adjustable)</strong> fitting: tighten the fitting body hex to " + rng(1) + " N·m (" + rng(1 / TQ_NM_PER_FTLB) + " ft-lb). Lubricate the threads and O-ring first. Values are for steel fittings in steel ports.");
-              plain.push("<strong>Adjustable</strong> fittings (elbows and tees with a locknut) and port plugs have their own, often lower, values in Parker's table — not included here.");
+            if(c === "orb"){ var adjO = /^A/.test(el("tqSer").value);
+              if(!adjO) plain.push("For a <strong>straight (non-adjustable)</strong> fitting: tighten the fitting body hex to " + rng(1) + " N·m (" + rng(1 / TQ_NM_PER_FTLB) + " ft-lb). Lubricate the threads and O-ring first. Values are for steel fittings in steel ports.");
+              else plain.push("For an <strong>adjustable</strong> fitting (elbow or tee with a locknut): turn the fitting into the port until the backup washer seats on the spot face, back it out no more than one turn to point it the right way, hold the body with a wrench and tighten the <strong>locknut</strong> to " + rng(1) + " N·m (" + rng(1 / TQ_NM_PER_FTLB) + " ft-lb). Lubricate the threads and O-ring first. Values are for steel fittings in steel ports.");
+              plain.push(adjO ? "Adjustable values are lower than the straight-fitting values at the small sizes (e.g. -4 S: 180 vs 310 in-lb) — don't use the straight value on a locknut." : "<strong>Adjustable</strong> fittings (elbows and tees with a locknut) have their own, often lower, values — choose an adjustable option under Stud end. Port plugs are not included: the two copies of Parker's table disagree on them.");
               plain.push("Heavy-duty S = the stud end on ORFS (Seal-Lok) fittings; light-duty L = the stud end on 37° JIC (Triple-Lok) and flareless fittings. Look at the other end of the fitting to tell which you have."); }
             if(c === "6149"){ if(b.basis === "disputed") plain.push("The sources disagree on M30x2 S series: <strong>215 N·m</strong> (SAE J2244-4 and World Wide Fittings) vs <strong>235 N·m</strong> (SAE J1453-1:2019 and Parker). The only torque inside both bands (+10 % / −0) is 235 to 236.5 N·m. Use the fitting maker's figure.");
               else plain.push("ISO 6149 qualification torque: tighten to at least " + fmt(nm[0]) + " N·m and no more than " + fmt(nm[1]) + " N·m. Lubricate the O-ring. " + (el("tqSer").value === "L" ? "L series = light duty (37° and flareless stud ends)." : "S series = heavy duty (ORFS / 24° stud ends)."));
@@ -10758,7 +10764,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           out.innerHTML = h;
           var cites = { jic:"Parker Hose Products Division catalogue p. G-12 (37° / 45° flare swivel nut torque, zinc-yellow plated carbon steel, no lubrication), checked in two copies. Sizes -5 and -6 were found in only one copy and are not shown.",
             orfs:"SAE J1453-1 / J1453-2 face seal nut qualification test torque, confirmed by the SAE sample pages, World Wide Fittings and Air-Way.",
-            orb:"Parker Table R1 / T1 — SAE J1926 straight-thread port assembly torques, non-adjustable stud ends (Parker Port End Assembly Guide, Parker catalogue 4300, and an L3Harris supplier-spec copy agree).",
+            orb:"Parker Table R1 / T1 — SAE J1926 straight-thread port assembly torques. Non-adjustable: Parker Port End Assembly Guide, Parker catalogue 4300 and an L3Harris supplier-spec copy agree. Adjustable: Port End Assembly Guide Table R1 and the Tube Fittings Division assembly guide Table S1 agree. Plugs not shown (the copies differ).",
             "6149":"ISO 6149-2 / -3 stud end qualification torques — World Wide Fittings, Parker Table R4, Gates and SAE J2244-4 / J1453-1 agree on every value except M30x2 S series (flagged).",
             flg:"Parker Tables R6 / R7 — Code 61 / 62 recommended bolt torque (Parker Port End Assembly Guide, matched by mfcp.com's copy).",
             nptf:"Turns from finger tight: Parker Table R5 and World Wide Fittings agree.",
@@ -10770,7 +10776,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           var T = function(head, rows){ return '<div class="tscroll"><table class="dtable"><tr>' + head.map(function(x, i){ return "<th" + (i ? "" : ' style="text-align:left"') + ">" + x + "</th>"; }).join("") + "</tr>" + rows.map(function(r){ return "<tr>" + r.map(function(x, i){ return "<td" + (i ? "" : ' style="text-align:left"') + ">" + (x == null ? "—" : x) + "</td>"; }).join("") + "</tr>"; }).join("") + "</table></div>"; };
           var h = '<h3 style="margin-top:12px">37° JIC flare swivel nut — Parker G-12 (steel, dry)</h3>' + T(["Dash","Thread","N·m","in-lb","Flats from finger tight"], TQ_JIC.map(function(r){ return [r[0], r[1], r[2].join("–"), r[3].join("–"), r[4]]; }));
           h += '<h3 style="margin-top:12px">ORFS face seal nut — SAE J1453 qualification torque (+10 % / −0)</h3>' + T(["Dash","Thread","N·m","ft-lb"], TQ_ORFS.map(function(r){ return [r[0], r[1], r[2], fmt(r[2] / TQ_NM_PER_FTLB)]; }));
-          h += '<h3 style="margin-top:12px">SAE J1926 O-ring boss, non-adjustable — Parker R1 (+10 % / −0, lubricated)</h3>' + T(["Dash","Thread","Heavy S (J1926-2)","Light L (J1926-3)"], TQ_ORB.map(function(r){ var p = function(x){ return x ? x[0] + " " + x[1] : null; }; return [r[0], r[1], p(r[2]), p(r[3])]; }));
+          h += '<h3 style="margin-top:12px">SAE J1926 O-ring boss — Parker R1 (+10 % / −0, lubricated)</h3>' + T(["Dash","Thread","Straight S (J1926-2)","Straight L (J1926-3)","Adjustable S","Adjustable L"], TQ_ORB.map(function(r){ var p = function(x){ return x ? x[0] + " " + x[1] : null; }; return [r[0], r[1], p(r[2]), p(r[3]), p(r[4]), p(r[5])]; }));
           h += '<h3 style="margin-top:12px">ISO 6149 stud ends — qualification torque, N·m (+10 % / −0)</h3>' + T(["Thread","S series (6149-2)","L series (6149-3)"], TQ_6149.map(function(r){ return [r[0], Array.isArray(r[1]) ? r[1][0] + " or " + r[1][1] + " *" : r[1], r[2]]; }));
           h += '<p class="small">* sources disagree — see the result above. M20x1.5: cartridge-valve plugs only.</p>';
           ["c61","c62"].forEach(function(cd){ h += '<h3 style="margin-top:12px">' + (cd === "c61" ? "Code 61" : "Code 62") + " flange bolts — Parker (+10 % / −0)</h3>" + T(["Dash","Flange","Inch bolt","ft-lb","Metric bolt","N·m"], TQ_FLG[cd].map(function(r){ return [r[0], r[1] + '"', r[2], r[3], r[4] + (r[6] ? "" : " †"), r[5]]; })); });
