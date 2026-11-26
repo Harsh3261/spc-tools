@@ -1,3 +1,27 @@
+# Note for Muse — Threads: easier to find metric internal threads (2026-11-26, v65)
+
+No data changed. Search and layout only, after Harsh couldn't find the metric internal thread calculator.
+
+## What changed
+- Thread search box understands side and class words: "M10 internal", "M10 nut", "M10 tapped hole", "M10x1.5 6H",
+  "M10-6H", "M10x1.5-6g", "1/2-13 2B", "1/2-13-3A". Picking a result sets Family, Size, External/Internal and Class.
+  Metric class case follows ISO 965 (capital = internal, small = external); UN: A = external, B = internal.
+  A side word wins over the typed case ("M10 nut 6h" opens 6H).
+- Non-catalogue metric sizes ("M9.5x1.25") now offer the custom calculation instead of "no match".
+- Top "Find a tool" box: a query that names a real thread size ranks Threads first, and opening Threads carries the
+  query across (size, side and class are set; other matching pitches listed). "metric internal thread" opens Threads
+  set to Metric / Internal. Threads keywords now include calculator, internal, external, nut, tapped hole, bolt, screw.
+- External / Internal is now two buttons under Family (the select is kept hidden and still carries the value).
+
+## Checks
+- New tests/thsearch.e2e.js (39 checks). Expected values typed from ISO 965-2 (M10 x 1.5 6H: D1 8.376–8.676,
+  D2 9.026–9.206, D min 10.000; 6g d 9.732–9.968) and worked by hand from ISO 965-1 for M9.5 x 1.25
+  (6H: D1 8.147–8.412, D2 8.688–8.848; 6g: d 9.260–9.472, d2 8.542–8.660). App matches.
+- All tests/*.test.js OK; smoke.e2e, cross.e2e, formats.e2e OK; no page errors.
+
+## Flags for Satureday
+- None on data. Review the wording of the side buttons on narrow phones (labels wrap to two lines at 390 px).
+
 # Note for Muse — Setting plugs: gauge-maker second source recorded; "X on PD" ordering trap flagged (2026-11-22, v64)
 
 ## Satureday's maker hunt — recorded as received

@@ -262,6 +262,11 @@
       }
       .seg button[aria-pressed="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(201,150,58,.28)}
       .seg button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
+      .thsidewrap{margin-top:14px}
+      .thsidewrap .seg{margin-top:6px}
+      .thsideseg button{flex:1 1 0; min-width:0}
+      .thsideseg button[disabled]{cursor:default; opacity:1}
+      .thsres .ts-side{display:block; font-size:.82em; color:var(--cyan)}
       .hidden{display:none !important}
       /* Sheet input (Map & Preview) overlay */
       .sheetoverlay{position:fixed; inset:0; z-index:90; background:rgba(6,6,7,.74); overflow-y:auto; padding:12px}
@@ -1453,11 +1458,12 @@
               <select id="thSize"></select>
             </div>
           </div>
+          <div class="thsidewrap">
+            <span class="flabel" id="thSideLbl">Thread — external or internal</span>
+            <div class="seg thsideseg" id="thSideSeg" role="group" aria-labelledby="thSideLbl"></div>
+            <select id="thSide" class="hidden" aria-hidden="true" tabindex="-1"></select>
+          </div>
           <div class="row2">
-            <div>
-              <label class="flabel" for="thSide">Thread</label>
-              <select id="thSide"></select>
-            </div>
             <div>
               <label class="flabel" for="thClass">Class / fit</label>
               <select id="thClass"></select>
@@ -8036,6 +8042,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         var prevSide = $("thSide").value;
         thFillSelect($("thSide"), sideOpts, sideOpts.some(function(o){ return o[0] === prevSide; }) ? prevSide : sideOpts[0][0]);
         var side = $("thSide").value;
+        /* 2026-11-26 · External / Internal shown as two buttons under Family (the hidden select still carries the value). */
+        $("thSideSeg").innerHTML = sideOpts.map(function(o){ return '<button type="button" data-side="' + o[0] + '" aria-pressed="' + (o[0] === side ? "true" : "false") + '"' + (sideOpts.length === 1 ? " disabled" : "") + ">" + esc(o[1]) + "</button>"; }).join("");
         if(fam === "metric") clsOpts = (side === "int" ? TH965_CLS_INT : TH965_CLS_EXT).map(function(c){ return [c, c + (c === "6H" || c === "6g" ? (custom ? "" : " — ISO 965-2 table") : " — from ISO 965-1 tables")]; });
         else if(fam === "un"){ var unRow = custom ? null : thUAll()[parseInt($("thSize").value, 10) || 0]; var un3 = unRow && TH_U3[unRow[0]]; clsOpts = side === "int" ? [["2B","2B"]].concat(un3 ? [["3B","3B"]] : []) : [["2A","2A"]].concat(un3 ? [["3A","3A"]] : []); }
         else if(fam === "bsp") clsOpts = side === "int" ? [["int","Internal — one class (ISO 228-1)"]] : [["A","Class A"],["B","Class B"]];
@@ -8490,28 +8498,118 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
             });
           });
         }
+        /* 2026-11-26 · side and class words. "M10 internal", "M10 nut", "M10x1.5 6H", "M10-6H",
+           "1/2-13 2B" now find the size and set External / Internal and the class on pick.
+           Metric class case follows ISO 965 (capital = internal, small = external); UN: A = external,
+           B = internal. A side word, if given, wins over the case of the class. */
+        var SIDE_W = { internal:"int", int:"int", inside:"int", nut:"int", nuts:"int", tapped:"int", tap:"int", hole:"int", bore:"int", female:"int",
+                       external:"ext", ext:"ext", outside:"ext", bolt:"ext", bolts:"ext", screw:"ext", screws:"ext", stud:"ext", male:"ext" };
+        var FILL_W = { thread:1, threads:1, threaded:1, calculator:1, calc:1, limits:1, limit:1, size:1, class:1, fit:1, "for":1, of:1, a:1, the:1 };
+        var CLS_RE = /^\d[a-h](?:\d[a-h])?$/i;
+        function parse(q){
+          var r = { words:[], side:null, cls:null };
+          q.trim().split(/\s+/).forEach(function(w){
+            if(!w) return;
+            var lw = w.toLowerCase();
+            if(SIDE_W[lw]){ r.side = SIDE_W[lw]; return; }
+            if(FILL_W[lw]) return;
+            if(CLS_RE.test(w)){ r.cls = w; return; }
+            var m = /^(.+)-(\d[a-h](?:\d[a-h])?)$/i.exec(w);
+            if(m){ r.cls = m[2]; w = m[1]; }
+            var n = norm(w); if(n) r.words.push(n);
+          });
+          return r;
+        }
+        function clsSide(cls, fam){
+          if(!cls) return null;
+          var L = cls.replace(/\d/g, "");
+          if(fam === "un" || fam === "unj") return /b/i.test(L) ? "int" : (/a/i.test(L) ? "ext" : null);
+          return L === L.toUpperCase() ? "int" : "ext";
+        }
+        function sideFor(P, fam){ return P.side || clsSide(P.cls, fam); }
+        var SIDE_TXT = { int:"Internal (nut / tapped hole)", ext:"External (bolt / screw)" };
+        function hitsFor(P){
+          if(!idx) build();
+          if(!P.words.length) return [];
+          var hits = idx.filter(function(e){ return P.words.every(function(w){ return e.key.indexOf(w) >= 0; }); });
+          hits.sort(function(a, b){ var qa = norm(a.label).indexOf(P.words[0]) === 0 ? 0 : 1, qb = norm(b.label).indexOf(P.words[0]) === 0 ? 0 : 1; return qa - qb; });
+          return hits;
+        }
+        function btn(e, P){
+          var sd = sideFor(P, e.fam), extra = (sd ? SIDE_TXT[sd] : "") + (P.cls ? (sd ? " · " : "") + "class " + P.cls : "");
+          return '<button type="button" role="option" data-i="' + idx.indexOf(e) + '"><span class="ts-size">' + esc(e.label) + '</span><span class="ts-fam">' + esc(e.famLabel) + "</span>" + (extra ? '<span class="ts-side">' + esc(extra) + "</span>" : "") + "</button>";
+        }
+        var lastP = { words:[], side:null, cls:null };
         function show(){
           var q = box.value.trim();
           if(!q){ out.innerHTML = ""; return; }
-          if(!idx) build();
-          var words = q.toLowerCase().split(/\s+/).map(norm).filter(Boolean);
-          var hits = idx.filter(function(e){ return words.every(function(w){ return e.key.indexOf(w) >= 0; }); });
-          hits.sort(function(a, b){ var qa = norm(a.label).indexOf(words[0]) === 0 ? 0 : 1, qb = norm(b.label).indexOf(words[0]) === 0 ? 0 : 1; return qa - qb; });
+          var P = lastP = parse(q);
+          if(!P.words.length){
+            out.innerHTML = '<p class="thsmore">' + (P.side || P.cls ? "Add the size too, e.g. “M10 internal” or “M10x1.5 6H”." : "Type a size, e.g. “M10” or “1/2-13”.") + "</p>";
+            return;
+          }
+          var hits = hitsFor(P);
           var more = hits.length > 30 ? '<p class="thsmore">' + (hits.length - 30) + " more — keep typing to narrow it down.</p>" : "";
-          out.innerHTML = hits.length ? hits.slice(0, 30).map(function(e, i){
-            return '<button type="button" role="option" data-i="' + idx.indexOf(e) + '"><span class="ts-size">' + esc(e.label) + '</span><span class="ts-fam">' + esc(e.famLabel) + "</span></button>";
-          }).join("") + more : '<p class="thsmore">No thread matches \u201c' + esc(q) + '\u201d. Try the size only, e.g. \u201c1/2\u201d or \u201cM12\u201d.</p>';
+          var cm = hits.length ? null : customM(P);
+          if(cm){ out.innerHTML = '<p class="thsmore">M' + esc(cm.D) + " × " + esc(cm.P) + " is not a catalogue size.</p>" + '<button type="button" role="option" data-custom="1"><span class="ts-size">M' + esc(cm.D) + " × " + esc(cm.P) + '</span><span class="ts-fam">Metric ISO · custom size, calculated per ISO 965-1</span>' + (sideFor(P, "metric") || P.cls ? '<span class="ts-side">' + esc((sideFor(P, "metric") ? SIDE_TXT[sideFor(P, "metric")] : "") + (P.cls ? " · class " + P.cls : "")) + "</span>" : "") + "</button>"; return; }
+          out.innerHTML = hits.length ? hits.slice(0, 30).map(function(e){ return btn(e, P); }).join("") + more
+            : '<p class="thsmore">No thread matches “' + esc(q) + '”. Try the size only, e.g. “1/2” or “M12”, then add “internal” or a class such as “6H”.</p>';
+        }
+        /* "M9.5x1.25" (or "M9.5 x 1.25") that is not in the tables → offer the calculated custom size */
+        function customM(P){ var j = P.words.join(""), m = /^m(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)$/.exec(j); return m && Number(m[1]) > 0 && Number(m[2]) > 0 ? { D:m[1], P:m[2] } : null; }
+        function pickCustom(cm, P){
+          $("thFam").value = "metric"; thFillSizes();
+          $("thSize").value = "custom"; thFillSideClass();
+          $("thCD").value = cm.D; $("thCP").value = cm.P; thRender();
+          applySideCls(P, "metric");
+          out.innerHTML = ""; box.value = "M" + cm.D + " × " + cm.P + " · custom";
+        }
+        function applySideCls(P, fam){
+          var sd = sideFor(P, fam);
+          if(sd && Array.prototype.some.call($("thSide").options, function(op){ return op.value === sd; })){ $("thSide").value = sd; thFillSideClass(); }
+          if(P.cls){
+            var opts = Array.prototype.slice.call($("thClass").options), want = P.cls;
+            /* a side word overrides the case typed: "M10 nut 6h" means 6H */
+            if(fam !== "un" && fam !== "unj" && P.side) want = P.side === "int" ? want.toUpperCase() : want.toLowerCase();
+            var o = opts.filter(function(op){ return op.value === want; })[0] || opts.filter(function(op){ return op.value.toLowerCase() === want.toLowerCase(); })[0];
+            if(o){ $("thClass").value = o.value; thRender(); }
+          }
+        }
+        function pick(it, P){
+          $("thFam").value = it.fam; thFillSizes();
+          $("thSize").value = it.size; thFillSideClass();
+          applySideCls(P, it.fam);
+          out.innerHTML = ""; box.value = it.label + " · " + it.famLabel;
         }
         box.addEventListener("input", show);
         box.addEventListener("keydown", function(e){ if(e.key === "Enter"){ var b = out.querySelector("button"); if(b){ e.preventDefault(); b.click(); } } });
         out.addEventListener("click", function(e){
+          var c = e.target.closest("button[data-custom]"); if(c){ var cm = customM(lastP); if(cm) pickCustom(cm, lastP); return; }
           var b = e.target.closest("button[data-i]"); if(!b) return;
-          var it = idx[+b.getAttribute("data-i")];
-          $("thFam").value = it.fam; thFillSizes();
-          $("thSize").value = it.size; thFillSideClass();
-          out.innerHTML = ""; box.value = it.label + " · " + it.famLabel;
+          pick(idx[+b.getAttribute("data-i")], lastP);
           var r = $("thOut") || $("thSize"); if(r && r.scrollIntoView) r.scrollIntoView({ block:"nearest" });
         });
+        /* Called by the top "Find a tool" box when it opens Threads, so the query is not lost.
+           With a size: pick the top match and list the others. Without one: set family / side only. */
+        var FAM_W = { metric:"metric", iso:"metric", un:"un", unc:"un", unf:"un", unef:"un", npt:"pipe", nptf:"pipe", bspt:"pipe", bsp:"bsp", bspp:"bsp",
+                      acme:"acme", trapezoidal:"tr", tr:"tr", whitworth:"whitworth", bsw:"whitworth", bsf:"whitworth", ba:"ba", unj:"unj", mj:"mj", buttress:"buttress" };
+        window.thHasMatch = function(raw){ var P = parse(raw || ""); return P.words.some(function(w){ return /\d/.test(w); }) && (hitsFor(P).length > 0 || !!customM(P)); };
+        window.thApplyQuery = function(raw){
+          var P = parse(raw || ""), sized = P.words.some(function(w){ return /\d/.test(w); });
+          if(sized){
+            var hits = hitsFor(P);
+            if(hits.length){
+              pick(hits[0], P);
+              if(hits.length > 1) out.innerHTML = '<p class="thsmore">Showing ' + esc(hits[0].label) + ". Other matches for “" + esc(raw) + "”:</p>" + hits.slice(1, 12).map(function(e){ return btn(e, P); }).join("");
+              lastP = P;
+              return;
+            }
+            var cm = customM(P); if(cm){ lastP = P; pickCustom(cm, P); return; }
+          }
+          var fam = null; P.words.forEach(function(w){ if(FAM_W[w]) fam = FAM_W[w]; });
+          if(fam && fam !== $("thFam").value){ $("thFam").value = fam; thFillSizes(); }
+          applySideCls(P, $("thFam").value);
+        };
       })();
 
       /* 2026-11-20 · thread finder (reverse lookup). Uses only the verified
@@ -8626,6 +8724,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
 
       $("thSize").addEventListener("change", function(){ holdScroll(function(){ thFillSideClass(); }); });
       $("thSide").addEventListener("change", function(){ holdScroll(function(){ thFillSideClass(); }); });
+      $("thSideSeg").addEventListener("click", function(e){ var b = e.target.closest("button[data-side]"); if(!b || b.disabled) return; $("thSide").value = b.getAttribute("data-side"); holdScroll(function(){ thFillSideClass(); }); });
       $("thClass").addEventListener("change", function(){ holdScroll(function(){ thRender(); }); });
       $("thCD").addEventListener("input", function(){ holdScroll(function(){ thRender(); }); });
       $("thCP").addEventListener("input", function(){ holdScroll(function(){ thRender(); }); });
@@ -11456,7 +11555,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           ["tp","True Position","true position GD&T MMC LMC bonus tolerance hole location"],
           ["stack","Stack-Up","tolerance stack stack-up worst case RSS assembly gap"],
           ["aql","AQL Lookup","AQL sampling plan Z1.4 lot size sample size accept reject inspection level code letter"],
-          ["threads","Threads","thread M10 UNC UNF NPT BSP pitch diameter gauge plug ring go no-go Acme metric class 6g 2A 3B tap"],
+          ["threads","Threads","thread threads calculator limits M10 UNC UNF NPT BSP major minor pitch diameter internal external nut tapped hole tap bolt screw female male metric ISO 965 class 6g 6H 2A 2B 3A 3B gauge plug ring go no-go Acme custom special"],
           ["cyl","Cylinder & oil","cylinder force push pull area speed flow rod buckling euler johnson column tube hoop stress barlow lame pressure iso 4406 cleanliness particle count oil code"],
           ["gdt","GD&T & uncertainty","gdt gd&t mmc lmc bonus tolerance virtual condition resultant condition position fastener floating fixed uncertainty gum budget expanded k=2 tur 14253"],
           ["msa","More MSA","msa type 1 gage study cg cgk bias linearity attribute agreement kappa fleiss cohen effectiveness miss rate false alarm vda 5 aiag gauge capability"],
@@ -11497,6 +11596,9 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           var raw = q.value.trim(), words = raw.toLowerCase().split(/\s+/).filter(Boolean);
           if(!words.length){ hits.hidden = true; hits.innerHTML = ""; return; }
           var list = TOOLS.map(function(t){ return [score(t, words), t]; }).filter(function(x){ return x[0] > 0; });
+          /* 2026-11-26 · a query that names a real thread size ("1/2-13 2B", "M10 nut") ranks Threads first */
+          if(window.thHasMatch && window.thHasMatch(raw)){ var thT = TOOLS.filter(function(t){ return t[0] === "threads"; })[0], thx = list.filter(function(x){ return x[1][0] === "threads"; })[0];
+            var top = list.reduce(function(m, x){ return Math.max(m, x[0]); }, 0) + 1; if(thx) thx[0] = Math.max(thx[0], top); else list.push([top, thT]); }
           TOOLS.forEach(function(t){ /* fall back to the text inside each tool, ranked below keyword matches */
             if(list.some(function(x){ return x[1][0] === t[0]; })) return;
             var txt = toolText(t[0]); if(txt && words.every(function(w){ return txt.indexOf(w) >= 0; })) list.push([0.5, t]);
@@ -11511,8 +11613,10 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           hits.hidden = false;
         }
         function go(tab){
+          var raw = q.value.trim();
           hits.hidden = true; q.value = "";
           showTool(tab);
+          if(tab === "threads" && raw && window.thApplyQuery) window.thApplyQuery(raw);
           var cur = document.querySelector("#toolPicker .tp-cur"), sel = $("tabbtn-"+tab); if(cur && sel) cur.textContent = sel.textContent.trim();
           var el = $("tool-"+tab); if(el) setTimeout(function(){ el.scrollIntoView({block:"start", behavior:"smooth"}); }, 30);
         }
