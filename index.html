@@ -1929,6 +1929,18 @@
           </div>
           </div>
           <div id="mgOut" aria-live="polite"></div>
+          <div id="mgCal" class="hidden" style="border:1px solid var(--line, #444);border-radius:8px;padding:10px 14px;margin:12px 0">
+            <h3 style="margin-top:0">Calibrate over three wires — plugs and setting plugs</h3>
+            <p class="small">Like a calibration program: enter the wire size actually used and the reading over the wires; the tool gives the pitch diameter and a verdict against the limits above. Targets for M are listed for every plug. Rings are checked on their setting plug, not over wires.</p>
+            <div class="row2">
+              <div><label class="flabel" for="mgCw">Wire diameter w (in, from the wire certificate)</label><input id="mgCw" type="number" step="any" inputmode="decimal" autocomplete="off"></div>
+              <div><label class="flabel" for="mgCg">Gauge measured</label><select id="mgCg"></select></div>
+            </div>
+            <div class="row2">
+              <div><label class="flabel" for="mgCm">Measurement over wires M (in)</label><input id="mgCm" type="number" step="any" inputmode="decimal" autocomplete="off" placeholder="e.g. reading from the bench micrometer"></div>
+            </div>
+            <div id="mgCout" aria-live="polite"></div>
+          </div>
           <details class="thfind" style="margin-top:14px">
             <summary>Calibration guide — thread plug, ring and check plug gauges</summary>
             <div class="small" id="mgGuide">
@@ -7986,8 +7998,14 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         var p = 1 / TPI;
         if(series === "UNS") return { LE: 9 * p, basis: "9p" };
         if(series === "8-UN") return { LE: D, basis: "D" };
-        if(series === "12-UN") return D > 1.5 ? { LE: 9 * p, basis: "9p" } : { LE: D, basis: "D" };
-        if(series === "16-UN") return D >= 1 ? { LE: 9 * p, basis: "9p" } : { LE: D, basis: "D" };
+        /* 2026-11-26 (gap 13 closed): 12-UN and 16-UN use LE = 9 pitches at EVERY diameter (NBS H28 1969 §2: "one
+           diameter, or 9 pitches for the fine and fixed-pitch series"), except where the size is also a UNC / UNF size of
+           the same pitch — then the B1.1 table repeats the UNC / UNF limits (LE = D). Back-solved from all 22 previously
+           failing B1.1 rows; reproduces every 12-UN and 16-UN row to ≤ 0.0002 in (tests/ungauge.e2e.js). */
+        if(series === "12-UN" || series === "16-UN"){
+          var tw = TPI === 12 ? [0.5625, 1.125, 1.25, 1.375, 1.5] : [0.375, 0.75];
+          return tw.some(function(d){ return Math.abs(d - D) < 1e-6; }) ? { LE: D, basis: "D" } : { LE: 9 * p, basis: "9p" };
+        }
         if(series === "UNEF") return D > 9 * p ? { LE: 9 * p, basis: "9p" } : { LE: D, basis: "D" };
         return { LE: D, basis: "D" };
       }
@@ -11307,13 +11325,21 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         [[32],.0001,.00015,12,[.0003,.0005,.0007],[.0001,.00015,.0002,.00025,.0003]],
         [[36],.0001,.00015,12,[.0003,.0004,null],[.0001,.00015,.0002,null,null]],
         [[40,44],.0001,.00015,15,[.0003,.0004,null],[.0001,.00015,.0002,null,null]],
-        [[48],.0001,.00015,18,[.0003,.0004,null],[.0001,.00015,.0002,null,null]]
+        [[48],.0001,.00015,18,[.0003,.0004,null],[.0001,.00015,.0002,null,null]],
+        /* 2026-11-26 (gap 14 closed): 7 to 4 TPI — NBS H28 (1969) Table 6.9 × Thread Check catalogue p.52 W rows, cell for
+           cell; PD band placement for 5 / 4-1/2 / 4 TPI confirmed by Machinery's Handbook 28th ed. Table 4 (blank to 1-1/2 in). */
+        [[7],null,.0003,5,[null,.0007,.0011],[null,.0002,.00025,.0003,.0004]],
+        [[6],null,.0003,5,[null,.0008,.0013],[null,.0002,.00025,.0003,.0004]],
+        [[5,4.5],null,.0003,4,[null,.0008,.0013],[null,null,.00025,.0003,.0004]],
+        [[4],null,.0003,4,[null,.0009,.0015],[null,null,.00025,.0003,.0004]]
       ];
       /* END DATA TH_W */
       function mgW(D, tpi){
         for(var i = 0; i < TH_W.length; i++){ var w = TH_W[i]; if(w[0].indexOf(tpi) < 0) continue;
-          var mc = D <= 0.5 ? 0 : D <= 4 ? 1 : 2, pc = D <= 0.5 ? 0 : D <= 1.5 ? 1 : D <= 4 ? 2 : D <= 8 ? 3 : 4;
-          return { lead:D <= 0.5 ? w[1] : w[2], half:w[3], maj:w[4][mc], pd:w[5][pc] }; }
+          var mc = D <= 0.5 ? 0 : D <= 4 ? 1 : 2, pc = D <= 0.5 ? 0 : D <= 1.5 ? 1 : D <= 4 ? 2 : D <= 8 ? 3 : 4, pd = w[5][pc];
+          /* above 12 in: the 8–12 in value × D / 12 (footnote to B1.2 W table — Machinery's Handbook Table 4 and H28) */
+          if(D > 12 && pd != null) pd = Math.round(pd * D / 12 * 1e5) / 1e5;
+          return { lead:D <= 0.5 ? w[1] : w[2], half:w[3], maj:w[4][mc], pd:pd }; }
         return null;
       }
       /* ASME B1.2 thread-setting plugs for external-thread ring gauges (Machinery's Handbook Table 5 = B1.2 Table):
@@ -11326,9 +11352,13 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         var w = mgW(D, tpi); if(!w || w.pd == null || w.maj == null) return null;
         var p = 1 / tpi, r4 = function(v){ return Math.round(v * 1e4) / 1e4; }, r5 = function(v){ return Math.round(v * 1e5) / 1e5; };
         var goT = r4(majMax - (0.060 * Math.pow(p, 2 / 3) + 0.017 * p)), loT = r4(pdMin + 0.433013 * p);
-        return { w:w,
+        /* LO full-form crest: the crest flat must stay ≥ 0.001 in. Machinery's Handbook 28th ed. Table 5 item 17 (B1.2-1983):
+           when it binds, major = Dmax + 0.216506p − (Td2 + 0.0017) with W minus; NBS H28 (1969) par. 4.6.3.2 gives the same
+           limit as min PD + H − 0.00173. (Dmax − Td2 + 0.216506p = min PD + H.) Never binds for the 28 catalogue sizes. */
+        var loCap = r4(pdMin + 0.866025 * p - 0.0017), loFull = loCap < r5(majMax + w.maj) ? [r5(loCap - w.maj), loCap] : [majMax, r5(majMax + w.maj)];
+        return { w:w, loCrest:loCap < r5(majMax + w.maj),
           go:{ pd:[r5(pdMax - w.pd), pdMax], full:[majMax, r5(majMax + w.maj)], trunc:[r5(goT - w.maj), goT] },
-          lo:{ pd:[pdMin, r5(pdMin + w.pd)], full:[majMax, r5(majMax + w.maj)], trunc:[r5(loT - w.maj), loT] } };
+          lo:{ pd:[pdMin, r5(pdMin + w.pd)], full:loFull, trunc:[r5(loT - w.maj), loT] } };
       }
       /* BEGIN DATA TH_X: ASME B1.2 X gage tolerances (GO, HI, LO thread gages), inch. B1.2-1983 Table 6 = NBS Handbook H28
          (1969) Part I Table 6.8 (nvlpubs.nist.gov, read 2026-11-26) × Thread Check Inc. catalogue p.52 "Gage Tolerances"
@@ -11336,9 +11366,9 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
          Row: [TPI list, lead ±, half-angle ± minutes, major & minor [to and incl. 4 in, above 4 in],
                pitch diameter [to and incl. 1-1/2 in, above 1-1/2 to 4, above 4 to 8, above 8 to 12 in]]; null = not listed.
          Above 12 in: the 8–12 in value × (D / 12) (footnote b in both H28 and B1.2).
-         NAMED GAP: 5, 4-1/2 and 4 TPI pitch-diameter bands left blank — both sources print three values (.0005 .0006 .0008)
-         but disagree on which diameter bands they sit in (H28 text: to 1-1/2 / 1-1/2–4 / 4–8; Thread Check layout and Royal
-         Oak Gage: 1-1/2–4 / 4–8 / 8–12). Their lead, angle and major/minor values agree and are kept.
+         5, 4-1/2, 4 TPI (gap 12 closed 2026-11-26): PD .0005 / .0006 / .0008 sit in the 1-1/2–4, 4–8 and 8–12 in bands,
+         blank up to 1-1/2 in — Machinery's Handbook 28th ed. Table 4 (p.1918, explicit blank cells) × Thread Check layout ×
+         Royal Oak Gage. The H28 text extraction had lost the blank cell.
          Cross-check: this table with the B1.2 placement rule reproduces the X of all 28 TH_G sizes (tests/ungauge.test.js). */
       var TH_X = [
         [[80,72],.0002,30,[.0003,null],[.0002,null,null,null]],
@@ -11351,8 +11381,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         [[9],.0003,10,[.0007,.0011],[.0003,.0004,.0006,.0008]],
         [[8,7],.0004,5,[.0007,.0011],[.0004,.0005,.0006,.0008]],
         [[6],.0004,5,[.0008,.0013],[.0004,.0005,.0006,.0008]],
-        [[5,4.5],.0004,5,[.0008,.0013],[null,null,null,null]],
-        [[4],.0004,5,[.0009,.0015],[null,null,null,null]]
+        [[5,4.5],.0004,5,[.0008,.0013],[null,.0005,.0006,.0008]],
+        [[4],.0004,5,[.0009,.0015],[null,.0005,.0006,.0008]]
       ];
       /* END DATA TH_X */
       function mgX(D, tpi){
@@ -11372,7 +11402,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       function mgUNCalc(D, tpi, series, cls){
         if(!(D > 0) || !(tpi > 0)) return { error:"Enter the diameter and the threads per inch." };
         var x = mgX(D, tpi); if(!x) return { error:"ASME B1.2 Table 6 has no X tolerances for " + tpi + " threads per inch (listed: 80 to 4 TPI)." };
-        if(x.pd == null) return { error:"ASME B1.2 Table 6 lists no pitch-diameter X tolerance for " + tpi + " TPI at " + D + " in" + (tpi <= 5 ? " that could be confirmed — named gap: the two sources disagree on which diameter bands the 4–5 TPI values belong to." : " — this pitch is not used at this diameter.") };
+        if(x.pd == null) return { error:"ASME B1.2 Table 6 lists no pitch-diameter X tolerance for " + tpi + " TPI at " + D + " in" +  + " — this pitch is not used at this diameter in the standard." };
         var ser = series && series !== "auto" ? series : mgSeriesAuto(D, tpi);
         var c = thCustomUN(D, tpi, ser), p = 1 / tpi, r4 = function(v){ return Math.round(v * 1e4) / 1e4; };
         var e, i, tbl = null, t3 = null;
@@ -11385,16 +11415,22 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         else { e = { maj:[r4(c.extMajor[0]), r4(c.extMajor[1])], pd:[r4(c.extPd[0]), r4(c.extPd[1])] }; i = { pd:[r4(c.intPd[0]), r4(c.intPd[1])], majMin:D }; }
         var g = mgUNPlace(D, tpi, e, i, x);
         g.table = !!(tbl && (cls !== "3" || t3)); g.tableLabel = tbl ? tbl[0] : null;
-        g.weak = !g.table && ((ser === "12-UN" && D <= 1.5) || (ser === "16-UN" && D < 1));
-        g.size = g.table ? tbl[0] : fmtUNSize(D, tpi, ser); g.cls = cls === "3" ? "3A / 3B" : "2A / 2B"; g.custom = true; g.series = ser; g.leBasis = c.leBasis; g.xi = x; g.prod = { e:e, i:i };
-        g.sp = D <= 12 ? mgSetPlugs(D, tpi, e.maj[1], e.pd[1], e.pd[0]) : null;
-        g.spNote = D > 12 ? "Setting-plug W tolerances above 12 in are not loaded (the W table in this tool stops at 12 in)." : null;
+        g.weak = false;
+        g.tpi = tpi; g.size = g.table ? tbl[0] : fmtUNSize(D, tpi, ser); g.cls = cls === "3" ? "3A / 3B" : "2A / 2B"; g.custom = true; g.series = ser; g.leBasis = c.leBasis; g.xi = x; g.prod = { e:e, i:i };
+        g.sp = mgSetPlugs(D, tpi, e.maj[1], e.pd[1], e.pd[0]);
+        g.spNote = g.sp ? null : "ASME B1.2 lists no W tolerance for " + tpi + " TPI at this diameter.";
         return g;
       }
       /* B1.2 placement of X on given product limits (e: ext {maj, pd}, i: int {pd, majMin}); inches. */
       function mgUNPlace(D, tpi, e, i, x){
         var p = 1 / tpi, r4 = function(v){ return Math.round(v * 1e4) / 1e4; }, X = x.pd, XM = x.maj, hiM = r4(i.pd[1] + 0.433013 * p);
-        return { x:X, goP:[i.pd[0], r4(i.pd[0] + X)], ngP:[r4(i.pd[1] - X), i.pd[1]], goR:[r4(e.pd[1] - X), e.pd[1]], ngR:[e.pd[0], r4(e.pd[0] + X)],
+        /* Ring minor diameters (gap 4): GO ring = max ext PD − H/2, X (major/minor) minus; LO ring = min ext PD − H/4, X plus —
+           Machinery's Handbook 28th ed. Table 5 items 2 and 4 × NBS H28 (1969) par. 4.5.1.3 / 4.5.2.3. H28 adds: LO ring min
+           minor not less than GO ring min minor + 0.0375H (flagged if it would bind; MH does not state it). */
+        var goRm = XM != null ? [r4(e.pd[1] - 0.433013 * p - XM), r4(e.pd[1] - 0.433013 * p)] : null;
+        var loRm = XM != null ? [r4(e.pd[0] - 0.216506 * p), r4(e.pd[0] - 0.216506 * p + XM)] : null;
+        var loRmFlag = goRm && loRm && loRm[0] < r4(goRm[0] + 0.0375 * 0.866025 * p);
+        return { x:X, goRm:goRm, loRm:loRm, loRmFlag:loRmFlag, goP:[i.pd[0], r4(i.pd[0] + X)], ngP:[r4(i.pd[1] - X), i.pd[1]], goR:[r4(e.pd[1] - X), e.pd[1]], ngR:[e.pd[0], r4(e.pd[0] + X)],
           goM:XM != null ? [i.majMin, r4(i.majMin + XM)] : null, ngM:XM != null ? [r4(hiM - XM), hiM] : null, setGo:e.pd[1], setLo:e.pd[0] };
       }
       function fmtUNSize(D, tpi, ser){
@@ -11414,18 +11450,17 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         var r4 = function(v){ return Math.round(v * 1e4) / 1e4; }, X = g.x;
         var ur = null; thUAll().forEach(function(q){ if(q[0] === size) ur = q; });
         if(cls === "3"){ var t3 = TH_U3[size]; if(!t3) return { error:"Class 3 data is not included for this size." };
-          return { size:size, cls:"3A / 3B", x:X, goP:[t3.i[2], r4(t3.i[2] + X)], ngP:[r4(t3.i[3] - X), t3.i[3]], goR:[r4(t3.e[2] - X), t3.e[2]], ngR:[t3.e[3], r4(t3.e[3] + X)], setGo:t3.e[2], setLo:t3.e[3],
+          var plc3 = ur ? mgUNPlace(ur[1], ur[2], { maj:[t3.e[1], t3.e[0]], pd:[t3.e[3], t3.e[2]] }, { pd:[t3.i[2], t3.i[3]], majMin:t3.i[4] }, mgX(ur[1], ur[2])) : {};
+          return { size:size, cls:"3A / 3B", x:X, goRm:plc3.goRm, loRm:plc3.loRm, loRmFlag:plc3.loRmFlag, goP:[t3.i[2], r4(t3.i[2] + X)], ngP:[r4(t3.i[3] - X), t3.i[3]], goR:[r4(t3.e[2] - X), t3.e[2]], ngR:[t3.e[3], r4(t3.e[3] + X)], setGo:t3.e[2], setLo:t3.e[3],
             sp:ur ? mgSetPlugs(ur[1], ur[2], t3.e[0], t3.e[2], t3.e[3]) : null }; }
-        return { size:size, cls:"2A / 2B", x:X, goP:g.goP, ngP:g.ngP || null, goR:g.goR, ngR:g.ngR, setGo:g.setGo, setLo:g.setLo,
+        var plc = ur ? mgUNPlace(ur[1], ur[2], { maj:[ur[6], ur[5]], pd:[ur[8], ur[7]] }, { pd:[ur[11], ur[12]], majMin:ur[10] }, mgX(ur[1], ur[2])) : {};
+        return { size:size, cls:"2A / 2B", x:X, goRm:plc.goRm, loRm:plc.loRm, loRmFlag:plc.loRmFlag, goP:g.goP, ngP:g.ngP || null, goR:g.goR, ngR:g.ngR, setGo:g.setGo, setLo:g.setLo,
           sp:mgSPGap(size, "2", ur ? mgSetPlugs(ur[1], ur[2], ur[5], g.setGo, g.setLo) : null) };
       }
-      /* Named gap: #4-48 UNF 2A LO full-form major. H28 Table III.13 prints .1110 / .1113 (W applied minus from .1113);
-         the Machinery's Handbook Table 5 rule (max major, W plus) gives .1113 / .1116. The B1.2 crest-width provision that
-         presumably causes this could not be read in either source, so the cell is withheld rather than guessed. */
-      function mgSPGap(size, cls, sp){
-        if(sp && size === "#4-48 UNF" && cls === "2"){ sp.lo.full = null; sp.gap = "LO full-form major for #4-48 UNF 2A is withheld: NBS H28 prints .1110–.1113 in, the B1.2 rule as reproduced in Machinery's Handbook gives .1113–.1116 in; the crest-width provision behind the difference could not be confirmed from two sources. Use the truncated LO plug, or ask the gauge maker to quote to ASME B1.2 directly."; }
-        return sp;
-      }
+      /* Gap 3 closed 2026-11-26: #4-48 UNF 2A LO full-form major follows the current B1.2 rule (max major, W plus →
+         .1113–.1116; the 0.001 in crest limit .1117 does not bind) — Machinery's Handbook 28th ed. Table 5 item 17 × NBS H28
+         (1969) par. 4.6.3.2. NBS H28 1963 Table III.13 printed .1110–.1113; older edition, recorded as a conflict in MUSE-NOTE. */
+      function mgSPGap(size, cls, sp){ return sp; }
       function mgWire(P, w, M){ return { best:Math.round(0.57735 * P * 1e4) / 1e4, E:(w > 0 && M > 0) ? Math.round((M - 3 * w + 0.866025 * P) * 1e4) / 1e4 : null }; }
       (function(){
         var el = function(id){ return document.getElementById(id); };
@@ -11553,7 +11588,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         function renderUN(){
           var cuU = el("mgUSize").value === "custom"; el("mgUCustom").classList.toggle("hidden", !cuU);
           var u = cuU ? mgUNCalc(parseInchD(el("mgUD").value), Number(el("mgUT").value), el("mgUSer").value, el("mgUCls").value) : mgUN(el("mgUSize").value, el("mgUCls").value), out = el("mgOut");
-          if(u.error){ out.innerHTML = '<p class="verdict warn">' + esc(u.error) + "</p>"; return; }
+          if(u.error){ out.innerHTML = '<p class="verdict warn">' + esc(u.error) + "</p>"; el("mgCal").classList.add("hidden"); return; }
           var R = function(n, z, use){ return '<tr><td style="text-align:left">' + n + "</td><td>" + (z ? f4in(z[0]) : "—") + "</td><td>" + (z ? f4in(z[1]) : "—") + '</td><td style="text-align:left">' + use + "</td></tr>"; };
           var H = '<tr><th style="text-align:left">Gauge</th><th>PD min (new)</th><th>PD max (new)</th><th style="text-align:left">Use / acceptance</th></tr>';
           var h = whoBox(true);
@@ -11568,6 +11603,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           h += "<h3>Ring gauges for " + esc(u.size) + "-" + (u.cls === "3A / 3B" ? "3A" : "2A") + " (external thread)</h3><div class=\"tscroll\"><table class=\"dtable wrap\">" + H;
           h += R("GO thread ring", u.goR, "Must screw over the whole thread length of a good part.");
           h += R("NOT GO (LO) thread ring", u.ngR, "Must not screw on a good part by more than three turns.");
+          if(u.goRm) h += R("GO ring — minor diameter", u.goRm, "Max external PD − H/2, X tolerance minus. Check with plain plugs: GO plug " + f4in(u.goRm[0]) + ", NOT GO plug " + f4in(u.goRm[1]) + ".");
+          if(u.loRm) h += R("NOT GO (LO) ring — minor diameter", u.loRm, "Min external PD − H/4, X tolerance plus. Check with plain plugs: GO plug " + f4in(u.loRm[0]) + ", NOT GO plug " + f4in(u.loRm[1]) + "." + (u.loRmFlag ? " Caution: NBS H28 also requires this to be at least the GO ring minimum minor + 0.0375H, which this size does not meet — confirm with the gauge maker." : ""));
           h += "</table></div>";
           var sp = u.sp, cl = u.cls === "3A / 3B" ? "3A" : "2A", rg = function(z){ return z ? f5in(z[0]) + " – " + f5in(z[1]) : "— (gap)"; }, rt = function(z){ return z ? z[0].toFixed(5).replace(/0$/, "") + "–" + z[1].toFixed(5).replace(/0$/, "") + " in" : "WITHHELD — not confirmed from two sources; order the truncated plug or quote to ASME B1.2 directly"; };
           h += banner("master") + "<h3>Setting plugs — masters for the " + esc(u.size) + "-" + cl + " ring gauges (ASME B1.2, W tolerance)</h3>";
@@ -11579,7 +11616,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
             h += '<p class="small">W tolerances for this size (order W on pitch diameter too — some makers\' standard setting plugs are X on PD unless W is specified): pitch diameter ' + f5in(sp.w.pd) + " (GO minus, LO plus); major diameter " + f5in(sp.w.maj) + "; lead ±" + f5in(sp.w.lead) + " in; half-angle ±" + sp.w.half + "′. Inches. A truncated setting plug\'s truncated portion sets the ring\'s pitch diameter and its full-form portion checks clearance at the ring\'s major diameter (FED-STD-H28/6, as quoted by gauge makers); order one or the other and say which.</p>";
             if(sp.gap) h += '<p class="verdict warn">' + esc(sp.gap) + "</p>";
           } else h += '<p class="verdict warn">' + esc(u.spNote || "Setting-plug limits are not included for this size.") + "</p>";
-          h += '<p class="small"><strong>Named gap:</strong> ASME B1.2 also uses a plain check plug for the minor diameter of the GO ring. Its limits are not given here because they could not be paired from two sources.</p>';
+          h += '<p class="small"><strong>Ring minor check plugs:</strong> plain GO plug = ring minimum minor (tolerance minus), plain NOT GO plug = ring maximum minor (tolerance plus). The tolerance class of these plain plugs is not shown: only NBS H28 (par. 4.7.2) states it (Z), with no second source — ask the gauge maker to quote to ASME B1.2.</p>';
           h += '<p class="small"><strong>How inch gauges differ from metric:</strong> ASME B1.2 has no separate GO-GO / GO-NOGO / wear check plugs; the two setting plugs above do that job. Masters carry no wear allowance — wear belongs to the ring, and the ring is reset or replaced when it no longer fits its setting plug. Plug and ring limits are X tolerance (' + f4in(u.x) + ", the working-gauge grade); setting plugs are W tolerance.</p>";
           var txt = "Please quote and supply to ASME B1.2, with ISO/IEC 17025 accredited calibration certificates reporting measured pitch and major diameter:\n" +
             "- " + u.size + " GO / NOT GO thread plug gauge, X tolerance (GO PD " + u.goP[0].toFixed(4) + "–" + u.goP[1].toFixed(4) + " in" + (u.ngP ? "; NOT GO PD " + u.ngP[0].toFixed(4) + "–" + u.ngP[1].toFixed(4) + " in" : "") + ")\n" +
@@ -11593,12 +11630,50 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
               "State: truncated or full-form. W tolerance applies to pitch diameter as well as lead and angle — please do not supply X-tolerance pitch diameter (some makers' standard setting plugs are X on PD unless W is ordered)." : "- GO and LO thread setting plugs, W tolerance per ASME B1.2 (limits not included in this app for this size).");
           h += ta("mgOrder", txt.trim(), 4, "Text for the gauge maker — workpiece gauges") + ta("mgOrderM", txtM, 8, "Text for the gauge maker — MASTERS (setting plugs) for the ring gauges");
           h += '<p class="cite">Gauge limits: ASME B1.2 (X tolerance inside the product limits), the same verified data as Threads → Gauge verification; class 3 values match the Westport and Judge Tool gauge charts. Setting plugs: ASME B1.2 rules and W tolerances as reproduced in Machinery\'s Handbook 28th ed. Tables 4–5, checked value-for-value against NBS Handbook H28 (1963 supplement) Table III.13 — 670 of 672 values agree; the 2 that do not are withheld above. Setting-plug PD nominals and the W value also agree with current gauge-maker charts (Hemco, Gage Assembly, Judge Tool, Thread Check Catalog 2026, Gage Crib, PMC/Mercury). Makers publish nominals and tolerance only; the limit pairs and majors rest on H28 and the B1.2 rules. ASME B1.2-1983 is current (reaffirmed 2017). NOT GO turns: ASME B1.2 allows up to three turns on inch threads.</p>';
-          h += '<p class="small">' + esc(TH_CAL_NOTE) + "</p>";
+          /* Formula cross-check (catalogue sizes): B1.1 formula vs the printed table, and B1.2 placement vs the stored gauge data */
+          if(!u.custom){ var xr = null; thUAll().forEach(function(q){ if(q[0] === u.size) xr = q; });
+            if(xr){ var fc = thCustomUN(xr[1], xr[2], xr[3]), r4 = function(v){ return Math.round(v * 1e4) / 1e4; }, cls3 = u.cls === "3A / 3B";
+              var dE = cls3 ? null : Math.max(Math.abs(r4(fc.extPd[1]) - xr[7]), Math.abs(r4(fc.extPd[0]) - xr[8]), Math.abs(r4(fc.intPd[1]) - xr[12]), Math.abs(r4(fc.intPd[0]) - xr[11]));
+              var pl = mgUNPlace(xr[1], xr[2], { maj:[xr[6], xr[5]], pd:[xr[8], xr[7]] }, { pd:[xr[11], xr[12]], majMin:xr[10] }, mgX(xr[1], xr[2])), g0 = TH_G[u.size];
+              var okP = !cls3 && g0 && ["goP", "ngP", "goR", "ngR"].every(function(k){ return !g0[k] || (Math.abs(pl[k][0] - g0[k][0]) < 5e-6 && Math.abs(pl[k][1] - g0[k][1]) < 5e-6); });
+              if(!cls3) h += '<p class="small"><strong>Cross-check:</strong> B1.1 formula vs the printed 2A / 2B pitch-diameter limits — largest difference ' + dE.toFixed(4) + ' in' + (dE <= 0.00011 ? " (rounding)" : "") + '. B1.2 X placement on the printed limits ' + (okP ? "reproduces the stored plug and ring limits exactly." : "differs from the stored data — check before use.") + "</p>"; } }
           out.innerHTML = h;
+          mgCalSetup(u);
         }
+        /* Three-wire calibration (inch, 60°): E = M − 3w + 0.86603p; M = E + 3w − 0.86603p. No lead-angle correction
+           (Engineers Edge "Three Wire Method" × B1.2-based gauge sizing note, 2026): adequate for single-start UN threads. */
+        var mgLastU = null;
+        function mgCalSetup(u){
+          mgLastU = u; el("mgCal").classList.remove("hidden");
+          var tpi = u.tpi || (function(){ var t = null; thUAll().forEach(function(q){ if(q[0] === u.size) t = q[2]; }); return t; })(); u.tpi = tpi;
+          var p = 1 / tpi, best = Math.round(0.57735 * p * 1e5) / 1e5;
+          if(!el("mgCw").value || el("mgCw").getAttribute("data-auto") === "1"){ el("mgCw").value = best; el("mgCw").setAttribute("data-auto", "1"); }
+          var opts = [["goP", "GO thread plug"], ["ngP", "NOT GO (HI) thread plug"]].concat(u.sp ? [["spGo", "GO setting plug"], ["spLo", "LO setting plug"]] : []);
+          var prev = el("mgCg").value; el("mgCg").innerHTML = opts.map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === prev ? " selected" : "") + ">" + o[1] + "</option>"; }).join("");
+          mgCalRun();
+        }
+        function mgCalLimits(u, k){ return k === "spGo" ? u.sp.go.pd : k === "spLo" ? u.sp.lo.pd : u[k]; }
+        function mgCalRun(){
+          var u = mgLastU, o = el("mgCout"); if(!u || !u.tpi){ o.innerHTML = ""; return; }
+          var p = 1 / u.tpi, w = Number(el("mgCw").value), k3 = function(E){ return E + 3 * w - 0.866025 * p; };
+          if(!(w > 0)){ o.innerHTML = '<p class="small">Enter the wire diameter.</p>'; return; }
+          var bw = 0.57735 * p, h = '<p class="small">Best wire for ' + u.tpi + " TPI: " + bw.toFixed(5) + " in" + (Math.abs(w - bw) > 0.1 * bw ? " — your wire is more than 10 % away from best size; the reading becomes sensitive to flank-angle error." : "") + ". Wire constant 3w − 0.86603p = " + (3 * w - 0.866025 * p).toFixed(5) + " in.</p>";
+          h += '<div class="tscroll"><table class="dtable wrap"><tr><th style="text-align:left">Gauge</th><th>PD limits</th><th>M over wires — min</th><th>M — max</th></tr>';
+          Array.prototype.forEach.call(el("mgCg").options, function(op){ var L = mgCalLimits(u, op.value); if(!L) return;
+            h += '<tr><td style="text-align:left">' + esc(op.textContent) + "</td><td>" + L[0].toFixed(5) + "–" + L[1].toFixed(5) + "</td><td>" + k3(L[0]).toFixed(5) + "</td><td>" + k3(L[1]).toFixed(5) + "</td></tr>"; });
+          h += "</table></div>";
+          var M = Number(el("mgCm").value), L = mgCalLimits(u, el("mgCg").value);
+          if(M > 0 && L){ var E = M - 3 * w + 0.866025 * p, ok = E >= L[0] - 5e-7 && E <= L[1] + 5e-7;
+            h += '<p class="verdict ' + (ok ? "good" : "warn") + '">' + esc(el("mgCg").selectedOptions[0].textContent) + ": PD = " + E.toFixed(5) + " in — " + (ok ? "within " : "OUTSIDE ") + L[0].toFixed(5) + "–" + L[1].toFixed(5) + " in" + (ok ? "." : (E < L[0] ? " (under by " + (L[0] - E).toFixed(5) + " in)." : " (over by " + (E - L[1]).toFixed(5) + " in).")) + "</p>"; }
+          h += '<p class="small">Uncorrected formula: no lead-angle or measuring-force correction. For the final certificate, use the lab’s corrected value (ASME B1.2 Appendix) and its uncertainty.</p>';
+          o.innerHTML = h;
+        }
+        ["mgCw", "mgCm"].forEach(function(id){ el(id).addEventListener("input", function(){ if(id === "mgCw") el("mgCw").setAttribute("data-auto", "0"); mgCalRun(); }); });
+        el("mgCg").addEventListener("change", mgCalRun);
         function render(){
           var un = el("mgSys").value === "un";
           el("mgUN").classList.toggle("hidden", !un); el("mgMet").classList.toggle("hidden", un);
+          if(!un) el("mgCal").classList.add("hidden");
           if(un){ renderUN(); return copyBtn(); }
           var D = parseFloat(el("mgD").value), P = parseFloat(el("mgP").value), side = el("mgSide").value, out = el("mgOut");
           if(!(D > 0)){ out.innerHTML = '<p class="small">Enter the nominal diameter.</p>'; return; }

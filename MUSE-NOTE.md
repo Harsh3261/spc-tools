@@ -1,3 +1,38 @@
+# Note for Muse — CERTIFI-style gauge calculation: cross-checks, three-wire calibration, gaps closed (2026-11-26, v67)
+
+Harsh asked to apply the CERTIFI concept (Gagemaker's calibration software, which works with their TDWIN thread software:
+ANSI tables + formulas + tolerances → product, ring, plug and setting-plug dimensions for standard and non-standard sizes;
+measurements over wires → calibration record) and to cross-check the formulas and close the gaps.
+
+## What the app now does (Thread masters → Inch UN)
+1. Table first, formula for specials (as TDWIN): catalogue sizes use the printed B1.1 limits; specials use the formulas.
+2. Visible cross-check on every catalogue size: B1.1 formula vs printed PD limits (difference shown) and B1.2 X placement
+   vs the stored plug / ring limits ("reproduces exactly" or a warning).
+3. Three-wire calibration panel: wire size (defaults to best wire 0.57735p), gauge chosen, M over wires → PD and
+   pass / fail against its limits; table of M targets (min / max) for GO plug, HI plug and both setting plugs.
+   Formula E = M − 3w + 0.86603p (Engineers Edge "Three Wire Method" × B1.2-based sizing note 2026), uncorrected for lead
+   angle — labelled so; the lab's corrected value and uncertainty govern the certificate.
+4. Ring minor diameters for GO and LO rings with their plain check-plug sizes.
+
+## Gaps closed — see GAPS.md "Closed" for sources
+#12 X 4–5 TPI bands · #14 W 7–4 TPI and >12 in · #13 12-UN / 16-UN length of engagement · #3 #4-48 LO full-form major ·
+#4 ring minor limits (the plain check-plug tolerance class stays open: single source).
+Key new rule (#13): 12-UN and 16-UN use LE = 9 pitches at every diameter, except sizes that are also UNC / UNF of the same
+pitch (9/16-12, 1-1/8 to 1-1/2-12, 3/8-16, 3/4-16 → LE = D). Found by back-solving the 22 failing rows; H28 1969 §2 states
+"one diameter, or 9 pitches for the fine and fixed-pitch series". Result: every B1.1 row within ≤ .0002 in.
+
+## CONFLICT recorded (standard governs)
+#4-48 UNF-2A LO full-form setting-plug major: H28 1963 Table III.13 prints .1110–.1113; the current B1.2-1983 rule
+(MH 28 Table 5 item 17; same rule in H28 1969 par. 4.6.3.2) gives .1113–.1116. App follows the current rule.
+
+## Still open (need the documents, not more searching)
+#1, #2 ISO 1502 master majors / flank tolerances (licensed ISO 1502) · #4 check-plug class · #6–#9 torques ·
+#10 UNJ rows · #11 B1.1-2024 redline.
+
+## Flags for Satureday
+- Three-wire formula is uncorrected; if a lab certificate differs by ~.0001 on fine pitches, that is the lead-angle term.
+- Please confirm the 12-UN / 16-UN twin list against B1.1 Table 2 if you have it.
+
 # Note for Muse — Gauges for any UN size (ASME B1.2), e.g. 9-1/2-12 (2026-11-26, v66)
 
 Harsh asked for gauge limits for every thread, not only catalogue sizes. Metric already calculated any size (ISO 1502).

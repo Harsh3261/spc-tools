@@ -45,9 +45,11 @@ Object.keys(H).forEach(size => ["2", "3"].forEach(cls => {
   const u = mgUN(size, cls); if (u.error || !u.sp) { fails.push(size + " " + cls + ": " + (u.error || "no set plugs")); return; }
   const g = u.sp.go, l = u.sp.lo;
   /* app [lo, hi] per element; H28 printed [max-line value, min-line value] — trunc & PD(GO) have W minus, full & PD(LO) W plus */
-  if (size === "#4-48 UNF" && cls === "2") { n += 2; if (l.full !== null || !u.sp.gap) fails.push("#4-48 2A LO full should be a named gap"); }
+  /* #4-48 2A LO full: current B1.2 rule (MH 28 Table 5 item 17 × H28 1969 par. 4.6.3.2) gives .1113–.1116; H28 1963
+     Table III.13 printed .1110–.1113 (older edition, recorded conflict) — so this one cell is checked against the rule. */
+  if (size === "#4-48 UNF" && cls === "2") { n += 2; if (!l.full || Math.abs(l.full[0] - .1113) > 5e-6 || Math.abs(l.full[1] - .1116) > 5e-6) fails.push("#4-48 2A LO full should be .1113–.1116: " + JSON.stringify(l.full)); }
   const app = [[g.trunc[1], g.trunc[0]], [g.full[0], g.full[1]], [g.pd[1], g.pd[0]], [l.trunc[1], l.trunc[0]], l.full ? [l.full[0], l.full[1]] : [null, null], [l.pd[0], l.pd[1]]];
-  for (let k = 0; k < 6; k++) for (let m = 0; m < 2; m++) { if (k === 4 && !l.full) continue; n++; const e = H[size][cls][m][k], a = app[k][m];
+  for (let k = 0; k < 6; k++) for (let m = 0; m < 2; m++) { if (k === 4 && (!l.full || (size === "#4-48 UNF" && cls === "2"))) continue; n++; const e = H[size][cls][m][k], a = app[k][m];
     if (Math.abs(a - e) > 5e-6) fails.push(size + " " + cls + "A " + lab[k] + (m ? " min-line" : " max-line") + ": app " + a + " vs H28 " + e); }
 }));
 /* Gauge-maker charts (setting-plug PD nominals): PMC/Mercury catalogue p.29 "Unified Thread Ring & Setting Plug P.D. Chart"

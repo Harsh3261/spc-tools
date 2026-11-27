@@ -1,4 +1,4 @@
-const CACHE = "spc-tools-v66-un-any-size-gauges";
+const CACHE = "spc-tools-v67-certifi-style";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

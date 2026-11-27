@@ -19,7 +19,12 @@ const X = [[12, 9.5, .0008, .0009, .0003, 10], [12, 0.5, .0003, .0006, .0003, 10
   [40, 0.25, .0002, .0004, .0002, 20], [80, 0.06, .0002, .0003, .0002, 30], [9, 1, .0003, .0007, .0003, 10], [32, 9, .0006, .0007, .0003, 15]];
 for (const [t, d, pd, mj, ld, hf] of X) { const x = await pg.evaluate(([d, t]) => mgX(d, t), [d, t]); chk(x && x.pd === pd && x.maj === mj && x.lead === ld && x.half === hf, `X ${t} TPI @ ${d}: ${JSON.stringify(x)}`); }
 chk((await pg.evaluate(() => mgX(24, 12))).pd === 0.0016, "above 12 in scales by D/12");
-chk((await pg.evaluate(() => mgX(5, 5))).pd === null, "5 TPI PD band is a named gap");
+// gap 12: 5 / 4-1/2 / 4 TPI — MH 28 Table 4 × Thread Check × Royal Oak
+for (const [t, d, pd] of [[5, 1.5, null], [5, 2, .0005], [4.5, 6, .0006], [4, 10, .0008], [4, 3.5, .0005]]) chk((await pg.evaluate(([d, t]) => mgX(d, t).pd, [d, t])) === pd, `X ${t} TPI @ ${d}`);
+// gap 14: W 7–4 TPI — H28 Table 6.9 × Thread Check, MH 28 Table 4 placement; >12 in scaled
+for (const [t, d, pd, mj, ld, hf] of [[7, 3, .00025, .0007, .0003, 5], [6, 1, .0002, .0008, .0003, 5], [5, 2, .00025, .0008, .0003, 4], [4, 10, .0004, .0015, .0003, 4], [4.5, 6, .0003, .0013, .0003, 4]]) {
+  const w = await pg.evaluate(([d, t]) => mgW(d, t), [d, t]); chk(w && w.pd === pd && w.maj === mj && w.lead === ld && w.half === hf, `W ${t} TPI @ ${d}: ${JSON.stringify(w)}`); }
+chk((await pg.evaluate(() => mgW(18, 8))).pd === 0.0006, "W above 12 in scales by D/12");
 
 // 2a · B1.2 placement rule on the printed B1.1 product limits (TH_U, TH_U3) must reproduce TH_G exactly
 const r = await pg.evaluate(() => {
@@ -38,16 +43,16 @@ for (const [k, f, ok, a, e] of r) { chk(ok, `${k} ${f}: rule ${a} vs data ${e}`)
 console.log("placement rule reproduced", reproduced, "of", r.length, "TH_G cells");
 
 // 2b · formula path (thCustomUN, used for specials) against the printed B1.1 rows, by length-of-engagement regime:
-//      LE = D series ≤ 0.0001 in; 9-pitch regime ≤ 0.0002 in; the known weak group (12-UN ≤ 1-1/2, 16-UN < 1) is flagged in the UI.
-const dev = await pg.evaluate(() => { const m = { D:0, p9:0, weak:0 }, r4 = v => Math.round(v * 1e4) / 1e4;
-  thUAll().forEach(q => { const D = q[1], T = q[2], c = thCustomUN(D, T, q[3]); const g = (q[3] === "12-UN" && D <= 1.5) || (q[3] === "16-UN" && D < 1) ? "weak" : c.leBasis === "9p" ? "p9" : "D";
+//      LE = D series ≤ 0.0001 in; 9-pitch regime ≤ 0.0002 in (12-UN / 16-UN: 9 pitches except UNC / UNF twins).
+const dev = await pg.evaluate(() => { const m = { D:0, p9:0 }, r4 = v => Math.round(v * 1e4) / 1e4;
+  thUAll().forEach(q => { const D = q[1], T = q[2], c = thCustomUN(D, T, q[3]); const g = c.leBasis === "9p" ? "p9" : "D";
     [[c.extMajor[1], q[5]], [c.extMajor[0], q[6]], [c.extPd[1], q[7]], [c.extPd[0], q[8]], [c.intPd[0], q[11]], [c.intPd[1], q[12]]].forEach(([a, b]) => m[g] = Math.max(m[g], Math.abs(r4(a) - b))); }); return m; });
 chk(dev.D <= 0.00011 && dev.p9 <= 0.00021, "formula deviation " + JSON.stringify(dev));
 console.log("formula vs B1.1 tables, max deviation:", JSON.stringify(dev));
 // catalogue sizes use the table limits: 1/2-13 via the calculator = TH_G exactly
 const cat = await pg.evaluate(() => { const c = mgUNCalc(0.5, 13, "auto", "2"), g = TH_G["1/2-13 UNC"]; return { t:c.table, ok:JSON.stringify([c.goR, c.ngR, c.goP, c.ngP]) === JSON.stringify([g.goR, g.ngR, g.goP, g.ngP]), c:c.goR }; });
 chk(cat.t && cat.ok, "catalogue path " + JSON.stringify(cat));
-chk((await pg.evaluate(() => mgUNCalc(1.2, 12, "auto", "2"))).weak === true, "1.2-12 flagged weak");
+// gap 13 closed: the 22 formerly weak 12-UN / 16-UN rows now within 0.0002 (covered by p9 / D above)
 
 // 3 · 9-1/2-12 UN, 2A/2B — hand values
 const u = await pg.evaluate(() => mgUNCalc(9.5, 12, "auto", "2"));
@@ -71,7 +76,27 @@ chk(/Calculated — not a catalogue size/.test(mg) && /9\.4429/.test(mg) && /9\.
 await pg.selectOption("#mgUCls", "3"); await pg.waitForTimeout(150);
 chk(/3A/.test(await pg.$eval("#mgOut", e => e.innerText)), "class 3 renders");
 await pg.fill("#mgUD", ""); await pg.fill("#mgUD", "5"); await pg.fill("#mgUT", "5"); await pg.waitForTimeout(150);
-chk(/named gap/i.test(await pg.$eval("#mgOut", e => e.innerText)), "5-5 shows the named gap");
+chk(/GO thread ring/.test(await pg.$eval("#mgOut", e => e.innerText)), "5-5 now calculates");
+
+// 5 · gap 4: ring minor diameters (MH 28 Table 5 items 2, 4 × H28 4.5.1.3 / 4.5.2.3), typed by hand for 9-1/2-12:
+//     GO ring minor = 9.4437 − 0.433013/12 = 9.4076 (X .0009 minus); LO ring minor = 9.4363 − 0.216506/12 = 9.4183 (plus)
+const rm = await pg.evaluate(() => mgUNCalc(9.5, 12, "auto", "2"));
+chk(JSON.stringify(rm.goRm) === "[9.4067,9.4076]" && JSON.stringify(rm.loRm) === "[9.4183,9.4192]" && !rm.loRmFlag, "ring minors " + JSON.stringify([rm.goRm, rm.loRm]));
+// gap 3: crest-width cap does not bind for #4-48 2A (current B1.2 rule .1113–.1116)
+const cr = await pg.evaluate(() => mgSetPlugs(0.112, 48, 0.1113, 0.0978, 0.0954));
+chk(JSON.stringify(cr.lo.full) === "[0.1113,0.1116]" && cr.loCrest === false, "#4-48 LO full " + JSON.stringify(cr.lo.full));
+// 6 · three-wire calibration: w = .04811, constant = 3w − 0.866025/12 = .0721612
+await pg.goto(URL + "#tool=mgauge&sys=un&ud=9-1/2&tpi=12&cls=2"); await pg.waitForTimeout(600);
+chk(await pg.$eval("#mgCal", e => !e.classList.contains("hidden")), "calibration panel shown");
+await pg.fill("#mgCw", "0.04811"); await pg.selectOption("#mgCg", "goP"); await pg.fill("#mgCm", "9.51850"); await pg.waitForTimeout(150);
+let co = await pg.$eval("#mgCout", e => e.innerText);
+chk(/9\.51806/.test(co) && /PD = 9\.44634 in — within/.test(co), "cal within: " + co.slice(0, 400));
+await pg.fill("#mgCm", "9.5170"); await pg.waitForTimeout(150); co = await pg.$eval("#mgCout", e => e.innerText);
+chk(/OUTSIDE/.test(co) && /under by 0\.00106/.test(co), "cal under: " + co.slice(-300));
+// 7 · cross-check line for a catalogue size
+await pg.goto(URL + "#tool=mgauge&sys=un&size=1/2-13 UNC&cls=2"); await pg.waitForTimeout(600);
+chk(/Cross-check:.*reproduces the stored plug and ring limits exactly/.test(await pg.$eval("#mgOut", e => e.innerText)), "cross-check line");
+chk(/GO ring — minor diameter/.test(await pg.$eval("#mgOut", e => e.innerText)), "catalogue ring minor shown");
 
 chk(errs.length === 0, "page errors: " + errs.join(" | "));
 console.log(fail ? fail + " of " + n + " FAILED" : "OK " + n + " UN gauge checks passed");
