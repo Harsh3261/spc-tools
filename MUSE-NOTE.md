@@ -1,3 +1,39 @@
+# Note for Muse — Gauges for any UN size (ASME B1.2), e.g. 9-1/2-12 (2026-11-26, v66)
+
+Harsh asked for gauge limits for every thread, not only catalogue sizes. Metric already calculated any size (ISO 1502).
+Scope agreed: inch UN any size first; BSP / NPT / Acme etc. later (each needs its own standard).
+
+## New data — TH_X (ASME B1.2 Table 6, X gage tolerances)
+Sources paired cell by cell: NBS Handbook H28 (1969) Part I Table 6.8 (nvlpubs.nist.gov, public domain; B1.2-1983 is
+built from it) × Thread Check Inc. catalogue p.52 "Gage Tolerances" (2026). Every loaded cell agrees.
+Key row, 12 TPI: lead ±.0003, half-angle ±10', major/minor .0006 (≤4 in) / .0009 (>4 in), PD .0003 (≤1-1/2) / .0004
+(1-1/2–4) / .0006 (4–8) / .0008 (8–12). Above 12 in: 8–12 value × D/12 (footnote in both).
+The W table already in the app (TH_W, Machinery's Handbook) matches H28 Table 6.9 for every loaded row.
+
+## Calculator
+Thread masters → Inch UN → "Any size — type diameter and TPI". Also reached from Threads → custom UN size →
+Gauge verification → "Open gauge limits", and from searching "9-1/2-12" / "9.5-12" in the thread search.
+- Catalogue sizes: product limits from the B1.1 tables (TH_U / TH_U3). Specials: B1.1 formulas (thCustomUN).
+- Gauges: B1.2 placement — GO plug +X from int PD min; HI plug −X from int PD max; GO ring −X from ext PD max; LO ring
+  +X from ext PD min; GO plug major +X(maj) from int major min; HI plug truncated major = int PD max + H/2, minus.
+  Setting plugs: existing mgSetPlugs (W).
+## Checks (tests/ungauge.e2e.js, 287 checks)
+- Placement rule on the printed product limits reproduces all 252 TH_G cells exactly (including 3/8-24 UNF, now that
+  its 2B PD max was corrected on 2026-11-22 — the D16 basis and the B1.1 table now agree).
+- Formula vs printed B1.1 rows: ≤ .0001 in (LE = D series), ≤ .0002 in (9-pitch regime, 86 rows).
+- 9-1/2-12 UN 2A/2B worked by hand: GO ring PD 9.4429–9.4437, LO ring 9.4363–9.4371, GO plug 9.4459–9.4467,
+  HI plug 9.4546–9.4554, GO plug major 9.5000–9.5009, HI major 9.4906–9.4915; setting plugs GO PD 9.4433–9.4437,
+  LO PD 9.4363–9.4367 (W .0004), full-form major 9.4978–9.4987, truncated GO 9.4840–9.4849, LO 9.4715–9.4724.
+
+## Named gaps (GAPS.md 12–14)
+- 5, 4-1/2, 4 TPI X PD bands: sources disagree on band placement → blank, the app says so.
+- Formula path for 12-UN ≤ 1-1/2 in and 16-UN < 1 in misses B1.1 by up to .0006 in → caution shown on specials there.
+- W above 12 in and for 4–7 TPI not loaded → setting plugs withheld there.
+
+## Flags for Satureday
+- Edition: values are B1.2-1983 (R2017) as reproduced in H28 and a 2026 maker catalogue; the standard itself not read.
+- Please spot-check the HI plug truncated-major rule against a maker's large-size chart if one turns up.
+
 # Note for Muse — Threads: easier to find metric internal threads (2026-11-26, v65)
 
 No data changed. Search and layout only, after Harsh couldn't find the metric internal thread calculator.
