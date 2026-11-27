@@ -1,3 +1,20 @@
+# Note for Muse — Threads / Thread masters interface pass (2026-11-26, v68)
+
+No data changed. Interface only, after Harsh asked for the thread tools to be easier to understand.
+- One home for gauge numbers: Threads → "Gauge limits" for metric and UN now hands off to Thread masters with the same
+  size, side and class filled in (other families keep their own gauge view).
+- Plain names: "Part limits / Gauge limits"; titles "Threads" and "Thread masters — gauge limits and calibration";
+  intros cut to one or two sentences; thread system chosen with two buttons (Metric M / Inch UN).
+- Phone layout: result tables become one block per gauge (name, min and max side by side, explanation full width).
+  Units moved to the column headers. Setting-plug table cut from 7 to 5 columns (wear and metric-equivalent moved to text).
+- "How to read and use these limits" is collapsed by default; "On this page" chips jump to plug gauges, ring gauges,
+  setting plugs, order text and the calibration panel.
+- Threads opens on M10 × 1.5 (metric) and 1/2-13 UNC (UN) instead of the smallest table size.
+- Bug fixed (old): tables with class "dtable wrap" inherited the page container's 124 px bottom padding on phones
+  (class name clash with .wrap) — visible as large gaps under tables site-wide.
+Tests: all *.test.js OK; ungauge 303, thsearch 39, smoke, cross, formats, ncp, command OK; no page errors.
+Flag for Satureday: please look at it on a phone and say if any tool outside threads should get the same table treatment.
+
 # Note for Muse — CERTIFI-style gauge calculation: cross-checks, three-wire calibration, gaps closed (2026-11-26, v67)
 
 Harsh asked to apply the CERTIFI concept (Gagemaker's calibration software, which works with their TDWIN thread software:

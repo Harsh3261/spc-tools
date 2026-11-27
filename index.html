@@ -263,6 +263,34 @@
       .seg button[aria-pressed="true"]{background:var(--cyan); color:var(--on-accent); border-color:var(--cyan-dim); box-shadow:0 2px 10px rgba(201,150,58,.28)}
       .seg button:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
       .thsidewrap{margin-top:14px}
+      span.flabel{display:block; font-size:12.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-dim); margin:12px 0 5px}
+      /* 2026-11-26 · readable gauge tables on phones: each row becomes a block (name, numbers side by side, note full width) */
+      @media (max-width: 640px){
+        table.stack, table.stack tbody, table.stack tr, table.stack td{display:block; width:auto}
+        table.stack{padding:0 !important; margin-top:4px}
+        table.stack tr:first-child:has(th){display:none}
+        table.stack tr{padding:10px 2px 12px; border-bottom:1px solid var(--line-soft)}
+        table.stack tr:nth-child(even) td{background:transparent}
+        table.stack td{border:0; padding:2px 0; text-align:left !important}
+        table.stack td.st-name{font-family:var(--sans); font-weight:600; font-size:15px; color:var(--ink); padding-bottom:6px}
+        table.stack td.st-num{display:inline-block; vertical-align:top; min-width:44%; margin-right:4%; padding:2px 0 6px; font-size:15.5px}
+        table.stack td.st-num::before{content:attr(data-label); display:block; font-family:var(--sans); font-size:11.5px; letter-spacing:.03em; color:var(--ink-dim); margin-bottom:1px}
+        table.stack td.st-txt{font-family:var(--sans); font-size:13.5px; line-height:1.45; color:var(--ink-dim); padding-top:4px}
+        table.stack td.st-txt::before{content:attr(data-label); display:block; font-size:11.5px; letter-spacing:.03em; margin-bottom:1px}
+        table.stack td.st-empty{display:none}
+      }
+      .seg button[aria-pressed="true"] .small{color:inherit; opacity:.75}
+      .seg button .small{font-weight:500}
+      #mgOut .verdict, #thGauge .verdict{font-family:var(--sans)}
+      table.stack td.st-txt{font-family:var(--sans); font-size:13.5px; line-height:1.45; text-align:left}
+      .onpage{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 4px}
+      .onpage a{font-size:13px; padding:5px 10px; border:1px solid var(--line-soft); border-radius:999px; color:var(--ink-dim); text-decoration:none}
+      .onpage a:hover, .onpage a:focus-visible{color:var(--ink); border-color:var(--cyan-dim)}
+      details.howto{border:1px solid var(--line-soft); border-radius:8px; padding:8px 12px; margin:12px 0}
+      details.howto summary{cursor:pointer; font-weight:600; color:var(--ink)}
+      details.howto[open] summary{margin-bottom:6px}
+      .handoff{border:1px solid var(--cyan-dim); border-radius:8px; padding:12px 14px; margin-top:12px}
+      .handoff p{margin:0 0 10px}
       .thsidewrap .seg{margin-top:6px}
       .thsideseg button{flex:1 1 0; min-width:0}
       .thsideseg button[disabled]{cursor:default; opacity:1}
@@ -486,6 +514,7 @@
           nav.clusters button{padding:8px 2px}
         }
         .wrap{padding-bottom:calc(124px + env(safe-area-inset-bottom))}
+        table.dtable.wrap{padding:0}
         html{scroll-padding-bottom:150px}
         /* 2 · targets */
         nav.tabs button{min-height:56px}
@@ -1392,8 +1421,8 @@
       <!-- ============ TOOL 7 : THREADS CATALOGUE ============ -->
       <section class="tool" id="tool-threads" role="tabpanel" aria-labelledby="tabbtn-threads">
         <div class="card">
-          <h2>Threads — manufacturing limits &amp; gauge verification</h2>
-          <p class="guru">Two different sets of numbers for two different jobs: manufacturing limits judge the part you make; gauge limits judge the gauge itself. Pick the thread, then choose the view.</p>
+          <h2>Threads</h2>
+          <p class="guru">The limits a thread must measure, for bolts (external) and tapped holes (internal). Search a size, identify an unknown thread from what you measured, or pick the family and size below. Gauge limits are in Thread masters.</p>
           <div class="thsearch">
             <label class="flabel" for="thSearch">Search all threads</label>
             <input id="thSearch" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="e.g. M10, 1/2-13, 3/4 NPT, G 1/4, Tr20, 1-1/4-12 UNJ" />
@@ -1495,8 +1524,8 @@
             <p class="small">Custom sizes are calculated from the standard's own formulas and are labelled “calculated” in the results — catalogue sizes above use the published tables.</p>
           </div>
           <div class="seg" role="group" aria-label="Threads view">
-            <button type="button" id="thSegMfg" aria-pressed="true">Manufacturing limits</button>
-            <button type="button" id="thSegGauge" aria-pressed="false">Gauge verification</button>
+            <button type="button" id="thSegMfg" aria-pressed="true">Part limits</button>
+            <button type="button" id="thSegGauge" aria-pressed="false">Gauge limits</button>
           </div>
           <div id="thMfg"></div>
           <div id="thGauge" class="hidden"></div>
@@ -1895,11 +1924,12 @@
 
       <section class="tool" id="tool-mgauge" role="tabpanel" aria-labelledby="tabbtn-mgauge">
         <div class="card">
-          <h2>Thread gauges and their masters — metric (ISO 1502) and inch (ASME B1.2)</h2>
-          <p class="guru"><strong>Workpiece gauges</strong> (thread plugs and rings) inspect parts. <strong>Masters</strong> (check plugs and setting plugs) calibrate the ring gauges — they are what a gauge maker needs when the pitch diameter inside a small ring cannot be measured. Choose what you need below. Choose the thread. The tool gives the pitch-diameter limits for the GO and NOGO thread plugs and rings (new and worn), and for the check plugs and setting plugs used to verify ring gauges, calculated by ISO 1502 for metric threads and taken from ASME B1.2 for inch threads. Use the numbers to check gauges at calibration and to order master gauges.</p>
+          <h2>Thread masters — gauge limits and calibration</h2>
+          <p class="guru">Limits for GO / NOT GO thread plugs and rings, and for the masters (check plugs, setting plugs) that calibrate the rings. Choose the system, then the size. Part limits are in Threads.</p>
           <div class="row2">
-            <div><label class="flabel" for="mgSys">Thread system</label><select id="mgSys"><option value="m" selected>Metric M — ISO 1502</option><option value="un">Inch UN (UNC / UNF / UN / UNS) — ASME B1.2</option></select></div>
-            <div><p class="small" style="margin-top:22px">Full thread dimensions (major, minor, tap drill) are in <a href="#tool=threads">Threads</a>.</p></div>
+            <div style="grid-column:1/-1"><span class="flabel" id="mgSysLbl">Thread system</span>
+              <div class="seg thsideseg" id="mgSysSeg" role="group" aria-labelledby="mgSysLbl" style="margin-top:6px"><button type="button" data-sys="m" aria-pressed="true">Metric M<br><span class="small">ISO 1502</span></button><button type="button" data-sys="un" aria-pressed="false">Inch UN<br><span class="small">ASME B1.2 — any size</span></button></div>
+              <select id="mgSys" class="hidden" aria-hidden="true" tabindex="-1"><option value="m" selected>Metric M — ISO 1502</option><option value="un">Inch UN — ASME B1.2</option></select></div>
           </div>
           <div id="mgUN" class="hidden"><div class="row2">
             <div><label class="flabel" for="mgUSize">Size</label><select id="mgUSize"></select></div>
@@ -2650,6 +2680,37 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
       /* Scroll hold: run fn(), then restore the exact scroll position so a
          control that re-renders content can never move the page (user rule:
          operating any control leaves window.scrollY unchanged). */
+      /* 2026-11-26 · phone layout for result tables: label every cell from its column header and mark name / number / text
+         cells; CSS (max-width 640px) then shows each row as a block. Desktop keeps the plain table. */
+      function stackTables(root){
+        if(!root) return;
+        Array.prototype.forEach.call(root.querySelectorAll("table.dtable"), function(t){
+          var hr = t.querySelector("tr"); if(!hr || !hr.querySelector("th")) return;
+          var heads = Array.prototype.map.call(hr.children, function(th){ return th.textContent.trim(); });
+          if(heads.length < 3) return;
+          t.classList.add("stack");
+          Array.prototype.forEach.call(t.querySelectorAll("tr"), function(tr){ if(tr === hr) return; var ci = 0;
+            Array.prototype.forEach.call(tr.children, function(td){
+              var lab = heads[ci] || ""; ci += td.colSpan || 1; td.setAttribute("data-label", lab);
+              var txt = td.textContent.trim();
+              if(td === tr.firstElementChild) td.classList.add("st-name");
+              else if(!txt || txt === "—") td.classList.add(/use|note|how|accept/i.test(lab) ? "st-empty" : "st-num");
+              else if(/use|note|how|accept|meaning/i.test(lab) || txt.length > 40) td.classList.add("st-txt");
+              else td.classList.add("st-num");
+            }); });
+        });
+      }
+      function onPageNav(root, extra){
+        if(!root) return; var old = root.querySelector(".onpage"); if(old) old.remove();
+        var hs = Array.prototype.filter.call(root.querySelectorAll("h3"), function(h){ return !h.closest("details"); }).concat(extra || []);
+        if(hs.length < 3) return;
+        var nav = document.createElement("nav"); nav.className = "onpage"; nav.setAttribute("aria-label", "On this page");
+        hs.forEach(function(h, i){ if(!h.id) h.id = root.id + "-s" + i; var a = document.createElement("a"); a.href = "#" + h.id;
+          var ht = h.textContent; if(/^Text for the gauge maker/.test(ht)) h.setAttribute("data-short", /MASTERS/i.test(ht) ? "Order text — masters" : "Order text — gauges");
+          a.textContent = h.getAttribute("data-short") || h.textContent.replace(/\s+—.*$/, "").replace(/ for .*$/, "").replace(/\s*\(.*$/, "").trim();
+          a.addEventListener("click", function(e){ e.preventDefault(); h.scrollIntoView({ block:"start", behavior:"smooth" }); }); nav.appendChild(a); });
+        root.insertBefore(nav, root.firstChild);
+      }
       function holdScroll(fn){
         var y = window.scrollY || window.pageYOffset || 0;
         var rootEl = document.documentElement;
@@ -8051,8 +8112,10 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         return TH_BAN.map(function(r, i){ return [String(i), r[0]]; });
       }
       function thFillSizes(){
-        var fam = thFam();
-        thFillSelect($("thSize"), thSizesFor(fam), "0");
+        var fam = thFam(), list = thSizesFor(fam), def = "0";
+        /* open on a size people actually use: M10 × 1.5 and 1/2-13 instead of the smallest in the table */
+        list.forEach(function(o){ if((fam === "metric" && o[1] === "M10 × 1.5") || (fam === "un" && /^1\/2-13 UNC/.test(o[1]))) def = o[0]; });
+        thFillSelect($("thSize"), list, def);
         thFillSideClass();
       }
       function thFillSideClass(){
@@ -8382,6 +8445,14 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           return "<h3>Gauge verification</h3><p>Enter the diameter and pitch above.</p>";
         }
         var idx = parseInt($("thSize").value, 10) || 0;
+        /* 2026-11-26 · one home for gauge numbers: metric and UN gauges live in Thread masters */
+        if(fam === "metric" || fam === "un"){
+          var sd = $("thSide").value, cl = $("thClass").value, href, lab;
+          if(fam === "metric"){ var mr = TH_M[idx]; lab = mr[0] + "-" + cl; href = "#tool=mgauge&sys=m&d=" + mr[1] + "&p=" + mr[2] + (sd === "int" ? "&int=" : "&ext=") + encodeURIComponent(cl); }
+          else { var ur0 = thUAll()[idx]; lab = ur0[0] + "-" + cl; href = TH_G[ur0[0]] ? "#tool=mgauge&sys=un&size=" + encodeURIComponent(ur0[0]) + "&cls=" + (/3/.test(cl) ? "3" : "2")
+                 : "#tool=mgauge&sys=un&ud=" + ur0[1] + "&tpi=" + ur0[2] + "&ser=" + encodeURIComponent(ur0[3]) + "&cls=" + (/3/.test(cl) ? "3" : "2"); }
+          return '<div class="handoff"><p>Gauge limits for <strong>' + esc(lab) + "</strong> are in Thread masters: GO / NOT GO " + (sd === "int" ? "plugs" : "rings") + ", " + (fam === "metric" ? "check plugs and setting plugs (ISO 1502)" : "setting plugs and the three-wire calibration check (ASME B1.2)") + ', with text to send to the gauge maker.</p><a class="ghostlink" href="' + href + '">Open gauge limits for ' + esc(lab) + "</a></div>" + calP;
+        }
         if(fam === "un"){
           var u = thUAll()[idx], g = TH_G[u[0]];
           var gc = $("thClass").value;
@@ -8497,6 +8568,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           }
         }
         gaugeEl.innerHTML = thGaugeHTML();
+        stackTables(mfgEl); stackTables(gaugeEl);
         var isMfg = thState.view === "mfg";
         mfgEl.classList.toggle("hidden", !isMfg);
         gaugeEl.classList.toggle("hidden", isMfg);
@@ -11482,15 +11554,14 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         var head = '<tr><th style="text-align:left">Gauge</th><th>Code</th><th>PD min (new)</th><th>PD max (new)</th><th>Wear limit (PD)</th><th style="text-align:left">Use / acceptance</th></tr>';
         /* Who-does-what box shown above every result (metric and inch). */
         function whoBox(inch){
-          return '<div class="tfplain" style="border:1px solid var(--line, #444);border-radius:8px;padding:10px 14px;margin:12px 0">' +
-            '<h3 style="margin-top:0">How to use these limits</h3><ul class="small">' +
+          return '<details class="howto"><summary>How to read and use these limits</summary><ul class="small">' +
             "<li><strong>PD columns are pitch diameter</strong>, not major diameter; the wear limit is a pitch diameter too. Major and minor diameters have their own columns or tables where they are given.</li>" +
             "<li><strong>Gauge maker:</strong> makes every gauge and master within its PD min–max (new). Send the order text below.</li>" +
             "<li><strong>Receiving inspection:</strong> each certificate's measured PD must lie between PD min and PD max. Reject the gauge if it does not.</li>" +
             (inch ? "<li><strong>Calibration:</strong> plugs and setting plugs — measure PD over three wires and compare with the limits. Rings — check the fit on their setting plug.</li>"
                   : "<li><strong>Calibration:</strong> working thread plugs — measure PD over three wires; a used plug passes while it is inside its wear limit. Check plugs and setting plugs (masters) — measure PD over three wires; they have no wear allowance and must stay inside their new limits. Rings — try the check plugs as the masters table says.</li>") +
             "<li><strong>Production inspection</strong> uses the gauges only. Gauge limits are not part limits; the part limits are in Threads.</li>" +
-            "</ul></div>";
+            "</ul></details>";
         }
         function basis(r){
           var b = r.band;
@@ -11501,8 +11572,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
         function lbl(r){ return "M" + r.D + "×" + r.P + "-" + r.cls; }
         function banner(kind){
           return kind === "work"
-            ? '<p class="verdict" style="margin:14px 0 6px;border-left:4px solid var(--accent, #c9a227);padding-left:10px"><strong>WORKPIECE GAUGES — used on parts in production.</strong> These inspect the threads you make. They are not masters.</p>'
-            : '<p class="verdict" style="margin:14px 0 6px;border-left:4px solid var(--ok, #3fa66b);padding-left:10px"><strong>MASTERS — used only to calibrate the thread ring gauges.</strong> Never used on parts. Order these when your gauge maker or lab cannot measure the pitch diameter inside a small ring.</p>';
+            ? '<p class="verdict" style="margin:14px 0 6px;border-left:4px solid var(--accent, #c9a227);padding-left:10px"><strong>Workpiece gauges</strong> — used on parts in production.</p>'
+            : '<p class="verdict" style="margin:14px 0 6px;border-left:4px solid var(--ok, #3fa66b);padding-left:10px"><strong>Masters</strong> — used only to calibrate the ring gauges, never on parts.</p>';
         }
         function ringsHTML(r){
           var g = r.ring, t = r.t, h = banner("work") + "<h3>Thread ring gauges — inspect external thread " + esc(lbl(r)) + " (part d₂ " + f4(t.pd[0]) + " to " + f4(t.pd[1]) + ")</h3>";
@@ -11589,8 +11660,8 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           var cuU = el("mgUSize").value === "custom"; el("mgUCustom").classList.toggle("hidden", !cuU);
           var u = cuU ? mgUNCalc(parseInchD(el("mgUD").value), Number(el("mgUT").value), el("mgUSer").value, el("mgUCls").value) : mgUN(el("mgUSize").value, el("mgUCls").value), out = el("mgOut");
           if(u.error){ out.innerHTML = '<p class="verdict warn">' + esc(u.error) + "</p>"; el("mgCal").classList.add("hidden"); return; }
-          var R = function(n, z, use){ return '<tr><td style="text-align:left">' + n + "</td><td>" + (z ? f4in(z[0]) : "—") + "</td><td>" + (z ? f4in(z[1]) : "—") + '</td><td style="text-align:left">' + use + "</td></tr>"; };
-          var H = '<tr><th style="text-align:left">Gauge</th><th>PD min (new)</th><th>PD max (new)</th><th style="text-align:left">Use / acceptance</th></tr>';
+          var R = function(n, z, use){ return '<tr><td style="text-align:left">' + n + "</td><td>" + (z ? z[0].toFixed(4) : "—") + "</td><td>" + (z ? z[1].toFixed(4) : "—") + '</td><td style="text-align:left">' + use + "</td></tr>"; };
+          var H = '<tr><th style="text-align:left">Gauge</th><th>Min, in</th><th>Max, in</th><th style="text-align:left">Use / acceptance</th></tr>';
           var h = whoBox(true);
           if(u.custom){ var pe = u.prod.e, pi = u.prod.i, cL = u.cls === "3A / 3B" ? ["3A", "3B"] : ["2A", "2B"];
             h += '<div class="tfplain" style="border:1px dashed var(--cyan);border-radius:8px;padding:10px 14px;margin:12px 0"><p class="small" style="margin:0">' + (u.table ? "<strong>Catalogue size — product limits from the ASME B1.1 table</strong> (" + esc(u.tableLabel) + "); gauge limits calculated from them. " : "<strong>Calculated — not a catalogue size.</strong> " + esc(u.size) + " treated as " + esc(u.series) + " (length of engagement " + (u.leBasis === "9p" ? "9 pitches" : "= diameter") + ", ASME B1.1). ") + (u.weak ? '<span style="color:var(--red-ink)">Caution: for 12-UN up to 1-1/2 in and 16-UN under 1 in the formula can differ from the B1.1 tables by up to 0.0006 in — confirm the product limits against the standard before ordering gauges.</span> ' : "") + "Product limits" + (u.table ? ": " : " from the B1.1 formulas: ") +
@@ -11606,13 +11677,14 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(u.goRm) h += R("GO ring — minor diameter", u.goRm, "Max external PD − H/2, X tolerance minus. Check with plain plugs: GO plug " + f4in(u.goRm[0]) + ", NOT GO plug " + f4in(u.goRm[1]) + ".");
           if(u.loRm) h += R("NOT GO (LO) ring — minor diameter", u.loRm, "Min external PD − H/4, X tolerance plus. Check with plain plugs: GO plug " + f4in(u.loRm[0]) + ", NOT GO plug " + f4in(u.loRm[1]) + "." + (u.loRmFlag ? " Caution: NBS H28 also requires this to be at least the GO ring minimum minor + 0.0375H, which this size does not meet — confirm with the gauge maker." : ""));
           h += "</table></div>";
-          var sp = u.sp, cl = u.cls === "3A / 3B" ? "3A" : "2A", rg = function(z){ return z ? f5in(z[0]) + " – " + f5in(z[1]) : "— (gap)"; }, rt = function(z){ return z ? z[0].toFixed(5).replace(/0$/, "") + "–" + z[1].toFixed(5).replace(/0$/, "") + " in" : "WITHHELD — not confirmed from two sources; order the truncated plug or quote to ASME B1.2 directly"; };
+          var sp = u.sp, cl = u.cls === "3A / 3B" ? "3A" : "2A", n5 = function(v){ return Math.round(v * 1e5) % 10 ? v.toFixed(5) : v.toFixed(4); }, rg = function(z){ return z ? n5(z[0]) + " – " + n5(z[1]) : "— (gap)"; }, rt = function(z){ return z ? z[0].toFixed(5).replace(/0$/, "") + "–" + z[1].toFixed(5).replace(/0$/, "") + " in" : "WITHHELD — not confirmed from two sources; order the truncated plug or quote to ASME B1.2 directly"; };
           h += banner("master") + "<h3>Setting plugs — masters for the " + esc(u.size) + "-" + cl + " ring gauges (ASME B1.2, W tolerance)</h3>";
           if(sp){
-            h += '<div class="tscroll"><table class="dtable wrap"><tr><th style="text-align:left">Master</th><th>Pitch diameter (new)</th><th>Major — truncated portion</th><th>Major — full-form portion / full-form plug</th><th>Wear limit</th><th style="text-align:left">Use / acceptance</th><th style="text-align:left">Metric equivalent</th></tr>';
-            h += '<tr><td style="text-align:left"><strong>GO setting plug</strong> (master — not for parts)</td><td>' + rg(sp.go.pd) + "</td><td>" + rg(sp.go.trunc) + "</td><td>" + rg(sp.go.full) + '</td><td>None — judged against its W limits at calibration</td><td style="text-align:left">The GO ring is set to it and must fit it. If a GO ring no longer fits it snugly, reset it (adjustable ring) or replace it (solid ring).</td><td style="text-align:left">Does the job of GO-GO (TT), GO-NOGO (TZ) and GO wear (TS)</td></tr>';
-            h += '<tr><td style="text-align:left"><strong>LO setting plug</strong> (master — not for parts)</td><td>' + rg(sp.lo.pd) + "</td><td>" + rg(sp.lo.trunc) + "</td><td>" + rg(sp.lo.full) + '</td><td>None — judged against its W limits at calibration</td><td style="text-align:left">The LO ring is set to it and must fit it. If a LO ring no longer fits it snugly, reset or replace it.</td><td style="text-align:left">Does the job of NOGO-GO (ZT), NOGO-NOGO (ZZ) and NOGO wear (ZS)</td></tr>';
+            h += '<div class="tscroll"><table class="dtable wrap"><tr><th style="text-align:left">Master</th><th>Pitch diameter, in</th><th>Major — truncated, in</th><th>Major — full form, in</th><th style="text-align:left">Use / acceptance</th></tr>';
+            h += '<tr><td style="text-align:left">GO setting plug</td><td>' + rg(sp.go.pd) + "</td><td>" + rg(sp.go.trunc) + "</td><td>" + rg(sp.go.full) + '</td><td style="text-align:left">The GO ring is set to it and must fit it. If a GO ring no longer fits it snugly, reset it (adjustable ring) or replace it (solid ring). Metric equivalent: GO-GO (TT), GO-NOGO (TZ) and GO wear (TS) check plugs.</td></tr>';
+            h += '<tr><td style="text-align:left">LO setting plug</td><td>' + rg(sp.lo.pd) + "</td><td>" + rg(sp.lo.trunc) + "</td><td>" + rg(sp.lo.full) + '</td><td style="text-align:left">The LO ring is set to it and must fit it. If a LO ring no longer fits it snugly, reset or replace it. Metric equivalent: NOGO-GO (ZT), NOGO-NOGO (ZZ) and NOGO wear (ZS).</td></tr>';
             h += "</table></div>";
+            h += '<p class="small">Masters have no wear limit: each calibration judges them against the W limits above.</p>';
             h += '<p class="small">W tolerances for this size (order W on pitch diameter too — some makers\' standard setting plugs are X on PD unless W is specified): pitch diameter ' + f5in(sp.w.pd) + " (GO minus, LO plus); major diameter " + f5in(sp.w.maj) + "; lead ±" + f5in(sp.w.lead) + " in; half-angle ±" + sp.w.half + "′. Inches. A truncated setting plug\'s truncated portion sets the ring\'s pitch diameter and its full-form portion checks clearance at the ring\'s major diameter (FED-STD-H28/6, as quoted by gauge makers); order one or the other and say which.</p>";
             if(sp.gap) h += '<p class="verdict warn">' + esc(sp.gap) + "</p>";
           } else h += '<p class="verdict warn">' + esc(u.spNote || "Setting-plug limits are not included for this size.") + "</p>";
@@ -11639,6 +11711,9 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
               if(!cls3) h += '<p class="small"><strong>Cross-check:</strong> B1.1 formula vs the printed 2A / 2B pitch-diameter limits — largest difference ' + dE.toFixed(4) + ' in' + (dE <= 0.00011 ? " (rounding)" : "") + '. B1.2 X placement on the printed limits ' + (okP ? "reproduces the stored plug and ring limits exactly." : "differs from the stored data — check before use.") + "</p>"; } }
           out.innerHTML = h;
           mgCalSetup(u);
+          stackTables(out);
+          var calH = el("mgCal").querySelector("h3"); calH.setAttribute("data-short", "Calibrate over wires");
+          onPageNav(out, [calH]);
         }
         /* Three-wire calibration (inch, 60°): E = M − 3w + 0.86603p; M = E + 3w − 0.86603p. No lead-angle correction
            (Engineers Edge "Three Wire Method" × B1.2-based gauge sizing note, 2026): adequate for single-start UN threads. */
@@ -11666,14 +11741,17 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(M > 0 && L){ var E = M - 3 * w + 0.866025 * p, ok = E >= L[0] - 5e-7 && E <= L[1] + 5e-7;
             h += '<p class="verdict ' + (ok ? "good" : "warn") + '">' + esc(el("mgCg").selectedOptions[0].textContent) + ": PD = " + E.toFixed(5) + " in — " + (ok ? "within " : "OUTSIDE ") + L[0].toFixed(5) + "–" + L[1].toFixed(5) + " in" + (ok ? "." : (E < L[0] ? " (under by " + (L[0] - E).toFixed(5) + " in)." : " (over by " + (E - L[1]).toFixed(5) + " in).")) + "</p>"; }
           h += '<p class="small">Uncorrected formula: no lead-angle or measuring-force correction. For the final certificate, use the lab’s corrected value (ASME B1.2 Appendix) and its uncertainty.</p>';
-          o.innerHTML = h;
+          o.innerHTML = h; stackTables(o);
         }
         ["mgCw", "mgCm"].forEach(function(id){ el(id).addEventListener("input", function(){ if(id === "mgCw") el("mgCw").setAttribute("data-auto", "0"); mgCalRun(); }); });
         el("mgCg").addEventListener("change", mgCalRun);
+        function syncSysSeg(){ Array.prototype.forEach.call(el("mgSysSeg").querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-sys") === el("mgSys").value ? "true" : "false"); }); }
+        el("mgSysSeg").addEventListener("click", function(e){ var b = e.target.closest("button[data-sys]"); if(!b) return; el("mgSys").value = b.getAttribute("data-sys"); syncSysSeg(); render(); });
         function render(){
           var un = el("mgSys").value === "un";
           el("mgUN").classList.toggle("hidden", !un); el("mgMet").classList.toggle("hidden", un);
           if(!un) el("mgCal").classList.add("hidden");
+          syncSysSeg();
           if(un){ renderUN(); return copyBtn(); }
           var D = parseFloat(el("mgD").value), P = parseFloat(el("mgP").value), side = el("mgSide").value, out = el("mgOut");
           if(!(D > 0)){ out.innerHTML = '<p class="small">Enter the nominal diameter.</p>'; return; }
@@ -11690,6 +11768,7 @@ Temperature ±2 °C × 11.5 ppm/°C × 50 mm, 0.00115, rect</textarea>
           if(work.length) h += ta("mgOrder", orderWork(work), 10, "Text for the gauge maker — workpiece gauges");
           h += '<p class="small">' + esc(TH_CAL_NOTE) + "</p>";
           out.innerHTML = h;
+          stackTables(out); onPageNav(out);
           copyBtn();
           var tm = el("mgToMst"); if(tm) tm.addEventListener("click", function(){ el("mgSide").value = "mst"; render(); });
         }
